@@ -73,13 +73,7 @@ YourDynamicDashboard is packed with features to enhance your new tab page, organ
 
 </details>
 
---- You can also download all the project files in a single ZIP folder:
-
-On the main repository page, find the green button labeled <> Code.
-
-Click on it to open the dropdown menu.
-
-Select Download ZIP.
+---
 
 ## 🚀 Getting Started
 
