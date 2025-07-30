@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Get a Weather API Key</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Styling for the Tutorial Page */
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid #333;
+        }
+        h1, h2 {
+            color: #ffffff;
+            border-bottom: 2px solid #f39c12;
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            border: none;
+        }
+        p, li {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+        }
+        a {
+            color: #f39c12;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border: 2px solid #444;
+        }
+        code {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .step {
+            background-color: #2c2c2c;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #f39c12;
+        }
+        .note {
+            background-color: #34495e;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>How to Get a Free Weather API Key (in 3 steps)</h1>
+        <p>To enable the weather widget in YourDynamicDashboard, you need a free API key from OpenWeatherMap. This guide will walk you through the simple steps to get one.</p>
+
+        <div class="step">
+            <h2>Step 1: Create an Account</h2>
+            <p>First, you need to sign up for a free account on the OpenWeatherMap website.</p>
+            <ol>
+                <li>Go to the <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap homepage</a>. (Login if you have an account already)</li>
+                <li>Click on the "Sign in" button, and then find the "Create an Account" link.</li>
+                <li>Fill in the required details: username, email, password, and accept the terms of service.</li>
+                <li>Click the "Create Account" button.</li>
+                <li>Check your email for a verification link and click it to activate your account.</
+                <li>Once verified, log in to your account.</li>
+            </ol>
+            <img src="signuppage.png" alt="Screenshot of the OpenWeatherMap signup page.">
+        </div>
+
+        <div class="step">
+            <h2>Step 2: Find your key and copy</h2>
+            <p>OpenWeatherMap gives you a free API key, you can use that in this extension</p>
+            <ol>
+                <li>After logging in, Click your username located in top-right corner. Then click "My API keys</li>
+                <li>Now, you can see your API key. Then copy your key.</li>
+            </ol>
+            <img src="copykey.png" alt="Screenshot of the OpenWeatherMap pricing page with the Free plan highlighted.">
+        </div>
+
+        <div class="step">
+            <h2>Step 3: Paste Your Key</h2>
+            <p>Now, just paste your key.</p>
+            <ol>
+                <li>Come back to your new tab page ("YourDynamicDashboard"). Then go to settings panel.</li>
+                <li>Find the "Weather API Key" input field.</li>
+                <li>Paste your key into the box and click save.</li>
+            </ol>
+            <img src="pastekey.png" alt="Screenshot showing where to paste the API key in the extension settings.">
+        </div>
+
+        <div class="note">
+            <h2>Important Note</h2>
+            <p>After your key is generated, it might take **a few minutes to a couple of hours**(usually immediately become active) to become active. If the weather doesn't show up immediately, please wait a little while before trying again.</p>
+            <p>Also, please note that the free plan has a limit of 60 calls per minute. If you exceed this limit, you may experience temporary disruptions in service.</p>
+            <p>If your API key stop working after a long time, Try to get a new API using another account</p>
+            <p><strong>--Must refresh the new tab page after pasting and saving the API key--</strong></p>
+        </div>
+    </div>
+
+</body>
+</html>
