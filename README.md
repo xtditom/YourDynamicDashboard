@@ -11,10 +11,10 @@
 </div>
 
 <div align="center">
-  <img src="https://img.shields.io/github/license/DITOM-BAROI-ANTU/YourDynamicDashboard?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/github/last-commit/DITOM-BAROI-ANTU/YourDynamicDashboard?style=for-the-badge" alt="Last Commit">
-  <img src="https://img.shields.io/github/stars/DITOM-BAROI-ANTU/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Stars">
-  <img src="https://img.shields.io/github/forks/DITOM-BAROI-ANTU/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Forks">
+  <img src="https://img.shields.io/github/license/xtditom/YourDynamicDashboard?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/github/last-commit/xtditom/YourDynamicDashboard?style=for-the-badge" alt="Last Commit">
+  <img src="https://img.shields.io/github/stars/xiditom/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Stars">
+  <img src="https://img.shields.io/github/forks/xtditom/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Forks">
 </div>
 
 <table>
@@ -24,9 +24,9 @@
     <td align="center"><b>YDD Mode</b></td>
   </tr>
   <tr>
-    <td><img src="light-mode.png" alt="Light Mode Screenshot"></td>
-    <td><img src="dark-mode.png" alt="Dark Mode Screenshot"></td>
-    <td><img src="YourDynamicDashboard-YDD.png" alt="YDD Mode Screenshot"></td>
+    <td><img src="Mode Overview/light-mode.png" alt="Light Mode Screenshot"></td>
+    <td><img src="Mode Overview/dark-mode.png" alt="Dark Mode Screenshot"></td>
+    <td><img src="Mode Overview/YourDynamicDashboard-YDD.png" alt="YDD Mode Screenshot"></td>
   </tr>
 </table>
 
