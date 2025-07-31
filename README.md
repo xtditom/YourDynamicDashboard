@@ -96,22 +96,45 @@ YourDynamicDashboard is packed with features to enhance your new tab page, organ
 
 ### Installation
 
-1.  **From the Store:** *(Coming Soon!)*
-    * [Link to Microsoft Edge Add-ons]()
+There are two main ways to install YourDynamicDashboard: from an official store or manually.
 
-2.  **Manual Installation (for Development):**
-    * Download or clone this repository to your computer.
-        * **To Download as ZIP:** On the main repository page, find the green button labeled as "<> Code". Click on it to open the dropdown menu. Then, just select 'Download ZIP'.
+**1. From the Store (Recommended)**
+*(Coming Soon!)*
+* [Link to Microsoft Edge Add-ons]()
 
-        * **To Clone:** Use the following command in your terminal:
-            ```bash
-            git clone https://github.com/xtditom/YourDynamicDashboard.git
-            ```
-            * Open your browser's extension management page:
-        * **Edge:** `edge://extensions`
-        * **Chrome:** `chrome://extensions`
-    * Enable **"Developer mode"**.
-    * Click **"Load unpacked"** and select the project folder you downloaded. Congrats! Your new Dynamic Dashboard is now successfully added to your browser extension.
+**2. Manual Installation**
+
+This process has two parts: first you get the project files, then you load them into your browser.
+
+**Part A: Get the Project Files**
+
+You have two options to get the files:
+
+* **Option 1: Stable Release (for most users)**
+    1.  Go to the **[Releases](https://github.com/xtditom/YourDynamicDashboard/releases)** page.
+    2.  Under the latest release (e.g., `v1.0.0`), find the **Assets** section.
+    3.  Download the `.zip` file (e.g., `YourDynamicDashboard-1-0-0-S.zip`).
+    4.  **Unzip** the downloaded file into a permanent folder on your computer.
+
+* **Option 2: Development Version (for developers)**
+    This will get you the very latest, cutting-edge code.
+    * Use the following command in your terminal:
+        ```bash
+        git clone https://github.com/xtditom/YourDynamicDashboard.git
+        ```
+
+**Part B: Install the Extension in Your Browser**
+
+Once you have the project folder from Part A, Unzip the zip file, then follow these steps:
+
+1.  Open your browser's extension management page:
+    * **Edge:** `edge://extensions`
+    * **Chrome:** `chrome://extensions`
+2.  Enable **"Developer mode"** (usually a toggle in the top-right corner).
+3.  Click the **"Load unpacked"** button.
+4.  Select the `YourDynamicDashboard` project folder that you downloaded and unzipped (or cloned).
+
+Congrats! Your new Dynamic Dashboard is now successfully added to your browser extension.
 
 ---
 
