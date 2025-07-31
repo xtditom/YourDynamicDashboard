@@ -11,22 +11,39 @@
 </div>
 
 <div align="center">
-  <img src="https://img.shields.io/github/license/xtditom/YourDynamicDashboard?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/github/last-commit/xtditom/YourDynamicDashboard?style=for-the-badge" alt="Last Commit">
-  <img src="https://img.shields.io/github/stars/xiditom/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Stars">
+  <img src="https://img.shields.io/github/stars/xtditom/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Stars">
   <img src="https://img.shields.io/github/forks/xtditom/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Forks">
 </div>
 
 <table>
   <tr>
-    <td align="center"><b>Light Mode</b></td>
-    <td align="center"><b>Dark Mode</b></td>
-    <td align="center"><b>YDD Mode</b></td>
+    <td align="center">
+      <b>Light Mode</b><br>
+      <img src="Mode Overview/light-mode.png" alt="Light Mode Theme">
+    </td>
+    <td align="center">
+      <b>Dark Mode</b><br>
+      <img src="Mode Overview/dark-mode.png" alt="Dark Mode Theme">
+    </td>
+    <td align="center">
+      <b>"YDD" Themed Mode</b><br>
+      <img src="Mode Overview/YourDynamicDashboard-YDD.png" alt="YDD Mode Theme">
+    </td>
   </tr>
   <tr>
-    <td><img src="Mode Overview/light-mode.png" alt="Light Mode Screenshot"></td>
-    <td><img src="Mode Overview/dark-mode.png" alt="Dark Mode Screenshot"></td>
-    <td><img src="Mode Overview/YourDynamicDashboard-YDD.png" alt="YDD Mode Screenshot"></td>
+    <td align="center">
+      <b>Crimson Pulse Theme</b><br>
+      <img src="Mode Overview/Crimson-Pulse.png" alt="Crimson Pulse Theme">
+    </td>
+    <td align="center">
+      <b>Azure Sky Theme</b><br>
+      <img src="Mode Overview/Azure-Sky.png" alt="Azure Sky Theme">
+    </td>
+    <td align="center">
+      <b>PopUp Features</b><br>
+      <img src="Mode Overview/PopUp-Features.png" alt="PopUp Features">
+    </td>
   </tr>
 </table>
 
@@ -88,13 +105,13 @@ YourDynamicDashboard is packed with features to enhance your new tab page, organ
 
         * **To Clone:** Use the following command in your terminal:
             ```bash
-            git clone [https://github.com/xtditom/YourDynamicDashboard.git](https://github.com/xtditom/YourDynamicDashboard.git)
+            git clone https://github.com/xtditom/YourDynamicDashboard.git
             ```
             * Open your browser's extension management page:
         * **Edge:** `edge://extensions`
         * **Chrome:** `chrome://extensions`
     * Enable **"Developer mode"**.
-    * Click **"Load unpacked"** and select the project folder you downloaded.
+    * Click **"Load unpacked"** and select the project folder you downloaded. Congrats! Your new Dynamic Dashboard is now successfully added to your browser extension.
 
 ---
 
@@ -122,7 +139,7 @@ I am actively working on new features to make the dashboard even better:
 
 ## 📄 License
 
-This project is licensed under the **Creative Commons BY-NC-SA 4.0 License**. See the `LICENSE` file for more details.
+This project is licensed under the **Creative Commons BY-NC-SA 4.0 License**. See the [LICENSE](LICENSE) file for more details.
 
 ---
 
