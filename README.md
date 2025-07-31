@@ -121,7 +121,7 @@ I am actively working on new features to make the dashboard even better:
 
 ## 📄 License
 
-This project is licensed under the **Creative Commons BY-NC-SA 4.0 License**. See the `LICENSE` file for more details.
+This project is licensed under the Creative Commons BY-NC-SA 4.0 License. See the [LICENSE](LICENSE) file for more details.
 
 ---
 
