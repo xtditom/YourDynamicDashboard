@@ -11,7 +11,6 @@
 </div>
 
 <div align="center">
-  <img src="https://img.shields.io/github/license/xtditom/YourDynamicDashboard?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/github/last-commit/xtditom/YourDynamicDashboard?style=for-the-badge" alt="Last Commit">
   <img src="https://img.shields.io/github/stars/xtditom/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Stars">
   <img src="https://img.shields.io/github/forks/xtditom/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Forks">
