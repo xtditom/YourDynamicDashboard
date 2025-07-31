@@ -87,7 +87,7 @@ YourDynamicDashboard is packed with features to enhance your new tab page, organ
 
         * **To Clone:** Use the following command in your terminal:
             ```bash
-            git clone [https://github.com/xtditom/YourDynamicDashboard.git](https://github.com/xtditom/YourDynamicDashboard.git)
+            git clone https://github.com/xtditom/YourDynamicDashboard.git
             ```
             * Open your browser's extension management page:
         * **Edge:** `edge://extensions`
