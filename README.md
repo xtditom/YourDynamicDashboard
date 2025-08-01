@@ -49,6 +49,8 @@
 
 ---
 
+#### 🔴 For a Live Test: [LIVE TEST](https://xtditom.github.io/YourDynamicDashboard/)
+
 ## ✨ Features
 
 YourDynamicDashboard is packed with features to enhance your new tab page, organized for your convenience.
@@ -168,7 +170,7 @@ This project is licensed under the **Creative Commons BY-NC-SA 4.0 License**. Se
 
 ## 🛡 Privacy Policy
 
-With **YourDynamicDashboard**, your data always remains your own. We are committed to protecting your privacy and focus only on creating a more personal and productive Browse experience. You can find all the details in our full [Privacy Policy](https://github.com/xtditom/YourDynamicDashboard/blob/main/privacy-policy.html).
+With **YourDynamicDashboard**, your data always remains your own. We are committed to protecting your privacy and focus only on creating a more personal and productive Browse experience. You can find all the details in our full [Privacy Policy](https://xtditom.github.io/YourDynamicDashboard/privacy-policy.html).
 
 ---
 
