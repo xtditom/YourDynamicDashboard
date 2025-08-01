@@ -394,6 +394,44 @@ body.loaded .corner-button { opacity: 1; transform: translateX(0) scale(1); }
     background-color: #c53030;
 }
 
+.about-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.about-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.icon-button {
+    flex-grow: 1; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem; 
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-interactive);
+    color: var(--text-secondary);
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.icon-button:hover {
+    background-color: var(--bg-interactive-hover);
+    color: var(--text-primary);
+}
+
+.icon-button svg {
+    flex-shrink: 0; 
+}
+
 .api-key-section {
     background-color: rgba(0,0,0,0.05);
     display: flex;

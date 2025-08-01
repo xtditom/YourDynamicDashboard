@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YourDynamicDashboard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A dynamic and personalized new tab dashboard.",
   "author": "Ditom Baroi Antu",
   "chrome_url_overrides": {

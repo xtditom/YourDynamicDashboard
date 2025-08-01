@@ -151,7 +151,8 @@ function handleSearchSubmit(event) {
             finalUrl += `&tbm=${provider.tbm}`;
         }
     }
-    window.open(finalUrl, '_blank');
+    window.location.href = finalUrl;
+    searchInputElement.value = '';
 }
 
 
@@ -312,7 +313,6 @@ function renderShortcuts() {
         const link = document.createElement('a');
         link.href = shortcut.url;
         link.className = 'shortcut-item';
-        link.target = '_blank';
         link.style.transitionDelay = `${index * 125}ms`;
         const iconDiv = document.createElement('div');
         iconDiv.className = 'shortcut-icon';

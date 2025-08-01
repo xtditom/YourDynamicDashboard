@@ -48,6 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const restoreButton = document.getElementById('restore-button');
     const restoreFileInput = document.getElementById('restore-file-input');
     const resetButton = document.getElementById('reset-button');
+
+    const updateButton = document.getElementById('check-for-updates-btn');
+    if (updateButton) {
+    updateButton.addEventListener('click', () => {
+        window.open('https://github.com/xtditom/YourDynamicDashboard/releases/latest');
+    });
+    }
     
     const weatherApiKeyInput = document.getElementById('weather-api-key-input');
     const saveApiKeyButton = document.getElementById('save-api-key-button');

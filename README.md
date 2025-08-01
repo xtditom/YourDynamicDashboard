@@ -166,9 +166,15 @@ This project is licensed under the **Creative Commons BY-NC-SA 4.0 License**. Se
 
 ---
 
+## 🛡 Privacy Policy
+
+With **YourDynamicDashboard**, your data always remains your own. We are committed to protecting your privacy and focus only on creating a more personal and productive Browse experience. You can find all the details in our full [Privacy Policy](https://github.com/xtditom/YourDynamicDashboard/blob/main/privacy-policy.html).
+
+---
+
 ## ❤️ Acknowledgments
 
-* **Inspiration:** A huge thanks to **XengShi** for their project, **[MaterialYouNewTab](https://github.com/XengShi/materialYouNewTab/)**, which served as a major inspiration.
+* **Inspiration:** A huge thanks to **XengShi** for their project, **[MaterialYouNewTab](https://github.com/prem-k-r/MaterialYouNewTab)**, which served as a major inspiration. (Currently maintained by _Prem Kumar_ & _Itz-RJ_)
 * **AI Assistance:** Developed with help from **Google's Gemini Pro**.
 * **Icons:** Icons sourced from various open-source libraries.
 

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - YourDynamicDashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-color: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b3b3b3;
+            --accent-color: #e53935; /* A shade of red to match your theme */
+            --border-color: #333;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.7;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        section {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-top: 0;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 1rem;
+        }
+        
+        ul {
+            padding-left: 20px;
+            list-style: none;
+        }
+
+        li {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        strong {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        code {
+            background-color: #2c2c2c;
+            color: #f1f1f1;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Privacy Policy</h1>
+            <p>For the "YourDynamicDashboard" Browser Extension</p>
+            <p>Last Updated: August 1, 2025</p>
+        </header>
+
+        <main>
+            <section>
+                <h2>👋 Introduction</h2>
+                <p><strong>YourDynamicDashboard</strong> is a personal and productive new tab page designed to give you a beautiful and functional start to your Browse session. This policy explains what data the extension uses and why, so you can feel confident and secure.</p>
+            </section>
+
+            <section>
+                <h2>🛡️ A Commitment to Your Privacy</h2>
+                <p>Your privacy is the top priority. <strong>YourDynamicDashboard does not collect, store, or share any of your personal data.</strong> All your settings, to-do lists, and customizations are saved directly in your browser's local storage and never leave your computer.</p>
+                <p>The extension includes no analytics, tracking scripts, or remote logging systems.</p>
+            </section>
+            
+            <section>
+                <h2>📋 Permissions We Request</h2>
+                <p>We only ask for the permissions absolutely necessary for the extension's features to work. Here is a breakdown:</p>
+                <ul>
+                    <li>
+                        <strong><code>storage</code></strong>: This is the primary permission used to save all your custom settings on your own computer. This includes your theme colors, to-do list items, custom shortcuts, and weather API key.
+                    </li>
+                    <li>
+                        <strong><code>geolocation</code></strong> (Optional): This permission is used **only** by the weather widget to automatically find your location for an accurate forecast. Access is managed entirely by your browser, and your location is never tracked or stored.
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>🌐 How We Use External Services (APIs)</h2>
+                <p>To provide certain features, the extension needs to communicate with a few external services. These services are only used to fetch information and do not receive any of your personal data.</p>
+                <ul>
+                    <li>
+                        <strong>🌍 OpenWeatherMap API:</strong> Used by the weather widget to get forecast data for your location. This feature only works after you provide your own personal API key in the settings. The API call looks like this:<br><code>https://openweathermap.org/api/one-call-3</code>
+                    </li>
+                    <li>
+                        <strong>🖼️ Google Favicon Service:</strong> This service is used to fetch the website icons (favicons) for the shortcuts you create. It does not expose your Browse history.<br><code>https://www.google.com/s2/favicons</code>
+                    </li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>🤝 Open Source & Transparency</h2>
+                <p>YourDynamicDashboard is a fully open-source project. You can review the entire source code on GitHub to verify how the extension works and confirm that your data is handled securely. We believe in full transparency.</p>
+                <p>You can find the project repository here: <a href="https://github.com/xtditom/YourDynamicDashboard" target="_blank" rel="noopener noreferrer">github.com/xtditom/YourDynamicDashboard</a></p>
+            </section>
+
+        </main>
+        
+        <footer>
+            <p>Thank you for using YourDynamicDashboard!</p>
+        </footer>
+
+    </div>
+
+</body>
+</html>
