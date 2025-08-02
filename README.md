@@ -49,7 +49,7 @@
 
 ---
 
-## 🔴 **For a Live Test:** [LIVE TEST](https://xtditom.github.io/YourDynamicDashboard/)
+## 🔴🔴🔴 **For a Live Test:** [LIVE TEST](https://xtditom.github.io/YourDynamicDashboard/)
 
 ## ✨ Features
 
@@ -158,6 +158,7 @@ To get weather forecasts, you need a free API key from **OpenWeatherMap**.
 I am actively working on new features to make the dashboard even better:
 - [ ] Add **Theme Presets** to the Appearance tab for quick, beautiful setups.
 - [ ] Implement an **inspirational quotes** widget that can be edited or disabled.
+- [ ] Compatibility with **Mozilla FireFox**.
 - [ ] General UI/UX adjustments and minor feature additions.
 
 ---
