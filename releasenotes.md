@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.1] - 2025-08-02
+
+This version fixes some issues with new features.
+
+### ✨ New Features
+- Added a button in the setting to check for updates.
+- Added **Privacy Policy**.
+
+### 🔧 Fixes
+- Search result will show in the same tab instead of a new tab (same goes for shortcut open)
+
+---
+
 ## [1.0.0] - 2025-08-01
 
 This is the first official stable release of YourDynamicDashboard!
