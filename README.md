@@ -101,8 +101,7 @@ YourDynamicDashboard is packed with features to enhance your new tab page, organ
 There are two main ways to install YourDynamicDashboard: from an official store or manually.
 
 **1. From the Store (Recommended)**
-*(Coming Soon!)*
-* [Link to Microsoft Edge Add-ons]()
+* [Get it on Edge Store](https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec)
 
 **2. Manual Installation**
 
