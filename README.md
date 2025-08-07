@@ -101,7 +101,11 @@ YourDynamicDashboard is packed with features to enhance your new tab page, organ
 There are two main ways to install YourDynamicDashboard: from an official store or manually.
 
 **1. From the Store (Recommended)**
-* [Get it on Edge Store](https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec)
+<p>
+  <a href="https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec" target="_blank">
+  <img src="https://img.shields.io/badge/Get%20it%20on-Microsoft%20Edge%20Store-0078D7.svg?style=for-the-badge&logo=microsoft-edge&logoColor=white" alt="Get it on Microsoft Edge Store" height="48">
+</a>
+</p>
 
 **2. Manual Installation**
 
@@ -111,11 +115,15 @@ This process has two parts: first you get the project files, then you load them 
 
 You have two options to get the files:
 
-* **Option 1: Stable Release (for most users)**
-    1.  Go to the **[Releases](https://github.com/xtditom/YourDynamicDashboard/releases)** page.
-    2.  Under the latest release (e.g., `v1.0.0`), find the **Assets** section.
-    3.  Download the `.zip` file (e.g., `YourDynamicDashboard-1-0-0-S.zip`).
-    4.  **Unzip** the downloaded file into a permanent folder on your computer.
+* **Option 1: Stable Release (for most users)** <br>
+    <br>
+    <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
+    <img src="https://img.shields.io/badge/Get%20it%20on-GitHub-181717.svg?style=for-the-badge&logo=github&logoColor=white" alt="Get it on GitHub" height="48">
+    </a>
+  
+    1.  Under the latest release (e.g., `v1.0.0`), find the **Assets** section.
+    2.  Download the `.zip` file (e.g., `YourDynamicDashboard-1-0-0-S.zip`).
+    3.  **Unzip** the downloaded file into a permanent folder on your computer.
 
 * **Option 2: Development Version (for developers)**
     This will get you the very latest, cutting-edge code.
