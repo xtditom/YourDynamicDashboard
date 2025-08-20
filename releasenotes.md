@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.1.0] - 2025-08-21
+
+This new version 1.1.0 comes with two new features.
+
+### ✨ New Features
+- Added Theme Presets with Colorful Gradient Theme Presets for easy theme choosing.
+- Added Social Media along with AI Tools with custom option to select them.
+
+### 🔧 Fixes
+- General UI fixes with some minor adjustments.
+
+---
+
 ## [1.0.1] - 2025-08-02
 
 This version fixes some issues with new features.
