@@ -69,7 +69,7 @@ YourDynamicDashboard is packed with features to enhance your new tab page, organ
   <tr>
     <td align="center">
       <b>v.1.1.0 New Feature</b><br>
-      <img src="New Feature Showcase/v-1-1-0 Feature" alt="v.1.1.0 Feature">
+      <img src="New Feature Showcase/v-1-1-0 Feature.png" height="300" width="350" alt="v.1.1.0 Feature">
     </td>
   </tr>
 </table>
