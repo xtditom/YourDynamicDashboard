@@ -40,7 +40,10 @@
         </span>
     </button>
     <button id="ai-tools-toggle-button" class="corner-button bottom-left">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+        <!-- Icon for AI Tools -->
+        <svg class="tool-icon ai-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+        <!-- Icon for Social Media -->
+        <svg class="tool-icon social-icon hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </button>
     <button id="apps-toggle-button" class="corner-button top-right">
         <span class="icon-grid">
@@ -60,8 +63,19 @@
         <form id="todo-add-form"><input type="text" id="todo-input" placeholder="Add a new task..." autocomplete="off"><button type="submit">+</button></form>
     </div>
     <div id="ai-tools-popup" class="popup-container">
-        <h2>AI Tools</h2>
-        <div id="ai-tools-list"></div>
+        <div class="tools-header">
+            <div class="tool-tabs-container">
+                <button class="tool-tab-button active" data-tab="ai">AI Tools</button>
+                <div class="tab-divider"></div>
+                <button class="tool-tab-button" data-tab="social">Social Media</button>
+            </div>
+            <button id="tool-edit-button" class="tool-edit-button">
+                <svg class="icon-pencil" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                <svg class="icon-check hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+        </div>
+        <div id="ai-tools-list" class="tool-list active"></div>
+        <div id="social-tools-list" class="tool-list"></div>
     </div>
     <div id="apps-popup" class="popup-container">
         <div id="apps-grid"></div>
@@ -77,7 +91,6 @@
 
         <div class="settings-content">
             <div id="functions-content" class="settings-pane active">
-                <h3 class="settings-header">Basic</h3>
                 <div class="setting-row">
                     <div class="label"><span>Analog Clock</span><small>Use the Android-style analog clock.</small></div>
                     <label class="toggle-switch"><input type="checkbox" id="clock-type-toggle"><span class="slider"></span></label>
@@ -90,10 +103,7 @@
                     <div class="label"><span>Temperature Unit</span><small>Toggle for Fahrenheit.</small></div>
                     <label class="toggle-switch"><input type="checkbox" id="temp-unit-toggle"><span class="slider"></span></label>
                 </div>
-                <div class="setting-row">
-                    <div class="label"><span>Dark Mode</span><small>Enable a darker theme.</small></div>
-                    <label class="toggle-switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider"></span></label>
-                </div>
+
                 <div class="api-key-section">
                     <div class="label">
                         <span>Enter your API key</span>
@@ -154,49 +164,70 @@
             </div>
             
             <div id="appearance-content" class="settings-pane">
-                 <div id="theme-color-note" class="settings-note"><p style="color:rgb(255, 0, 0)">Advanced Colors will work when the 'Dark Mode' is off.</p></div>
-                <div class="setting-row">
-                    <div class="label"><span>Background</span><small>Upload a custom wallpaper (Size: <3MB)</small></div>
-                    <div class="background-controls">
-                        <button id="upload-bg-button" class="settings-button">Upload</button>
-                        <input type="file" id="bg-file-input" accept="image/*" class="hidden">
-                        <button id="remove-bg-button" class="settings-button hidden">Remove</button>
+                <div id="theme-color-note" class="settings-note"><p>Advanced Colors will work when the 'Dark Mode' is off and you are not using "Gradient Theme".</p></div>
+                <div id="standard-theme-controls">
+                    <div class="setting-row">
+                        <div class="label"><span>Dark Mode</span><small>Enable a darker theme.</small></div>
+                        <label class="toggle-switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider"></span></label>
+                    </div>
+                    <div class="setting-row">
+                        <div class="label"><span>Background</span><small>Upload a custom wallpaper (Size: <3MB)</small></div>
+                        <div class="background-controls">
+                            <button id="upload-bg-button" class="settings-button">Upload</button>
+                            <input type="file" id="bg-file-input" accept="image/*" class="hidden">
+                            <button id="remove-bg-button" class="settings-button hidden">Remove</button>
+                        </div>
                     </div>
                 </div>
-
+                
+                <!-- NEW: Theme Preset Section -->
                 <div class="settings-divider"></div>
-                <h3 class="settings-header">Advanced Colors</h3>
-                <div class="setting-row">
-                    <div class="label"><span>Primary Background</span><small>Set color for the theme</small></div>
-                    <input type="color" id="bg-primary-picker" class="color-picker">
+                <h3 class="settings-header">Theme Presets</h3>
+                <div id="normal-themes-container">
+                    <!-- Normal theme presets will be rendered here by JS -->
                 </div>
-                <div class="setting-row">
-                    <div class="label"><small>Widgets Background</small></div>
-                    <input type="color" id="bg-secondary-picker" class="color-picker">
+                <div class="settings-divider"></div>
+                <h3 class="settings-header">Gradient Theme Presets</h3>
+                <div id="gradient-themes-container">
+                    <!-- Gradient theme presets will be rendered here by JS -->
                 </div>
-                <div class="setting-row">
-                    <div class="label"><small>Popups Background</small></div>
-                    <input type="color" id="bg-tertiary-picker" class="color-picker">
-                </div>
-                <div class="setting-row">
-                    <div class="label"><small>Accent Color</small></div>
-                    <input type="color" id="theme-color-picker" class="color-picker">
-                </div>
-                <div class="setting-row">
-                    <div class="label"><span>Primary Text</span><small>Set color for Primary Text</small></div>
-                    <input type="color" id="text-primary-picker" class="color-picker">
-                </div>
-                <div class="setting-row">
-                    <div class="label"><small>Secondary Text</small></div>
-                    <input type="color" id="text-secondary-picker" class="color-picker">
-                </div>
-                <div class="setting-row">
-                    <div class="label"><small>SearchBox Text</small></div>
-                    <input type="color" id="text-placeholder-picker" class="color-picker">
-                </div>
-                <div class="setting-row">
-                    <div class="label"><span>Glow Effect</span><small>Set Clock's glow effect color</small></div>
-                    <input type="color" id="glow-color-picker" class="color-picker">
+                <!-- END NEW -->
+
+                <div id="advanced-color-controls">
+                    <div class="settings-divider"></div>
+                    <h3 class="settings-header">Advanced Colors</h3>
+                    <div class="setting-row">
+                        <div class="label"><span>Primary Background</span><small>Set color for the theme</small></div>
+                        <input type="color" id="bg-primary-picker" class="color-picker">
+                    </div>
+                    <div class="setting-row">
+                        <div class="label"><small>Widgets Background</small></div>
+                        <input type="color" id="bg-secondary-picker" class="color-picker">
+                    </div>
+                    <div class="setting-row">
+                        <div class="label"><small>Popups Background</small></div>
+                        <input type="color" id="bg-tertiary-picker" class="color-picker">
+                    </div>
+                    <div class="setting-row">
+                        <div class="label"><small>Accent Color</small></div>
+                        <input type="color" id="theme-color-picker" class="color-picker">
+                    </div>
+                    <div class="setting-row">
+                        <div class="label"><span>Primary Text</span><small>Set color for Primary Text</small></div>
+                        <input type="color" id="text-primary-picker" class="color-picker">
+                    </div>
+                    <div class="setting-row">
+                        <div class="label"><small>Secondary Text</small></div>
+                        <input type="color" id="text-secondary-picker" class="color-picker">
+                    </div>
+                    <div class="setting-row">
+                        <div class="label"><small>SearchBox Text</small></div>
+                        <input type="color" id="text-placeholder-picker" class="color-picker">
+                    </div>
+                    <div class="setting-row">
+                        <div class="label"><span>Glow Effect</span><small>Set Clock's glow effect color</small></div>
+                        <input type="color" id="glow-color-picker" class="color-picker">
+                    </div>
                 </div>
             </div>
 
@@ -285,6 +316,7 @@
 
     <script src="script.js"></script>
     <script src="todo.js"></script>
+    <script src="socials.js"></script> <!-- Add new script file -->
     <script src="aitools.js"></script>
     <script src="google-apps.js"></script>
     <script src="settings.js"></script>

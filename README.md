@@ -64,6 +64,16 @@ YourDynamicDashboard is packed with features to enhance your new tab page, organ
 
 ---
 
+## 🆕 New Feature Showcase
+<table>
+  <tr>
+    <td align="center">
+      <b>v.1.1.0 New Feature</b><br>
+      <img src="New Feature Showcase/v-1-1-0 Feature" alt="v.1.1.0 Feature">
+    </td>
+  </tr>
+</table>
+
 ## 🔍 Feature Showcase
 <details>
 <summary><b>Click here to see a detailed breakdown of all features</b></summary>
@@ -101,22 +111,33 @@ YourDynamicDashboard is packed with features to enhance your new tab page, organ
 There are two main ways to install YourDynamicDashboard: from an official store or manually.
 
 **1. From the Store (Recommended)**
-*(Coming Soon!)*
-* [Link to Microsoft Edge Add-ons]()
+<p>
+  <a href="https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec" target="_blank">
+  <img src="https://img.shields.io/badge/Get%20it%20on-Microsoft%20Edge%20Store-0078D7.svg?style=for-the-badge&logo=microsoft-edge&logoColor=white" alt="Get it on Microsoft Edge Store" height="48"> <br>
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/" target="_blank">
+  <img src="https://img.shields.io/badge/Get%20it%20on-Firefox%20Add--ons-E66000.svg?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Get it on Firefox Add-ons" height="48">
+</a>
+</p>
+    
+* NOTE: Stores may have older versions if a new version has arrived recently❗Check our [GitHub Releases](https://github.com/xtditom/YourDynamicDashboard/releases) for the LATEST updates.
 
 **2. Manual Installation**
 
-This process has two parts: first you get the project files, then you load them into your browser.
+This process has two parts: first, you get the project files, then you load them into your browser.
 
 **Part A: Get the Project Files**
 
 You have two options to get the files:
 
-* **Option 1: Stable Release (for most users)**
-    1.  Go to the **[Releases](https://github.com/xtditom/YourDynamicDashboard/releases)** page.
-    2.  Under the latest release (e.g., `v1.0.0`), find the **Assets** section.
-    3.  Download the `.zip` file (e.g., `YourDynamicDashboard-1-0-0-S.zip`).
-    4.  **Unzip** the downloaded file into a permanent folder on your computer.
+* **Option 1: Stable Release (for most users)** <br>
+    <br>
+    <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
+    <img src="https://img.shields.io/badge/Get%20it%20on-GitHub-181717.svg?style=for-the-badge&logo=github&logoColor=white" alt="Get it on GitHub" height="48">
+    </a>
+  
+    1.  Under the latest release (e.g., `v1.0.0`), find the **Assets** section.
+    2.  Download the `.zip` file (e.g., `YourDynamicDashboard-1-0-0-S.zip`).
+    3.  **Unzip** the downloaded file into a permanent folder on your computer.
 
 * **Option 2: Development Version (for developers)**
     This will get you the very latest, cutting-edge code.
@@ -156,9 +177,9 @@ To get weather forecasts, you need a free API key from **OpenWeatherMap**.
 ## 🔜 Future Plans
 
 I am actively working on new features to make the dashboard even better:
-- [ ] Add **Theme Presets** to the Appearance tab for quick, beautiful setups.
+- [ ] Add some new productivity tools like Calculator, Focus Timer, and Notes.
 - [ ] Implement an **inspirational quotes** widget that can be edited or disabled.
-- [ ] Compatibility with **Mozilla FireFox**.
+- [ ] Make shortcuts draggable for easy shortcut arrangements.
 - [ ] General UI/UX adjustments and minor feature additions.
 
 ---

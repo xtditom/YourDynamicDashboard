@@ -420,8 +420,55 @@ function manageWelcomePopup() {
 }
 
 function applyInitialSettings() {
-    const darkMode = localStorage.getItem('darkMode') !== 'false';
-    document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    const gradientModeActive = localStorage.getItem('gradientModeActive') === 'true';
+
+    if (gradientModeActive) {
+        document.body.classList.add('gradient-mode-active');
+        const gradientThemeType = localStorage.getItem('gradientThemeType') || 'light';
+        document.body.dataset.gradientThemeType = gradientThemeType;
+        
+        const gradientThemes = [
+            { id: 'oceanic', colors: ['#89f7fe', '#66a6ff'] }, { id: 'sunset', colors: ['#fddb92', '#d1fdff'] },
+            { id: 'meadow', colors: ['#c5cbe6ff', '#5effe1ff'] }, { id: 'lush', colors: ['#56ab2f', '#b7df4aff'] },
+            { id: 'grey', colors: ['#c9c9c9', '#4e4e4e'] }, { id: 'royal', colors: ['#6b03cc', '#2575fc'] },
+            { id: 'cosmic', colors: ['#141e30', '#243b55'] }, { id: 'ember', colors: ['#480048', '#C04848'] },
+            { id: 'forest', colors: ['#295038', '#414d0b'] }
+        ];
+        const gradientThemeId = localStorage.getItem('gradientThemeId') || 'oceanic';
+        const selectedTheme = gradientThemes.find(t => t.id === gradientThemeId) || gradientThemes[0];
+        document.documentElement.style.setProperty('--gradient-color-1', selectedTheme.colors[0]);
+        document.documentElement.style.setProperty('--gradient-color-2', selectedTheme.colors[1]);
+
+        const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+        const timings = ['ease', 'linear', 'ease-in-out'];
+        const randomAngle = angles[Math.floor(Math.random() * angles.length)];
+        const randomTiming = timings[Math.floor(Math.random() * timings.length)];
+        document.body.style.setProperty('--gradient-angle', `${randomAngle}deg`);
+        document.body.style.setProperty('--gradient-timing', randomTiming);
+
+    } else {
+        const darkMode = localStorage.getItem('darkMode') !== 'false';
+        document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+        
+        // FIX: Corrected the keys to match what's saved in settings.js
+        const customColors = [
+            { key: 'custom---bg-primary', variable: '--bg-primary' },
+            { key: 'custom---bg-secondary', variable: '--bg-secondary' },
+            { key: 'custom---bg-tertiary', variable: '--bg-tertiary' },
+            { key: 'custom---accent-color', variable: '--accent-color' },
+            { key: 'custom---text-primary', variable: '--text-primary' },
+            { key: 'custom---text-secondary', variable: '--text-secondary' },
+            { key: 'custom---text-placeholder', variable: '--text-placeholder' },
+            { key: 'custom---glow-color', variable: '--glow-color' }
+        ];
+        customColors.forEach(color => {
+            const savedValue = localStorage.getItem(color.key);
+            if (savedValue) {
+                document.documentElement.style.setProperty(color.variable, savedValue);
+            }
+        });
+    }
+
     setClockType(clockType);
     const todoButton = document.getElementById('todo-toggle-button');
     const appsButton = document.getElementById('apps-toggle-button');
@@ -437,22 +484,9 @@ function applyInitialSettings() {
     if (savedBg) {
         document.body.style.backgroundImage = `url(${savedBg})`;
     }
-    const customColors = [
-        { key: 'themeColor', variable: '--accent-color' },
-        { key: 'custom-bg-primary', variable: '--bg-primary' },
-        { key: 'custom-bg-secondary', variable: '--bg-secondary' },
-        { key: 'custom-bg-tertiary', variable: '--bg-tertiary' },
-        { key: 'custom-text-primary', variable: '--text-primary' },
-        { key: 'custom-text-secondary', variable: '--text-secondary' },
-        { key: 'custom-text-placeholder', variable: '--text-placeholder' },
-        { key: 'custom-glow-color', variable: '--glow-color' }
-    ];
-    customColors.forEach(color => {
-        const savedValue = localStorage.getItem(color.key);
-        if (savedValue) {
-            document.documentElement.style.setProperty(color.variable, savedValue);
-        }
-    });
+    
+    const transparencyActive = localStorage.getItem('transparencyActive') === 'true';
+    document.body.classList.toggle('transparency-active', transparencyActive);
 }
 
 function initializeCore() {
@@ -489,34 +523,55 @@ function initializeCore() {
     setTimeout(() => {
         document.body.classList.add('loaded');
     }, 100);
+
     document.addEventListener('settingChanged', (e) => {
         const { key, value } = e.detail;
-        if (key === 'clockFormat') {
-            clockFormat = value;
-            updateDigitalClock(new Date());
-        }
-        if (key === 'clockType') {
-            setClockType(value);
-        }
-        if (key === 'tempUnit') {
-            tempUnit = value;
-            getWeather();
-        }
-        if (key === 'showShortcuts') {
-            if (shortcutsContainer) {
-                shortcutsContainer.classList.toggle('hidden', !value);
-            }
-        }
-        if (key === 'showTodo') {
-            const todoButton = document.getElementById('todo-toggle-button');
-            if (todoButton) todoButton.classList.toggle('hidden', !value);
-        }
-        if (key === 'showApps') {
-            const appsButton = document.getElementById('apps-toggle-button');
-            if (appsButton) appsButton.classList.toggle('hidden', !value);
-        }
-        if (key === 'weatherApiKey') {
-            location.reload();
+        switch (key) {
+            case 'clockFormat':
+                clockFormat = value;
+                updateDigitalClock(new Date());
+                break;
+            case 'clockType':
+                setClockType(value);
+                break;
+            case 'tempUnit':
+                tempUnit = value;
+                getWeather();
+                break;
+            case 'showShortcuts':
+                if (shortcutsContainer) shortcutsContainer.classList.toggle('hidden', !value);
+                break;
+            case 'showTodo':
+                document.getElementById('todo-toggle-button')?.classList.toggle('hidden', !value);
+                break;
+            case 'showApps':
+                document.getElementById('apps-toggle-button')?.classList.toggle('hidden', !value);
+                break;
+            case 'weatherApiKey':
+                location.reload();
+                break;
+            case 'darkMode':
+                 document.body.setAttribute('data-theme', value ? 'dark' : 'light');
+                 break;
+            case 'gradientModeActive':
+                document.body.classList.toggle('gradient-mode-active', value);
+                if (!value) { // When turning off, re-apply standard theme
+                    const isDarkMode = localStorage.getItem('darkMode') !== 'false';
+                    document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+                } else { // When turning on, apply gradient theme type
+                    const themeType = localStorage.getItem('gradientThemeType') || 'light';
+                    document.body.dataset.gradientThemeType = themeType;
+                }
+                break;
+            case 'transparencyActive':
+                document.body.classList.toggle('transparency-active', value);
+                break;
+            case 'gradientThemeChanged':
+                const selectedTheme = value;
+                document.documentElement.style.setProperty('--gradient-color-1', selectedTheme.colors[0]);
+                document.documentElement.style.setProperty('--gradient-color-2', selectedTheme.colors[1]);
+                document.body.dataset.gradientThemeType = selectedTheme.type;
+                break;
         }
     });
 }

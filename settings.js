@@ -1,5 +1,74 @@
 // settings.js (Ditom Baroi Antu)
 
+// --- NEW: Normal Theme Presets (PLACEHOLDER COLORS) ---
+const normalThemes = [
+    // You can replace these color codes with your own
+    { id: 'default-light', name: 'Default Light', colors: { '--bg-primary': '#bdbdbd', '--bg-secondary': '#ffffff', '--bg-tertiary': '#ffffff', '--accent-color': '#1a1a1a', '--text-primary': '#1a1a1a', '--text-secondary': '#65676b', '--text-placeholder': '#8a8d91', '--glow-color': '#000000' }},
+    { id: 'default-dark', name: 'Default Dark', colors: { '--bg-primary': '#000000', '--bg-secondary': '#3a3a3a', '--bg-tertiary': '#2d2d2d', '--accent-color': '#a1a1a1', '--text-primary': '#f9fafb', '--text-secondary': '#d1d5db', '--text-placeholder': '#9ca3af', '--glow-color': '#ffffff' }},
+    { id: 'theme-1', name: 'YDD Standard', colors: { '--bg-primary': '#000000', '--bg-secondary': '#141414', '--bg-tertiary': '#2d2d2d', '--accent-color': '#ff7300', '--text-primary': '#ff7300', '--text-secondary': '#ff7300', '--text-placeholder': '#ff7300', '--glow-color': '#ff7300' }},
+    { id: 'theme-2', name: 'Crimson Red', colors: { '--bg-primary': '#000000', '--bg-secondary': '#000000', '--bg-tertiary': '#2d0000', '--accent-color': '#ed0707', '--text-primary': '#ed0707', '--text-secondary': '#ed0707', '--text-placeholder': '#ed0707', '--glow-color': '#ed0707' }},
+    { id: 'theme-3', name: 'Azure Sky', colors: { '--bg-primary': '#f5f5f5', '--bg-secondary': '#006eff', '--bg-tertiary': '#006eff', '--accent-color': '#ffffff', '--text-primary': '#000000', '--text-secondary': '#ffffff', '--text-placeholder': '#ffffff', '--glow-color': '#006eff' }},
+    { id: 'theme-4', name: 'Minty Fresh', colors: { '--bg-primary': '#c2d6c7', '--bg-secondary': '#FFFFFF', '--bg-tertiary': '#E6F8EB', '--accent-color': '#3CB371', '--text-primary': '#2E8B57', '--text-secondary': '#555555', '--text-placeholder': '#888888', '--glow-color': '#3CB371' }},
+    { id: 'theme-5', name: 'Sakura', colors: { '--bg-primary': '#FFc7e2', '--bg-secondary': '#FFdbed', '--bg-tertiary': '#FFECF0', '--accent-color': '#FF69B4', '--text-primary': '#C71585', '--text-secondary': '#8B5765', '--text-placeholder': '#A9818E', '--glow-color': '#FF69B4' }},
+    { id: 'theme-6', name: 'Cyberpunk', colors: { '--bg-primary': '#0A043C', '--bg-secondary': '#140C4F', '--bg-tertiary': '#221B64', '--accent-color': '#00E5FF', '--text-primary': '#00e5ff', '--text-secondary': '#FF00FF', '--text-placeholder': '#ff00ff', '--glow-color': '#00E5FF' }},
+    { id: 'theme-7', name: 'Forest Mist', colors: { '--bg-primary': '#1A2A27', '--bg-secondary': '#243834', '--bg-tertiary': '#364D47', '--accent-color': '#A8D5BA', '--text-primary': '#E0EFE6', '--text-secondary': '#B0C9BE', '--text-placeholder': '#829E91', '--glow-color': '#A8D5BA' }}
+];
+
+const gradientThemes = [
+    { id: 'oceanic', name: 'Oceanic', colors: ['#5eaeffff', '#ae8bffff'], type: 'light' },
+    { id: 'sunset', name: 'Sunset', colors: ['#fddb92', '#ff67f2ff'], type: 'light' },
+    { id: 'meadow', name: 'Meadow', colors: ['#c5cbe6ff', '#5effe1ff'], type: 'light' },
+    { id: 'lush', name: 'Lush', colors: ['#2acf09ff', '#b7df4aff'], type: 'light' },
+    { id: 'grey', name: 'Passion', colors: ['#c9c9c9', '#4e4e4e'], type: 'dark' },
+    { id: 'royal', name: 'Royal', colors: ['#6b03cc', '#2575fc'], type: 'dark' },
+    { id: 'cosmic', name: 'Cosmic', colors: ['#141e30', '#243b55'], type: 'dark' },
+    { id: 'ember', name: 'Ember', colors: ['#480048', '#C04848'], type: 'dark' },
+    { id: 'forest', name: 'Forest', colors: ['#295038', '#414d0b'], type: 'dark' }
+];
+
+function renderNormalThemes() {
+    const container = document.getElementById('normal-themes-container');
+    if (!container) return;
+    container.innerHTML = '';
+    const currentThemeId = localStorage.getItem('normalThemeId');
+
+    normalThemes.forEach(theme => {
+        const button = document.createElement('button');
+        button.className = 'theme-preset-button';
+        button.dataset.themeId = theme.id;
+        button.title = theme.name;
+        button.style.background = theme.colors['--bg-primary'];
+        button.style.borderColor = theme.colors['--accent-color'];
+        button.style.color = theme.colors['--text-primary'];
+        button.textContent = theme.name;
+
+        if (theme.id === currentThemeId) {
+            button.classList.add('active');
+        }
+        container.appendChild(button);
+    });
+}
+
+function renderGradientThemes() {
+    const container = document.getElementById('gradient-themes-container');
+    if (!container) return;
+    container.innerHTML = '';
+    const currentThemeId = localStorage.getItem('gradientThemeId');
+
+    gradientThemes.forEach(theme => {
+        const button = document.createElement('button');
+        button.className = 'theme-preset-button gradient';
+        button.dataset.themeId = theme.id;
+        button.title = theme.name;
+        button.style.background = `linear-gradient(45deg, ${theme.colors[0]}, ${theme.colors[1]})`;
+        
+        if (theme.id === currentThemeId) {
+            button.classList.add('active');
+        }
+        container.appendChild(button);
+    });
+}
+
 function renderShortcutEditor() {
     const editorList = document.getElementById('shortcuts-editor-list');
     if (!editorList) return;
@@ -65,33 +134,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const functionsContent = document.getElementById('functions-content');
     const appearanceContent = document.getElementById('appearance-content');
     const shortcutsContent = document.getElementById('shortcuts-content');
-    const themeColorNote = document.getElementById('theme-color-note');
 
     const addShortcutForm = document.getElementById('add-shortcut-form');
     const shortcutNameInput = document.getElementById('shortcut-name-input');
     const shortcutUrlInput = document.getElementById('shortcut-url-input');
     const shortcutsEditorList = document.getElementById('shortcuts-editor-list');
 
+    const normalThemesContainer = document.getElementById('normal-themes-container');
+    const gradientThemesContainer = document.getElementById('gradient-themes-container');
+    
+    const advancedColorControls = document.getElementById('advanced-color-controls');
+    
+    // --- NEW: Get the note element ---
+    const themeColorNote = document.getElementById('theme-color-note');
 
     const advancedColorPickers = [
-        { id: 'bg-primary-picker', key: 'custom-bg-primary', variable: '--bg-primary' },
-        { id: 'bg-secondary-picker', key: 'custom-bg-secondary', variable: '--bg-secondary' },
-        { id: 'bg-tertiary-picker', key: 'custom-bg-tertiary', variable: '--bg-tertiary' },
-        { id: 'theme-color-picker', key: 'themeColor', variable: '--accent-color' },
-        { id: 'text-primary-picker', key: 'custom-text-primary', variable: '--text-primary' },
-        { id: 'text-secondary-picker', key: 'custom-text-secondary', variable: '--text-secondary' },
-        { id: 'text-placeholder-picker', key: 'custom-text-placeholder', variable: '--text-placeholder' },
-        { id: 'glow-color-picker', key: 'custom-glow-color', variable: '--glow-color' }
+        { id: 'bg-primary-picker', variable: '--bg-primary' },
+        { id: 'bg-secondary-picker', variable: '--bg-secondary' },
+        { id: 'bg-tertiary-picker', variable: '--bg-tertiary' },
+        { id: 'theme-color-picker', variable: '--accent-color' },
+        { id: 'text-primary-picker', variable: '--text-primary' },
+        { id: 'text-secondary-picker', variable: '--text-secondary' },
+        { id: 'text-placeholder-picker', variable: '--text-placeholder' },
+        { id: 'glow-color-picker', variable: '--glow-color' }
     ];
+    
+    const pickerMap = new Map(advancedColorPickers.map(p => [p.variable, p.id]));
 
     const settingsKeys = [
         'clockFormat', 'clockType', 'tempUnit', 'darkMode', 'showTodo', 'showApps', 
         'showShortcuts', 'showAiTools', 'welcomeText', 'userShortcuts', 'todos', 
-        'currentSearch', 'backgroundImage', 'weatherApiKey', 'welcomeShown'
-    ].concat(advancedColorPickers.map(p => p.key));
+        'currentSearch', 'backgroundImage', 'weatherApiKey', 'welcomeShown',
+        'gradientModeActive', 'transparencyActive', 'gradientThemeId', 'gradientThemeType', 'normalThemeId'
+    ].concat(advancedColorPickers.map(p => `custom-${p.variable}`));
 
     function saveSetting(key, value) {
         localStorage.setItem(key, value);
+    }
+    
+    // --- NEW: Function to control visibility of note and advanced controls ---
+    function updateAppearanceControlsState() {
+        if (!themeColorNote || !advancedColorControls) return;
+
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        const isGradientMode = localStorage.getItem('gradientModeActive') === 'true';
+        const isAdvancedDisabled = isDarkMode || isGradientMode;
+
+        advancedColorControls.classList.toggle('disabled', isAdvancedDisabled);
+        themeColorNote.classList.toggle('hidden', !isAdvancedDisabled);
     }
 
     function loadSettings() {
@@ -114,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const darkMode = localStorage.getItem('darkMode') !== 'false';
         if (darkModeToggle) darkModeToggle.checked = darkMode;
-        if (themeColorNote) themeColorNote.classList.toggle('hidden', !darkMode);
 
         const savedBg = localStorage.getItem('backgroundImage');
         if (removeBgButton) removeBgButton.classList.toggle('hidden', !savedBg);
@@ -123,15 +212,40 @@ document.addEventListener('DOMContentLoaded', () => {
         advancedColorPickers.forEach(picker => {
             const element = document.getElementById(picker.id);
             if (element) {
-                const savedValue = localStorage.getItem(picker.key);
+                const savedValue = localStorage.getItem(`custom-${picker.variable}`);
                 element.value = savedValue || rootStyles.getPropertyValue(picker.variable).trim();
             }
         });
+        
+        updateAppearanceControlsState(); // Call on load
     }
 
     function dispatchSettingChange(key, value) {
         const event = new CustomEvent('settingChanged', { detail: { key, value } });
         document.dispatchEvent(event);
+    }
+    
+    function applyNormalTheme(theme) {
+        saveSetting('gradientModeActive', 'false');
+        dispatchSettingChange('gradientModeActive', false);
+        saveSetting('transparencyActive', 'false');
+        dispatchSettingChange('transparencyActive', false);
+
+        Object.entries(theme.colors).forEach(([variable, color]) => {
+            saveSetting(`custom-${variable}`, color);
+            document.documentElement.style.setProperty(variable, color);
+            
+            const pickerId = pickerMap.get(variable);
+            if (pickerId) {
+                const pickerElement = document.getElementById(pickerId);
+                if (pickerElement) pickerElement.value = color;
+            }
+        });
+
+        const isDark = theme.id.includes('dark');
+        saveSetting('darkMode', isDark);
+        dispatchSettingChange('darkMode', isDark);
+        if (darkModeToggle) darkModeToggle.checked = isDark;
     }
 
     function backupSettings() {
@@ -178,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetSettings() {
-        if (window.confirm("Are you sure you want to reset all settings? This action cannot be undone.")) {
+        if (confirm("Are you sure you want to reset all settings? This action cannot be undone.")) {
             localStorage.clear();
             location.reload();
         }
@@ -250,17 +364,12 @@ document.addEventListener('DOMContentLoaded', () => {
             darkModeToggle.addEventListener('change', () => {
                 const isEnabled = darkModeToggle.checked;
                 saveSetting('darkMode', isEnabled);
-                document.body.setAttribute('data-theme', isEnabled ? 'dark' : 'light');
-                if (themeColorNote) themeColorNote.classList.toggle('hidden', !isEnabled);
-
-                const newThemeStyles = getComputedStyle(document.documentElement);
-                advancedColorPickers.forEach(picker => {
-                    const element = document.getElementById(picker.id);
-                    const isCustomColorSaved = localStorage.getItem(picker.key);
-                    if (!isCustomColorSaved && element) {
-                        element.value = newThemeStyles.getPropertyValue(picker.variable).trim();
-                    }
-                });
+                dispatchSettingChange('darkMode', isEnabled);
+                
+                localStorage.removeItem('normalThemeId');
+                document.querySelectorAll('#normal-themes-container .theme-preset-button').forEach(btn => btn.classList.remove('active'));
+                
+                updateAppearanceControlsState(); // Call on change
             });
         }
         if (uploadBgButton && bgFileInput) {
@@ -281,8 +390,55 @@ document.addEventListener('DOMContentLoaded', () => {
         if (removeBgButton) {
             removeBgButton.addEventListener('click', () => {
                 localStorage.removeItem('backgroundImage');
-                document.body.style.backgroundImage = 'none';
+                document.body.style.backgroundImage = '';
                 removeBgButton.classList.add('hidden');
+            });
+        }
+
+        if (normalThemesContainer) {
+            normalThemesContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('.theme-preset-button');
+                if (!button) return;
+
+                const themeId = button.dataset.themeId;
+                const selectedTheme = normalThemes.find(t => t.id === themeId);
+                
+                if (selectedTheme) {
+                    saveSetting('normalThemeId', themeId);
+                    localStorage.removeItem('gradientThemeId');
+                    applyNormalTheme(selectedTheme);
+                    updateAppearanceControlsState(); // Call on change
+                }
+
+                document.querySelectorAll('.theme-preset-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        }
+
+        if (gradientThemesContainer) {
+            gradientThemesContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('.theme-preset-button');
+                if (!button) return;
+
+                const themeId = button.dataset.themeId;
+                const selectedTheme = gradientThemes.find(t => t.id === themeId);
+                
+                if (selectedTheme) {
+                    saveSetting('gradientThemeId', themeId);
+                    saveSetting('gradientThemeType', selectedTheme.type);
+                    localStorage.removeItem('normalThemeId');
+
+                    saveSetting('gradientModeActive', 'true');
+                    dispatchSettingChange('gradientModeActive', true);
+                    saveSetting('transparencyActive', 'true');
+                    dispatchSettingChange('transparencyActive', true);
+                    
+                    dispatchSettingChange('gradientThemeChanged', selectedTheme);
+                    updateAppearanceControlsState(); // Call on change
+                }
+
+                document.querySelectorAll('.theme-preset-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
             });
         }
 
@@ -291,16 +447,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (restoreFileInput) restoreFileInput.addEventListener('change', restoreSettings);
         if (resetButton) resetButton.addEventListener('click', resetSettings);
 
-        advancedColorPickers.forEach(picker => {
-            const element = document.getElementById(picker.id);
-            if (element) {
-                element.addEventListener('input', (e) => {
-                    const newColor = e.target.value;
-                    saveSetting(picker.key, newColor);
-                    document.documentElement.style.setProperty(picker.variable, newColor);
-                });
-            }
-        });
+        if (advancedColorControls) {
+            advancedColorControls.addEventListener('input', (e) => {
+                if (e.target.classList.contains('color-picker')) {
+                    const picker = advancedColorPickers.find(p => p.id === e.target.id);
+                    if (picker) {
+                        const newColor = e.target.value;
+                        saveSetting(`custom-${picker.variable}`, newColor);
+                        document.documentElement.style.setProperty(picker.variable, newColor);
+
+                        saveSetting('gradientModeActive', 'false');
+                        dispatchSettingChange('gradientModeActive', false);
+                        saveSetting('transparencyActive', 'false');
+                        dispatchSettingChange('transparencyActive', false);
+                        localStorage.removeItem('normalThemeId');
+                        localStorage.removeItem('gradientThemeId');
+                        document.querySelectorAll('.theme-preset-button').forEach(btn => btn.classList.remove('active'));
+                        updateAppearanceControlsState(); // Call on change
+                    }
+                }
+            });
+        }
 
         if (addShortcutForm) {
             addShortcutForm.addEventListener('submit', (e) => {
@@ -348,6 +515,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Settings module loaded.");
     loadSettings();
     manageSettingsEvents();
+    renderNormalThemes();
+    renderGradientThemes();
 });
 
 // settings.js (Ditom Baroi Antu)
