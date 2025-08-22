@@ -23,7 +23,7 @@ const gradientThemes = [
     { id: 'royal', name: 'Royal', colors: ['#6b03cc', '#2575fc'], type: 'dark' },
     { id: 'cosmic', name: 'Cosmic', colors: ['#141e30', '#243b55'], type: 'dark' },
     { id: 'ember', name: 'Ember', colors: ['#480048', '#C04848'], type: 'dark' },
-    { id: 'forest', name: 'Forest', colors: ['#295038', '#4d0b0bff'], type: 'dark' }
+    { id: 'forest', name: 'Forest', colors: ['#295038', '#0a3314ff'], type: 'dark' }
 ];
 
 function renderNormalThemes() {
