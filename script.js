@@ -427,13 +427,6 @@ function applyInitialSettings() {
         const gradientThemeType = localStorage.getItem('gradientThemeType') || 'light';
         document.body.dataset.gradientThemeType = gradientThemeType;
         
-        const gradientThemes = [
-            { id: 'oceanic', colors: ['#89f7fe', '#66a6ff'] }, { id: 'sunset', colors: ['#fddb92', '#d1fdff'] },
-            { id: 'meadow', colors: ['#c5cbe6ff', '#5effe1ff'] }, { id: 'lush', colors: ['#56ab2f', '#b7df4aff'] },
-            { id: 'grey', colors: ['#c9c9c9', '#4e4e4e'] }, { id: 'royal', colors: ['#6b03cc', '#2575fc'] },
-            { id: 'cosmic', colors: ['#141e30', '#243b55'] }, { id: 'ember', colors: ['#480048', '#C04848'] },
-            { id: 'forest', colors: ['#295038', '#414d0b'] }
-        ];
         const gradientThemeId = localStorage.getItem('gradientThemeId') || 'oceanic';
         const selectedTheme = gradientThemes.find(t => t.id === gradientThemeId) || gradientThemes[0];
         document.documentElement.style.setProperty('--gradient-color-1', selectedTheme.colors[0]);
