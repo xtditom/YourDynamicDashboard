@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">🚀 YourDynamicDashboard</h1>
+  <h1 align="center">🚀 YourDynamicDashboard (v.2.0.0 soon) </h1>
   <p align="center">
     A clean, powerful, dynamic and customizable new tab page built to make your browse experience personal and productive.
     <br />
