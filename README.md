@@ -64,29 +64,29 @@ YourDynamicDashboard has been completely re-engineered for productivity.
   <tr>
     <td align="center">
       <b>Light Mode</b><br>
-      <img src="Mode Overview/light-mode.png" alt="Light Mode Theme">
+      <img src="assets/mode-overview/light-mode.png" alt="Light Mode Theme">
     </td>
     <td align="center">
       <b>Dark Mode</b><br>
-      <img src="Mode Overview/dark-mode.png" alt="Dark Mode Theme">
+      <img src="assets/mode-overview/dark-mode.png" alt="Dark Mode Theme">
     </td>
     <td align="center">
-      <b>"YDD" Themed Mode</b><br>
-      <img src="Mode Overview/YourDynamicDashboard-YDD.png" alt="YDD Mode Theme">
+      <b>Crimson Red Mode</b><br>
+      <img src="assets/mode-overview/crimson-red.png" alt="Crimson Red Mode">
     </td>
   </tr>
   <tr>
     <td align="center">
-      <b>Crimson Pulse Theme</b><br>
-      <img src="Mode Overview/Crimson-Pulse.png" alt="Crimson Pulse Theme">
+      <b>Royalty Gradient Theme</b><br>
+      <img src="assets/mode-overview/royalty-gradient.png" alt="Royalty Gradient Theme">
     </td>
     <td align="center">
-      <b>Azure Sky Theme</b><br>
-      <img src="Mode Overview/Azure-Sky.png" alt="Azure Sky Theme">
+      <b>Forest Theme Mode</b><br>
+      <img src="assets/mode-overview/forest-theme.png" alt="Forest Theme">
     </td>
     <td align="center">
       <b>PopUp Features</b><br>
-      <img src="Mode Overview/PopUp-Features.png" alt="PopUp Features">
+      <img src="assets/mode-overview/pop-up-features.png" alt="PopUp Features">
     </td>
   </tr>
 </table>
@@ -112,7 +112,7 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 ## 🛠️ Installation Guide
 
 ### Option 1: Web Store (Stable)
-*Store versions may be delayed by review processes.*
+*Stores may have older version if a new version is arrived recently.*
 <p>
   <a href="https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec" target="_blank">
   <img src="https://img.shields.io/badge/Get%20it%20on-Microsoft%20Edge%20Store-0078D7.svg?style=for-the-badge&logo=microsoft-edge&logoColor=white" alt="Microsoft Edge Store">
