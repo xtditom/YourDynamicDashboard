@@ -7,9 +7,9 @@
     <br />
     <br />
     <a href="#-features-v20"><strong>Features</strong></a> ·
-    <a href="#-installation-guide"><strong>Installation</strong></a> ·
-    <a href="#-configuration"><strong>Configuration</strong></a> ·
-    <a href="#-keyboard-shortcuts"><strong>Shortcuts</strong></a>
+    <a href="#%EF%B8%8F-installation-guide"><strong>Installation</strong></a> ·
+    <a href="#%EF%B8%8F-keyboard-shortcuts"><strong>Keyboard Shortcuts</strong></a> ·
+    <a href="#-mode--theme-overview"><strong>Extension Preview</strong></a>
   </p>
 </div>
 
