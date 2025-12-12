@@ -1,21 +1,65 @@
 <div align="center">
-  <h1 align="center">🚀 YourDynamicDashboard (v.2.0.0 soon) </h1>
+  <h1 align="center">🚀 YourDynamicDashboard (v2.0.0)</h1>
   <p align="center">
-    A clean, powerful, dynamic and customizable new tab page built to make your browse experience personal and productive.
+    <strong>The Productivity Update.</strong><br>
+    Transform your new tab into a powerful, privacy-first command center.<br>
+    Featuring Voice Search, Zen Mode, and Instant Weather.
     <br />
-    <a href="#-features"><strong>Features</strong></a> ·
-    <a href="#-feature-showcase"><strong>Showcase</strong></a> ·
-    <a href="#-getting-started"><strong>Installation</strong></a> ·
-    <a href="#️-configuration"><strong>Configuration</strong></a>
+    <br />
+    <a href="#-features-v20"><strong>Features</strong></a> ·
+    <a href="#-installation-guide"><strong>Installation</strong></a> ·
+    <a href="#-configuration"><strong>Configuration</strong></a> ·
+    <a href="#-keyboard-shortcuts"><strong>Shortcuts</strong></a>
   </p>
 </div>
 
 <div align="center">
+  <img src="https://img.shields.io/github/v/release/xtditom/YourDynamicDashboard?style=for-the-badge&color=blue" alt="Version">
   <img src="https://img.shields.io/github/last-commit/xtditom/YourDynamicDashboard?style=for-the-badge" alt="Last Commit">
   <img src="https://img.shields.io/github/stars/xtditom/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Stars">
-  <img src="https://img.shields.io/github/forks/xtditom/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Forks">
 </div>
 
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/promo/lifestyle-1.jpg" alt="YDD in Action - Setup 1" width="100%">
+      <br><b>Focus Mode</b>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/promo/lifestyle-2.png" alt="YDD in Action - Setup 2" width="100%">
+      <br><b>Productivity Hub</b>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🔴🔴🔴 **For a Live Test:** [LIVE TEST](https://xtditom.github.io/YourDynamicDashboard/)
+
+---
+
+## ⚡ Why Choose YourDynamicDashboard?
+
+Most dashboards are either too simple (just a clock) or too cluttered (ads and news feeds). **YDD** strikes the perfect balance:
+
+* **🔒 Privacy First:** No tracking. Your data (To-Do lists, links, settings) lives on your computer, not our servers.
+* **🏎️ Speed:** Built with vanilla JavaScript. No heavy frameworks. Loads instantly.
+* **🎨 Aesthetics:** Glassmorphism UI, animated gradients, and full color control.
+
+---
+
+## ✨ Features (v2.0)
+
+YourDynamicDashboard has been completely re-engineered for productivity.
+
+| Category | Premium Features |
+| :--- | :--- |
+| **🤖 Interaction** | <li>**Voice Search ("Jarvis Mode"):** Click the mic or press `V`. Speak your query, and it searches instantly.</li><li>**Zen Mode:** Press `Z` to banish all clutter. Only the clock and wallpaper remain.</li><li>**God Mode:** Full keyboard navigation (`1-9`, `T`, `A`, `S`) for power users.</li> |
+| **🎨 Personalization** | <li>**Auto Theme Shuffle:** Get a fresh look every time you open a tab.</li><li>**Personal Greeting:** Double-click the text to set your nickname.</li><li>**Save Presets:** Crafted the perfect theme? Save it to a slot and switch back anytime.</li> |
+| **☁️ Utilities** | <li>**Instant Weather:** No API keys required. We switched to Open-Meteo for privacy-friendly, zero-setup weather.</li><li>**Smart Search:** Switch engines (Google, Bing, DuckDuckGo) or platforms (YouTube, Reddit) instantly.</li><li>**Daily Quotes:** A rotating collection of wisdom to start your day.</li> |
+| **⚡ Quick Access** | <li>**Draggable Shortcuts:** Reorder your favorite sites via drag-and-drop.</li><li>**AI Tools Menu:** Quick links to ChatGPT, Gemini, Claude, and more.</li><li>**Google Apps:** The classic 9-dot menu for Gmail, Drive, etc.</li> |
+
+### 🎨 Mode & Theme Overview
 <table>
   <tr>
     <td align="center">
@@ -49,138 +93,85 @@
 
 ---
 
-## 🔴🔴🔴 **For a Live Test:** [LIVE TEST](https://xtditom.github.io/YourDynamicDashboard/)
-
-## ✨ Features
-
-YourDynamicDashboard is packed with features to enhance your new tab page, organized for your convenience.
-
-| Category               | Features                                                                                                                                                                                           |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Interface & Clocks** | <li>**Dual Clock Modes:** Choose between a sleek digital clock or a beautiful analog clock with a stunning glow effect.</li><li>**Dynamic Greetings:** Get personalized greetings that change based on the time of day.</li> |
-| **Productivity Tools** | <li>**Live Weather:** See current weather, temperature, humidity, and location at a glance.</li><li>**To-Do List:** Keep track of your daily tasks with a simple and accessible to-do list.</li><li>**Customizable Search:** Search using your favorite engine (Google, Bing, Brave) or directly on platforms like YouTube and Wikipedia.</li> |
-| **Quick-Access Panels**| <li>**AI Tools:** Instant links to popular AI chatbots like Gemini, ChatGPT, Claude, and more.</li><li>**Google Apps:** A familiar grid of shortcuts to all your favorite Google services.</li><li>**Personalized Shortcuts:** Create, edit, and manage your own list of favorite websites on the shortcuts bar.</li> |
-| **Customization & Data**| <li>**Deep Theming:** Switch between Dark/Light modes or use **Advanced Colors** to theme every element yourself.</li><li>**Custom Backgrounds:** Set your own wallpaper to personalize your space.</li><li>**Element Toggles:** Show or hide any element you don't need for a minimal look.</li><li>**Backup & Restore:** Save all your settings to a file and restore them anytime.</li> |
-
----
-
 ## 🆕 New Feature Showcase
 <table>
   <tr>
     <td align="center">
       <b>v.1.1.0 New Feature</b><br>
-      <img src="New Feature Showcase/v-1-1-0 Feature.png" height="300" width="350" alt="v.1.1.0 Feature">
+      <img src="assets/new-feature-showcase/v-1-1-0-feature.png" height="300" width="350" alt="v.1.1.0 Feature">
+    </td>
+    <td align="center">
+      <b>v.2.0.0 New Feature</b><br>
+      <img src="assets/new-feature-showcase/v-2-0-0-feature.png" height="300" width="350" alt="v.1.1.0 Feature">
     </td>
   </tr>
 </table>
 
-## 🔍 Feature Showcase
-<details>
-<summary><b>Click here to see a detailed breakdown of all features</b></summary>
-
-### Interface & Clocks
-* **Digital Clock:** Displays hours, minutes, and seconds with varying opacity for a modern aesthetic. The separators between them fade in and out. Can be switched between 12-hour and 24-hour formats.
-* **Analog Clock:** A beautiful, minimalist analog clock, with a dynamic glow effect.
-* **Dynamic Greetings:** The extension greets you with different messages depending on the time of day, such as "Good morning" or "Are you still awake?".
-* **Editable Welcome Text:** A small line of text under the greeting that you can click and edit to anything you like.
-
-### Productivity Tools
-* **Live Weather:** Shows a complete weather report including a description (e.g., "Broken clouds"), a humidity progress bar, the "feels like" temperature, and your current city. *Requires a free OpenWeatherMap API key.*
-* **To-Do List:** A dedicated panel for adding tasks. You can mark tasks as complete (which strikes them through) and delete them. Your list is saved automatically.
-* **Multi-Engine Search:** Features a powerful search bar with rotating placeholder suggestions. Use the "Search With/On" switcher to instantly change your search provider from standard engines like Google and Bing to platforms like YouTube and Wikipedia.
-
-### Quick-Access Panels
-* **AI Tools Panel:** A pop-up menu with direct links to the most popular AI chatbots, including Gemini, ChatGPT, Claude, Copilot, and more.
-* **Google Apps Panel:** A classic 9-dot grid that opens a panel with shortcuts to all essential Google services like Google Account, Gmail, Drive, Calendar, and Photos.
-* **Personalized Shortcuts:** A customizable bar at the bottom of the page. You can add, edit (name and URL), and delete your own shortcuts to your favorite websites through the settings panel.
-
-### Customization & Data
-* **Deep Theming:** Beyond a simple Dark/Light mode switch, the "Appearance" tab in Settings lets you use color pickers to change the color of every single element, from the background and text to the clock's glow.
-* **Custom Backgrounds:** Easily upload any image from your computer to use as a persistent background wallpaper.
-* **Element Visibility Toggles:** Don't use the To-Do List or AI Tools? You can hide their buttons from the interface for a cleaner look.
-* **Backup, Restore, Reset:** In the settings, you can one-click backup all your settings (including shortcuts, theme colors, etc.) to a file. You can restore from this file later or reset everything to default.
-
-</details>
-
 ---
 
-## 🚀 Getting Started
+## 🛠️ Installation Guide
 
-### Installation
-
-There are two main ways to install YourDynamicDashboard: from an official store or manually.
-
-**1. From the Store (Recommended)**
+### Option 1: Web Store (Stable)
+*Store versions may be delayed by review processes.*
 <p>
   <a href="https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec" target="_blank">
-  <img src="https://img.shields.io/badge/Get%20it%20on-Microsoft%20Edge%20Store-0078D7.svg?style=for-the-badge&logo=microsoft-edge&logoColor=white" alt="Get it on Microsoft Edge Store" height="48"> <br>
+  <img src="https://img.shields.io/badge/Get%20it%20on-Microsoft%20Edge%20Store-0078D7.svg?style=for-the-badge&logo=microsoft-edge&logoColor=white" alt="Microsoft Edge Store">
+  </a>
   <a href="https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/" target="_blank">
-  <img src="https://img.shields.io/badge/Get%20it%20on-Firefox%20Add--ons-E66000.svg?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Get it on Firefox Add-ons" height="48">
-</a>
+  <img src="https://img.shields.io/badge/Get%20it%20on-Firefox%20Add--ons-E66000.svg?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Firefox Add-ons">
+  </a>
 </p>
-    
-* NOTE: Stores may have older versions if a new version has arrived recently❗Check our [GitHub Releases](https://github.com/xtditom/YourDynamicDashboard/releases) for the LATEST updates.
 
-**2. Manual Installation**
+### Option 2: Manual Installation (Developer Mode)
+*Best for getting the latest updates immediately.*
 
-This process has two parts: first, you get the project files, then you load them into your browser.
-
-**Part A: Get the Project Files**
-
-You have two options to get the files:
-
-* **Option 1: Stable Release (for most users)** <br>
-    <br>
-    <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
+#### **For Google Chrome / Brave / Opera**
+1.  **Download:** Go to <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
     <img src="https://img.shields.io/badge/Get%20it%20on-GitHub-181717.svg?style=for-the-badge&logo=github&logoColor=white" alt="Get it on GitHub" height="48">
-    </a>
-  
-    1.  Under the latest release (e.g., `v1.0.0`), find the **Assets** section.
-    2.  Download the `.zip` file (e.g., `YourDynamicDashboard-1-0-0-S.zip`).
-    3.  **Unzip** the downloaded file into a permanent folder on your computer.
+    </a> and download the latest release `YourDynamicDashboard V2`.
+2.  **Unzip:** Extract the folder to a safe location (e.g., `Download/YDD`).
+3.  **Open Extensions:** Type `chrome://extensions` in your address bar.
+4.  **Enable Developer Mode:** Toggle the switch in the top-right corner.
+5.  **Load:** Click **"Load unpacked"** (top left).
+6.  **Select:** Choose the folder you extracted in Step 2.
+7.  **Done!** Open a new tab to see it in action.
 
-* **Option 2: Development Version (for developers)**
-    This will get you the very latest, cutting-edge code.
-    * Use the following command in your terminal:
-        ```bash
-        git clone https://github.com/xtditom/YourDynamicDashboard.git
-        ```
-
-**Part B: Install the Extension in Your Browser**
-
-Once you have the project folder from Part A, Unzip the zip file, then follow these steps:
-
-1.  Open your browser's extension management page:
-    * **Edge:** `edge://extensions`
-    * **Chrome:** `chrome://extensions`
-2.  Enable **"Developer mode"** (usually a toggle in the top-right corner).
-3.  Click the **"Load unpacked"** button.
-4.  Select the `YourDynamicDashboard` project folder that you downloaded and unzipped (or cloned).
-
-Congrats! Your new Dynamic Dashboard is now successfully added to your browser extension.
+#### **For Microsoft Edge**
+1.  Follow steps 1 & 2 above.
+2.  Go to `edge://extensions`.
+3.  Toggle **"Developer mode"** in the left sidebar (or bottom left).
+4.  Click **"Load unpacked"**.
+5.  Select the folder.
 
 ---
 
 ## ⚙️ Configuration
 
-To get weather forecasts, you need a free API key from **OpenWeatherMap**.
+**Good news!** As of v2.0.0, **configuration is essentially zero.**
 
-1.  Open the **Tab Settings** panel (the ⚙️ icon in the bottom-right).
-2.  Navigate to the **Functions** tab.
-3.  You will find a section to enter your API key. Paste your key there and click **Save**.
-4.  Reload the new tab page.
-
-> A detailed guide on how to get a free key is linked directly below the input box in the settings panel.
+* **Weather:** Auto-detects your approximate location securely.
+    * *Prefer manual?* Go to **Settings > Functions > Custom Location** and type your city.
+* **Search:** Click the icon in the search bar to switch between Google, Bing, YouTube, etc.
+* **Shortcuts:** Use the Settings panel to add/edit/delete shortcuts.
 
 ---
 
-## 🔜 Future Plans
+## ⌨️ Keyboard Shortcuts
 
-I am actively working on new features to make the dashboard even better:
-- [ ] Add some new productivity tools like Calculator, Focus Timer, and Notes.
-- [ ] Implement an **inspirational quotes** widget that can be edited or disabled.
-- [ ] Make shortcuts draggable for easy shortcut arrangements.
-- [ ] General UI/UX adjustments and minor feature additions.
+Navigate like a pro without touching your mouse.
+
+| Key | Action |
+| :--- | :--- |
+| **`V`** | **Voice Search:** Activate microphone instantly. |
+| **`Z`** | **Zen Mode:** Toggle distractions On/Off. |
+| **`/`** | **Focus Search:** Jump to the search bar. |
+| **`T`** | Toggle **To-Do List**. |
+| **`A`** | Toggle **AI / Social Tools**. |
+| **`G`** | Toggle **Google Apps Grid**. |
+| **`S`** | Open **Settings**. |
+| **`1-9`** | Launch **Shortcut Link** (1 through 9). |
+
+*You can also re-bind the keys in Settings.*
 
 ---
 
@@ -192,7 +183,28 @@ This project is licensed under the **Creative Commons BY-NC-SA 4.0 License**. Se
 
 ## 🛡 Privacy Policy
 
-With **YourDynamicDashboard**, your data always remains your own. We are committed to protecting your privacy and focus only on creating a more personal and productive Browse experience. You can find all the details in our full [Privacy Policy](https://xtditom.github.io/YourDynamicDashboard/privacy-policy.html).
+With **YourDynamicDashboard**, you are the product owner, not the product.
+
+* **No Analytics:** We do not track you.
+* **Local Storage:** Your todos, shortcuts, and themes stay on your PC.
+* **Icons:** Icons sourced from various open-source libraries.
+* **Voice Search:** Processed locally by your browser's Web Speech API; audio is never sent to us.
+* **Weather Data:** We use [Open-Meteo](https://open-meteo.com/), a privacy-focused open-source weather provider.
+
+Read the full [Privacy Policy](https://xtditom.github.io/YourDynamicDashboard/privacy-policy.html).
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+Feel free to check the [issues page](https://github.com/xtditom/YourDynamicDashboard/issues).
+
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
 ---
 
@@ -200,9 +212,10 @@ With **YourDynamicDashboard**, your data always remains your own. We are committ
 
 * **Inspiration:** A huge thanks to **XengShi** for their project, **[MaterialYouNewTab](https://github.com/prem-k-r/MaterialYouNewTab)**, which served as a major inspiration. (Currently maintained by _Prem Kumar_ & _Itz-RJ_)
 * **AI Assistance:** Developed with help from **Google's Gemini Pro**.
-* **Icons:** Icons sourced from various open-source libraries.
+
+---
 
 <div align="center">
-  <br>
-  Made with ❤️ by Ditom Baroi Antu
+  <h3>Created with ❤️ by <a href="https://github.com/xtditom">Ditom Baroi Antu</a></h3>
+  <p>© 2025 All Rights Reserved.</p>
 </div>

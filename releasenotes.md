@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.0.0] - 2025-12-07
+
+**The Productivity Update** is here! This major release transforms YourDynamicDashboard into a powerful, privacy-first command center with voice controls, instant weather, and deep personalization.
+
+### ✨ New Features
+- **🎙️ Voice Search:** Hands-free browsing! Click the microphone icon or press `V` to search using your voice.
+- **🧘 Zen Mode:** Overwhelmed? Press `Z` to instantly hide all widgets and focus purely on the clock and wallpaper.
+- **☁️ Instant Weather:** No API keys required! We switched to Open-Meteo for privacy-friendly, zero-setup local weather.
+- **⌨️ God Mode (Shortcuts):** Navigate without a mouse. Use keys `1-9` for apps, `T` for To-Do, `S` for Settings, and more.
+- **🎨 Auto Theme Shuffle:** Automatically cycles through fresh color palettes and gradients on every new tab.
+- **👋 Personal Greeting:** Double-click the "Good Morning" text to set your custom nickname.
+- **❝ Daily Quotes:** A new motivational quote greets you every time you open a tab.
+- **💾 Save Presets:** Created the perfect color combo? Save it as a custom preset.
+- **📅 Date & Day:** Added a toggleable display for the current date and day below the clock.
+
+### 🚀 Improvements
+- **Smart Search:** Direct "Open" buttons for platforms like YouTube to visit sites without searching.
+- **Gradient Themes:** Added a collection of stunning, animated gradient backgrounds.
+- **Info Button:** Added a quick-access info button in settings for tips and help.
+- **UI/UX Polish:** Significant improvements to animations, button states, and overall smoothness.
+
+### 🔧 Fixes
+- **Google Apps Icons:** Fixed sizing inconsistencies where some icons appeared too large or small.
+- **Duplicate Contacts:** Resolved a bug where "Google Contacts" appeared twice in the apps menu.
+- **Greeting Position:** Corrected the alignment of the greeting text to prevent overlapping.
+- **Dark Mode Logic:** Fixed issues where Dark Mode would desync with custom themes.
+- **General Stability:** Addressed various reported bugs and performance issues.
+
+---
+
 ## [1.1.0] - 2025-08-21
 
 This new version 1.1.0 comes with two new features.

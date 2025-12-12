@@ -6,178 +6,282 @@
     <title>Privacy Policy - YourDynamicDashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #121212;
-            --card-color: #1e1e1e;
-            --text-primary: #e0e0e0;
-            --text-secondary: #b3b3b3;
-            --accent-color: #e53935; /* A shade of red to match your theme */
+            --bg-color: #0a0a0a;
+            --card-bg: #171717;
+            --text-primary: #ededed;
+            --text-secondary: #a1a1a1;
+            --accent-color: #3b82f6; /* Trust Blue */
+            --accent-hover: #2563eb;
             --border-color: #333;
+            --code-bg: #262626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             font-family: 'Lexend', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-primary);
-            line-height: 1.7;
-            margin: 0;
-            padding: 2rem;
+            line-height: 1.6;
             display: flex;
             justify-content: center;
+            min-height: 100vh;
+            padding: 3rem 1.5rem;
         }
 
-        .container {
-            max-width: 800px;
+        .wrapper {
+            max-width: 720px;
             width: 100%;
         }
 
+        /* --- Header --- */
         header {
             text-align: center;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
+            animation: fadeIn 0.8s ease-out;
         }
 
         h1 {
-            color: #fff;
             font-size: 2.5rem;
-            margin: 0;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, #a1a1a1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        header p {
-            font-size: 0.9rem;
+        .subtitle {
             color: var(--text-secondary);
-            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .last-updated {
+            display: inline-block;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            background: var(--card-bg);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        /* --- Main Content --- */
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            animation: slideUp 0.8s ease-out;
         }
 
         section {
-            background-color: var(--card-color);
+            background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 1.5rem;
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        section:hover {
+            border-color: #444;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         h2 {
-            font-size: 1.5rem;
-            color: #fff;
-            margin-top: 0;
-            border-left: 4px solid var(--accent-color);
-            padding-left: 1rem;
-        }
-        
-        ul {
-            padding-left: 20px;
-            list-style: none;
-        }
-
-        li {
+            font-size: 1.25rem;
+            font-weight: 500;
             margin-bottom: 1rem;
-            padding-left: 1.5rem;
-            position: relative;
-        }
-
-        li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             color: var(--accent-color);
-            font-weight: 700;
         }
 
-        strong {
-            color: #fff;
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        p strong {
+            color: var(--text-primary);
             font-weight: 500;
         }
 
+        /* --- Lists & Cards --- */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-card {
+            background-color: rgba(255,255,255,0.03);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .info-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .info-card p {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
         code {
-            background-color: #2c2c2c;
-            color: #f1f1f1;
-            padding: 0.2rem 0.5rem;
-            border-radius: 6px;
-            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            color: #fff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
         }
 
         a {
             color: var(--accent-color);
             text-decoration: none;
-            font-weight: 500;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
         }
 
         a:hover {
-            text-decoration: underline;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 2rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+            border-bottom-color: var(--accent-color);
         }
 
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (min-width: 600px) {
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .full-width {
+                grid-column: 1 / -1;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="wrapper">
         <header>
             <h1>Privacy Policy</h1>
-            <p>For the "YourDynamicDashboard" Browser Extension</p>
-            <p>Last Updated: August 1, 2025</p>
+            <p class="subtitle">YourDynamicDashboard Extension</p>
+            <span class="last-updated">Last Updated: December 07, 2025</span>
         </header>
 
         <main>
             <section>
-                <h2>👋 Introduction</h2>
-                <p><strong>YourDynamicDashboard</strong> is a personal and productive new tab page designed to give you a beautiful and functional start to your Browse session. This policy explains what data the extension uses and why, so you can feel confident and secure.</p>
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    Introduction
+                </h2>
+                <p>We believe your browser's new tab page should be personal, private, and yours. <strong>YourDynamicDashboard</strong> is built with a "Privacy First" architecture. This document outlines exactly how we handle your data.</p>
+                <p><strong>The Short Version:</strong> We do not track you. We do not collect analytics. Your data stays on your device.</p>
             </section>
 
             <section>
-                <h2>🛡️ A Commitment to Your Privacy</h2>
-                <p>Your privacy is the top priority. <strong>YourDynamicDashboard does not collect, store, or share any of your personal data.</strong> All your settings, to-do lists, and customizations are saved directly in your browser's local storage and never leave your computer.</p>
-                <p>The extension includes no analytics, tracking scripts, or remote logging systems.</p>
-            </section>
-            
-            <section>
-                <h2>📋 Permissions We Request</h2>
-                <p>We only ask for the permissions absolutely necessary for the extension's features to work. Here is a breakdown:</p>
-                <ul>
-                    <li>
-                        <strong><code>storage</code></strong>: This is the primary permission used to save all your custom settings on your own computer. This includes your theme colors, to-do list items, custom shortcuts, and weather API key.
-                    </li>
-                    <li>
-                        <strong><code>geolocation</code></strong> (Optional): This permission is used **only** by the weather widget to automatically find your location for an accurate forecast. Access is managed entirely by your browser, and your location is never tracked or stored.
-                    </li>
-                </ul>
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Where is my data?
+                </h2>
+                <p>All your customizations are stored locally in your browser using <code>localStorage</code>. This data never leaves your computer. We do not have servers, and we cannot see your data.</p>
+                <div class="info-grid">
+                    <div class="info-card full-width">
+                        <h3>What is stored locally?</h3>
+                        <p>Theme colors, saved presets, personal greeting name, to-do lists, custom shortcut links, keyboard settings, and general preferences.</p>
+                    </div>
+                </div>
             </section>
 
             <section>
-                <h2>🌐 How We Use External Services (APIs)</h2>
-                <p>To provide certain features, the extension needs to communicate with a few external services. These services are only used to fetch information and do not receive any of your personal data.</p>
-                <ul>
-                    <li>
-                        <strong>🌍 OpenWeatherMap API:</strong> Used by the weather widget to get forecast data for your location. This feature only works after you provide your own personal API key in the settings. The API call looks like this:<br><code>https://openweathermap.org/api/one-call-3</code>
-                    </li>
-                    <li>
-                        <strong>🖼️ Google Favicon Service:</strong> This service is used to fetch the website icons (favicons) for the shortcuts you create. It does not expose your Browse history.<br><code>https://www.google.com/s2/favicons</code>
-                    </li>
-                </ul>
-            </section>
-            
-            <section>
-                <h2>🤝 Open Source & Transparency</h2>
-                <p>YourDynamicDashboard is a fully open-source project. You can review the entire source code on GitHub to verify how the extension works and confirm that your data is handled securely. We believe in full transparency.</p>
-                <p>You can find the project repository here: <a href="https://github.com/xtditom/YourDynamicDashboard" target="_blank" rel="noopener noreferrer">github.com/xtditom/YourDynamicDashboard</a></p>
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    Permissions & Usage
+                </h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>📁 Storage</h3>
+                        <p>Used to save your preferences so they persist every time you open a new tab.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>📍 Geolocation</h3>
+                        <p><strong>Optional.</strong> Used <strong>only</strong> if you click "Detect Location". Your coordinates are sent directly to the weather provider and are not stored by us.</p>
+                    </div>
+                    <div class="info-card full-width">
+                        <h3>🎙️ Microphone (Voice Search)</h3>
+                        <p><strong>Optional.</strong> Used only when you click the microphone icon or press 'V'. We use your browser's native <code>Web Speech API</code>. Audio is processed by your browser vendor (e.g., Google for Chrome) to convert speech to text. We do not record or store your voice.</p>
+                    </div>
+                </div>
             </section>
 
+            <section>
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    External Services (APIs)
+                </h2>
+                <p>To provide dynamic features, the extension communicates directly with the following third-party services. No personal identifiers are sent to these services.</p>
+                
+                <div class="info-grid">
+                    <div class="info-card full-width">
+                        <h3>Open-Meteo</h3>
+                        <p>Used to fetch weather data. Open-Meteo is a privacy-focused, open-source weather API.<br><code>https://open-meteo.com/en/pricing</code></p>
+                    </div>
+                    <div class="info-card">
+                        <h3>BigDataCloud</h3>
+                        <p>Used for "Reverse Geocoding" (converting GPS coordinates into a City Name) only when auto-detect is used.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>Google Favicons</h3>
+                        <p>Used to fetch the small icons for the websites you add to your Shortcuts bar.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    Open Source Transparency
+                </h2>
+                <p>We believe in "Trust, but Verify". The entire source code for YourDynamicDashboard is available publicly.</p>
+                <p>You can audit the code yourself on GitHub: <a href="https://github.com/xtditom/YourDynamicDashboard" target="_blank">github.com/xtditom/YourDynamicDashboard</a></p>
+            </section>
         </main>
-        
-        <footer>
-            <p>Thank you for using YourDynamicDashboard!</p>
-        </footer>
 
+        <footer>
+            &copy; 2025 Ditom Baroi Antu. All rights reserved.
+        </footer>
     </div>
 
 </body>

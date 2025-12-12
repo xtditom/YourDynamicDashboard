@@ -1,13 +1,13 @@
-<!-- index.html (Ditom Baroi Antu)-->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Tab</title>
-    <link rel="icon" type="image/png" href="icons/icon32.png">
-    <link rel="stylesheet" href="style.css">
+    
+    <link rel="icon" type="image/png" href="assets/icons/icon32.png">
+    <link rel="stylesheet" href="css/main.css">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
@@ -17,17 +17,90 @@
     <div id="welcome-modal-overlay" class="hidden">
         <div id="welcome-modal">
             <button id="welcome-modal-close">&times;</button>
-            <h1>Welcome!</h1>
-            <br>
-            <br>
-            <p>
-                <h3>Welcome to "Your Dynamic Dashboard". Glad to see you using the extension. Hope you will love it.</h3>
-            </p>
-            <br>
-            <br>
-            <p class="warning">
-                <strong>Warning:</strong> Please add your weather API key in the settings panel to see the weather report for your area.
-            </p>
+            
+            <div class="modal-header">
+                <div class="badge-container"><span class="version-badge">YourDynamicDashboard V2</span></div>
+                <h1>The Productivity Update</h1>
+                <p>A massive UPDATE. No weather API needed.</p>
+            </div>
+
+            <div class="modal-content-split">
+                <div class="col-left">
+                    <div class="section-title">✨ Key Interactions</div>
+                    <div class="hero-grid-2x2">
+                        <div class="hero-card">
+                            <div class="icon-box">🎙️</div>
+                            <div class="card-text">
+                                <h3>Voice Search</h3>
+                                <p>Hands-free control. Click the mic or press <strong>'V'</strong> to speak.</p>
+                            </div>
+                        </div>
+                        <div class="hero-card">
+                            <div class="icon-box">🧘</div>
+                            <div class="card-text">
+                                <h3>Zen Mode</h3>
+                                <p>Overwhelmed? Press <strong>'Z'</strong> to get more cleaner look</p>
+                            </div>
+                        </div>
+                        <div class="hero-card">
+                            <div class="icon-box">⌨️</div>
+                            <div class="card-text">
+                                <h3>God Mode</h3>
+                                <p>Navigate without a mouse. Use keys <strong>1-9</strong>, <strong>T</strong>, <strong>A</strong>, <strong>S</strong> etc.</p>
+                            </div>
+                        </div>
+                        <div class="hero-card">
+                            <div class="icon-box">☁️</div>
+                            <div class="card-text">
+                                <h3>Instant Weather</h3>
+                                <p>Live weather out of the box. No complex API setup required.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-right">
+                    <div class="info-group">
+                        <div class="section-title">🎨 Make It Yours</div>
+                        <ul class="detail-list">
+                            <li>
+                                <strong>Personal Greeting:</strong> 
+                                <span>Double-click "Good Morning" to set your name.</span>
+                            </li>
+                            <li>
+                                <strong>Auto Theme:</strong> 
+                                <span>Shuffle through fresh looks on every new tab.</span>
+                            </li>
+                            <li>
+                                <strong>Daily Quotes:</strong> 
+                                <span>New motivation waiting for you every time.</span>
+                            </li>
+                            <li>
+                                <strong>Save Themes:</strong> 
+                                <span>Create a look you love? Save it as a preset.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="info-group">
+                        <div class="section-title">🚀 Improvements & Fixes</div>
+                        <div class="tags-container">
+                            <span class="tag">Direct "Open" Buttons</span>
+                            <span class="tag">New Gradient Themes</span>
+                            <span class="tag">Info Button in Settings</span>
+                            <span class="tag">Fixed App Icons</span>
+                            <span class="tag">Logic Sync Fixes</span>
+                            <span class="tag">Smoother UI</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <a id="release-notes-btn" href="https://github.com/xtditom/YourDynamicDashboard/blob/main/releasenotes.md" target="_blank">
+                    Read Full Release Notes <span class="arrow">→</span>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -39,12 +112,12 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </span>
     </button>
+    
     <button id="ai-tools-toggle-button" class="corner-button bottom-left">
-        <!-- Icon for AI Tools -->
         <svg class="tool-icon ai-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
-        <!-- Icon for Social Media -->
         <svg class="tool-icon social-icon hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </button>
+    
     <button id="apps-toggle-button" class="corner-button top-right">
         <span class="icon-grid">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="4" height="4" rx="1"/><rect x="10" y="3" width="4" height="4" rx="1"/><rect x="17" y="3" width="4" height="4" rx="1"/><rect x="3" y="10" width="4" height="4" rx="1"/><rect x="10" y="10" width="4" height="4" rx="1"/><rect x="17" y="10" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><rect x="10" y="17" width="4" height="4" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/></svg>
@@ -53,6 +126,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
         </span>
     </button>
+    
     <button id="settings-toggle-button" class="corner-button bottom-right">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l-.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
     </button>
@@ -62,6 +136,7 @@
         <div id="todo-list"></div>
         <form id="todo-add-form"><input type="text" id="todo-input" placeholder="Add a new task..." autocomplete="off"><button type="submit">+</button></form>
     </div>
+
     <div id="ai-tools-popup" class="popup-container">
         <div class="tools-header">
             <div class="tool-tabs-container">
@@ -77,11 +152,18 @@
         <div id="ai-tools-list" class="tool-list active"></div>
         <div id="social-tools-list" class="tool-list"></div>
     </div>
+
     <div id="apps-popup" class="popup-container">
         <div id="apps-grid"></div>
     </div>
+
     <div id="settings-popup" class="popup-container">
-        <h2>Tab Settings</h2>
+        <div style="position: relative; text-align: center; margin-bottom: 1rem;">
+            <h2 style="margin: 0; display: inline-block;">Tab Settings</h2>
+            <button id="info-btn" title="Tips & Tricks" style="position: absolute; right: 0; top: 0; background: none; border: none; color: var(--accent-color); cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            </button>
+        </div>
         
         <div class="settings-tabs">
             <button id="functions-tab" class="settings-tab-button active">Functions</button>
@@ -95,6 +177,10 @@
                     <div class="label"><span>Analog Clock</span><small>Use the Android-style analog clock.</small></div>
                     <label class="toggle-switch"><input type="checkbox" id="clock-type-toggle"><span class="slider"></span></label>
                 </div>
+                <div class="setting-row">
+                    <div class="label"><span>Show Date</span><small>Display the day and date.</small></div>
+                    <label class="toggle-switch"><input type="checkbox" id="date-visibility-toggle"><span class="slider"></span></label>
+                </div>
                 <div class="setting-row" id="clock-format-row">
                     <div class="label"><span>Clock Format</span><small>Toggle for 24-hour format.</small></div>
                     <label class="toggle-switch"><input type="checkbox" id="clock-format-toggle"><span class="slider"></span></label>
@@ -103,19 +189,36 @@
                     <div class="label"><span>Temperature Unit</span><small>Toggle for Fahrenheit.</small></div>
                     <label class="toggle-switch"><input type="checkbox" id="temp-unit-toggle"><span class="slider"></span></label>
                 </div>
+                <div class="setting-row">
+                    <div class="label"><span>Shortcut Keys</span><small>Customize keyboard controls.</small></div>
+                    <button id="edit-keys-btn" class="settings-button" style="width: auto; padding: 5px 15px;">Open</button>
+                </div>
 
                 <div class="api-key-section">
                     <div class="label">
-                        <span>Enter your API key</span>
+                        <span>Custom Location</span>
+                        <small>Enter your city name</small>
                     </div>
                     <div class="api-key-input-wrapper">
-                        <input type="password" id="weather-api-key-input" placeholder="Paste your key here">
-                        <button id="save-api-key-button" class="settings-button">Save</button>
+                        <input type="text" id="custom-location-input" placeholder="Auto-detect">
+                        <button id="save-location-btn" class="settings-button">Save</button>
+                        <button id="detect-location-btn" class="settings-button" title="Detect My Location">Auto</button>
                     </div>
-                    <a href="Get Weather API/getapi.html" target="_blank" class="api-key-link">How to get API key for Free</a>
                 </div>
+
                 <div class="settings-divider"></div>
-                <h3 class="settings-header">Element Visibility</h3>
+                <h3 class="settings-header">Element Control</h3>
+                <div class="setting-row">
+                    <div class="label">
+                        <span>Quote Widget</span>
+                        <small>Position or hide quotes.</small>
+                    </div>
+                    <select id="quote-position-select" class="settings-dropdown" style="padding: 5px; border-radius: 5px; background: var(--bg-interactive); color: var(--text-primary); border: none;">
+                        <option value="below">Below Search</option>
+                        <option value="replace">Replace Weather</option>
+                        <option value="off">Turn Off</option>
+                    </select>
+                </div>
                 <div class="setting-row">
                     <div class="label"><span>Show To-Do List</span><small>Display the To-Do List button.</small></div>
                     <label class="toggle-switch"><input type="checkbox" id="todo-visibility-toggle"><span class="slider"></span></label>
@@ -125,7 +228,7 @@
                     <label class="toggle-switch"><input type="checkbox" id="apps-visibility-toggle"><span class="slider"></span></label>
                 </div>
                 <div class="setting-row">
-                    <div class="label"><span>Show AI Tools</span><small>Display the AI Tools button.</small></div>
+                    <div class="label"><span>Show AI Tools & Socials</span><small>Display the AI Tools & Socials button.</small></div>
                     <label class="toggle-switch"><input type="checkbox" id="ai-tools-visibility-toggle"><span class="slider"></span></label>
                 </div>
                 <div class="setting-row">
@@ -151,10 +254,10 @@
                     </button>
                 </div>
                 <div class="about-row">
-                    <a href="https://github.com/xtditom/YourDynamicDashboard" rel="noopener noreferrer" class="icon-button">
+                    <button id="github-repo-btn" class="icon-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                     <span>GitHub</span>
-                    </a>
+                    </button>
                     <a href="privacy-policy.html" rel="noopener noreferrer" class="icon-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                     <span>Privacy Policy</span>
@@ -178,20 +281,26 @@
                             <button id="remove-bg-button" class="settings-button hidden">Remove</button>
                         </div>
                     </div>
+                    <div class="setting-row">
+                        <div class="label"><span>Auto Theme</span><small>Randomize theme on every new tab.</small></div>
+                        <label class="toggle-switch"><input type="checkbox" id="auto-theme-toggle"><span class="slider"></span></label>
+                    </div>
                 </div>
                 
-                <!-- NEW: Theme Preset Section -->
                 <div class="settings-divider"></div>
                 <h3 class="settings-header">Theme Presets</h3>
-                <div id="normal-themes-container">
-                    <!-- Normal theme presets will be rendered here by JS -->
-                </div>
+                <div id="normal-themes-container"></div>
+                
                 <div class="settings-divider"></div>
                 <h3 class="settings-header">Gradient Theme Presets</h3>
-                <div id="gradient-themes-container">
-                    <!-- Gradient theme presets will be rendered here by JS -->
+                <div id="gradient-themes-container"></div>
+
+                <div class="settings-divider"></div>
+                <h3 class="settings-header">Saved Presets</h3>
+                <div class="setting-row" style="background: transparent; padding: 0 0 10px 0;">
+                    <button id="save-current-theme-btn" class="settings-button">Save Current Theme</button>
                 </div>
-                <!-- END NEW -->
+                <div id="saved-themes-container"></div>
 
                 <div id="advanced-color-controls">
                     <div class="settings-divider"></div>
@@ -232,8 +341,7 @@
             </div>
 
             <div id="shortcuts-content" class="settings-pane">
-                <div id="shortcuts-editor-list">
-                </div>
+                <div id="shortcuts-editor-list"></div>
                 <form id="add-shortcut-form">
                     <h3 class="settings-header">Add New Shortcut</h3>
                     <div class="add-shortcut-inputs">
@@ -248,6 +356,8 @@
 
         <div class="settings-footer">
             <p>&copy; Ditom Baroi Antu - 2025</p>
+            <p><strong>YourDynamicDashboard</strong> V.2.0.0</p>
+            <p>Weather data provided by <a href="https://open-meteo.com/" target="_blank" style="color: inherit;">Open-Meteo.com</a></p>
         </div>
     </div>
 
@@ -257,6 +367,11 @@
                 <div id="digital-clock-container" class="clock-container">
                     <span id="clock-hours">00</span><span class="clock-separator">:</span><span id="clock-minutes">00</span><span class="clock-separator">:</span><span id="clock-seconds">00</span>
                     <span id="clock-ampm"></span>
+                </div>
+                
+                <div id="clock-date-row" class="clock-container">
+                    <span id="clock-day">Friday</span>
+                    <span id="clock-date">Nov 28</span>
                 </div>
                 <div id="analog-clock-container" class="clock-container">
                     <svg id="analog-clock-svg" viewBox="0 0 200 200">
@@ -296,32 +411,90 @@
                     <div id="current-temp">--°</div>
                 </div>
             </div>
+            
+            <div id="quote-widget" class="widget-container hidden">
+                <div class="quote-content">
+                    <p id="quote-text">"Loading quote..."</p>
+                    <span id="quote-author">- Author</span>
+                </div>
+            </div>
+
             <form id="search-form" class="widget-container" action="https://www.google.com/search" method="GET" target="_blank">
+                <button type="button" id="search-provider-button" title="Change Search Engine">
+                    <img id="current-provider-icon" src="assets/search-tools/google.png" alt="Google">
+                    <span class="dropdown-caret">▼</span>
+                </button>
+                
                 <input type="text" id="search-input" name="q" required autocomplete="off">
-                <button type="submit" id="search-button">Search</button>
-            </form>
-            <div id="search-switcher-widget" class="widget-container">
-                <button id="search-switcher-button">Search With</button>
-                <div class="search-options-container">
-                    <div id="search-engines" class="search-options active">
+                
+                <button type="button" id="voice-search-btn" title="Voice Search">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                </button>
+                <button type="submit" id="search-button" class="search-btn">Search</button>
+                <a id="open-site-button" class="search-btn hidden" href="#" target="_blank">Open</a>
+                
+                <div id="search-dropdown" class="hidden">
+                    <div class="dropdown-section">
+                        <h4>Search Engines</h4>
+                        <div id="dropdown-engines" class="dropdown-grid"></div>
                     </div>
-                    <div id="search-platforms" class="search-options">
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-section">
+                        <h4>Platforms</h4>
+                        <div id="dropdown-platforms" class="dropdown-grid"></div>
                     </div>
                 </div>
+            </form>
+            
+        </div>
+    </div>
+
+    <div id="info-modal-overlay" class="hidden">
+        <div class="modal-box">
+            <button class="modal-close" id="info-modal-close">&times;</button>
+            <h2>Did You Know?</h2>
+            <div class="info-content">
+                <div class="info-item">
+                    <strong>👋 Personalized Greeting</strong>
+                    <p><b>Double-click</b> the Greeting text (e.g. Good Morning) text to enter your Name.</p>
+                </div>
+                <div class="info-item">
+                    <strong>⌨️ Key Shortcuts</strong>
+                    <p>Use <b>keyboard shortcuts</b> to navigate faster. Press <code>/</code> to search, <code>V</code> to voice search, <code>Z</code> for Zen Mode, <code>T</code> for To-Do, or <code>1-9</code> for your Shortcuts.</p>
+                </div>
+                <div class="info-item">
+                    <strong>📍 Manual Weather</strong>
+                    <p>Enter your city name manually in Settings to get weather without needing GPS.</p>
+                </div>
+                <div class="info-item">
+                    <strong>🎨 Custom Themes</strong>
+                    <p>In <b>"Appearance"</b>, you can fine-tune every color using the <b>Advanced Colors</b> section. You can also save them.</p>
+                </div>
+                <div class="info-item">
+                    <strong>🔍 Switch Engine</strong>
+                    <p>Click the current <b>"Search Engine"</b> (e.g. Google) to change <b>Search Engine</b>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="key-modal-overlay" class="hidden">
+        <div class="modal-box">
+            <button class="modal-close" id="key-modal-close">&times;</button>
+            <h2>Keyboard Shortcuts</h2>
+            <p class="modal-subtitle">Click a button, then press a key to rebind.</p>
+            <div id="key-list" class="key-grid">
+                </div>
+            <div class="modal-footer">
+                <button id="reset-keys-btn" class="settings-button danger">Reset to Defaults</button>
             </div>
         </div>
     </div>
 
     <div id="shortcuts-container"></div>
 
-    <script src="settings.js"></script>
-    <script src="script.js"></script>
-    <script src="todo.js"></script>
-    <script src="socials.js"></script> <!-- Add new script file -->
-    <script src="aitools.js"></script>
-    <script src="google-apps.js"></script>
+    <script type="module" src="src/main.js"></script>
 </body>
 </html>
 
-
-<!-- index.html (Ditom Baroi Antu)-->
+<!-- index.html YourDynamicDashboard (Ditom Baroi Antu - 2025) -->
