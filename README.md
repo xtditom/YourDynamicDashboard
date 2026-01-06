@@ -122,6 +122,9 @@ YourDynamicDashboard has been completely re-engineered for productivity.
   </a>
 </p>
 
+> [!UPDATE]
+> It will be available on 'Chrome Web Store' soon!
+
 ### Option 2: Manual Installation (Developer Mode)
 *Best for getting the latest updates immediately.*
 
