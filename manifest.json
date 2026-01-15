@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YourDynamicDashboard",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A dynamic and personalized new tab dashboard.",
   "author": "Ditom Baroi Antu",
   "homepage_url": "https://github.com/xtditom/YourDynamicDashboard",
@@ -10,7 +10,6 @@
     "newtab": "index.html"
   },
   "permissions": [
-    "storage",
     "geolocation"
   ],
   "host_permissions": [

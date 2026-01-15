@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.0.1] - 2026-01-16
+
+This version fixes a little bug or issue.
+
+### 🔧 Fixes
+- removed unnecessary permission "storage".
+
+
 ## [2.0.0] - 2025-12-07 (**MAJOR UPDATE**)
 
 **The Productivity Update** is here! This major release transforms YourDynamicDashboard into a powerful, privacy-first command center with voice controls, instant weather, and deep personalization.

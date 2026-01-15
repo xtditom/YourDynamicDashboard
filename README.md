@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">🚀 YourDynamicDashboard (v2.0.0)</h1>
+  <h1 align="center">🚀 YourDynamicDashboard (v2.0.1)</h1>
   <p align="center">
     <strong>The Productivity Update.</strong><br>
     Transform your new tab into a powerful, privacy-first command center.<br>
@@ -101,7 +101,7 @@ YourDynamicDashboard has been completely re-engineered for productivity.
       <img src="assets/new-feature-showcase/v-1-1-0-feature.png" height="300" width="350" alt="v.1.1.0 Feature">
     </td>
     <td align="center">
-      <b>v.2.0.0 New Feature</b><br>
+      <b>v.2.0 New Feature</b><br>
       <img src="assets/new-feature-showcase/v-2-0-0-feature.png" height="300" width="350" alt="v.1.1.0 Feature">
     </td>
   </tr>
@@ -149,7 +149,7 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 
 ## ⚙️ Configuration
 
-**Good news!** As of v2.0.0, **configuration is essentially zero.**
+**Good news!** As of v2.0, **configuration is essentially zero.**
 
 * **Weather:** Auto-detects your approximate location securely.
     * *Prefer manual?* Go to **Settings > Functions > Custom Location** and type your city.
