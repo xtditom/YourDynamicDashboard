@@ -114,11 +114,11 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 ### Option 1: Web Store (Stable)
 *Stores may have older version if a new version is arrived recently.*
 <p>
-  <a href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn">
+  <a href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn" target="_blank">
     <img src="https://img.shields.io/badge/Get%20it%20on-Chrome%20Web%20Store-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white" height="40">
   </a>
-  <a href="https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec" target="_blank">
-  <img src="https://img.shields.io/badge/Get%20it%20on-Microsoft%20Edge%20Store-6FA33E.svg?style=for-the-badge&logo=microsoft-edge&logoColor=white" alt="Microsoft Edge Store">
+  <a href="https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec" target="_blank" rel="noopener noreferrer">
+  <img src="assets/badges/edge-store-badge.svg" alt="Get it on Microsoft Edge Store" height="40">
   </a>
   <a href="https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/" target="_blank">
   <img src="https://img.shields.io/badge/Get%20it%20on-Firefox%20Add--ons-E66000.svg?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Firefox Add-ons">
