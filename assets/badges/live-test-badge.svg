@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="205" height="40" viewBox="0 0 205 40">
+  <g fill="none" fill-rule="evenodd">
+    <rect width="75" height="40" fill="#00ff00"/>
+    <rect width="130" height="40" x="75" fill="#303030"/>
+    
+    <text fill="#000" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" x="37.5" y="24" text-anchor="middle">LIVE DEMO</text>
+    
+    <path fill="#fff" transform="translate(95 13) scale(1.1)" d="M3 2l10 6-10 6z"/>
+
+    <text fill="#fff" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" x="155" y="25" text-anchor="middle">TRY IT NOW</text>
+  </g>
+</svg>
