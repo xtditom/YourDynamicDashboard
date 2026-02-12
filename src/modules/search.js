@@ -1,4 +1,4 @@
-// src/modules/search.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/search.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 
 import { state } from '../state.js';
 import { CONFIG, SEARCH_PROVIDERS, SEARCH_SUGGESTIONS } from '../config.js'; 
@@ -255,4 +255,4 @@ export class Search {
     }
 }
 
-// src/modules/search.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/search.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

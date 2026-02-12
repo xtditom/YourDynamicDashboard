@@ -1,4 +1,4 @@
-/* main.css YourDynamicDashboard (Ditom Baroi Antu - 2025) */
+/* main.css YourDynamicDashboard (Ditom Baroi Antu - 2025-26) */
 
 /* --- 1. RESET & VARIABLES --- */
 * {
@@ -561,4 +561,4 @@ body.loaded .shortcut-item { opacity: 1; transform: translateY(0); }
 body.zen-mode .corner-button, body.zen-mode #shortcuts-container { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.5s ease-in-out; }
 body.zen-mode .master-clock-container, body.zen-mode .text-container { opacity: 1 !important; transition: opacity 0.5s ease-in-out; }
 
-/* main.css YourDynamicDashboard (Ditom Baroi Antu - 2025) */
+/* main.css YourDynamicDashboard (Ditom Baroi Antu - 2025-26) */

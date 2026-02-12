@@ -1,4 +1,4 @@
-// src/modules/aitools.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/aitools.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 
 import { CONFIG, AI_TOOLS, SOCIAL_LINKS } from '../config.js';
 import { state } from '../state.js';
@@ -176,4 +176,4 @@ export class AiTools {
     }
 }
 
-// src/modules/aitools.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/aitools.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

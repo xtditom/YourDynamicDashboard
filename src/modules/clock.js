@@ -1,4 +1,4 @@
-// src/modules/clock.js
+// src/modules/clock.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 import { state } from '../state.js';
 import { formatTime } from '../utils.js';
 
@@ -182,3 +182,5 @@ export class Clock {
         }, speed);
     }
 }
+
+// src/modules/clock.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

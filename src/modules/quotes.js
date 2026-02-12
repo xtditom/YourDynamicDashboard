@@ -1,4 +1,4 @@
-// src/modules/quotes.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/quotes.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 
 import { state } from '../state.js';
 import { CONFIG, QUOTES } from '../config.js';
@@ -73,4 +73,4 @@ export class QuoteWidget {
     }
 }
 
-// src/modules/quotes.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/quotes.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

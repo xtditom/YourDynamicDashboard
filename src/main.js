@@ -1,4 +1,4 @@
-// src/main.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/main.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 
 import { state } from './state.js';
 import { Clock } from './modules/clock.js';
@@ -99,4 +99,10 @@ function manageWelcomePopup() {
     });
 }
 
-// src/main.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+const yearSpan = document.getElementById('copyright-year');
+    const currentYear = new Date().getFullYear();
+    if (currentYear > 2025) {
+        yearSpan.textContent = `2025 - ${currentYear}`;
+    }
+
+// src/main.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

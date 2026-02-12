@@ -1,4 +1,4 @@
-// src/modules/shortcuts.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/shortcuts.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 
 import { state } from '../state.js';
 import { getIconUrl } from '../utils.js';
@@ -81,4 +81,4 @@ export class Shortcuts {
     }
 }
 
-// src/modules/shortcuts.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/shortcuts.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

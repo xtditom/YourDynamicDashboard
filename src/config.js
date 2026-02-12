@@ -1,4 +1,4 @@
-// src/config.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/config.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 // Central Repository for all static data - FULL VERSION
 
 export const CONFIG = {
@@ -144,7 +144,7 @@ export const SEARCH_SUGGESTIONS = [
     'How to protect data privacy online', 'Future of remote work trends', 'Quantum computing explained simply',
     'Best coding languages for AI development', 'SpaceX Starship mission updates',
     'Impact of automation on the economy', 'Sustainable living tips for beginners',
-    'Web 3.0 and the future of the internet', 'Advances in CRISPR gene editing', 'Top cybersecurity threats in 2025',
+    'Web 3.0 and the future of the internet', 'Advances in CRISPR gene editing', 'Top cybersecurity threats in 2026',
     'How to build a personal knowledge base', 'Electric vehicle battery tech news', 'Ethical implications of AGI',
     'Digital nomad visa requirements', 'Future of vertical farming', 'Best open source LLMs to try',
     'Timeline for Mars colonization', 'Augmented Reality glasses reviews', 'How to detect AI generated text',
@@ -165,4 +165,4 @@ export const DEFAULT_KEY_MAP = {
     autoTheme: { key: 'e', enabled: false }
 };
 
-// src/config.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/config.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

@@ -1,4 +1,4 @@
-// src/utils.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/utils.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 
 export function formatTime(number) {
     return String(number).padStart(2, '0');
@@ -21,4 +21,4 @@ export function createEl(tag, className, text = '') {
     return el;
 }
 
-// src/utils.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/utils.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

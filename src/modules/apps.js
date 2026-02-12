@@ -1,4 +1,4 @@
-// src/modules/apps.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/apps.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 
 import { CONFIG, GOOGLE_APPS } from '../config.js';
 import { state } from '../state.js';
@@ -85,4 +85,4 @@ export class AppGrid {
     }
 }
 
-// src/modules/apps.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/apps.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

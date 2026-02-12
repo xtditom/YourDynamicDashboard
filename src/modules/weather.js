@@ -1,4 +1,4 @@
-// src/modules/weather.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/weather.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 
 import { state } from '../state.js';
 
@@ -105,4 +105,4 @@ export class Weather {
     }
 }
 
-// src/modules/weather.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/weather.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

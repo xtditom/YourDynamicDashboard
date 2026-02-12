@@ -1,4 +1,4 @@
-// src/modules/settings.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/settings.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 import { state } from '../state.js';
 import { getIconUrl } from '../utils.js';
 import { DEFAULT_KEY_MAP } from '../config.js'; 
@@ -868,4 +868,4 @@ export class SettingsManager {
     restore(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (event) => { try { const data = JSON.parse(event.target.result); Object.keys(data).forEach(key => localStorage.setItem(key, data[key])); location.reload(); } catch (err) { alert("Invalid Backup File"); } }; reader.readAsText(file); }
 }
 
-// src/modules/settings.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/modules/settings.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

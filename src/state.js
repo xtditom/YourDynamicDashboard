@@ -1,4 +1,4 @@
-// src/state.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/state.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)
 
 import { CONFIG, DEFAULT_KEY_MAP } from './config.js';
 
@@ -72,4 +72,4 @@ class StateManager {
 
 export const state = new StateManager();
 
-// src/state.js YourDynamicDashboard (Ditom Baroi Antu - 2025)
+// src/state.js YourDynamicDashboard (Ditom Baroi Antu - 2025-26)

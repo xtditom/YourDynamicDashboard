@@ -226,5 +226,5 @@ Feel free to check the [issues page](https://github.com/xtditom/YourDynamicDashb
 
 <div align="center">
   <h3>Created with ❤️ by <a href="https://github.com/xtditom">Ditom Baroi Antu</a></h3>
-  <p>© 2025 All Rights Reserved.</p>
+  <p>© 2025-2026 All Rights Reserved.</p>
 </div>
