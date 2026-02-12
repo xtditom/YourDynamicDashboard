@@ -44,7 +44,7 @@
 
 ## ⚡ Why Choose YourDynamicDashboard?
 
-Most dashboards are either too simple (just a clock) or too cluttered (ads and news feeds). **YDD** strikes the perfect balance:
+Most New Tab Page/ Dashboards are either too simple (just a clock) or too cluttered (ads and news feeds). **YDD** strikes the perfect balance:
 
 * **🔒 Privacy First:** No tracking. Your data (To-Do lists, links, settings) lives on your computer, not our servers.
 * **🏎️ Speed:** Built with vanilla JavaScript. No heavy frameworks. Loads instantly.
