@@ -487,7 +487,36 @@ export class SettingsManager {
         const note = document.createElement('div');
         note.className = 'settings-note';
         note.style.marginTop = '1rem';
-        note.innerHTML = '<p>Keys <strong>1-9</strong> are reserved for <strong>Shortcuts</strong>.<br>Press <strong>Z</strong> for <strong>Zen Mode</strong>, <strong>V</strong> for <strong>Voice Search</strong></p>';
+        
+        // Manual creation to avoid innerHTML
+        const p = document.createElement('p');
+        p.appendChild(document.createTextNode('Keys '));
+        const strong1 = document.createElement('strong');
+        strong1.textContent = '1-9';
+        p.appendChild(strong1);
+        p.appendChild(document.createTextNode(' are reserved for '));
+        const strong2 = document.createElement('strong');
+        strong2.textContent = 'Shortcuts';
+        p.appendChild(strong2);
+        p.appendChild(document.createElement('br'));
+        p.appendChild(document.createTextNode('Press '));
+        const strong3 = document.createElement('strong');
+        strong3.textContent = 'Z';
+        p.appendChild(strong3);
+        p.appendChild(document.createTextNode(' for '));
+        const strong4 = document.createElement('strong');
+        strong4.textContent = 'Zen Mode';
+        p.appendChild(strong4);
+        p.appendChild(document.createTextNode(', '));
+        const strong5 = document.createElement('strong');
+        strong5.textContent = 'V';
+        p.appendChild(strong5);
+        p.appendChild(document.createTextNode(' for '));
+        const strong6 = document.createElement('strong');
+        strong6.textContent = 'Voice Search';
+        p.appendChild(strong6);
+        
+        note.appendChild(p);
         this.els.keyList.appendChild(note);
     }
 
@@ -546,7 +575,7 @@ export class SettingsManager {
 
                 const del = document.createElement('div');
                 del.className = 'delete-preset';
-                del.innerHTML = '×';
+                del.textContent = '×';
                 del.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const newSaved = savedThemes.filter((_, idx) => idx !== i);
@@ -804,22 +833,61 @@ export class SettingsManager {
             div.className = 'shortcut-editor-item';
             div.draggable = true;
             div.dataset.index = index;
-            div.innerHTML = `
-                <div class="drag-handle" title="Drag to reorder">☰</div>
-                <img src="${s.icon}" class="icon">
-                <div class="inputs">
-                    <input type="text" class="name-input" value="${s.name}" placeholder="Name">
-                    <input type="text" class="url-input" value="${s.url}" placeholder="URL">
-                </div>
-                <div class="actions">
-                    <button class="action-btn save" title="Save"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
-                    <button class="action-btn delete" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
-                </div>
-            `;
-            const saveBtn = div.querySelector('.save');
-            const delBtn = div.querySelector('.delete');
-            const nameInput = div.querySelector('.name-input');
-            const urlInput = div.querySelector('.url-input');
+
+            // Drag Handle
+            const dragHandle = document.createElement('div');
+            dragHandle.className = 'drag-handle';
+            dragHandle.title = 'Drag to reorder';
+            dragHandle.textContent = '☰';
+
+            // Icon
+            const img = document.createElement('img');
+            img.src = s.icon;
+            img.className = 'icon';
+
+            // Inputs Container
+            const inputsDiv = document.createElement('div');
+            inputsDiv.className = 'inputs';
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'name-input';
+            nameInput.value = s.name;
+            nameInput.placeholder = 'Name';
+
+            const urlInput = document.createElement('input');
+            urlInput.type = 'text';
+            urlInput.className = 'url-input';
+            urlInput.value = s.url;
+            urlInput.placeholder = 'URL';
+
+            inputsDiv.appendChild(nameInput);
+            inputsDiv.appendChild(urlInput);
+
+            // Actions Container
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'actions';
+
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'action-btn save';
+            saveBtn.title = 'Save';
+            // SVG is static, safe to use innerHTML for icon only
+            saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'action-btn delete';
+            delBtn.title = 'Delete';
+            delBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
+
+            actionsDiv.appendChild(saveBtn);
+            actionsDiv.appendChild(delBtn);
+
+            // Assemble
+            div.appendChild(dragHandle);
+            div.appendChild(img);
+            div.appendChild(inputsDiv);
+            div.appendChild(actionsDiv);
+
             saveBtn.addEventListener('click', () => { this.updateShortcut(index, nameInput.value, urlInput.value); saveBtn.style.color = 'var(--accent-color)'; setTimeout(() => saveBtn.style.color = '', 500); });
             delBtn.addEventListener('click', () => this.deleteShortcut(index));
             div.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', index); div.classList.add('dragging'); });

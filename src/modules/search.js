@@ -157,7 +157,17 @@ export class Search {
         const createItem = (p, type) => {
             const div = document.createElement('div');
             div.className = `dropdown-item ${p.id === this.current.id ? 'active' : ''}`;
-            div.innerHTML = `<img src="${CONFIG.paths.search + p.icon}" alt="${p.name}"><span>${p.name}</span>`;
+            
+            const img = document.createElement('img');
+            img.src = CONFIG.paths.search + p.icon;
+            img.alt = p.name;
+            
+            const span = document.createElement('span');
+            span.textContent = p.name;
+            
+            div.appendChild(img);
+            div.appendChild(span);
+
             div.addEventListener('click', () => {
                 this.setProvider(p.id, type);
                 this.closeDropdown(); 

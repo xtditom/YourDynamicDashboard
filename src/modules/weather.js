@@ -90,7 +90,15 @@ export class Weather {
         if(this.els.bar) this.els.bar.style.width = `${current.relative_humidity_2m}%`;
         if(this.els.temp) this.els.temp.textContent = `${Math.round(current.temperature_2m)}°`;
         if(this.els.feelsLike) this.els.feelsLike.textContent = `Feels like ${Math.round(current.apparent_temperature)}${unitSym}`;
-        if(this.els.icon) this.els.icon.innerHTML = `<span style="font-size: 42px;">${wmo.icon}</span>`;
+        
+        if(this.els.icon) {
+            this.els.icon.innerHTML = '';
+            const span = document.createElement('span');
+            span.style.fontSize = '42px';
+            span.textContent = wmo.icon;
+            this.els.icon.appendChild(span);
+        }
+
         if(this.els.location) this.els.location.textContent = coords.city;
         
         if(this.els.widget) {

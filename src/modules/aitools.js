@@ -141,7 +141,11 @@ export class AiTools {
             if (this.isEditMode) {
                 const overlay = document.createElement('div');
                 overlay.className = 'edit-overlay';
-                overlay.innerHTML = `<span class="${isHidden ? 'icon-add' : 'icon-remove'}">${isHidden ? '+' : '×'}</span>`;
+                
+                const span = document.createElement('span');
+                span.className = isHidden ? 'icon-add' : 'icon-remove';
+                span.textContent = isHidden ? '+' : '×';
+                overlay.appendChild(span);
                 
                 // Toggle Hidden Logic
                 overlay.addEventListener('click', (e) => {
