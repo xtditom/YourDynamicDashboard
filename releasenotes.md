@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.0.2] - 2026-02-13
+
+This version fixes some common issues.
+
+### 🔧 Fixes
+- updated for 2026.
+- removed unnecessary files that takes unnecessary storage.
+- common bug fixes.
+
 ## [2.0.1] - 2026-01-16
 
 This version fixes a little bug or issue.

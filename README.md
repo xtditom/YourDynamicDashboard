@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">🚀 YourDynamicDashboard (v2.0.1)</h1>
+  <h1 align="center">🚀 YourDynamicDashboard (v2.0.2)</h1>
   <p align="center">
     <strong>The Productivity Update.</strong><br>
     Transform your new tab into a powerful, privacy-first command center.<br>
@@ -128,8 +128,6 @@ YourDynamicDashboard has been completely re-engineered for productivity.
   <img src="https://img.shields.io/badge/Get%20it%20on-Firefox%20Add--ons-E66000.svg?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Firefox Add-ons">
   </a>
 </p>
-
-> Currently, the Chrome Web Store has v2.0.2, just for a issue happening with Only Chrome browser. Every other thing is OK.
 
 ### Option 2: Manual Installation (Developer Mode)
 *Best for getting the latest updates immediately.*

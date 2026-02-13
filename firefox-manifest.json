@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YourDynamicDashboard",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A dynamic and personalized new tab dashboard.",
   "author": "Ditom Baroi Antu",
   "homepage_url": "https://github.com/xtditom/YourDynamicDashboard",
@@ -19,7 +19,6 @@
     "geolocation"
   ],
   "host_permissions": [
-    "https://*.google.com/",
     "https://api.open-meteo.com/",
     "https://geocoding-api.open-meteo.com/",
     "https://api.bigdatacloud.net/"
