@@ -115,7 +115,7 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 
 ## 🛠️ Installation Guide
 
-### Option 1: Web Store (Stable)
+### 🧩 Web Store (Stable)
 *Stores may have older version if a new version has arrived recently.*
 <p>
   <a href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn" target="_blank">
