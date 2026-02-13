@@ -129,7 +129,7 @@ YourDynamicDashboard has been completely re-engineered for productivity.
   </a>
 </p>
 
-> ‼️Follow the [steps](https://github.com/xtditom/YourDynamicDashboard/edit/main/README.md#-set-as-startup-page-firefox-only) below to set it as the Homepage for Firefox
+> ‼️Follow the [steps](https://github.com/xtditom/YourDynamicDashboard?tab=readme-ov-file#-set-as-startup-page-firefox-only) below to set it as the Homepage for Firefox
 
 ### ⚡ Manual Installation (Chrome, Edge, Brave)
 
