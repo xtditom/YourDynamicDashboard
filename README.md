@@ -116,7 +116,7 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 ## 🛠️ Installation Guide
 
 ### Option 1: Web Store (Stable)
-*Stores may have older version if a new version is arrived recently.*
+*Stores may have older version if a new version has arrived recently.*
 <p>
   <a href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn" target="_blank">
     <img src="https://img.shields.io/badge/Get%20it%20on-Chrome%20Web%20Store-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white" height="40">
@@ -129,27 +129,25 @@ YourDynamicDashboard has been completely re-engineered for productivity.
   </a>
 </p>
 
-### Option 2: Manual Installation (Developer Mode)
-*Best for getting the latest updates immediately.*
+### ⚡ Manual Installation (Chrome, Edge, Brave)
 
-#### **For Google Chrome / Brave / Opera**
-1.  **Download:** Go to <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
-    <img src="https://img.shields.io/badge/Get%20it%20on-GitHub-181717.svg?style=for-the-badge&logo=github&logoColor=white" alt="Get it on GitHub" height="48">
-    </a> and download the latest release `YourDynamicDashboard V2`.
-2.  **Unzip:** Extract the folder to a safe location (e.g., `Download/YDD`).
-3.  **Open Extensions:** Type `chrome://extensions` in your address bar.
-4.  **Enable Developer Mode:** Toggle the switch in the top-right corner.
-5.  **Load:** Click **"Load unpacked"** (top left).
-6.  **Select:** Choose the folder you extracted in Step 2.
-7.  **Done!** Open a new tab to see it in action.
+<a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
+    <img src="https://img.shields.io/badge/Download%20Latest%20Version-v2.0.2-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
+</a>
 
-#### **For Microsoft Edge**
-1.  Follow steps 1 & 2 above.
-2.  Go to `edge://extensions`.
-3.  Toggle **"Developer mode"** in the left sidebar (or bottom left).
-4.  Click **"Load unpacked"**.
-5.  Select the folder.
+**1. Download & Prepare**
+1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.0.2/YourDynamicDashboard-V2.zip)
+2.  **Unzip** the folder to a **permanent location** (e.g., `Downloads/YDD`).
+    > ⚠️ **Important:** Do not delete or move this folder after installing, or the extension will stop working.
 
+**2. Load into Browser**
+1.  Open your browser's extension manager by typing this in the URL bar:
+    * **Chrome / Brave:** `chrome://extensions`
+    * **Edge:** `edge://extensions`
+2.  Toggle **Developer Mode** on (usually a switch in the top-right corner 🛠️).
+3.  Click the **Load Unpacked** button.
+4.  Select the folder you extracted in Step 1.
+5.  **Done!** Open a new tab to see your new dashboard.
 ---
 
 ## ⚙️ Configuration
