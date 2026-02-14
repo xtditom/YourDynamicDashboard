@@ -132,26 +132,6 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 > [!NOTE]
 > ‼️Follow these [steps](https://github.com/xtditom/YourDynamicDashboard?tab=readme-ov-file#-additional-steps-for-gecko-engine-based-browser-firefox-zen-etc) below to set it as the Homepage for Firefox
 
-### ⚡ Manual Installation (Chrome, Edge, Brave)
-
-<a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
-    <img src="https://img.shields.io/badge/Download%20Latest%20Version-v2.0.2-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
-</a>
-
-**1. Download & Prepare**
-1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.0.2/YourDynamicDashboard-V2.zip)
-2.  **Unzip** the folder to a **permanent location** (e.g., `Downloads/YDD`).
-    > ⚠️ **Important:** Do not delete or move this folder after installing, or the extension will stop working.
-
-**2. Load into Browser**
-1.  Open your browser's extension manager by typing this in the URL bar:
-    * **Chrome / Brave:** `chrome://extensions`
-    * **Edge:** `edge://extensions`
-2.  Toggle **Developer Mode** on (usually a switch in the top-right corner 🛠️).
-3.  Click the **Load Unpacked** button.
-4.  Select the folder you extracted in Step 1.
-5.  **Done!** Open a new tab to see your new dashboard.
-
 ### 🦊 Additional steps for Gecko engine-based browser (Firefox, Zen, etc.)
 *Firefox, Zen, Librewolf, etc. treat New Tabs and Homepages separately. To see your dashboard on startup:*
 
@@ -181,6 +161,56 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 * **Fix:** Add an **Exception** for this extension in your Privacy & Security settings, or disable the auto-delete feature to allow `localStorage` to save your preferences.
 
 </details>
+
+### ⭕ Additional steps for Opera / Opera GX
+
+<details>
+<summary><strong>➡️ Set as Startup Page AND New Tab Page</strong></summary>
+
+*Opera blocks extensions from changing the New Tab page by default. You need a simple "Helper" extension to fix this.*
+
+1.  **Install:** Download the **[New Tab & Toolbox](https://chromewebstore.google.com/detail/new-tab-start-page/mjfahldkpjhcnfbbmdhpjolcjpcfhcpj)** extension from the Chrome Web Store.
+2.  **Configure:** Open "New Tab & Toolbox" extension and select **Configuration**.
+3.  **Set URL:** In the "Custom URL" box, paste this exact ID:
+    `chrome-extension://fckmlnagohleefboaleepppikpdkckjn/index.html`
+4.  **Activate:** Change **"Override default Start Page when browser launches"** to **YES**.
+5.  **Save:** Click the **Save** button at the bottom.
+    * *Result:* You will now see your dashboard when opening a New Tab AND when starting Opera.
+
+</details>
+
+<details>
+<summary><strong>➡️ Set as Startup Page only</strong></summary>
+
+*If you only want the dashboard to appear when you first launch Opera (but keep the default Speed Dial for new tabs):*
+
+1.  **Settings:** Go to **Browser Settings** (`Alt+P`) > **On Startup**.
+2.  **Select:** Choose **"Open a specific page or set of pages"** → **Add a new page**.
+3.  **Paste:** Enter this URL and click **Add**:
+    `chrome-extension://fckmlnagohleefboaleepppikpdkckjn/index.html`
+4.  **Done:** The dashboard will now load automatically whenever you launch Opera.
+
+</details>
+
+---
+
+### ⚡ Manual Installation (Chromium Browsers)
+
+<a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
+    <img src="https://img.shields.io/badge/Download%20Latest%20Version-v2.0.2-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
+</a>
+
+**1. Download & Prepare**
+1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.0.2/YourDynamicDashboard-V2.zip)
+2.  **Unzip** the folder to a **permanent location** (e.g., `Downloads/YDD`).
+    > ⚠️ **Important:** Do not delete or move this folder after installing, or the extension will stop working.
+
+**2. Load into Browser**
+1.  Open your browser's extension manager by typing `chrome://extensions` in the URL bar. (*Doesn't matter if you are using Edge, Brave, etc.*)
+2.  Toggle **Developer Mode** on (usually a switch in the top-right corner 🛠️).
+3.  Click the **Load Unpacked** button.
+4.  Select the folder you extracted in Step 1.
+5.  **Done!** Open a new tab to see your new dashboard.
 
 ---
 
