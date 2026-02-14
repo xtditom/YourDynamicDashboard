@@ -151,14 +151,36 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 4.  Select the folder you extracted in Step 1.
 5.  **Done!** Open a new tab to see your new dashboard.
 
-### 🦊 Set as Startup Page (Firefox only)
-*Firefox treats New Tabs and Homepages separately. To see your dashboard on startup:*
+### 🦊 Additional steps for Gecko engine-based browser (Firefox, Zen, etc.)
+*Firefox, Zen, Librewolf, etc. treat New Tabs and Homepages separately. To see your dashboard on startup:*
 
 1.  **Install:** Get the extension from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/).
 2.  **Bookmark:** Open a **New Tab** (so the dashboard loads), then press `Ctrl+D` to bookmark it.
-3.  **Configure:** Go to **Firefox Settings** > **Home**.
+3.  **Configure:** Go to **Browser's Settings** > **Home**.
 4.  **Select:** Under **"Homepage and new windows"**, choose **Custom URLs** → **Use Bookmark...** and pick the bookmark you just created.
-5.  **Done:** Now your dashboard will load instantly when you start Firefox.
+5.  **Done:** Now your dashboard will load instantly when you start your browser.
+
+<details>
+<summary><strong>⚠️ Important Step for Zen Browser Users</strong></summary>
+
+By default, Zen Browser does not open extensions on New Tabs. You must enable this:
+1.  Open a new tab & Type `about:config` in your address bar and press Enter.
+2.  Click **"Accept the Risk and Continue"**.
+3.  Search for: `zen.urlbar.replace-newtab`
+4.  Double-click it or manually set its value to **false**.
+5.  Now open a new tab, and the dashboard will appear.
+
+</details>
+
+<details>
+<summary><strong>⚠️ Settings Not Saving? (LibreWolf / Zen)</strong></summary>
+
+If your Theme, Location, or To-Do list resets every time you close the browser:
+* This happens because **"Delete cookies and site data when closed"** is enabled in your browser settings.
+* **Fix:** Add an **Exception** for this extension in your Privacy & Security settings, or disable the auto-delete feature to allow `localStorage` to save your preferences.
+
+</details>
+
 ---
 
 ## ⚙️ Configuration
