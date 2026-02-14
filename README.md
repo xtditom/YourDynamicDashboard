@@ -130,7 +130,9 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 </p>
 
 > [!NOTE]
-> ‼️Follow these [steps](https://github.com/xtditom/YourDynamicDashboard?tab=readme-ov-file#-additional-steps-for-gecko-engine-based-browser-firefox-zen-etc) below to set it as the Homepage for Firefox
+> ‼️Follow these [steps](https://github.com/xtditom/YourDynamicDashboard?tab=readme-ov-file#-additional-steps-for-gecko-engine-based-browser-firefox-zen-etc) below to set it as the Homepage for Firefox, Zen, etc.
+>
+> ‼️Follow these [steps](https://github.com/xtditom/YourDynamicDashboard?tab=readme-ov-file#-additional-steps-for-opera--opera-gx) below to configure it for Opera/ Opera GX.
 
 ### 🦊 Additional steps for Gecko engine-based browser (Firefox, Zen, etc.)
 *Firefox, Zen, Librewolf, etc. treat New Tabs and Homepages separately. To see your dashboard on startup:*
