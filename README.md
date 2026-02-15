@@ -196,7 +196,9 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 
 ---
 
-### ⚡ Manual Installation (Chromium Browsers)
+### ⚡ Manual Installation
+
+#### 🟢 Chromium Browsers (Chrome, Edge, Brave, etc.)
 
 <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-v2.0.2-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
@@ -212,6 +214,20 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 2.  Toggle **Developer Mode** on (usually a switch in the top-right corner 🛠️).
 3.  Click the **Load Unpacked** button.
 4.  Select the folder you extracted in Step 1.
+5.  **Done!** Open a new tab to see your new dashboard.
+
+#### 🦊 Gecko Browsers (Firefox, Zen, Waterfox, etc.)
+
+**1. Download & Prepare**
+1.  Download the latest `.xpi` release from above. Or, Direct download: [![Download XPI](https://img.shields.io/badge/Download-XPI-orange.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.0.2/YourDynamicDashboard-V2-firefox.xpi)
+2.  Keep the `.xpi` file in a **safe location** (e.g., `Downloads/YDD`).
+    > ⚠️ **Important:** Do not delete or move this file after installing, or the extension will stop working.
+
+**2. Load into Browser**
+1.  Open your browser's extension manager by typing `about:addons` in the URL bar.
+2.  Click the ⚙️ **(Settings Icon)** next to "Manage Your Extensions".
+3.  Select **Install Add-on From File...**
+4.  Browse and select the `.xpi` file you downloaded.
 5.  **Done!** Open a new tab to see your new dashboard.
 
 ---
