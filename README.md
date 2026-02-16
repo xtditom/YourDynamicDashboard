@@ -282,6 +282,18 @@ Read the full [Privacy Policy](https://xtditom.github.io/YourDynamicDashboard/pr
 
 ---
 
+## 🔜 Future Plans
+
+Features that may come in the **future** we planned!
+
+1. Add **Unsplash API** for random wallpapers.
+2. Enhance the **To-Do** List & **Smart Search**.
+3. Fix UI & Visual bugs.
+4. Enhance **Clock** & **AI Tools**.
+5. Make widgets **draggable** for hyper customization.
+
+---
+
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome!
