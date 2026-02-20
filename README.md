@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">🚀 YourDynamicDashboard (v2.0.2)</h1>
+  <h1 align="center">🚀 YourDynamicDashboard (v2.1.0 Soon)</h1>
   <p align="center">
     <strong>The Productivity Update.</strong><br>
     Transform your new tab into a powerful, privacy-first command center.<br>
