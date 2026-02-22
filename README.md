@@ -97,29 +97,6 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 
 ---
 
-## 🆕 New Feature Showcase
-
-<details>
-  <summary><b>Click to view New Feature Showcase</b></summary>
-  <br>
-
-  <table>
-    <tr>
-      <td align="center">
-        <b>v.1.1.0 New Feature</b><br>
-        <img src="assets/new-feature-showcase/v-1-1-0-feature.png" height="300" width="350" alt="v.1.1.0 Feature">
-      </td>
-      <td align="center">
-        <b>v.2.0 New Feature</b><br>
-        <img src="assets/new-feature-showcase/v-2-0-0-feature.png" height="300" width="350" alt="v.2.0.0 Feature">
-      </td>
-    </tr>
-  </table>
-  
-</details>
-
----
-
 ## 🛠️ Installation Guide
 
 ### 🧩 Web Store (Stable)
