@@ -52,7 +52,7 @@ Most New Tab Page/ Dashboards are either too simple (just a clock) or too clutte
 
 ---
 
-## ✨ Features (v2.0)
+## ✨ Features (v2)
 
 YourDynamicDashboard has been completely re-engineered for productivity.
 
@@ -62,6 +62,8 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 | **🎨 Personalization** | <li>**Auto Theme Shuffle:** Get a fresh look every time you open a tab.</li><li>**Personal Greeting:** Double-click the text to set your nickname.</li><li>**Save Presets:** Crafted the perfect theme? Save it to a slot and switch back anytime.</li> |
 | **☁️ Utilities** | <li>**Instant Weather:** No API keys required. We switched to Open-Meteo for privacy-friendly, zero-setup weather.</li><li>**Smart Search:** Switch engines (Google, Bing, DuckDuckGo) or platforms (YouTube, Reddit) instantly.</li><li>**Daily Quotes:** A rotating collection of wisdom to start your day.</li> |
 | **⚡ Quick Access** | <li>**Draggable Shortcuts:** Reorder your favorite sites via drag-and-drop.</li><li>**AI Tools Menu:** Quick links to ChatGPT, Gemini, Claude, and more.</li><li>**Google Apps:** The classic 9-dot menu for Gmail, Drive, etc.</li> |
+
+---
 
 ### 🎨 Mode & Theme Overview
 <table>

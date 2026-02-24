@@ -1,500 +1,1225 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>New Tab</title>
-    
-    <link rel="icon" type="image/png" href="assets/icons/icon32.png">
-    <link rel="stylesheet" href="css/main.css">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
-</head>
-<body>
 
+    <link rel="icon" type="image/png" href="assets/icons/icon32.png" />
+    <link rel="stylesheet" href="css/main.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <div id="welcome-modal-overlay" class="hidden">
-        <div id="welcome-modal">
-            <button id="welcome-modal-close">&times;</button>
-            
-            <div class="modal-header">
-                <div class="badge-container"><span class="version-badge">YourDynamicDashboard V2</span></div>
-                <h1>The Productivity Update</h1>
-                <p>A massive UPDATE. No weather API needed.</p>
-            </div>
+      <div id="welcome-modal" class="v2-1-modal">
+        <button id="welcome-modal-close">&times;</button>
 
-            <div class="modal-content-split">
-                <div class="col-left">
-                    <div class="section-title">✨ Key Interactions</div>
-                    <div class="hero-grid-2x2">
-                        <div class="hero-card">
-                            <div class="icon-box">🎙️</div>
-                            <div class="card-text">
-                                <h3>Voice Search</h3>
-                                <p>Hands-free control. Click the mic or press <strong>'V'</strong> to speak.</p>
-                            </div>
-                        </div>
-                        <div class="hero-card">
-                            <div class="icon-box">🧘</div>
-                            <div class="card-text">
-                                <h3>Zen Mode</h3>
-                                <p>Overwhelmed? Press <strong>'Z'</strong> to get more cleaner look</p>
-                            </div>
-                        </div>
-                        <div class="hero-card">
-                            <div class="icon-box">⌨️</div>
-                            <div class="card-text">
-                                <h3>God Mode</h3>
-                                <p>Navigate without a mouse. Use keys <strong>1-9</strong>, <strong>T</strong>, <strong>A</strong>, <strong>S</strong> etc.</p>
-                            </div>
-                        </div>
-                        <div class="hero-card">
-                            <div class="icon-box">☁️</div>
-                            <div class="card-text">
-                                <h3>Instant Weather</h3>
-                                <p>Live weather out of the box. No complex API setup required.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-right">
-                    <div class="info-group">
-                        <div class="section-title">🎨 Make It Yours</div>
-                        <ul class="detail-list">
-                            <li>
-                                <strong>Personal Greeting:</strong> 
-                                <span>Double-click "Good Morning" to set your name.</span>
-                            </li>
-                            <li>
-                                <strong>Auto Theme:</strong> 
-                                <span>Shuffle through fresh looks on every new tab.</span>
-                            </li>
-                            <li>
-                                <strong>Daily Quotes:</strong> 
-                                <span>New motivation waiting for you every time.</span>
-                            </li>
-                            <li>
-                                <strong>Save Themes:</strong> 
-                                <span>Create a look you love? Save it as a preset.</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="info-group">
-                        <div class="section-title">🚀 Improvements & Fixes</div>
-                        <div class="tags-container">
-                            <span class="tag">Direct "Open" Buttons</span>
-                            <span class="tag">New Gradient Themes</span>
-                            <span class="tag">Info Button in Settings</span>
-                            <span class="tag">Fixed App Icons</span>
-                            <span class="tag">Logic Sync Fixes</span>
-                            <span class="tag">Smoother UI</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <a id="release-notes-btn" href="https://github.com/xtditom/YourDynamicDashboard/blob/main/releasenotes.md" target="_blank">
-                    Read Full Release Notes <span class="arrow">→</span>
-                </a>
-            </div>
+        <div class="modal-header">
+          <div class="badge-container">
+            <span class="version-badge">YourDynamicDashboard v2.1</span>
+          </div>
+          <h1>The Polish, Privacy & Productivity Update</h1>
+          <p>Massive customization. Better interactions. Stricter privacy.</p>
         </div>
+
+        <div class="modal-content-v2">
+          <div class="section-title">✨ Key Interactions</div>
+          <div class="feature-row-3">
+            <div class="feature-card new-glow">
+              <div class="card-header">
+                <span class="icon">📌</span>
+                <h3>Pinned Tasks</h3>
+              </div>
+              <p>
+                Keep your highest-priority items locked at the top of your To-Do
+                list.
+              </p>
+            </div>
+            <div class="feature-card new-glow">
+              <div class="card-header">
+                <span class="icon">🖱️</span>
+                <h3>Drag & Drop</h3>
+              </div>
+              <p>
+                Freely reorder To-Do tasks, AI Tools, and Google Apps with your
+                mouse.
+              </p>
+            </div>
+            <div class="feature-card new-glow">
+              <div class="card-header">
+                <span class="icon">🎲</span>
+                <h3>Random BG</h3>
+              </div>
+              <p>
+                Fetch fresh wallpapers automatically, and
+                <strong>Freeze</strong> the ones you love.
+              </p>
+            </div>
+          </div>
+
+          <div class="modal-split-bottom">
+            <div class="info-group">
+              <div class="section-title">🎨 Make It Yours</div>
+              <ul class="detail-list modern-list">
+                <li>
+                  <span class="list-icon">🌟</span>
+                  <div>
+                    <strong>Glow Control:</strong>
+                    <span
+                      >Toggle clock glow & pulsing effects directly in
+                      Settings.</span
+                    >
+                  </div>
+                </li>
+                <li>
+                  <span class="list-icon">☢️</span>
+                  <div>
+                    <strong>Toxic Palettes:</strong>
+                    <span>New 'Radioactive' & 'Phosphor' themes.</span>
+                  </div>
+                </li>
+                <li>
+                  <span class="list-icon">🌡️</span>
+                  <div>
+                    <strong>Weather Expansion:</strong>
+                    <span
+                      >Widget now displays daily Min & Max temperatures.</span
+                    >
+                  </div>
+                </li>
+                <li>
+                  <span class="list-icon">🔗</span>
+                  <div>
+                    <strong>Link Direction:</strong>
+                    <span
+                      >Control exactly how and where your shortcuts open.</span
+                    >
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <div class="info-group">
+              <div class="section-title">🚀 Core Improvements</div>
+              <div class="tags-container tight-tags">
+                <span class="tag alert-tag">Privacy First</span>
+                <span class="tag alert-tag">Improved Logic</span>
+                <span class="tag alert-tag-2">Visual Clarity</span>
+                <span class="tag alert-tag-2">Smart Onboarding</span>
+                <span class="tag">Modals Show</span>
+                <span class="tag">Voice Fix</span>
+                <span class="tag">Fluid Animations</span>
+                <span class="tag">Icon Visibility Fix</span>
+                <span class="tag">New Icons</span>
+                <span class="tag">Storage Fixes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <a
+            id="release-notes-btn"
+            href="https://github.com/xtditom/YourDynamicDashboard/blob/main/releasenotes.md"
+            target="_blank"
+          >
+            Read Full Release Notes <span class="arrow">→</span>
+          </a>
+        </div>
+      </div>
     </div>
 
     <button id="todo-toggle-button" class="corner-button top-left">
-        <span class="icon-list">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
-        </span>
-        <span class="icon-close">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </span>
+      <span class="icon-list">
+        <svg
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M2 2h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Zm4.655 8.595a.75.75 0 0 1 0 1.06L4.03 14.28a.75.75 0 0 1-1.06 0l-1.5-1.5a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l.97.97 2.095-2.095a.75.75 0 0 1 1.06 0ZM9.75 2.5h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm0 5h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm0 5h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm-7.25-9v3h3v-3Z"
+          />
+        </svg>
+      </span>
+      <span class="icon-close">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </span>
     </button>
-    
+
     <button id="ai-tools-toggle-button" class="corner-button bottom-left">
-        <svg class="tool-icon ai-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
-        <svg class="tool-icon social-icon hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <svg
+        class="tool-icon ai-icon"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M10 7L9.48415 8.39405C8.80774 10.222 8.46953 11.136 7.80278 11.8028C7.13603 12.4695 6.22204 12.8077 4.39405 13.4842L3 14L4.39405 14.5158C6.22204 15.1923 7.13603 15.5305 7.80278 16.1972C8.46953 16.864 8.80774 17.778 9.48415 19.6059L10 21L10.5158 19.6059C11.1923 17.778 11.5305 16.864 12.1972 16.1972C12.864 15.5305 13.778 15.1923 15.6059 14.5158L17 14L15.6059 13.4842C13.778 12.8077 12.864 12.4695 12.1972 11.8028C11.5305 11.136 11.1923 10.222 10.5158 8.39405L10 7Z"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M18 3L17.7789 3.59745C17.489 4.38087 17.3441 4.77259 17.0583 5.05833C16.7726 5.34408 16.3809 5.48903 15.5975 5.77892L15 6L15.5975 6.22108C16.3809 6.51097 16.7726 6.65592 17.0583 6.94167C17.3441 7.22741 17.489 7.61913 17.7789 8.40255L18 9L18.2211 8.40255C18.511 7.61913 18.6559 7.22741 18.9417 6.94166C19.2274 6.65592 19.6191 6.51097 20.4025 6.22108L21 6L20.4025 5.77892C19.6191 5.48903 19.2274 5.34408 18.9417 5.05833C18.6559 4.77259 18.511 4.38087 18.2211 3.59745L18 3Z"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <svg
+        class="tool-icon social-icon hidden"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M2 5.5a3.5 3.5 0 1 1 5.898 2.549 5.508 5.508 0 0 1 3.034 4.084.75.75 0 1 1-1.482.235 4 4 0 0 0-7.9 0 .75.75 0 0 1-1.482-.236A5.507 5.507 0 0 1 3.102 8.05 3.493 3.493 0 0 1 2 5.5ZM11 4a3.001 3.001 0 0 1 2.22 5.018 5.01 5.01 0 0 1 2.56 3.012.749.749 0 0 1-.885.954.752.752 0 0 1-.549-.514 3.507 3.507 0 0 0-2.522-2.372.75.75 0 0 1-.574-.73v-.352a.75.75 0 0 1 .416-.672A1.5 1.5 0 0 0 11 5.5.75.75 0 0 1 11 4Zm-5.5-.5a2 2 0 1 0-.001 3.999A2 2 0 0 0 5.5 3.5Z"
+        />
+      </svg>
     </button>
-    
+
     <button id="apps-toggle-button" class="corner-button top-right">
-        <span class="icon-grid">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="4" height="4" rx="1"/><rect x="10" y="3" width="4" height="4" rx="1"/><rect x="17" y="3" width="4" height="4" rx="1"/><rect x="3" y="10" width="4" height="4" rx="1"/><rect x="10" y="10" width="4" height="4" rx="1"/><rect x="17" y="10" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><rect x="10" y="17" width="4" height="4" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/></svg>
-        </span>
-        <span class="icon-square">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-        </span>
+      <span class="icon-grid">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <rect x="3" y="3" width="4" height="4" rx="1" />
+          <rect x="10" y="3" width="4" height="4" rx="1" />
+          <rect x="17" y="3" width="4" height="4" rx="1" />
+          <rect x="3" y="10" width="4" height="4" rx="1" />
+          <rect x="10" y="10" width="4" height="4" rx="1" />
+          <rect x="17" y="10" width="4" height="4" rx="1" />
+          <rect x="3" y="17" width="4" height="4" rx="1" />
+          <rect x="10" y="17" width="4" height="4" rx="1" />
+          <rect x="17" y="17" width="4" height="4" rx="1" />
+        </svg>
+      </span>
+      <span class="icon-square">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+        </svg>
+      </span>
     </button>
-    
+
     <button id="settings-toggle-button" class="corner-button bottom-right">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l-.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+      <svg
+        stroke="currentColor"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          opacity="0.34"
+          d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-miterlimit="10"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M2 12.8799V11.1199C2 10.0799 2.85 9.21994 3.9 9.21994C5.71 9.21994 6.45 7.93994 5.54 6.36994C5.02 5.46994 5.33 4.29994 6.24 3.77994L7.97 2.78994C8.76 2.31994 9.78 2.59994 10.25 3.38994L10.36 3.57994C11.26 5.14994 12.74 5.14994 13.65 3.57994L13.76 3.38994C14.23 2.59994 15.25 2.31994 16.04 2.78994L17.77 3.77994C18.68 4.29994 18.99 5.46994 18.47 6.36994C17.56 7.93994 18.3 9.21994 20.11 9.21994C21.15 9.21994 22.01 10.0699 22.01 11.1199V12.8799C22.01 13.9199 21.16 14.7799 20.11 14.7799C18.3 14.7799 17.56 16.0599 18.47 17.6299C18.99 18.5399 18.68 19.6999 17.77 20.2199L16.04 21.2099C15.25 21.6799 14.23 21.3999 13.76 20.6099L13.65 20.4199C12.75 18.8499 11.27 18.8499 10.36 20.4199L10.25 20.6099C9.78 21.3999 8.76 21.6799 7.97 21.2099L6.24 20.2199C5.33 19.6999 5.02 18.5299 5.54 17.6299C6.45 16.0599 5.71 14.7799 3.9 14.7799C2.85 14.7799 2 13.9199 2 12.8799Z"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-miterlimit="10"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
     </button>
-    
+
     <div id="todo-popup" class="popup-container">
-        <h2>To-Do List</h2>
-        <div id="todo-list"></div>
-        <form id="todo-add-form"><input type="text" id="todo-input" placeholder="Add a new task..." autocomplete="off"><button type="submit">+</button></form>
+      <h2>To-Do List</h2>
+      <div id="todo-list"></div>
+      <form id="todo-add-form">
+        <input
+          type="text"
+          id="todo-input"
+          placeholder="Add a new task..."
+          autocomplete="off"
+          maxlength="50"
+        /><button type="submit" id="todo-add-btn">+</button>
+      </form>
     </div>
 
     <div id="ai-tools-popup" class="popup-container">
-        <div class="tools-header">
-            <div class="tool-tabs-container">
-                <button class="tool-tab-button active" data-tab="ai">AI Tools</button>
-                <div class="tab-divider"></div>
-                <button class="tool-tab-button" data-tab="social">Social Media</button>
-            </div>
-            <button id="tool-edit-button" class="tool-edit-button">
-                <svg class="icon-pencil" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                <svg class="icon-check hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </button>
+      <div class="tools-header">
+        <div class="tool-tabs-container">
+          <button class="tool-tab-button active" data-tab="ai">AI Tools</button>
+          <div class="tab-divider"></div>
+          <button class="tool-tab-button" data-tab="social">
+            Social Media
+          </button>
         </div>
-        <div id="ai-tools-list" class="tool-list active"></div>
-        <div id="social-tools-list" class="tool-list"></div>
+        <button id="tool-edit-button" class="tool-edit-button">
+          <svg
+            class="icon-pencil"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M21.7312 2.26884C20.706 1.24372 19.044 1.24372 18.0188 2.26884L16.8617 3.42599L20.574 7.1383L21.7312 5.98116C22.7563 4.95603 22.7563 3.29397 21.7312 2.26884Z"
+              fill="currentColor"
+            />
+            <path
+              d="M19.5133 8.19896L15.801 4.48665L7.40019 12.8875C6.78341 13.5043 6.33002 14.265 6.081 15.101L5.28122 17.7859C5.2026 18.0498 5.27494 18.3356 5.46967 18.5303C5.6644 18.725 5.95019 18.7974 6.21412 18.7188L8.89901 17.919C9.73498 17.67 10.4957 17.2166 11.1125 16.5998L19.5133 8.19896Z"
+              fill="currentColor"
+            />
+            <path
+              d="M5.25 5.24999C3.59315 5.24999 2.25 6.59314 2.25 8.24999V18.75C2.25 20.4068 3.59315 21.75 5.25 21.75H15.75C17.4069 21.75 18.75 20.4068 18.75 18.75V13.5C18.75 13.0858 18.4142 12.75 18 12.75C17.5858 12.75 17.25 13.0858 17.25 13.5V18.75C17.25 19.5784 16.5784 20.25 15.75 20.25H5.25C4.42157 20.25 3.75 19.5784 3.75 18.75V8.24999C3.75 7.42156 4.42157 6.74999 5.25 6.74999H10.5C10.9142 6.74999 11.25 6.41421 11.25 5.99999C11.25 5.58578 10.9142 5.24999 10.5 5.24999H5.25Z"
+              fill="currentColor"
+            />
+          </svg>
+          <svg
+            class="icon-check hidden"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div id="ai-tools-list" class="tool-list active"></div>
+      <div id="social-tools-list" class="tool-list"></div>
     </div>
 
     <div id="apps-popup" class="popup-container">
-        <div id="apps-grid"></div>
+      <div id="apps-grid"></div>
+      <div class="apps-footer">Drag and drop to rearrange apps</div>
     </div>
 
     <div id="settings-popup" class="popup-container">
-        <div style="position: relative; text-align: center; margin-bottom: 1rem;">
-            <h2 style="margin: 0; display: inline-block;">Tab Settings</h2>
-            <button id="info-btn" title="Tips & Tricks" style="position: absolute; right: 0; top: 0; background: none; border: none; color: var(--accent-color); cursor: pointer;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+      <div style="position: relative; text-align: center; margin-bottom: 1rem">
+        <h2 style="margin: 0; display: inline-block">Tab Settings</h2>
+        <button
+          id="info-btn"
+          title="Tips & Tricks"
+          style="
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+          "
+        >
+          <svg
+            height="24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 256 256"
+            fill="currentColor"
+          >
+            <path
+              d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="settings-tabs">
+        <button id="functions-tab" class="settings-tab-button active">
+          Functions
+        </button>
+        <button id="appearance-tab" class="settings-tab-button">
+          Appearance
+        </button>
+        <button id="shortcuts-tab" class="settings-tab-button">
+          Shortcuts
+        </button>
+      </div>
+
+      <div class="settings-content">
+        <div id="functions-content" class="settings-pane active">
+          <div class="setting-row">
+            <div class="label">
+              <span>Analog Clock</span><small>Use the analog clock.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="clock-type-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Day & Date</span><small>Display the day and date.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="date-visibility-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-row" id="clock-format-row">
+            <div class="label">
+              <span>Clock Format</span><small>Toggle for 24-hour format.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="clock-format-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
+          <div class="api-key-section">
+            <div class="label">
+              <span>Weather Location</span>
+            </div>
+            <div class="api-key-input-wrapper" style="display: flex; gap: 8px">
+              <input
+                type="text"
+                id="custom-location-input"
+                placeholder="Enter city name..."
+                style="flex: 1"
+              />
+              <button id="save-location-btn" class="settings-button">
+                Save
+              </button>
+              <button
+                id="settings-gps-btn"
+                class="settings-button"
+                title="Detect My Location"
+                style="
+                  padding: 0 12px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+                  <g fill="none" fill-rule="evenodd">
+                    <path
+                      d="M18 0v18H0V0zM9.445 17.443l-.008.002-.053.026-.015.003-.011-.003-.053-.026c-.008-.003-.014-.001-.018.004l-.003.007-.013.321.004.015.008.01.078.056.011.003.009-.003.078-.056.009-.012.003-.013-.013-.32a.016.016 0 0 0-.013-.014m.199-.085-.01.002-.139.07-.007.007-.003.008.014.323.004.009.006.005.15.07c.009.003.017 0 .022-.006l.003-.01-.026-.46c-.002-.009-.007-.015-.015-.016m-.536.001a.017.017 0 0 0-.02.005l-.005.01-.025.46c0 .009.005.015.013.018l.011-.001.151-.07.007-.006.003-.008.013-.322-.002-.009-.008-.008z"
+                    />
+                    <path
+                      fill="currentColor"
+                      fill-rule="nonzero"
+                      d="M5.04 12.48a.75.75 0 0 1 .42 1.44c-.375.11-.645.225-.818.33.178.107.46.227.852.339C6.36 14.836 7.6 15 9 15s2.64-.164 3.506-.411c.392-.112.674-.232.852-.339-.173-.105-.443-.22-.818-.33a.75.75 0 0 1 .42-1.44c.501.146.96.334 1.313.575.326.224.727.615.727 1.195 0 .587-.411.98-.743 1.205-.358.241-.827.43-1.34.576C11.884 16.327 10.5 16.5 9 16.5s-2.885-.173-3.918-.469c-.512-.146-.981-.335-1.34-.576C3.332 15.23 2.92 14.836 2.92 14.25c0-.58.401-.971.727-1.195.353-.241.812-.428 1.313-.575M9 1.5a5.625 5.625 0 0 1 5.625 5.625c0 1.926-1.05 3.492-2.137 4.605A12.3 12.3 0 0 1 11.098 12.94c-.446.335-1.464.962-1.464.962a1.283 1.283 0 0 1-1.268 0s-1.018-.627-1.464-.962a12.217 12.217 0 0 1-1.39-1.21C4.425 10.617 3.375 9.051 3.375 7.125A5.625 5.625 0 0 1 9 1.5m0 4.125a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"
+                    />
+                  </g>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Temperature Unit</span><small>Toggle for Fahrenheit.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="temp-unit-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Temperature Display</span
+              ><small>Switch between Min-Max and Feels like.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="temp-display-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
+
+          <div class="setting-row">
+            <div class="label">
+              <span>Shortcut Keys</span
+              ><small>Customize keyboard controls.</small>
+            </div>
+            <button id="edit-keys-btn" class="settings-button">Open</button>
+          </div>
+
+          <div class="setting-row">
+            <div class="label">
+              <span>Link Direction</span><small>Set where links open.</small>
+            </div>
+            <button id="edit-link-direction-btn" class="settings-button">
+              Open
             </button>
-        </div>
-        
-        <div class="settings-tabs">
-            <button id="functions-tab" class="settings-tab-button active">Functions</button>
-            <button id="appearance-tab" class="settings-tab-button">Appearance</button>
-            <button id="shortcuts-tab" class="settings-tab-button">Shortcuts</button>
-        </div>
+          </div>
 
-        <div class="settings-content">
-            <div id="functions-content" class="settings-pane active">
-                <div class="setting-row">
-                    <div class="label"><span>Analog Clock</span><small>Use the Android-style analog clock.</small></div>
-                    <label class="toggle-switch"><input type="checkbox" id="clock-type-toggle"><span class="slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <div class="label"><span>Show Date</span><small>Display the day and date.</small></div>
-                    <label class="toggle-switch"><input type="checkbox" id="date-visibility-toggle"><span class="slider"></span></label>
-                </div>
-                <div class="setting-row" id="clock-format-row">
-                    <div class="label"><span>Clock Format</span><small>Toggle for 24-hour format.</small></div>
-                    <label class="toggle-switch"><input type="checkbox" id="clock-format-toggle"><span class="slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <div class="label"><span>Temperature Unit</span><small>Toggle for Fahrenheit.</small></div>
-                    <label class="toggle-switch"><input type="checkbox" id="temp-unit-toggle"><span class="slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <div class="label"><span>Shortcut Keys</span><small>Customize keyboard controls.</small></div>
-                    <button id="edit-keys-btn" class="settings-button" style="width: auto; padding: 5px 15px;">Open</button>
-                </div>
-
-                <div class="api-key-section">
-                    <div class="label">
-                        <span>Custom Location</span>
-                        <small>Enter your city name</small>
-                    </div>
-                    <div class="api-key-input-wrapper">
-                        <input type="text" id="custom-location-input" placeholder="Auto-detect">
-                        <button id="save-location-btn" class="settings-button">Save</button>
-                        <button id="detect-location-btn" class="settings-button" title="Detect My Location">Auto</button>
-                    </div>
-                </div>
-
-                <div class="settings-divider"></div>
-                <h3 class="settings-header">Element Control</h3>
-                <div class="setting-row">
-                    <div class="label">
-                        <span>Quote Widget</span>
-                        <small>Position or hide quotes.</small>
-                    </div>
-                    <select id="quote-position-select" class="settings-dropdown" style="padding: 5px; border-radius: 5px; background: var(--bg-interactive); color: var(--text-primary); border: none;">
-                        <option value="below">Below Search</option>
-                        <option value="replace">Replace Weather</option>
-                        <option value="off">Turn Off</option>
-                    </select>
-                </div>
-                <div class="setting-row">
-                    <div class="label"><span>Show To-Do List</span><small>Display the To-Do List button.</small></div>
-                    <label class="toggle-switch"><input type="checkbox" id="todo-visibility-toggle"><span class="slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <div class="label"><span>Show Google Apps</span><small>Display the Google Apps button.</small></div>
-                    <label class="toggle-switch"><input type="checkbox" id="apps-visibility-toggle"><span class="slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <div class="label"><span>Show AI Tools & Socials</span><small>Display the AI Tools & Socials button.</small></div>
-                    <label class="toggle-switch"><input type="checkbox" id="ai-tools-visibility-toggle"><span class="slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <div class="label"><span>Show Shortcuts</span><small>Display the shortcuts bar.</small></div>
-                    <label class="toggle-switch"><input type="checkbox" id="shortcuts-toggle"><span class="slider"></span></label>
-                </div>
-
-                <div class="settings-divider"></div>
-                <h3 class="settings-header">Backup & Restore</h3>
-                <div class="backup-controls">
-                    <button id="backup-button" class="settings-button">Backup</button>
-                    <button id="restore-button" class="settings-button">Restore</button>
-                    <input type="file" id="restore-file-input" accept=".json" class="hidden">
-                    <button id="reset-button" class="settings-button danger">Reset All</button>
-                </div>
-                <div class="settings-divider"></div>
-                <h3 class="settings-header">Others</h3>
-                <div class="about-section">
-                <div class="about-row">
-                    <button id="check-for-updates-btn" class="icon-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                    <span>Check for Updates</span>
-                    </button>
-                </div>
-                <div class="about-row">
-                    <button id="github-repo-btn" class="icon-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                    <span>GitHub</span>
-                    </button>
-                    <a href="privacy-policy.html" rel="noopener noreferrer" class="icon-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    <span>Privacy Policy</span>
-                    </a>
-                </div>
-                </div>
+          <div class="settings-divider"></div>
+          <h3 class="settings-header">Element Control</h3>
+          <div class="setting-row">
+            <div class="label">
+              <span>Quote Widget</span>
+              <small>Position or hide quotes.</small>
             </div>
-            
-            <div id="appearance-content" class="settings-pane">
-                <div id="theme-color-note" class="settings-note"><p>Advanced Colors will work when the 'Dark Mode' is off and you are not using "Gradient Theme".</p></div>
-                <div id="standard-theme-controls">
-                    <div class="setting-row">
-                        <div class="label"><span>Dark Mode</span><small>Enable a darker theme.</small></div>
-                        <label class="toggle-switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider"></span></label>
-                    </div>
-                    <div class="setting-row">
-                        <div class="label"><span>Background</span><small>Upload a custom wallpaper (Size: <3MB)</small></div>
-                        <div class="background-controls">
-                            <button id="upload-bg-button" class="settings-button">Upload</button>
-                            <input type="file" id="bg-file-input" accept="image/*" class="hidden">
-                            <button id="remove-bg-button" class="settings-button hidden">Remove</button>
-                        </div>
-                    </div>
-                    <div class="setting-row">
-                        <div class="label"><span>Auto Theme</span><small>Randomize theme on every new tab.</small></div>
-                        <label class="toggle-switch"><input type="checkbox" id="auto-theme-toggle"><span class="slider"></span></label>
-                    </div>
-                </div>
-                
-                <div class="settings-divider"></div>
-                <h3 class="settings-header">Theme Presets</h3>
-                <div id="normal-themes-container"></div>
-                
-                <div class="settings-divider"></div>
-                <h3 class="settings-header">Gradient Theme Presets</h3>
-                <div id="gradient-themes-container"></div>
-
-                <div class="settings-divider"></div>
-                <h3 class="settings-header">Saved Presets</h3>
-                <div class="setting-row" style="background: transparent; padding: 0 0 10px 0;">
-                    <button id="save-current-theme-btn" class="settings-button">Save Current Theme</button>
-                </div>
-                <div id="saved-themes-container"></div>
-
-                <div id="advanced-color-controls">
-                    <div class="settings-divider"></div>
-                    <h3 class="settings-header">Advanced Colors</h3>
-                    <div class="setting-row">
-                        <div class="label"><span>Primary Background</span><small>Set color for the theme</small></div>
-                        <input type="color" id="bg-primary-picker" class="color-picker">
-                    </div>
-                    <div class="setting-row">
-                        <div class="label"><small>Widgets Background</small></div>
-                        <input type="color" id="bg-secondary-picker" class="color-picker">
-                    </div>
-                    <div class="setting-row">
-                        <div class="label"><small>Popups Background</small></div>
-                        <input type="color" id="bg-tertiary-picker" class="color-picker">
-                    </div>
-                    <div class="setting-row">
-                        <div class="label"><small>Accent Color</small></div>
-                        <input type="color" id="theme-color-picker" class="color-picker">
-                    </div>
-                    <div class="setting-row">
-                        <div class="label"><span>Primary Text</span><small>Set color for Primary Text</small></div>
-                        <input type="color" id="text-primary-picker" class="color-picker">
-                    </div>
-                    <div class="setting-row">
-                        <div class="label"><small>Secondary Text</small></div>
-                        <input type="color" id="text-secondary-picker" class="color-picker">
-                    </div>
-                    <div class="setting-row">
-                        <div class="label"><small>SearchBox Text</small></div>
-                        <input type="color" id="text-placeholder-picker" class="color-picker">
-                    </div>
-                    <div class="setting-row">
-                        <div class="label"><span>Glow Effect</span><small>Set Clock's glow effect color</small></div>
-                        <input type="color" id="glow-color-picker" class="color-picker">
-                    </div>
-                </div>
+            <select
+              id="quote-position-select"
+              class="settings-dropdown"
+              style="
+                padding: 5px;
+                border-radius: 5px;
+                background: var(--bg-interactive);
+                color: var(--text-primary);
+                border: none;
+              "
+            >
+              <option value="below">Below Search</option>
+              <option value="replace">Replace Weather</option>
+              <option value="off">Turn Off</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Show To-Do List</span
+              ><small>Display the To-Do List button.</small>
             </div>
-
-            <div id="shortcuts-content" class="settings-pane">
-                <div id="shortcuts-editor-list"></div>
-                <form id="add-shortcut-form">
-                    <h3 class="settings-header">Add New Shortcut</h3>
-                    <div class="add-shortcut-inputs">
-                        <input type="text" id="shortcut-name-input" placeholder="Name (e.g., Google)" required>
-                        <input type="url" id="shortcut-url-input" placeholder="URL (e.g., https://google.com)" required>
-                    </div>
-                    <button type="submit" class="settings-button">Add Shortcut</button>
-                </form>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="todo-visibility-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Show Google Apps</span
+              ><small>Display the Google Apps button.</small>
             </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="apps-visibility-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Show AI Tools & Socials</span
+              ><small>Display the AI Tools & Socials button.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="ai-tools-visibility-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Show Shortcuts</span
+              ><small>Display the shortcuts bar.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="shortcuts-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
 
+          <div class="settings-divider"></div>
+          <h3 class="settings-header">Backup & Restore</h3>
+          <div class="backup-controls">
+            <button id="backup-button" class="settings-button">Backup</button>
+            <button id="restore-button" class="settings-button">Restore</button>
+            <input
+              type="file"
+              id="restore-file-input"
+              accept=".json"
+              class="hidden"
+            />
+            <button id="reset-button" class="settings-button danger">
+              Reset All
+            </button>
+          </div>
+          <div class="settings-divider"></div>
+          <h3 class="settings-header">Others</h3>
+          <div class="about-section">
+            <div class="about-row">
+              <button id="check-for-updates-btn" class="icon-button">
+                <svg
+                  stroke="currentColor"
+                  fill="currentColor"
+                  height="24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  id="mdi-update"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z"
+                  />
+                </svg>
+                <span>Check for Updates</span>
+              </button>
+            </div>
+            <div class="about-row">
+              <button id="github-repo-btn" class="icon-button">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                  />
+                </svg>
+                <span>GitHub</span>
+              </button>
+              <a
+                href="privacy-policy.html"
+                rel="noopener noreferrer"
+                class="icon-button"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20.25 5C17.5866 5 14.992 4.05652 12.45 2.15C12.1833 1.95 11.8167 1.95 11.55 2.15C9.00797 4.05652 6.41341 5 3.75 5C3.33579 5 3 5.33579 3 5.75V11C3 16.0012 5.95756 19.6757 11.7251 21.9478C11.9018 22.0174 12.0982 22.0174 12.2749 21.9478C18.0424 19.6757 21 16.0012 21 11V5.75C21 5.33579 20.6642 5 20.25 5ZM16.7568 9.30287L10.7568 14.8029C10.4608 15.0742 10.0036 15.0643 9.71967 14.7803L7.21967 12.2803C6.92678 11.9874 6.92678 11.5126 7.21967 11.2197C7.51256 10.9268 7.98744 10.9268 8.28033 11.2197L10.2726 13.2119L15.7432 8.19714C16.0485 7.91724 16.523 7.93787 16.8029 8.24321C17.0828 8.54855 17.0621 9.02297 16.7568 9.30287Z"
+                    fill="currentColor"
+                  />
+                </svg>
+                <span>Privacy Policy</span>
+              </a>
+            </div>
+          </div>
         </div>
 
-        <div class="settings-footer">
-            <p>&copy; Ditom Baroi Antu <span id="copyright-year">2025</span></p>
-            <p><strong>YourDynamicDashboard</strong> V.2.0.2</p>
-            <p>Weather data provided by <a href="https://open-meteo.com/" target="_blank" style="color: inherit;">Open-Meteo.com</a></p>
+        <div id="appearance-content" class="settings-pane">
+          <div id="theme-color-note" class="settings-note">
+            <p>
+              Advanced Colors will work when the 'Dark Mode' is off and you are
+              not using "Gradient Theme".
+            </p>
+          </div>
+          <div id="standard-theme-controls">
+            <div class="setting-row">
+              <div class="label">
+                <span>Dark Mode</span><small>Enable the dark theme</small>
+              </div>
+              <label class="toggle-switch"
+                ><input type="checkbox" id="dark-mode-toggle" /><span
+                  class="slider"
+                ></span
+              ></label>
+            </div>
+            <div class="setting-row">
+              <div class="label">
+                <span>Custom BG</span><small>Upload an image</small>
+              </div>
+              <div class="background-controls">
+                <button id="upload-bg-button" class="settings-button">
+                  Upload
+                </button>
+                <input
+                  type="file"
+                  id="bg-file-input"
+                  accept="image/*"
+                  class="hidden"
+                />
+                <button id="remove-bg-button" class="settings-button hidden">
+                  Remove
+                </button>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="label">
+                <span>Random BG</span
+                ><small>Fetch image from Lorem Picsum.</small>
+              </div>
+              <div class="background-controls">
+                <button
+                  id="random-bg-freeze-btn"
+                  class="settings-button hidden"
+                >
+                  Freeze
+                </button>
+                <button id="random-bg-rnd-btn" class="settings-button">
+                  Random
+                </button>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="label">
+                <span>Auto Theme</span
+                ><small>Randomize theme on every new tab.</small>
+              </div>
+              <label class="toggle-switch"
+                ><input type="checkbox" id="auto-theme-toggle" /><span
+                  class="slider"
+                ></span
+              ></label>
+            </div>
+            <div class="setting-row">
+              <div class="label">
+                <span>Glow Effect</span
+                ><small>Toggle clock glow & pulsing.</small>
+              </div>
+              <label class="toggle-switch"
+                ><input type="checkbox" id="glow-effect-toggle" /><span
+                  class="slider"
+                ></span
+              ></label>
+            </div>
+          </div>
+
+          <div class="settings-divider"></div>
+          <h3 class="settings-header">Theme Presets</h3>
+          <div id="normal-themes-container"></div>
+
+          <div class="settings-divider"></div>
+          <h3 class="settings-header">Gradient Theme Presets</h3>
+          <div id="gradient-themes-container"></div>
+
+          <div class="settings-divider"></div>
+          <h3 class="settings-header">Saved Presets</h3>
+          <div
+            class="setting-row"
+            style="background: transparent; padding: 0 0 10px 0"
+          >
+            <button id="save-current-theme-btn" class="settings-button">
+              Save Current Theme
+            </button>
+          </div>
+          <div id="saved-themes-container"></div>
+
+          <div id="advanced-color-controls">
+            <div class="settings-divider"></div>
+            <h3 class="settings-header">Advanced Colors</h3>
+            <p
+              id="advanced-color-warning"
+              class="settings-note hidden"
+              style="
+                color: var(--text-secondary);
+                font-weight: bold;
+                margin-top: 7px;
+                margin-bottom: 15px;
+              "
+            >
+              (Switch to Normal Theme to use Advanced Colors)
+            </p>
+            <div class="setting-row">
+              <div class="label">
+                <span>Primary Background</span
+                ><small>Set color for the theme</small>
+              </div>
+              <input type="color" id="bg-primary-picker" class="color-picker" />
+            </div>
+            <div class="setting-row">
+              <div class="label"><small>Widgets Background</small></div>
+              <input
+                type="color"
+                id="bg-secondary-picker"
+                class="color-picker"
+              />
+            </div>
+            <div class="setting-row">
+              <div class="label"><small>Popups Background</small></div>
+              <input
+                type="color"
+                id="bg-tertiary-picker"
+                class="color-picker"
+              />
+            </div>
+            <div class="setting-row">
+              <div class="label"><small>Accent Color</small></div>
+              <input
+                type="color"
+                id="theme-color-picker"
+                class="color-picker"
+              />
+            </div>
+            <div class="setting-row">
+              <div class="label">
+                <span>Primary Text</span
+                ><small>Set color for Primary Text</small>
+              </div>
+              <input
+                type="color"
+                id="text-primary-picker"
+                class="color-picker"
+              />
+            </div>
+            <div class="setting-row">
+              <div class="label"><small>Secondary Text</small></div>
+              <input
+                type="color"
+                id="text-secondary-picker"
+                class="color-picker"
+              />
+            </div>
+            <div class="setting-row">
+              <div class="label"><small>SearchBox Text</small></div>
+              <input
+                type="color"
+                id="text-placeholder-picker"
+                class="color-picker"
+              />
+            </div>
+            <div class="setting-row">
+              <div class="label">
+                <span>Glow Effect</span
+                ><small>Set Clock's glow effect color</small>
+              </div>
+              <input type="color" id="glow-color-picker" class="color-picker" />
+            </div>
+          </div>
         </div>
+
+        <div id="shortcuts-content" class="settings-pane">
+          <div id="shortcuts-editor-list"></div>
+          <form id="add-shortcut-form">
+            <h3 class="settings-header">Add New Shortcut</h3>
+            <div class="add-shortcut-inputs">
+              <input
+                type="text"
+                id="shortcut-name-input"
+                placeholder="Name (e.g., Google)"
+                maxlength="35"
+                required
+              />
+              <input
+                type="text"
+                id="shortcut-url-input"
+                placeholder="URL (e.g., https://google.com)"
+                required
+              />
+            </div>
+            <button type="submit" class="settings-button">Add Shortcut</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="settings-footer">
+        <p>&copy; Ditom Baroi Antu <span id="copyright-year">2025</span></p>
+        <p><strong>YourDynamicDashboard</strong> V.2.1.0</p>
+        <p>
+          Weather data provided by
+          <a
+            href="https://open-meteo.com/"
+            target="_blank"
+            style="color: inherit"
+            >Open-Meteo.com</a
+          >
+        </p>
+      </div>
     </div>
 
     <div class="layout-container">
-        <div class="column-left">
-            <div class="master-clock-container">
-                <div id="digital-clock-container" class="clock-container">
-                    <span id="clock-hours">00</span><span class="clock-separator">:</span><span id="clock-minutes">00</span><span class="clock-separator">:</span><span id="clock-seconds">00</span>
-                    <span id="clock-ampm"></span>
-                </div>
-                
-                <div id="clock-date-row" class="clock-container">
-                    <span id="clock-day">Friday</span>
-                    <span id="clock-date">Nov 28</span>
-                </div>
-                <div id="analog-clock-container" class="clock-container">
-                    <svg id="analog-clock-svg" viewBox="0 0 200 200">
-                        <defs>
-                            <path id="scalloped-edge" d=" M 100, 10 A 90,90 0 0,1 163.64,36.36 90,90 0 0,1 190,100 90,90 0 0,1 163.64,163.64 90,90 0 0,1 100,190 90,90 0 0,1 36.36,163.64 90,90 0 0,1 10,100 90,90 0 0,1 36.36,36.36 90,90 0 0,1 100,10 Z" />
-                        </defs>
-                        <use href="#scalloped-edge" class="clock-face" />
-                        <g class="clock-hands">
-                            <line id="hour-hand" x1="100" y1="100" x2="100" y2="65" />
-                            <line id="minute-hand" x1="100" y1="100" x2="100" y2="40" />
-                            <circle id="second-dot" cx="100" cy="25" r="6" />
-                        </g>
-                    </svg>
-                </div>
-            </div>
-            <div class="text-container">
-                <h1 id="greeting-text">Good morning</h1>
-                <p id="welcome-text" contenteditable="true" title="Click to edit"></p>
-            </div>
-        </div>
-        <div class="column-right">
-            <div id="weather-widget" class="widget-container">
-                <div class="weather-details">
-                    <div id="weather-condition">Loading Weather...</div>
-                    <div class="weather-info-bar">
-                        <span>Humidity</span>
-                        <div class="progress-bar-container"><div id="humidity-bar" class="progress-bar"></div></div>
-                        <span id="humidity-value">--%</span>
-                    </div>
-                    <div class="weather-extra-info">
-                        <div id="feels-like-temp" class="info-box">Feels like --°</div>
-                        <div id="location" class="info-box">Unknown</div>
-                    </div>
-                </div>
-                <div class="weather-current">
-                    <div id="weather-icon"></div>
-                    <div id="current-temp">--°</div>
-                </div>
-            </div>
-            
-            <div id="quote-widget" class="widget-container hidden">
-                <div class="quote-content">
-                    <p id="quote-text">"Loading quote..."</p>
-                    <span id="quote-author">- Author</span>
-                </div>
-            </div>
+      <div class="column-left">
+        <div class="master-clock-container">
+          <div id="digital-clock-container" class="clock-container">
+            <span id="clock-hours">00</span
+            ><span class="clock-separator">:</span
+            ><span id="clock-minutes">00</span
+            ><span class="clock-separator">:</span
+            ><span id="clock-seconds">00</span>
+            <span id="clock-ampm"></span>
+          </div>
 
-            <form id="search-form" class="widget-container" action="https://www.google.com/search" method="GET" target="_blank">
-                <button type="button" id="search-provider-button" title="Change Search Engine">
-                    <img id="current-provider-icon" src="assets/search-tools/google.png" alt="Google">
-                    <span class="dropdown-caret">▼</span>
-                </button>
-                
-                <input type="text" id="search-input" name="q" required autocomplete="off">
-                
-                <button type="button" id="voice-search-btn" title="Voice Search">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                </button>
-                <button type="submit" id="search-button" class="search-btn">Search</button>
-                <a id="open-site-button" class="search-btn hidden" href="#" target="_blank">Open</a>
-                
-                <div id="search-dropdown" class="hidden">
-                    <div class="dropdown-section">
-                        <h4>Search Engines</h4>
-                        <div id="dropdown-engines" class="dropdown-grid"></div>
-                    </div>
-                    <div class="dropdown-divider"></div>
-                    <div class="dropdown-section">
-                        <h4>Platforms</h4>
-                        <div id="dropdown-platforms" class="dropdown-grid"></div>
-                    </div>
-                </div>
-            </form>
-            
+          <div id="clock-date-row" class="clock-container">
+            <span id="clock-day">Friday</span>
+            <span id="clock-date">Nov 28</span>
+          </div>
+          <div id="analog-clock-container" class="clock-container">
+            <svg id="analog-clock-svg" viewBox="0 0 200 200">
+              <defs>
+                <path
+                  id="scalloped-edge"
+                  d=" M 100, 10 A 90,90 0 0,1 163.64,36.36 90,90 0 0,1 190,100 90,90 0 0,1 163.64,163.64 90,90 0 0,1 100,190 90,90 0 0,1 36.36,163.64 90,90 0 0,1 10,100 90,90 0 0,1 36.36,36.36 90,90 0 0,1 100,10 Z"
+                />
+              </defs>
+              <use href="#scalloped-edge" class="clock-face" />
+              <g class="clock-hands">
+                <line id="hour-hand" x1="100" y1="100" x2="100" y2="65" />
+                <line id="minute-hand" x1="100" y1="100" x2="100" y2="40" />
+                <circle id="second-dot" cx="100" cy="25" r="6" />
+              </g>
+            </svg>
+          </div>
         </div>
+        <div class="text-container">
+          <h1 id="greeting-text"></h1>
+          <p id="welcome-text" contenteditable="true" title="Click to edit"></p>
+        </div>
+      </div>
+      <div class="column-right">
+        <div id="pinned-tasks-widget" class="widget-container hidden">
+          <h3 class="pinned-title">Your Tasks</h3>
+          <ul id="pinned-tasks-list"></ul>
+        </div>
+        <div id="weather-widget" class="widget-container">
+          <div id="weather-setup-ui" class="hidden">
+            <h3>Enter your location for Weather Forecast</h3>
+            <br />
+            <div
+              class="weather-setup-controls"
+              style="display: flex; gap: 0.5rem; width: 100%"
+            >
+              <input
+                type="text"
+                id="widget-location-input"
+                placeholder="Enter city name..."
+                style="flex: 3"
+              />
+              <button
+                id="widget-save-btn"
+                class="settings-button"
+                style="flex: 1"
+              >
+                Save
+              </button>
+              <button
+                id="widget-gps-btn"
+                class="settings-button"
+                title="Detect Location"
+                style="
+                  flex: 1;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 0.5rem;
+                "
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                  <g fill="none" fill-rule="evenodd">
+                    <path
+                      d="M20 0v20H0V0zM10.494 19.382l-.009.001-.059.03-.017.003-.012-.003-.059-.03c-.008-.003-.016-.001-.02.004l-.003.009-.015.356.005.016.009.011.086.062.013.003.01-.003.086-.062.01-.013.003-.014-.014-.356a.019.019 0 0 0-.014-.015m.221-.094-.011.002-.154.077-.008.008-.003.01.015.358.004.01.007.006.167.078c.01.003.019 0 .024-.007l.004-.011-.029-.512a.016.016 0 0 0-.016-.019m-.596.002a.019.019 0 0 0-.022.005l-.005.011-.029.512c0 .01.006.017.014.02l.013-.002.167-.077.008-.007.003-.009.015-.358-.003-.01-.008-.008z"
+                    />
+                    <path
+                      fill="currentColor"
+                      fill-rule="nonzero"
+                      d="M5.6 13.867a.833.833 0 0 1 .467 1.6c-.417.122-.717.25-.91.367.199.119.512.253.947.377C7.067 16.485 8.444 16.667 10 16.667s2.933-.182 3.896-.457c.435-.124.748-.258.947-.377-.192-.117-.492-.245-.909-.367a.833.833 0 0 1 .466-1.6c.557.163 1.067.371 1.459.638.362.249.808.684.808 1.328 0 .653-.457 1.09-.825 1.34-.398.268-.919.477-1.488.64A15.378 15.378 0 0 1 10 18.333c-1.603 0-3.205-.192-4.353-.52a13.567 13.567 0 0 1-1.489-.641C3.79 16.92 3.333 16.483 3.333 15.833c0-.644.446-1.079.808-1.328.392-.267.902-.476 1.459-.638M10 1.667A6.25 6.25 0 0 1 16.25 7.917c0 2.14-1.166 3.88-2.375 5.116A13.668 13.668 0 0 1 12.332 14.38c-.496.372-1.627 1.068-1.627 1.068a1.425 1.425 0 0 1-1.409 0s-1.13-.697-1.626-1.068a13.575 13.575 0 0 1-1.543-1.346c-1.209-1.236-2.376-2.977-2.376-5.117a6.25 6.25 0 0 1 6.25-6.25m0 4.583a1.667 1.667 0 1 0 0 3.333 1.667 1.667 0 0 0 0-3.333"
+                    />
+                  </g>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="weather-details">
+            <div id="weather-condition">Loading Weather...</div>
+            <div class="weather-info-bar">
+              <span>Humidity</span>
+              <div class="progress-bar-container">
+                <div id="humidity-bar" class="progress-bar"></div>
+              </div>
+              <span id="humidity-value">--%</span>
+            </div>
+            <div class="weather-extra-info">
+              <div id="feels-like-temp" class="info-box">Feels like --°</div>
+              <div id="location" class="info-box">Unknown</div>
+            </div>
+          </div>
+          <div class="weather-current">
+            <div id="weather-icon"></div>
+            <div id="current-temp">--°</div>
+          </div>
+        </div>
+
+        <div id="quote-widget" class="widget-container hidden">
+          <div class="quote-content">
+            <p id="quote-text">"Loading quote..."</p>
+            <span id="quote-author">- Author</span>
+          </div>
+        </div>
+
+        <form
+          id="search-form"
+          class="widget-container"
+          action="https://www.google.com/search"
+          method="GET"
+          target="_blank"
+        >
+          <button
+            type="button"
+            id="search-provider-button"
+            title="Change Search Engine"
+          >
+            <img
+              id="current-provider-icon"
+              src="assets/search-tools/google.png"
+              alt="Google"
+            />
+            <span class="dropdown-caret">▼</span>
+          </button>
+
+          <input
+            type="text"
+            id="search-input"
+            name="q"
+            required
+            autocomplete="off"
+          />
+
+          <button type="button" id="voice-search-btn" title="Voice Search">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-mic-fill"
+              viewBox="0 0 16 16"
+            >
+              <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z" />
+              <path
+                d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5"
+              />
+            </svg>
+          </button>
+          <button type="submit" id="search-button" class="search-btn">
+            Search
+          </button>
+          <button type="button" id="open-site-button" class="search-btn hidden">
+            Open
+          </button>
+
+          <div id="search-dropdown" class="hidden">
+            <div class="dropdown-section">
+              <h4>Search Engines</h4>
+              <div id="dropdown-engines" class="dropdown-grid"></div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-section">
+              <h4>Platforms</h4>
+              <div id="dropdown-platforms" class="dropdown-grid"></div>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
 
     <div id="info-modal-overlay" class="hidden">
-        <div class="modal-box">
-            <button class="modal-close" id="info-modal-close">&times;</button>
-            <h2>Did You Know?</h2>
-            <div class="info-content">
-                <div class="info-item">
-                    <strong>👋 Personalized Greeting</strong>
-                    <p><b>Double-click</b> the Greeting text (e.g. Good Morning) text to enter your Name.</p>
-                </div>
-                <div class="info-item">
-                    <strong>⌨️ Key Shortcuts</strong>
-                    <p>Use <b>keyboard shortcuts</b> to navigate faster. Press <code>/</code> to search, <code>V</code> to voice search, <code>Z</code> for Zen Mode, <code>T</code> for To-Do, or <code>1-9</code> for your Shortcuts.</p>
-                </div>
-                <div class="info-item">
-                    <strong>📍 Manual Weather</strong>
-                    <p>Enter your city name manually in Settings to get weather without needing GPS.</p>
-                </div>
-                <div class="info-item">
-                    <strong>🎨 Custom Themes</strong>
-                    <p>In <b>"Appearance"</b>, you can fine-tune every color using the <b>Advanced Colors</b> section. You can also save them.</p>
-                </div>
-                <div class="info-item">
-                    <strong>🔍 Switch Engine</strong>
-                    <p>Click the current <b>"Search Engine"</b> (e.g. Google) to change <b>Search Engine</b>.</p>
-                </div>
-            </div>
+      <div class="modal-box">
+        <button class="modal-close" id="info-modal-close">&times;</button>
+        <h2>Did You Know? (Read this)</h2>
+        <div class="info-content">
+          <div class="info-item">
+            <strong>👋 Personalized Greeting</strong>
+            <p>
+              <b>Double-click</b> the Greeting text (e.g. Good Morning) text to
+              enter your Name.
+            </p>
+          </div>
+          <div class="info-item">
+            <strong> 📝 Editable Text</strong>
+            <p>
+              Keep the <b>Editable Text</b> field (under Greeting text) empty to
+              remove it.
+            </p>
+          </div>
+          <div class="info-item">
+            <strong>⌨️ Key Shortcuts</strong>
+            <p>
+              Use <b>keyboard shortcuts</b> to navigate faster. Press
+              <code>/</code> to search, <code>V</code> to voice search,
+              <code>Z</code> for Zen Mode, <code>T</code> for To-Do, or
+              <code>1-9</code> for your Shortcuts.
+            </p>
+          </div>
+          <div class="info-item">
+            <strong> 🔗 Link Direction</strong>
+            <p>
+              Open <b>Link Direction</b> in Settings to change the direction
+              <b>(New Tab / Current Tab)</b> of Google Apps, AI Tools,
+              Shortcuts, etc.
+            </p>
+          </div>
+          <div class="info-item">
+            <strong>🎙️ Voice Search Issue</strong>
+            <p>
+              If you are using Gecko based browser (like Firefox), you can't use
+              Voice Search. It's a
+              <b>privacy feature</b> of Gecko based browsers.
+            </p>
+          </div>
+          <div class="info-item">
+            <strong>🔍 Switch Engine</strong>
+            <p>
+              Click the current <b>"Search Engine"</b> (e.g. Google) to change
+              <b>Search Engine</b>. Also click <b>Open</b> to open the
+              <b>Search Engine</b> or the selected <b>Platform</b>.
+            </p>
+          </div>
         </div>
+      </div>
     </div>
 
     <div id="key-modal-overlay" class="hidden">
-        <div class="modal-box">
-            <button class="modal-close" id="key-modal-close">&times;</button>
-            <h2>Keyboard Shortcuts</h2>
-            <p class="modal-subtitle">Click a button, then press a key to rebind.</p>
-            <div id="key-list" class="key-grid">
-                </div>
-            <div class="modal-footer">
-                <button id="reset-keys-btn" class="settings-button danger">Reset to Defaults</button>
-            </div>
+      <div class="modal-box">
+        <button class="modal-close" id="key-modal-close">&times;</button>
+        <h2>Keyboard Shortcuts</h2>
+        <p class="modal-subtitle">
+          Click a button, then press a key to rebind.
+        </p>
+        <div id="key-list" class="key-grid"></div>
+        <div id="key-note-container"></div>
+        <div class="modal-footer">
+          <button id="reset-keys-btn" class="settings-button danger">
+            Reset to Defaults
+          </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Link Direction Modal -->
+    <div id="link-direction-modal-overlay" class="hidden">
+      <div class="modal-box">
+        <button class="modal-close" id="link-direction-modal-close">
+          &times;
+        </button>
+        <h2>Link Direction</h2>
+        <p class="modal-subtitle">Choose where your links open.</p>
+        <div id="link-direction-list" class="key-grid">
+          <!-- Content injected by JS -->
+        </div>
+        <div class="modal-footer">
+          <button id="reset-link-direction-btn" class="settings-button danger">
+            Reset to Defaults
+          </button>
+        </div>
+      </div>
     </div>
 
     <div id="shortcuts-container"></div>
 
-    <script type="module" src="src/main.js"></script>
-</body>
-</html>
+    <div
+      id="gps-consent-modal-overlay"
+      class="hidden"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 3000;
+        opacity: 1;
+        transition: opacity 0.3s;
+      "
+    >
+      <div class="modal-box" style="max-width: 400px; text-align: center">
+        <h2 style="color: var(--accent-color); margin-bottom: 1rem">
+          Location Access
+        </h2>
+        <p
+          style="
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            text-align: left;
+          "
+        >
+          Your coordinates are used strictly to fetch local weather data. When
+          you proceed, your browser will securely ping Open-Meteo (for weather)
+          and BigDataCloud (for the city name).
+        </p>
+        <p
+          style="
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+          "
+        >
+          This data is saved locally on your device. We do not track you in the
+          background, and we have no server to store your location data.
+        </p>
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+          "
+        >
+          <input
+            type="checkbox"
+            id="gps-consent-checkbox"
+            class="custom-rounded-checkbox"
+          />
+          <label
+            for="gps-consent-checkbox"
+            style="
+              color: var(--text-primary);
+              font-size: 0.9rem;
+              cursor: pointer;
+            "
+            >Don't show this warning again</label
+          >
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center">
+          <button
+            id="gps-consent-agree"
+            class="settings-button"
+            style="width: 120px"
+          >
+            I Agree
+          </button>
+          <button
+            id="gps-consent-cancel"
+            class="settings-button"
+            style="
+              width: 120px;
+              background-color: var(--bg-interactive);
+              color: var(--text-primary);
+            "
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
 
-<!-- index.html YourDynamicDashboard (Ditom Baroi Antu - 2025-26) -->
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
+<!-- index.html YourDynamicDashboard V2.1 (Ditom Baroi Antu - 2025-26) -->

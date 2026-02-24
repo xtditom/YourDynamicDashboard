@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YourDynamicDashboard",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "A dynamic and personalized new tab dashboard.",
   "author": "Ditom Baroi Antu",
   "homepage_url": "https://github.com/xtditom/YourDynamicDashboard",
@@ -9,14 +9,6 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
-  "permissions": [
-    "geolocation"
-  ],
-  "host_permissions": [
-    "https://api.open-meteo.com/",
-    "https://geocoding-api.open-meteo.com/",
-    "https://api.bigdatacloud.net/"
-  ],
   "icons": {
     "16": "assets/icons/icon16.png",
     "48": "assets/icons/icon48.png",
@@ -31,9 +23,7 @@
         "assets/google-apps/*.png",
         "assets/socials/*.png"
       ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "matches": ["<all_urls>"]
     }
   ]
 }

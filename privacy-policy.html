@@ -1,288 +1,405 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Privacy Policy - YourDynamicDashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        :root {
-            --bg-color: #0a0a0a;
-            --card-bg: #171717;
-            --text-primary: #ededed;
-            --text-secondary: #a1a1a1;
-            --accent-color: #3b82f6; /* Trust Blue */
-            --accent-hover: #2563eb;
-            --border-color: #333;
-            --code-bg: #262626;
-        }
+      :root {
+        --bg-color: #0a0a0a;
+        --card-bg: #121212;
+        --text-primary: #ededed;
+        --text-secondary: #a1a1a1;
+        --accent-color: #00c41a; /* Brand matched to the Toxin theme */
+        --border-color: #00ff1525;
+        --code-bg: #2e2f30;
+      }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body {
-            font-family: 'Lexend', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 3rem 1.5rem;
-        }
+      body {
+        font-family: "Lexend", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        line-height: 1.6;
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 4rem 1.5rem;
+      }
 
-        .wrapper {
-            max-width: 720px;
-            width: 100%;
-        }
+      .wrapper {
+        max-width: 800px;
+        width: 100%;
+      }
 
-        /* --- Header --- */
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
-            animation: fadeIn 0.8s ease-out;
-        }
+      /* --- Header --- */
+      header {
+        text-align: center;
+        margin-bottom: 4rem;
+      }
 
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 600;
-            letter-spacing: -0.03em;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #fff, #a1a1a1);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #fff;
+      }
 
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 1rem;
-        }
+      .subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+      }
 
-        .last-updated {
-            display: inline-block;
-            margin-top: 1rem;
-            font-size: 0.8rem;
-            background: var(--card-bg);
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-        }
+      .last-updated {
+        display: inline-block;
+        margin-top: 1.5rem;
+        font-size: 0.85rem;
+        background: var(--card-bg);
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        color: var(--accent-color);
+      }
 
-        /* --- Main Content --- */
-        main {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            animation: slideUp 0.8s ease-out;
-        }
+      /* --- Main Content --- */
+      main {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
 
-        section {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 2rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+      section {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2.5rem;
+      }
 
-        section:hover {
-            border-color: #444;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
+      h2 {
+        font-size: 1.4rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #fff;
+      }
 
-        h2 {
-            font-size: 1.25rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: var(--accent-color);
-        }
+      h2 svg {
+        color: var(--accent-color);
+      }
 
-        p {
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-        }
+      p {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        font-size: 1rem;
+      }
 
-        p strong {
-            color: var(--text-primary);
-            font-weight: 500;
-        }
+      p strong {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
 
-        /* --- Lists & Cards --- */
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
+      /* --- Grid & Cards --- */
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        /* Cards will now natively stretch to match the row height */
+      }
 
-        .info-card {
-            background-color: rgba(255,255,255,0.03);
-            padding: 1rem;
-            border-radius: 8px;
-            border-left: 3px solid var(--accent-color);
-        }
+      .info-card {
+        background-color: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.2s ease;
+      }
 
-        .info-card h3 {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
+      .info-card:hover {
+        border-color: var(--accent-color);
+      }
 
-        .info-card p {
-            margin-bottom: 0;
-            font-size: 0.9rem;
-        }
+      .info-card h3 {
+        font-size: 1.05rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
 
-        code {
-            background-color: var(--code-bg);
-            color: #fff;
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-        }
+      .info-card p {
+        margin-bottom: 0;
+        font-size: 0.95rem;
+        flex-grow: 1; /* Pushes content down cleanly if heights differ */
+      }
 
-        a {
-            color: var(--accent-color);
-            text-decoration: none;
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.2s;
-        }
+      .full-width {
+        grid-column: 1 / -1;
+      }
 
-        a:hover {
-            border-bottom-color: var(--accent-color);
-        }
+      code {
+        background-color: var(--code-bg);
+        color: var(--accent-color);
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        font-size: 0.85rem;
+      }
 
-        /* --- Footer --- */
-        footer {
-            text-align: center;
-            margin-top: 4rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
+      a {
+        color: var(--accent-color);
+        text-decoration: none;
+        transition: opacity 0.2s;
+      }
 
-        /* --- Animations --- */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+      a:hover {
+        text-decoration: underline;
+      }
 
-        /* Responsive */
-        @media (min-width: 600px) {
-            .info-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .full-width {
-                grid-column: 1 / -1;
-            }
-        }
+      /* --- Footer --- */
+      footer {
+        text-align: center;
+        margin-top: 4rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        opacity: 0.7;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="wrapper">
-        <header>
-            <h1>Privacy Policy</h1>
-            <p class="subtitle">YourDynamicDashboard Extension</p>
-            <span class="last-updated">Last Updated: December 14, 2025</span>
-        </header>
+      <header>
+        <h1>Privacy Policy</h1>
+        <p class="subtitle">YourDynamicDashboard Extension</p>
+        <span class="last-updated">Last Updated: February 24, 2026</span>
+      </header>
 
-        <main>
-            <section>
-                <h2>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    Introduction
-                </h2>
-                <p>We believe your browser's new tab page should be personal, private, and yours. <strong>YourDynamicDashboard</strong> is built with a "Privacy First" architecture. This document outlines exactly how we handle your data.</p>
-                <p><strong>The Short Version:</strong> We do not track you. We do not collect analytics. Your data stays on your device.</p>
-            </section>
+      <main>
+        <section>
+          <h2>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Introduction
+          </h2>
+          <p>
+            We believe your browser's new tab page should be personal, private,
+            and yours. <strong>YourDynamicDashboard</strong> is built with a
+            "Privacy First" architecture. This document outlines exactly how we
+            handle your data.
+          </p>
+          <p>
+            <strong>The Short Version:</strong> YourDynamicDashboard does not
+            collect, store, or sell your personal data. Location data is
+            strictly opt-in and stored locally on your device.
+          </p>
+        </section>
 
-            <section>
-                <h2>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Where is my data?
-                </h2>
-                <p>All your customizations are stored locally in your browser using <code>localStorage</code>. This data never leaves your computer. We do not have servers, and we cannot see your data.</p>
-                <div class="info-grid">
-                    <div class="info-card full-width">
-                        <h3>What is stored locally?</h3>
-                        <p>Theme colors, saved presets, personal greeting name, to-do lists, custom shortcut links, keyboard settings, and general preferences.</p>
-                    </div>
-                </div>
-            </section>
+        <section>
+          <h2>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Where is my data?
+          </h2>
+          <p>
+            All your customizations are stored locally in your browser using
+            <code>localStorage</code>. This data never leaves your computer. We
+            do not have servers, and we cannot see your data.
+          </p>
+          <div class="info-grid">
+            <div class="info-card full-width">
+              <h3>What is stored locally?</h3>
+              <p>
+                Theme colors, saved presets, personal greeting name, to-do
+                lists, custom shortcut links, keyboard settings, and general
+                preferences.
+              </p>
+            </div>
+          </div>
+        </section>
 
-            <section>
-                <h2>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    Permissions & Usage
-                </h2>
-                <div class="info-grid">
-                    <div class="info-card">
-                        <h3>📁 Storage</h3>
-                        <p>Used to save your preferences so they persist every time you open a new tab.</p>
-                    </div>
-                    <div class="info-card">
-                        <h3>📍 Geolocation</h3>
-                        <p><strong>Optional.</strong> Used <strong>only</strong> if you click "Detect Location". Your coordinates are sent directly to the weather provider and are not stored by us.</p>
-                    </div>
-                    <div class="info-card full-width">
-                        <h3>🎙️ Microphone (Voice Search)</h3>
-                        <p><strong>Optional.</strong> Used only when you click the microphone icon or press 'V'. We use your browser's native <code>Web Speech API</code>. Audio is processed by your browser vendor (e.g., Google for Chrome) to convert speech to text. We do not record or store your voice.</p>
-                    </div>
-                </div>
-            </section>
+        <section>
+          <h2>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Permissions & Usage
+          </h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>🎙️ Microphone (Voice Search)</h3>
+              <p>
+                <strong>Optional.</strong> Used only when you click the
+                microphone icon or press 'V'. We use your browser's native
+                <code>Web Speech API</code>. Audio is processed by your browser
+                vendor (e.g., Google for Chrome) to convert speech to text. We
+                do not record or store your voice.
+              </p>
+            </div>
+            <div class="info-card">
+              <h3>📍 Geolocation</h3>
+              <p>
+                <strong>Strictly Opt-In.</strong> This extension does not track
+                your location in the background. If you manually click "Detect
+                Location", it triggers your browser's native, one-time
+                permission prompt. Your coordinates are sent directly to the
+                weather provider and saved locally. We do not store or monitor
+                this data.
+              </p>
+            </div>
+            <div class="info-card full-width">
+              <h3>📁 Storage</h3>
+              <p>
+                Used to save your preferences so they persist every time you
+                open a new tab.
+              </p>
+            </div>
+          </div>
+        </section>
 
-            <section>
-                <h2>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                    External Services (APIs)
-                </h2>
-                <p>To provide dynamic features, the extension communicates directly with the following third-party services. No personal identifiers are sent to these services.</p>
-                
-                <div class="info-grid">
-                    <div class="info-card full-width">
-                        <h3>Open-Meteo</h3>
-                        <p>Used to fetch weather data. Open-Meteo is a privacy-focused, open-source weather API.<br><code>https://open-meteo.com/en/pricing</code></p>
-                    </div>
-                    <div class="info-card">
-                        <h3>BigDataCloud</h3>
-                        <p>Used for "Reverse Geocoding" (converting GPS coordinates into a City Name) only when auto-detect is used.</p>
-                    </div>
-                    <div class="info-card">
-                        <h3>Google Favicons</h3>
-                        <p>Used to fetch the small icons for the websites you add to your Shortcuts bar.</p>
-                    </div>
-                </div>
-            </section>
+        <section>
+          <h2>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path
+                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+              ></path>
+            </svg>
+            External Services (APIs)
+          </h2>
+          <p>
+            To provide dynamic features, the extension communicates directly
+            with the following third-party services. While we do not send
+            personal identifiers, please note that communicating with any web
+            server natively exposes standard network requests (like your IP
+            address) to that service.
+          </p>
 
-            <section>
-                <h2>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                    Open Source Transparency
-                </h2>
-                <p>We believe in "Trust, but Verify". The entire source code for YourDynamicDashboard is available publicly.</p>
-                <p>You can audit the code yourself on GitHub: <a href="https://github.com/xtditom/YourDynamicDashboard" target="_blank">github.com/xtditom/YourDynamicDashboard</a></p>
-            </section>
-        </main>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>Open-Meteo</h3>
+              <p>
+                Used to fetch weather data. Open-Meteo is a privacy-focused,
+                open-source weather API.<br /><br /><a
+                  href="https://open-meteo.com/en/pricing"
+                  target="_blank"
+                  >open-meteo.com/en/pricing</a
+                >
+              </p>
+            </div>
+            <div class="info-card">
+              <h3>BigDataCloud</h3>
+              <p>
+                Used for "Reverse Geocoding" (converting raw GPS coordinates
+                into a readable City Name) only when the auto-detect location
+                feature is used.
+              </p>
+            </div>
+            <div class="info-card">
+              <h3>Google Favicons</h3>
+              <p>
+                Used to fetch the small icons for the custom websites you add to
+                your Shortcuts bar.
+              </p>
+            </div>
+            <div class="info-card">
+              <h3>Picsum.photos</h3>
+              <p>
+                Used to fetch random, high-quality background images if you
+                explicitly enable the "Random BG" feature in settings.
+              </p>
+            </div>
+          </div>
+        </section>
 
-        <footer>
-            &copy; 2025-2026 Ditom Baroi Antu. All rights reserved.
-        </footer>
+        <section>
+          <h2>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+            Open Source Transparency
+          </h2>
+          <p>
+            We believe in "Trust, but Verify". The entire source code for
+            YourDynamicDashboard is available publicly.
+          </p>
+          <p>
+            You can audit the code yourself on GitHub: <br /><a
+              href="https://github.com/xtditom/YourDynamicDashboard"
+              target="_blank"
+              >github.com/xtditom/YourDynamicDashboard</a
+            >
+          </p>
+        </section>
+      </main>
+
+      <footer>&copy; 2025-2026 Ditom Baroi Antu. All rights reserved.</footer>
     </div>
-
-</body>
+  </body>
 </html>
