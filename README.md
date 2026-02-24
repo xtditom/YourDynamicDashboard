@@ -1,14 +1,14 @@
 <div align="center">
-  <h1 align="center">🚀 YourDynamicDashboard (v2.1.0 Soon)</h1>
+  <h1 align="center">🚀 YourDynamicDashboard (v2.1.0)</h1>
   <p align="center">
-    <strong>The Productivity Update.</strong><br>
+    <strong>The Polish, Privacy & Productivity Update.</strong><br>
     Transform your new tab into a powerful, privacy-first command center.<br>
-    Featuring Voice Search, Zen Mode, and Instant Weather.
+    Featuring Voice Search, Zen Mode, Drag & Drop, and Instant Weather.
     <br />
     <br />
-    <a href="#-features-v20"><strong>Features</strong></a> ·
+    <a href="#-features-v210"><strong>Features</strong></a> ·
     <a href="#%EF%B8%8F-installation-guide"><strong>Installation</strong></a> ·
-    <a href="#%EF%B8%8F-keyboard-shortcuts"><strong>Keyboard Shortcuts</strong></a> ·
+    <a href="#-future-plans"><strong>Future Plans</strong></a> ·
     <a href="#-mode--theme-overview"><strong>Extension Preview</strong></a>
   </p>
 </div>
@@ -52,18 +52,16 @@ Most New Tab Page/ Dashboards are either too simple (just a clock) or too clutte
 
 ---
 
-## ✨ Features (v2)
+## ✨ Features (v2.1)
 
-YourDynamicDashboard has been completely re-engineered for productivity.
+YourDynamicDashboard has been heavily upgraded with the "Polish & Productivity" patch.
 
 | Category | Premium Features |
 | :--- | :--- |
-| **🤖 Interaction** | <li>**Voice Search ("Jarvis Mode"):** Click the mic or press `V`. Speak your query, and it searches instantly.</li><li>**Zen Mode:** Press `Z` to banish all clutter. Only the clock and wallpaper remain.</li><li>**God Mode:** Full keyboard navigation (`1-9`, `T`, `A`, `S`) for power users.</li> |
-| **🎨 Personalization** | <li>**Auto Theme Shuffle:** Get a fresh look every time you open a tab.</li><li>**Personal Greeting:** Double-click the text to set your nickname.</li><li>**Save Presets:** Crafted the perfect theme? Save it to a slot and switch back anytime.</li> |
-| **☁️ Utilities** | <li>**Instant Weather:** No API keys required. We switched to Open-Meteo for privacy-friendly, zero-setup weather.</li><li>**Smart Search:** Switch engines (Google, Bing, DuckDuckGo) or platforms (YouTube, Reddit) instantly.</li><li>**Daily Quotes:** A rotating collection of wisdom to start your day.</li> |
-| **⚡ Quick Access** | <li>**Draggable Shortcuts:** Reorder your favorite sites via drag-and-drop.</li><li>**AI Tools Menu:** Quick links to ChatGPT, Gemini, Claude, and more.</li><li>**Google Apps:** The classic 9-dot menu for Gmail, Drive, etc.</li> |
-
----
+| **🤖 Interaction** | <li>**Drag & Drop Engine:** Reorder To-Do tasks, AI Tools, and Google Apps seamlessly.</li><li>**Voice Search ("Jarvis Mode"):** Hands-free control with privacy-browser fallback support.</li><li>**Zen Mode:** Press `Z` to banish all clutter. Only the clock and wallpaper remain.</li><li>**God Mode:** Full keyboard navigation (`1-9`, `T`, `A`, `S`) for power users.</li> |
+| **🎨 Personalization** | <li>**Random Backgrounds:** Fetch fresh wallpapers automatically, and **Freeze** the ones you love.</li><li>**Glow Control:** Toggle the clock's glow and pulsing effects directly in Settings.</li><li>**Toxic Palettes:** New  'Radioactive' and 'Phosphor' theme presets.</li><li>**Personal Greeting:** Double-click the text to set your nickname.</li> |
+| **☁️ Utilities** | <li>**Advanced Weather:** Live local weather including daily Min/Max temperatures. No API keys required.</li><li>**Smart Search:** Switch engines (Google, Bing, DuckDuckGo) or platforms (YouTube, Reddit) instantly.</li><li>**Interactive Onboarding:** Smart, reactive tasks guide new users through hidden features.</li> |
+| **⚡ Quick Access** | <li>**Pinned Tasks:** Keep your highest-priority To-Do items locked at the top of your list.</li><li>**Link Direction:** Control exactly how and where your shortcut links open.</li><li>**AI Tools Menu:** Quick links to ChatGPT, Gemini, Grok, Claude, and more.</li> |
 
 ### 🎨 Mode & Theme Overview
 <table>
@@ -102,7 +100,7 @@ YourDynamicDashboard has been completely re-engineered for productivity.
 ## 🛠️ Installation Guide
 
 ### 🧩 Web Store (Stable)
-*Stores may have older version if a new version has arrived recently.*
+*Stores may have older versions if a new update has arrived recently.*
 <p>
   <a href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn" target="_blank">
     <img src="https://img.shields.io/badge/Get%20it%20on-Chrome%20Web%20Store-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white" height="40">
@@ -187,11 +185,11 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 #### 🟢 Chromium Browsers (Chrome, Edge, Brave, etc.)
 
 <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
-    <img src="https://img.shields.io/badge/Download%20Latest%20Version-v2.0.2-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
+    <img src="https://img.shields.io/badge/Download%20Latest%20Version-v2.1.0-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
 </a>
 
 **1. Download & Prepare**
-1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.0.2/YourDynamicDashboard-V2.zip)
+1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.1.0/YourDynamicDashboard-V2.1.zip)
 2.  **Unzip** the folder to a **permanent location** (e.g., `Downloads/YDD`).
     > ⚠️ **Important:** Do not delete or move this folder after installing, or the extension will stop working.
 
@@ -205,7 +203,7 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 #### 🦊 Gecko Browsers (Firefox, Zen, Waterfox, etc.)
 
 **1. Download & Prepare**
-1.  Download the latest `.xpi` release from above. Or, Direct download: [![Download XPI](https://img.shields.io/badge/Download-XPI-orange.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.0.2/YourDynamicDashboard-V2-firefox.xpi)
+1.  Download the latest `.xpi` release from above. Or, Direct download: [![Download XPI](https://img.shields.io/badge/Download-XPI-orange.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.1.0/YourDynamicDashboard-V2.1.xpi)
 2.  Keep the `.xpi` file in a **safe location** (e.g., `Downloads/YDD`).
     > ⚠️ **Important:** Do not delete or move this file after installing, or the extension will stop working.
 
@@ -220,11 +218,11 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 
 ## ⚙️ Configuration
 
-**Good news!** As of v2.0, **configuration is essentially zero.**
+**Good news!** As of v2.1.0, **configuration is essentially zero.**
 
 * **Weather:** Auto-detects your approximate location securely.
     * *Prefer manual?* Go to **Settings > Functions > Custom Location** and type your city.
-* **Search:** Click the icon in the search bar to switch between Google, Bing, YouTube, etc.
+* **Search:** Click the Engine/Platform icon in the search bar to switch between Google, Bing, YouTube, etc.
 * **Shortcuts:** Use the Settings panel to add/edit/delete shortcuts.
 
 ---
@@ -270,13 +268,13 @@ Read the full [Privacy Policy](https://xtditom.github.io/YourDynamicDashboard/pr
 
 ## 🔜 Future Plans
 
-Features that may come in the **future** we planned!
+Features planned for upcoming major releases:
 
-1. Add **Unsplash API** for random wallpapers.
-2. Enhance the **To-Do** List & **Smart Search**.
-3. Fix UI & Visual bugs.
-4. Enhance **Clock** & **AI Tools**.
-5. Make widgets **draggable** for hyper customization.
+1. **Fully Draggable Grid:** Move the clock, weather, and quote modules anywhere on the screen.
+2. **Time-based Theme Change:** Theme changes based on Day & Night time.
+3. **Search History:** Stores Search History in localstorage.
+4. **Image Search:** Use image search on supported engines.
+5. **Fix remaining bugs:** Fixing remaining bugs & issues.
 
 ---
 
