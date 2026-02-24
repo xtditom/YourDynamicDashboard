@@ -1739,15 +1739,18 @@ export class SettingsManager {
       const saveBtn = document.createElement("button");
       saveBtn.className = "action-btn save";
       saveBtn.title = "Save";
-      // SVG is static, safe to use innerHTML for icon only
-      saveBtn.innerHTML =
+      const saveSvgString =
         '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
+      const saveParsedSvg = new DOMParser().parseFromString(saveSvgString, 'image/svg+xml');
+      saveBtn.appendChild(saveParsedSvg.documentElement);
 
       const delBtn = document.createElement("button");
       delBtn.className = "action-btn delete";
       delBtn.title = "Delete";
-      delBtn.innerHTML =
+      const delSvgString =
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const delParsedSvg = new DOMParser().parseFromString(delSvgString, 'image/svg+xml');
+      delBtn.appendChild(delParsedSvg.documentElement);
 
       actionsDiv.appendChild(saveBtn);
       actionsDiv.appendChild(delBtn);
@@ -1854,10 +1857,10 @@ export class SettingsManager {
 
   async fetchRandomBackground() {
     const targetBtn = this.els.randomBgRnd;
-    let originalContent = "";
+    let originalNodes = [];
     if (targetBtn) {
-      originalContent = targetBtn.innerHTML;
-      targetBtn.innerHTML = "⏳";
+      originalNodes = Array.from(targetBtn.childNodes);
+      targetBtn.textContent = "⏳";
       targetBtn.disabled = true;
     }
 
@@ -1872,7 +1875,8 @@ export class SettingsManager {
       this.updateAutoThemeGlowState();
 
       if (targetBtn) {
-        targetBtn.innerHTML = originalContent;
+        targetBtn.textContent = "";
+        originalNodes.forEach(node => targetBtn.appendChild(node));
         targetBtn.disabled = false;
       }
     };
@@ -1889,7 +1893,8 @@ export class SettingsManager {
       applyBg(finalUrl);
     } catch (err) {
       if (targetBtn) {
-        targetBtn.innerHTML = originalContent;
+        targetBtn.textContent = "";
+        originalNodes.forEach(node => targetBtn.appendChild(node));
         targetBtn.disabled = false;
       }
     }

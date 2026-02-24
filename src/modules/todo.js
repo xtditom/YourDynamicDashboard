@@ -205,9 +205,11 @@ export class TodoManager {
 
         const pinBtn = document.createElement("button");
         pinBtn.className = `action-btn pin-btn ${todo.pinned ? "active" : ""}`;
-        pinBtn.innerHTML = todo.pinned
+        const pinSvgString = todo.pinned
           ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11.2V5h1V3H7v2h1v6.2l-2 3v2h5v6l1 1 1-1v-6h5v-2z"/></svg>'
           : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11.2V5h1V3H7v2h1v6.2l-2 3v2h5v6l1 1 1-1v-6h5v-2z"/></svg>';
+        const pinParsedSvg = new DOMParser().parseFromString(pinSvgString, 'image/svg+xml');
+        pinBtn.appendChild(pinParsedSvg.documentElement);
         pinBtn.title = "Pin to Dashboard";
         pinBtn.onclick = (e) => {
           e.stopPropagation();
@@ -216,8 +218,10 @@ export class TodoManager {
 
         const delBtn = document.createElement("button");
         delBtn.className = "action-btn delete-btn";
-        delBtn.innerHTML =
+        const delSvgString =
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        const delParsedSvg = new DOMParser().parseFromString(delSvgString, 'image/svg+xml');
+        delBtn.appendChild(delParsedSvg.documentElement);
         delBtn.title = "Delete Task";
         delBtn.onclick = (e) => {
           e.stopPropagation();
@@ -263,7 +267,9 @@ export class TodoManager {
       if (todos.length > 1) {
         const footer = document.createElement("div");
         footer.className = "todo-footer";
-        footer.innerHTML = "<span>Drag and drop to re-order tasks</span>";
+        const footerSpan = document.createElement("span");
+        footerSpan.textContent = "Drag and drop to re-order tasks";
+        footer.appendChild(footerSpan);
         this.els.list.appendChild(footer);
       }
     }
