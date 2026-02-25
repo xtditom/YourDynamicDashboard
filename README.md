@@ -66,29 +66,29 @@ YourDynamicDashboard has been heavily upgraded with the "Polish & Productivity" 
 ### 🎨 The Showcase
 <table>
   <tr>
-    <td align="center">
+    <td align="center" width="33%">
       <b>Glassmorphism</b><br>
       <img src="assets/the-showcase/custom-bg-2.png" alt="Glassmorphism">
     </td>
-    <td align="center">
+    <td align="center" width="33%">
       <b>Wild West</b><br>
       <img src="assets/the-showcase/wild-west-bg.png" alt="Wild West">
     </td>
-    <td align="center">
+    <td align="center" width="33%">
       <b>Blue Abstract</b><br>
       <img src="assets/the-showcase/abstract-bg.png" alt="Blue Abstract">
     </td>
   </tr>
   <tr>
-    <td align="center">
+    <td align="center" width="33%">
       <b>Bio Lime</b><br>
       <img src="assets/the-showcase/bio-lime.png" alt="Bio Lime">
     </td>
-    <td align="center">
+    <td align="center" width="33%">
       <b>The Dawn</b><br>
       <img src="assets/the-showcase/custom-bg.png" alt="The Dawn">
     </td>
-    <td align="center">
+    <td align="center" width="33%">
       <b>PopUp Features</b><br>
       <img src="assets/the-showcase/pop-up-features.png" alt="PopUp Features">
     </td>
