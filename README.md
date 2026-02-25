@@ -22,12 +22,12 @@
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="assets/promo/lifestyle-1.jpg" alt="YDD in Action - Setup 1" width="100%">
-      <br><b>Focus Mode</b>
+      <img src="assets/promo/ydd-bg.png" alt="YDD in Custom Bg" width="100%">
+      <br><b>Transform Your</b>
     </td>
     <td align="center" width="50%">
-      <img src="assets/promo/lifestyle-2.png" alt="YDD in Action - Setup 2" width="100%">
-      <br><b>Productivity Hub</b>
+      <img src="assets/promo/ydd-bg-2.png" alt="YDD in Custom Bg 2" width="100%">
+      <br><b>New Tab Page</b>
     </td>
   </tr>
 </table>
