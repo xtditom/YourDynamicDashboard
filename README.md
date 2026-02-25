@@ -63,34 +63,34 @@ YourDynamicDashboard has been heavily upgraded with the "Polish & Productivity" 
 | **☁️ Utilities** | <li>**Advanced Weather:** Live local weather including daily Min/Max temperatures. No API keys required.</li><li>**Smart Search:** Switch engines (Google, Bing, DuckDuckGo) or platforms (YouTube, Reddit) instantly.</li><li>**Interactive Onboarding:** Smart, reactive tasks guide new users through hidden features.</li> |
 | **⚡ Quick Access** | <li>**Pinned Tasks:** Keep your highest-priority To-Do items locked at the top of your list.</li><li>**Link Direction:** Control exactly how and where your shortcut links open.</li><li>**AI Tools Menu:** Quick links to ChatGPT, Gemini, Grok, Claude, and more.</li> |
 
-### 🎨 Mode & Theme Overview
+### 🎨 The Showcase
 <table>
   <tr>
     <td align="center">
-      <b>Light Mode</b><br>
-      <img src="assets/mode-overview/light-mode.png" alt="Light Mode Theme">
+      <b>Glassmorphism</b><br>
+      <img src="assets/the-showcase/custom-bg-2.png" alt="Glassmorphism">
     </td>
     <td align="center">
-      <b>Dark Mode</b><br>
-      <img src="assets/mode-overview/dark-mode.png" alt="Dark Mode Theme">
+      <b>Wild West</b><br>
+      <img src="assets/the-showcase/wild-west-bg.png" alt="Wild West">
     </td>
     <td align="center">
-      <b>Crimson Red Mode</b><br>
-      <img src="assets/mode-overview/crimson-red.png" alt="Crimson Red Mode">
+      <b>Blue Abstract</b><br>
+      <img src="assets/the-showcase/abstract-bg.png" alt="Blue Abstract">
     </td>
   </tr>
   <tr>
     <td align="center">
-      <b>Royalty Gradient Theme</b><br>
-      <img src="assets/mode-overview/royalty-gradient.png" alt="Royalty Gradient Theme">
+      <b>Bio Lime</b><br>
+      <img src="assets/the-showcase/bio-lime.png" alt="Bio Lime">
     </td>
     <td align="center">
-      <b>Forest Theme Mode</b><br>
-      <img src="assets/mode-overview/forest-theme.png" alt="Forest Theme">
+      <b>The Dawn</b><br>
+      <img src="assets/the-showcase/custom-bg.png" alt="The Dawn">
     </td>
     <td align="center">
       <b>PopUp Features</b><br>
-      <img src="assets/mode-overview/pop-up-features.png" alt="PopUp Features">
+      <img src="assets/the-showcase/pop-up-features.png" alt="PopUp Features">
     </td>
   </tr>
 </table>
