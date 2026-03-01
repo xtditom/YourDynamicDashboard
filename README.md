@@ -34,11 +34,14 @@
 
 ---
 
-<h3>🔴 For a Live Test:</h3>
-<a href="https://xtditom.github.io/YourDynamicDashboard/" target="_blank" rel="noopener noreferrer">
-  <img src="assets/badges/live-test-badge.svg" alt="Live Demo - Try it now in your browser" height="40">
-</a>
-<br><br>
+<br>
+<div align="center">
+  <h3>🔴 For a Live Test:</h3>
+  <a href="https://xtditom.github.io/YourDynamicDashboard/" target="_blank" rel="noopener noreferrer">
+    <img src="assets/badges/live-test-badge.svg" alt="Live Demo - Try it now in your browser" height="40">
+  </a>
+</div>
+<br>
 
 ---
 
