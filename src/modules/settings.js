@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { getIconUrl, showCustomModal } from "../utils.js";
 import { DEFAULT_KEY_MAP, CONFIG } from "../config.js";
+import { imageStorage } from './imageStorage.js';
 
 // --- ALIEN DNA (Glass Palettes) ---
 const ALIEN_LIGHT = {
@@ -1618,47 +1619,40 @@ export class SettingsManager {
       this.els.bgInput.value = "";
       this.els.bgInput.click();
     });
-    this.els.bgInput.addEventListener("change", (e) => {
+    this.els.bgInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (ev) => {
+        reader.onload = async (ev) => {
           const img = new window.Image();
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            let width = img.width;
-            let height = img.height;
-            const maxWidth = 1920;
-            const maxHeight = 1080;
-
-            if (width > maxWidth || height > maxHeight) {
-              const ratio = Math.min(maxWidth / width, maxHeight / height);
-              width = Math.round(width * ratio);
-              height = Math.round(height * ratio);
+          img.onload = async () => {
+            const dataUrl = ev.target.result;
+            
+            try {
+              await imageStorage.saveImage('background', dataUrl);
+              
+              state.set('hasBackground', true);
+              state.set("randomBgMode", null);
+              
+              document.body.classList.add("has-custom-bg");
+              document.body.style.backgroundImage = `url(${dataUrl})`;
+              
+              if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
+              this.updateRandomBgButtons();
+              this.updateAutoThemeGlowState();
+            } catch (err) {
+              console.error('Failed to save image:', err);
+              showCustomModal('Failed to save image. Not enough storage space.');
             }
-
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
-
-            const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-
-            state.set("backgroundImage", dataUrl);
-            state.set("randomBgMode", null);
-            document.body.classList.add("has-custom-bg");
-            document.body.style.backgroundImage = `url(${dataUrl})`;
-            if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
-            this.updateRandomBgButtons();
-            this.updateAutoThemeGlowState();
           };
           img.src = ev.target.result;
         };
         reader.readAsDataURL(file);
       }
     });
-    this.els.removeBg.addEventListener("click", () => {
-      state.set("backgroundImage", null);
+    this.els.removeBg.addEventListener("click", async () => {
+      await imageStorage.deleteImage('background');
+      state.set('hasBackground', false);
       state.set("randomBgMode", null);
       document.body.classList.remove("has-custom-bg");
       document.body.style.backgroundImage = "";
@@ -1692,6 +1686,21 @@ export class SettingsManager {
         location.reload();
       }
     });
+  }
+
+  async loadBackground() {
+    const hasBg = state.get('hasBackground');
+    if (hasBg) {
+      try {
+        const bgData = await imageStorage.getImage('background');
+        if (bgData) {
+          document.body.classList.add("has-custom-bg");
+          document.body.style.backgroundImage = `url(${bgData})`;
+        }
+      } catch (err) {
+        console.error('Failed to load background:', err);
+      }
+    }
   }
 
   renderShortcutEditor() {
