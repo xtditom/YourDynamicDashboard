@@ -257,11 +257,11 @@ export class SettingsManager {
       todo: document.getElementById("todo-visibility-toggle"),
       apps: document.getElementById("apps-visibility-toggle"),
       ai: document.getElementById("ai-tools-visibility-toggle"),
-      shortcuts: document.getElementById("shortcuts-toggle"),
+      shortcutsPosition: document.getElementById("shortcuts-position-select"),
       dark: document.getElementById("dark-mode-toggle"),
       autoThemeToggle: document.getElementById("auto-theme-toggle"),
       glowToggle: document.getElementById("glow-effect-toggle"),
-      quote: document.getElementById("quote-position-select"),
+      widgetControl: document.getElementById("widget-control-select"),
       colorControls: document.getElementById("advanced-color-controls"),
       themeColorNote: document.getElementById("theme-color-note"),
       normalContainer: document.getElementById("normal-themes-container"),
@@ -319,7 +319,7 @@ export class SettingsManager {
 
     state.subscribe((key, value) => {
       if (
-        key === "quotePosition" ||
+        key === "widgetControl" ||
         key === "yd_city" ||
         key === "locationUpdate"
       ) {
@@ -378,8 +378,16 @@ export class SettingsManager {
     this.bindSimpleToggle(this.els.todo, "showTodo", true);
     this.bindSimpleToggle(this.els.apps, "showApps", true);
     this.bindSimpleToggle(this.els.ai, "showAiTools", true);
-    this.bindSimpleToggle(this.els.shortcuts, "showShortcuts", true);
     this.bindSimpleToggle(this.els.autoThemeToggle, "autoTheme", false);
+
+    if (this.els.shortcutsPosition) {
+      this.els.shortcutsPosition.value = state.get("shortcutsPosition") || "bottom";
+      // Handle legacy state
+      if (state.get("showShortcuts") === false && !state.get("shortcutsPosition")) {
+        this.els.shortcutsPosition.value = "hide";
+        state.set("shortcutsPosition", "hide");
+      }
+    }
 
     // Explicitly bind glow toggle with default TRUE
     this.bindSimpleToggle(this.els.glowToggle, "glowEffect", true);
@@ -388,7 +396,7 @@ export class SettingsManager {
       this.els.dark.checked = state.get("darkMode") === true;
     }
 
-    if (this.els.quote) this.els.quote.value = state.get("quotePosition");
+    if (this.els.widgetControl) this.els.widgetControl.value = state.get("widgetControl") || "all";
     if (this.els.locInput) this.els.locInput.value = state.get("yd_city") || "";
 
     const bg = state.get("backgroundImage");
@@ -482,7 +490,7 @@ export class SettingsManager {
   }
 
   updateTempTogglesState() {
-    const quotePosition = state.get("quotePosition");
+    const widgetControl = state.get("widgetControl") || "all";
     const city = state.get("yd_city");
     const lat = state.get("yd_lat");
     const lon = state.get("yd_lon");
@@ -490,7 +498,9 @@ export class SettingsManager {
     // Check if location is set (based on weather.js logic)
     const hasLocation = city && lat && lon && lat !== "0" && lon !== "0";
 
-    const shouldDisable = quotePosition === "replace" || !hasLocation;
+    // Weather is hidden when these options are selected
+    const weatherHidden = ["search-only", "quote-only", "search-quote", "nothing"].includes(widgetControl);
+    const shouldDisable = weatherHidden || !hasLocation;
 
     [this.els.tempUnit, this.els.tempDisplayToggle].forEach((toggleEl) => {
       if (toggleEl) {
@@ -580,10 +590,16 @@ export class SettingsManager {
       });
     });
 
-    if (this.els.quote)
-      this.els.quote.addEventListener("change", (e) =>
-        state.set("quotePosition", e.target.value),
+    if (this.els.widgetControl)
+      this.els.widgetControl.addEventListener("change", (e) =>
+        state.set("widgetControl", e.target.value),
       );
+
+    if (this.els.shortcutsPosition) {
+      this.els.shortcutsPosition.addEventListener("change", (e) => {
+        state.set("shortcutsPosition", e.target.value);
+      });
+    }
 
     if (this.els.dark) {
       this.els.dark.addEventListener("change", () => {
@@ -1465,14 +1481,7 @@ export class SettingsManager {
       this.els.themeColorNote.style.display = "none";
     }
 
-    // Disable Advanced Colors in Gradient Mode
-    if (this.els.colorControls) {
-      if (isGradient) {
-        this.els.colorControls.classList.add("disabled");
-      } else {
-        this.els.colorControls.classList.remove("disabled");
-      }
-    }
+    // Advanced Colors Disable Logic is handled inside updateAutoThemeGlowState
 
     // Disable Glow Toggle & Picker in Gradient Mode
     const glowPicker = document.getElementById("glow-color-picker");
@@ -1710,10 +1719,26 @@ export class SettingsManager {
       dragHandle.textContent = "☰";
 
       // Icon
-      const img = document.createElement("img");
-      img.src = s.icon;
-      img.className = "icon";
+      const iconContainer = document.createElement("div");
+      iconContainer.className = "icon-container";
+      iconContainer.style.position = "relative";
+      iconContainer.style.cursor = "pointer";
+      iconContainer.title = "Click to upload custom icon";
 
+      const img = document.createElement("img");
+      img.src = s.customIcon || s.icon || getIconUrl(s.url);
+      img.className = "icon";
+      
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = "image/*";
+      fileInput.style.display = "none";
+
+      iconContainer.appendChild(img);
+      iconContainer.appendChild(fileInput);
+
+      iconContainer.addEventListener("click", () => fileInput.click());
+      
       const inputsDiv = document.createElement("div");
       inputsDiv.className = "inputs";
 
@@ -1730,19 +1755,62 @@ export class SettingsManager {
       urlInput.value = s.url;
       urlInput.placeholder = "URL";
 
+      const triggerSave = () => {
+        this.updateShortcut(index, nameInput.value, urlInput.value);
+      };
+      
+      nameInput.addEventListener("blur", triggerSave);
+      nameInput.addEventListener("change", triggerSave);
+      urlInput.addEventListener("blur", triggerSave);
+      urlInput.addEventListener("change", triggerSave);
+
       inputsDiv.appendChild(nameInput);
       inputsDiv.appendChild(urlInput);
 
       const actionsDiv = document.createElement("div");
       actionsDiv.className = "actions";
 
-      const saveBtn = document.createElement("button");
-      saveBtn.className = "action-btn save";
-      saveBtn.title = "Save";
-      const saveSvgString =
-        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
-      const saveParsedSvg = new DOMParser().parseFromString(saveSvgString, 'image/svg+xml');
-      saveBtn.appendChild(saveParsedSvg.documentElement);
+      const resetBtn = document.createElement("button");
+      resetBtn.className = "action-btn reset";
+      resetBtn.title = "Reset Icon";
+      const resetSvgString = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>';
+      const resetParsedSvg = new DOMParser().parseFromString(resetSvgString, 'image/svg+xml');
+      resetBtn.appendChild(resetParsedSvg.documentElement);
+      
+      if (!s.customIcon) {
+        resetBtn.style.display = "none";
+      }
+
+      resetBtn.addEventListener("click", () => {
+        this.updateShortcut(index, nameInput.value, urlInput.value, null, true);
+        const autoIcon = getIconUrl(urlInput.value);
+        img.src = autoIcon;
+        resetBtn.style.display = "none";
+      });
+      
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const tempImg = new window.Image();
+          tempImg.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(tempImg, 0, 0, 256, 256);
+            const dataUrl = canvas.toDataURL("image/png");
+            
+            img.src = dataUrl;
+            this.updateShortcut(index, nameInput.value, urlInput.value, dataUrl);
+            resetBtn.style.display = ""; // Show reset button
+          };
+          tempImg.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+        fileInput.value = "";
+      });
 
       const delBtn = document.createElement("button");
       delBtn.className = "action-btn delete";
@@ -1752,19 +1820,14 @@ export class SettingsManager {
       const delParsedSvg = new DOMParser().parseFromString(delSvgString, 'image/svg+xml');
       delBtn.appendChild(delParsedSvg.documentElement);
 
-      actionsDiv.appendChild(saveBtn);
+      actionsDiv.appendChild(resetBtn);
       actionsDiv.appendChild(delBtn);
 
       div.appendChild(dragHandle);
-      div.appendChild(img);
+      div.appendChild(iconContainer);
       div.appendChild(inputsDiv);
       div.appendChild(actionsDiv);
 
-      saveBtn.addEventListener("click", () => {
-        this.updateShortcut(index, nameInput.value, urlInput.value);
-        saveBtn.style.color = "var(--accent-color)";
-        setTimeout(() => (saveBtn.style.color = ""), 500);
-      });
       delBtn.addEventListener("click", () => this.deleteShortcut(index));
       div.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", index);
@@ -1796,14 +1859,28 @@ export class SettingsManager {
     this.renderShortcutEditor();
   }
 
-  updateShortcut(index, name, url) {
+  updateShortcut(index, name, url, customIconData = undefined, removeCustomIcon = false) {
     url = url.trim();
     if (!/^https?:\/\//i.test(url)) url = "https://" + url;
     const current = [...(state.get("userShortcuts") || [])];
     if (current[index]) {
       current[index].name = name.substring(0, 35);
+      const oldUrl = current[index].url;
       current[index].url = url;
-      current[index].icon = getIconUrl(url);
+      
+      if (!current[index].customIcon && !customIconData) {
+        if (oldUrl !== url) {
+          current[index].icon = getIconUrl(url);
+        }
+      }
+      
+      if (customIconData !== undefined && customIconData !== null) {
+        current[index].customIcon = customIconData;
+      }
+      if (removeCustomIcon) {
+        delete current[index].customIcon;
+        current[index].icon = getIconUrl(url);
+      }
       state.set("userShortcuts", current);
     }
   }
@@ -1958,8 +2035,12 @@ export class SettingsManager {
     );
 
     if (advancedColorsContainer) {
+      const colorInputs = advancedColorsContainer.querySelectorAll("input");
       if (disabledControls) {
         advancedColorsContainer.classList.add("advanced-colors-disabled");
+        advancedColorsContainer.classList.add("disabled");
+        advancedColorsContainer.style.opacity = "0.5";
+        colorInputs.forEach(input => input.disabled = true);
         if (themeColorNote) {
           themeColorNote.style.color = "#ff6b6b"; // Warning color
           themeColorNote.style.fontWeight = "bold";
@@ -1969,6 +2050,9 @@ export class SettingsManager {
         }
       } else {
         advancedColorsContainer.classList.remove("advanced-colors-disabled");
+        advancedColorsContainer.classList.remove("disabled");
+        advancedColorsContainer.style.opacity = "1";
+        colorInputs.forEach(input => input.disabled = false);
         if (themeColorNote) {
           themeColorNote.style.color = ""; // Revert to CSS default
           themeColorNote.style.fontWeight = "normal";

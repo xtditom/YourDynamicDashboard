@@ -3,10 +3,10 @@ export const CONFIG = {
     clockFormat: "12",
     clockType: "digital",
     tempUnit: "metric",
-    quotePosition: "below",
+    widgetControl: "all",
     showTodo: true,
     showApps: true,
-    showShortcuts: true,
+    shortcutsPosition: "bottom",
     showAiTools: true,
     todos: [
       {

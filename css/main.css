@@ -140,6 +140,19 @@ body {
 .fade-down {
   animation: fade-down 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+.popup-scale-entry {
+  animation: popup-scale 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes popup-scale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
@@ -192,6 +205,19 @@ body {
     align-items: center;
     text-align: center;
   }
+}
+
+/* --- Widget Control: Nothing mode --- */
+body.widgets-hidden .column-right {
+  display: none;
+}
+body.widgets-hidden .layout-container {
+  gap: 0;
+  justify-content: center;
+}
+body.widgets-hidden .column-left {
+  align-items: center;
+  text-align: center;
 }
 
 /* --- 4. TRANSPARENCY MODES --- */
@@ -305,20 +331,26 @@ body.gradient-mode-active #quote-author {
   color: var(--accent-color);
   opacity: 0.9;
   z-index: 10;
-  transition: opacity 0.5s ease;
+  transition: opacity 1.5s ease;
 }
 
 /* Clock Animations & Logic */
 #clock-hours,
 #clock-minutes,
 #clock-seconds {
-  transition: opacity 1s ease-in-out;
+  transition: opacity 1.5s ease-in-out;
   animation: digit-glow 2s infinite;
 }
 body:not(.loaded) #clock-hours,
 body:not(.loaded) #clock-minutes,
 body:not(.loaded) #clock-seconds,
-body:not(.loaded) #clock-date-row {
+body:not(.loaded) .clock-separator,
+body:not(.loaded) #clock-ampm,
+body:not(.loaded) #clock-date-row,
+body:not(.loaded) #welcome-text {
+  opacity: 0 !important;
+}
+body:not(.loaded) #analog-clock-container {
   opacity: 0 !important;
 }
 #clock-hours {
@@ -335,16 +367,23 @@ body:not(.loaded) #clock-date-row {
 }
 #clock-date-row {
   opacity: 1;
-  transition-delay: 750ms;
+  transition-delay: 0.75s;
 }
 #clock-ampm {
   font-size: 2rem;
   font-weight: 500;
   opacity: 0.8;
   margin-left: 1rem;
+  transition: opacity 1.5s ease-in-out;
+  transition-delay: 1000ms;
 }
 .clock-separator {
-  animation: fade-in-out 2s infinite;
+  transition: opacity 1.5s ease-in-out;
+  transition-delay: 400ms;
+  opacity: 0.85; /* Target opacity after fade */
+}
+body.loaded .clock-separator {
+  animation: fade-in-out 2s infinite 2s; /* Starts blinking after 2s fade sequence */
 }
 
 @keyframes fade-in-out {
@@ -499,12 +538,20 @@ body:not(.loaded) #clock-date-row {
   margin-top: 0.5rem;
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
-  transition: background-color 0.2s ease-in-out;
+  opacity: 1;
+  transition:
+    opacity 1.5s ease-in-out,
+    background-color 0.2s ease-in-out;
+  transition-delay: 1.5s;
 }
 #welcome-text:hover,
 #welcome-text:focus {
   background-color: var(--bg-interactive);
   outline: none;
+}
+body.loaded #welcome-text,
+body.loaded #clock-ampm {
+  transition-delay: 1s;
 }
 
 /* --- 6. WIDGETS (Weather, Search, Quotes) --- */
@@ -1780,7 +1827,7 @@ body.has-custom-bg .toggle-switch .slider:before {
   background-color: #000000 !important;
 }
 
-#quote-position-select option {
+.settings-dropdown option {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
 }
@@ -1871,6 +1918,10 @@ body.has-custom-bg .toggle-switch .slider:before {
   transform: translateX(-50%);
   display: flex;
   gap: 1rem;
+}
+#shortcuts-container.position-top {
+  bottom: auto;
+  top: 2rem;
 }
 .shortcut-item {
   opacity: 0;
@@ -1965,6 +2016,19 @@ body.loaded .shortcut-item {
   object-fit: contain;
   background-color: var(--bg-tertiary);
   padding: 4px;
+  outline: 2px solid transparent;
+  transition: outline-color 0.2s ease;
+}
+.shortcut-editor-item .icon-container:hover .icon {
+  outline-color: var(--text-secondary);
+}
+body.gradient-dark .shortcut-editor-item .icon-container:hover .icon,
+body.has-custom-bg .shortcut-editor-item .icon-container:hover .icon,
+body.force-white-text .shortcut-editor-item .icon-container:hover .icon {
+  outline-color: white !important;
+}
+body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
+  outline-color: black !important;
 }
 .shortcut-editor-item .inputs {
   display: flex;

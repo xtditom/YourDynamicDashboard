@@ -297,8 +297,9 @@ export class Search {
 
     const quoteWidget = document.getElementById("quote-widget");
     if (quoteWidget) {
-      const pos = state.get("quotePosition");
-      if (pos !== "replace") {
+      const control = state.get("widgetControl") || "all";
+      const quoteVisible = ["all", "quote-only", "search-quote", "weather-quote"].includes(control);
+      if (quoteVisible) {
         quoteWidget.classList.add("visually-hidden");
       }
     }

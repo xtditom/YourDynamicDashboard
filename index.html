@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="google-site-verification" content="EOdEUW58DUvLbQxnv_gyzCjydCvMbA9gOGxrVNYJqg4" />
+    <meta
+      name="google-site-verification"
+      content="EOdEUW58DUvLbQxnv_gyzCjydCvMbA9gOGxrVNYJqg4"
+    />
     <title>New Tab</title>
 
     <link rel="icon" type="image/png" href="assets/icons/icon32.png" />
@@ -493,11 +496,11 @@
           <h3 class="settings-header">Element Control</h3>
           <div class="setting-row">
             <div class="label">
-              <span>Quote Widget</span>
-              <small>Position or hide quotes.</small>
+              <span>Widget Control</span>
+              <small>Control widget visibility.</small>
             </div>
             <select
-              id="quote-position-select"
+              id="widget-control-select"
               class="settings-dropdown"
               style="
                 padding: 5px;
@@ -507,9 +510,14 @@
                 border: none;
               "
             >
-              <option value="below">Below Search</option>
-              <option value="replace">Replace Weather</option>
-              <option value="off">Turn Off</option>
+              <option value="all">All Visible</option>
+              <option value="search-only">Search Only</option>
+              <option value="weather-only">Weather Only</option>
+              <option value="quote-only">Quote Only</option>
+              <option value="search-weather">Search &amp; Weather</option>
+              <option value="search-quote">Search &amp; Quote</option>
+              <option value="weather-quote">Weather &amp; Quote</option>
+              <option value="nothing">Nothing</option>
             </select>
           </div>
           <div class="setting-row">
@@ -541,17 +549,6 @@
             </div>
             <label class="toggle-switch"
               ><input type="checkbox" id="ai-tools-visibility-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
-          </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Show Shortcuts</span
-              ><small>Display the shortcuts bar.</small>
-            </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="shortcuts-toggle" /><span
                 class="slider"
               ></span
             ></label>
@@ -813,6 +810,27 @@
         </div>
 
         <div id="shortcuts-content" class="settings-pane">
+          <div class="setting-row">
+            <div class="label">
+              <span>Shortcuts Position</span>
+              <small>Position or hide the shortcuts bar.</small>
+            </div>
+            <select
+              id="shortcuts-position-select"
+              class="settings-dropdown"
+              style="
+                padding: 5px;
+                border-radius: 5px;
+                background: var(--bg-interactive);
+                color: var(--text-primary);
+                border: none;
+              "
+            >
+              <option value="bottom">Bottom</option>
+              <option value="top">Top</option>
+              <option value="hide">Hide</option>
+            </select>
+          </div>
           <div id="shortcuts-editor-list"></div>
           <form id="add-shortcut-form">
             <h3 class="settings-header">Add New Shortcut</h3>
@@ -962,13 +980,6 @@
           </div>
         </div>
 
-        <div id="quote-widget" class="widget-container hidden">
-          <div class="quote-content">
-            <p id="quote-text">"Loading quote..."</p>
-            <span id="quote-author">- Author</span>
-          </div>
-        </div>
-
         <form
           id="search-form"
           class="widget-container"
@@ -1031,6 +1042,13 @@
             </div>
           </div>
         </form>
+
+        <div id="quote-widget" class="widget-container hidden">
+          <div class="quote-content">
+            <p id="quote-text">"Loading quote..."</p>
+            <span id="quote-author">- Author</span>
+          </div>
+        </div>
       </div>
     </div>
 

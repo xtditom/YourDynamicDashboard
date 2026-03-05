@@ -8,7 +8,7 @@ export class QuoteWidget {
       text: document.getElementById("quote-text"),
       author: document.getElementById("quote-author"),
       weather: document.getElementById("weather-widget"),
-      rightCol: document.querySelector(".column-right"),
+      search: document.getElementById("search-form"),
     };
     this.init();
   }
@@ -20,9 +20,9 @@ export class QuoteWidget {
     setInterval(() => this.cycleQuote(), 12500);
 
     state.subscribe((key) => {
-      if (key === "quotePosition") this.updatePosition();
+      if (key === "widgetControl") this.applyWidgetVisibility();
     });
-    this.updatePosition();
+    this.applyWidgetVisibility();
   }
 
   updateText() {
@@ -37,54 +37,103 @@ export class QuoteWidget {
 
     setTimeout(() => {
       this.updateText();
-
       this.els.text.classList.remove("quote-fading");
       this.els.author.classList.remove("quote-fading");
     }, 500);
   }
 
-  updatePosition() {
-    const pos = state.get("quotePosition");
+  applyWidgetVisibility() {
+    const control = state.get("widgetControl") || "all";
 
-    this.els.widget.classList.add("hidden");
-    this.els.widget.classList.remove(
-      "fade-up",
-      "fade-down",
-      "popup-scale-entry",
-    );
+    const showSearch  = ["all", "search-only", "search-weather", "search-quote"].includes(control);
+    const showWeather = ["all", "weather-only", "search-weather", "weather-quote"].includes(control);
+    const showQuote   = ["all", "quote-only",  "search-quote",  "weather-quote"].includes(control);
 
-    void this.els.widget.offsetWidth;
-
-    if (this.els.weather) {
-      this.els.weather.classList.remove("hidden");
-      this.els.weather.classList.remove("popup-scale-entry");
-      void this.els.weather.offsetWidth;
+    // --- Animation assignments per mode ---
+    // "only" → popup-scale-entry (spotlight entrance, 0.3s delay via CSS)
+    // "search-weather" / "search-quote" → Search pops at 0.15s, secondary widget keeps CSS default 0.3s
+    // "weather-quote" → weather fades down, quote fades up — they meet
+    // "all" → fade-down for weather, popup-scale for search, fade-up for quote
+    let weatherAnim = null, searchAnim = null, quoteAnim = null;
+    // searchDelay: overrides the CSS animation-delay inline (null = use CSS default)
+    let searchDelay = null;
+    switch (control) {
+      case "all":
+        weatherAnim = "fade-down";
+        searchAnim  = "popup-scale-entry";
+        quoteAnim   = "fade-up";
+        break;
+      case "weather-only":
+        weatherAnim = "popup-scale-entry";
+        break;
+      case "search-only":
+        searchAnim = "popup-scale-entry";
+        break;
+      case "quote-only":
+        quoteAnim = "popup-scale-entry";
+        break;
+      case "search-weather":
+        searchAnim  = "popup-scale-entry";
+        searchDelay = "0.15s"; // appears before weather (0.3s) and before pinned task (0.5s)
+        weatherAnim = "popup-scale-entry";
+        break;
+      case "search-quote":
+        searchAnim  = "popup-scale-entry";
+        searchDelay = "0.15s"; // appears before quote (0.3s) and before pinned task (0.5s)
+        quoteAnim   = "popup-scale-entry";
+        break;
+      case "weather-quote":
+        weatherAnim = "fade-down"; // slides down from above
+        quoteAnim   = "fade-up";   // slides up from below — they meet in center
+        break;
     }
 
-    if (pos === "off") {
-      if (this.els.weather) {
-        this.els.weather.classList.add("popup-scale-entry");
-      }
-      return;
-    }
+    // Helper: reset classes, optionally override animation-delay inline, then apply animation class
+    const animate = (el, animClass, inlineDelay = null) => {
+      if (!el) return;
+      el.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+      // Apply inline delay override (null clears any previous inline override → CSS default takes over)
+      el.style.animationDelay = inlineDelay || "";
+      void el.offsetWidth; // force reflow to restart animation
+      if (animClass) el.classList.add(animClass);
+    };
 
-    this.els.widget.classList.remove("hidden");
-
-    if (pos === "replace") {
-      if (this.els.weather) {
-        this.els.weather.classList.add("hidden");
-        this.els.rightCol.insertBefore(this.els.widget, this.els.weather);
+    // Search widget
+    if (this.els.search) {
+      if (showSearch) {
+        this.els.search.classList.remove("hidden");
+        animate(this.els.search, searchAnim, searchDelay);
       } else {
-        this.els.rightCol.insertBefore(
-          this.els.widget,
-          this.els.rightCol.firstChild,
-        );
+        this.els.search.classList.add("hidden");
+        this.els.search.style.animationDelay = "";
+        this.els.search.classList.remove("fade-up", "fade-down", "popup-scale-entry");
       }
-      this.els.widget.classList.add("popup-scale-entry");
-    } else {
-      this.els.rightCol.appendChild(this.els.widget);
-      this.els.widget.classList.add("fade-up");
     }
+
+    // Weather widget
+    if (this.els.weather) {
+      if (showWeather) {
+        this.els.weather.classList.remove("hidden");
+        animate(this.els.weather, weatherAnim);
+      } else {
+        this.els.weather.classList.add("hidden");
+        this.els.weather.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+      }
+    }
+
+    // Quote widget
+    if (this.els.widget) {
+      if (showQuote) {
+        this.els.widget.classList.remove("hidden");
+        animate(this.els.widget, quoteAnim);
+      } else {
+        this.els.widget.classList.add("hidden");
+        this.els.widget.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+      }
+    }
+
+    // "Nothing" mode — hide right column, center left content
+    document.body.classList.toggle("widgets-hidden", control === "nothing");
   }
 }
 

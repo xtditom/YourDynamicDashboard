@@ -33,7 +33,7 @@ export class Shortcuts {
       if (key === "userShortcuts") {
         this.render();
       }
-      if (key === "showShortcuts") this.updateVisibility();
+      if (key === "shortcutsPosition" || key === "showShortcuts") this.updateVisibility();
       if (key === "linkTargets") this.render();
     });
 
@@ -58,7 +58,8 @@ export class Shortcuts {
       iconDiv.className = "shortcut-icon";
 
       const img = document.createElement("img");
-      img.src = shortcut.icon || getIconUrl(shortcut.url);
+      img.src =
+        shortcut.customIcon || shortcut.icon || getIconUrl(shortcut.url);
       img.alt = shortcut.name;
       img.onerror = () => {
         img.style.display = "none";
@@ -80,8 +81,31 @@ export class Shortcuts {
   }
 
   updateVisibility() {
-    const show = state.get("showShortcuts");
-    if (this.container) this.container.classList.toggle("hidden", !show);
+    if (!this.container) return;
+    
+    // Handle migrations from legacy showShortcuts
+    let position = state.get("shortcutsPosition");
+    if (!position) {
+      const showLegacy = state.get("showShortcuts");
+      if (showLegacy === false) {
+        position = "hide";
+        state.set("shortcutsPosition", "hide");
+      } else {
+        position = "bottom";
+        state.set("shortcutsPosition", "bottom");
+      }
+    }
+
+    if (position === "hide") {
+      this.container.classList.add("hidden");
+    } else {
+      this.container.classList.remove("hidden");
+      if (position === "top") {
+        this.container.classList.add("position-top");
+      } else {
+        this.container.classList.remove("position-top");
+      }
+    }
   }
 }
 
