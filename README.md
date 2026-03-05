@@ -251,7 +251,14 @@ Navigate like a pro without touching your mouse.
 
 ## 📄 License
 
-This project is licensed under the **Creative Commons BY-NC-SA 4.0 License**. See the [LICENSE](LICENSE) file for more details.
+This project is legally protected and licensed under the **GNU General Public License v3.0**. 
+
+**What this means:**
+* **✅ Permissions:** You are completely free to use, modify, and distribute this software for private or commercial purposes.
+* **🛑 Conditions (Copyleft):** If you modify and distribute this codebase, **you must** make your entire modified project open-source and free under the exact same GPLv3 license. You cannot take this code, modify it, and hide it in a closed-source project.
+* **⚠️ No Warranty:** This software is provided "as is", without warranty of any kind.
+
+See the [LICENSE](LICENSE) file for the full legal text and details.
 
 ---
 
