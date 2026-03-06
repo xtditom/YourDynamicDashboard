@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { getIconUrl, showCustomModal } from "../utils.js";
 import { DEFAULT_KEY_MAP, CONFIG } from "../config.js";
+import { secondStorage } from "../secondStorage.js";
 
 // --- ALIEN DNA (Glass Palettes) ---
 const ALIEN_LIGHT = {
@@ -52,7 +53,7 @@ const THEMES = {
       type: "default-dark",
       name: "Default Dark",
       colors: {
-        "--bg-primary": "#030303",
+        "--bg-primary": "#0a0a0a",
         "--bg-secondary": "#3a3a3a",
         "--bg-tertiary": "#2d2d2d",
         "--accent-color": "#ffffffff",
@@ -434,6 +435,14 @@ export class SettingsManager {
     } else {
       document.body.classList.remove("has-custom-bg");
     }
+
+    secondStorage.getImage().then((blob) => {
+      if (blob) {
+        document.body.classList.add("has-custom-bg");
+        if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
+        this.updateAutoThemeGlowState();
+      }
+    }).catch(err => console.error("IndexedDB load error:", err));
 
     this.updateRandomBgButtons();
     this.updateAutoThemeGlowState();
@@ -1206,11 +1215,29 @@ export class SettingsManager {
 
   applyNormalTheme(theme, skipBgWipe = false) {
     if (!skipBgWipe) {
+      // 1. Nuke the database and preloader flag
+      secondStorage.deleteImage().catch(err => console.error(err));
+      localStorage.removeItem("has_idb_bg");
+      
+      // 2. Clear legacy local storage states
       state.set("backgroundImage", null);
       state.set("randomBgMode", null);
       state.set("savedBgUrl", null);
       state.set("bgSavedDate", null);
-      document.body.style.backgroundImage = "";
+      
+      // 3. Aggressively strip the inline styles
+      document.body.style.removeProperty("background-image");
+      document.body.style.removeProperty("background-size");
+      document.body.style.removeProperty("background-position");
+      
+      // Search and destroy injected <style> tags from theme-init.js
+      document.querySelectorAll("style").forEach(styleEl => {
+        if (styleEl.textContent.includes("background-image: url")) {
+          styleEl.remove();
+        }
+      });
+      
+      // 4. Reset UI states
       document.body.classList.remove("has-custom-bg");
       if (this.els.removeBg) this.els.removeBg.classList.add("hidden");
       this.updateRandomBgButtons();
@@ -1262,11 +1289,29 @@ export class SettingsManager {
 
   applyGradientTheme(theme, save = true, skipBgWipe = false) {
     if (!skipBgWipe) {
+      // 1. Nuke the database and preloader flag
+      secondStorage.deleteImage().catch(err => console.error(err));
+      localStorage.removeItem("has_idb_bg");
+      
+      // 2. Clear legacy local storage states
       state.set("backgroundImage", null);
       state.set("randomBgMode", null);
       state.set("savedBgUrl", null);
       state.set("bgSavedDate", null);
-      document.body.style.backgroundImage = "";
+      
+      // 3. Aggressively strip the inline styles
+      document.body.style.removeProperty("background-image");
+      document.body.style.removeProperty("background-size");
+      document.body.style.removeProperty("background-position");
+      
+      // Search and destroy injected <style> tags from theme-init.js
+      document.querySelectorAll("style").forEach(styleEl => {
+        if (styleEl.textContent.includes("background-image: url")) {
+          styleEl.remove();
+        }
+      });
+      
+      // 4. Reset UI states
       document.body.classList.remove("has-custom-bg");
       if (this.els.removeBg) this.els.removeBg.classList.add("hidden");
       this.updateRandomBgButtons();
@@ -1627,50 +1672,46 @@ export class SettingsManager {
       this.els.bgInput.value = "";
       this.els.bgInput.click();
     });
-    this.els.bgInput.addEventListener("change", (e) => {
+    this.els.bgInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          const img = new window.Image();
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            let width = img.width;
-            let height = img.height;
-            const maxWidth = 1920;
-            const maxHeight = 1080;
+        try {
+          await secondStorage.saveImage(file);
+          const objectUrl = URL.createObjectURL(file);
 
-            if (width > maxWidth || height > maxHeight) {
-              const ratio = Math.min(maxWidth / width, maxHeight / height);
-              width = Math.round(width * ratio);
-              height = Math.round(height * ratio);
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
-
-            const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-
-            state.set("backgroundImage", dataUrl);
-            state.set("randomBgMode", null);
-            document.body.classList.add("has-custom-bg");
-            document.body.style.backgroundImage = `url(${dataUrl})`;
-            if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
-            this.updateRandomBgButtons();
-            this.updateAutoThemeGlowState();
-          };
-          img.src = ev.target.result;
-        };
-        reader.readAsDataURL(file);
+          state.set("randomBgMode", null);
+          localStorage.setItem("has_idb_bg", "true");
+          document.body.classList.add("has-custom-bg");
+          
+          document.body.style.setProperty("background-image", `url("${objectUrl}")`, "important");
+          document.body.style.setProperty("background-size", "cover", "important");
+          document.body.style.setProperty("background-position", "center", "important");
+          
+          if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
+          
+          this.updateRandomBgButtons();
+          this.updateAutoThemeGlowState();
+        } catch (err) {
+          console.error("Failed to save background image to IndexedDB", err);
+        }
       }
     });
     this.els.removeBg.addEventListener("click", () => {
+      secondStorage.deleteImage().catch(err => console.error(err));
       state.set("backgroundImage", null);
       state.set("randomBgMode", null);
+      localStorage.removeItem("has_idb_bg");
       document.body.classList.remove("has-custom-bg");
-      document.body.style.backgroundImage = "";
+      document.body.style.removeProperty("background-image");
+      document.body.style.removeProperty("background-size");
+      document.body.style.removeProperty("background-position");
+      
+      // Search and destroy injected <style> tags from theme-init.js
+      document.querySelectorAll("style").forEach(styleEl => {
+        if (styleEl.textContent.includes("background-image: url")) {
+          styleEl.remove();
+        }
+      });
       this.els.removeBg.classList.add("hidden");
       this.updateRandomBgButtons();
       this.updateAutoThemeGlowState();
@@ -1942,8 +1983,21 @@ export class SettingsManager {
     }
 
     const applyBg = (url) => {
+      secondStorage.deleteImage().catch(err => console.error(err));
+      localStorage.removeItem("has_idb_bg");
+      localStorage.removeItem("lowResBg");
+      
+      document.querySelectorAll("style").forEach(styleEl => {
+        if (styleEl.textContent.includes("background-image: url")) {
+          styleEl.remove();
+        }
+      });
+
       document.body.classList.add("has-custom-bg");
-      document.body.style.backgroundImage = `url(${url})`;
+      document.body.style.setProperty("background-image", `url("${url}")`, "important");
+      document.body.style.setProperty("background-size", "cover", "important");
+      document.body.style.setProperty("background-position", "center", "important");
+      
       state.set("backgroundImage", url);
       if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
 

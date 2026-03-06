@@ -30,7 +30,8 @@
   --gradient-color-2: #66a6ff;
 }
 
-body[data-theme="dark"] {
+body[data-theme="dark"],
+html[data-theme="dark"] body {
   /* Dark Mode Overrides */
   --bg-primary: #000000;
   --bg-secondary: #3a3a3a;
@@ -79,6 +80,10 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+body:not(.loaded) {
+  transition: none !important;
 }
 
 /* --- 2. CORE ANIMATIONS --- */
@@ -135,13 +140,13 @@ body {
   transition: opacity 0.2s ease !important;
 }
 .fade-up {
-  animation: fade-up 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-up 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
 }
 .fade-down {
-  animation: fade-down 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-down 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
 }
 .popup-scale-entry {
-  animation: popup-scale 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: popup-scale 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
 }
 @keyframes popup-scale {
   0% {
@@ -1935,10 +1940,19 @@ body.has-custom-bg .toggle-switch .slider:before {
   flex-direction: column;
   align-items: center;
 }
+
 body.loaded .shortcut-item {
   opacity: 1;
   transform: translateY(0);
 }
+
+#shortcuts-container.position-top .shortcut-item {
+  transform: translateY(-20px);
+}
+body.loaded #shortcuts-container.position-top .shortcut-item {
+  transform: translateY(0);
+}
+
 .shortcut-icon {
   background-color: var(--bg-tertiary);
   width: 52px;
@@ -1949,14 +1963,17 @@ body.loaded .shortcut-item {
   align-items: center;
   transition: background-color 0.2s ease;
 }
+
 .shortcut-item:hover .shortcut-icon {
   background-color: var(--bg-interactive);
 }
+
 .shortcut-item:hover .shortcut-icon img {
   filter: grayscale(0%);
   opacity: 1;
   transform: scale(1.1);
 }
+
 .shortcut-label {
   background-color: #1f2937;
   color: #f9fafb;
@@ -1972,6 +1989,12 @@ body.loaded .shortcut-item {
     visibility 0.2s ease;
   white-space: nowrap;
 }
+
+#shortcuts-container.position-top .shortcut-label {
+  bottom: auto;
+  top: 120%;
+}
+
 .shortcut-item:hover .shortcut-label {
   opacity: 1;
   visibility: visible;
