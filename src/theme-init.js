@@ -60,14 +60,22 @@ try {
   }
 
   var hasIdbBg = localStorage.getItem("has_idb_bg") === "true";
-  if (hasIdbBg) {
+  var fallback = THEME_COLORS[thId] || "#0a0a0a";
+  if (hasIdbBg || (bgMode === '"random"' || bgMode === '"freeze"')) {
     var preloader = document.createElement("style");
     preloader.id = "idb-preloader";
-    preloader.textContent = "body { background-color: #000000 !important; background-image: none !important; transition: none !important; }";
+    var pColor = fallback || "#0a0a0a";
+    preloader.textContent = "body { background-color: " + pColor + " !important; background-image: none !important; transition: none !important; }";
     document.head.appendChild(preloader);
   }
 
-  var request = indexedDB.open("YDD_Storage", 1);
+  var request = indexedDB.open("YDD_Storage", 2);
+  request.onupgradeneeded = function(event) {
+    var db = event.target.result;
+    if (!db.objectStoreNames.contains("images")) {
+      db.createObjectStore("images");
+    }
+  };
   request.onsuccess = function(event) {
     var db = event.target.result;
     if (db.objectStoreNames.contains("images")) {

@@ -1,6 +1,6 @@
 const DB_NAME = 'YDD_Storage';
 const STORE_NAME = 'images';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 function openDB() {
   return new Promise((resolve, reject) => {

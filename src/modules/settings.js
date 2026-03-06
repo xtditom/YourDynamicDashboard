@@ -1674,27 +1674,34 @@ export class SettingsManager {
     });
     this.els.bgInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
-      if (file) {
-        try {
-          await secondStorage.saveImage(file);
-          const objectUrl = URL.createObjectURL(file);
+      if (!file) return;
 
-          state.set("randomBgMode", null);
-          localStorage.setItem("has_idb_bg", "true");
-          document.body.classList.add("has-custom-bg");
-          
-          document.body.style.setProperty("background-image", `url("${objectUrl}")`, "important");
-          document.body.style.setProperty("background-size", "cover", "important");
-          document.body.style.setProperty("background-position", "center", "important");
-          
-          if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
-          
-          this.updateRandomBgButtons();
-          this.updateAutoThemeGlowState();
-        } catch (err) {
-          console.error("Failed to save background image to IndexedDB", err);
-        }
+      const objectUrl = URL.createObjectURL(file);
+
+      // 1. Instant UI Update
+      document.body.classList.add("has-custom-bg");
+      document.body.style.setProperty("background-image", `url("${objectUrl}")`, "important");
+      document.body.style.setProperty("background-size", "cover", "important");
+      document.body.style.setProperty("background-position", "center", "important");
+      if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
+      this.updateRandomBgButtons();
+      this.updateAutoThemeGlowState();
+
+      // 2. Strict IndexedDB Save (Silent Failure on Block)
+      try {
+        await secondStorage.saveImage(file);
+        localStorage.setItem("has_idb_bg", "true");
+        
+        // Nuke legacy storage and blur logic to prevent conflicts
+        state.set("randomBgMode", null);
+        state.set("backgroundImage", null);
+        localStorage.removeItem("lowResBg"); 
+      } catch (idbErr) {
+        console.warn("IndexedDB blocked by browser shields. Failing silently without modal.", idbErr);
+        // Silent failure: UI remains updated until page refresh
       }
+
+      this.els.bgInput.value = "";
     });
     this.els.removeBg.addEventListener("click", () => {
       secondStorage.deleteImage().catch(err => console.error(err));
