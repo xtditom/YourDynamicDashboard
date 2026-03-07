@@ -18,6 +18,11 @@
   <img src="https://img.shields.io/github/v/release/xtditom/YourDynamicDashboard?style=for-the-badge&color=blue" alt="Version">
   <img src="https://img.shields.io/github/last-commit/xtditom/YourDynamicDashboard?style=for-the-badge" alt="Last Commit">
   <img src="https://img.shields.io/github/stars/xtditom/YourDynamicDashboard?style=for-the-badge&logo=github" alt="Stars">
+  <br>
+  <img src="https://img.shields.io/chrome-web-store/v/fckmlnagohleefboaleepppikpdkckjn?style=for-the-badge" alt="Chrome Web Store Version">
+  <img src="https://img.shields.io/chrome-web-store/users/fckmlnagohleefboaleepppikpdkckjn?style=for-the-badge" alt="Chrome Web Store Users">
+  <img src="https://img.shields.io/amo/v/yourdynamicdashboard?style=for-the-badge" alt="Mozilla Addons Version">
+  <img src="https://img.shields.io/amo/users/yourdynamicdashboard?style=for-the-badge" alt="Mozilla Addons Users">
 </div>
 
 <table>
