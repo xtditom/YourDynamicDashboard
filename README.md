@@ -18,7 +18,9 @@
   <img src="https://img.shields.io/github/v/release/xtditom/YourDynamicDashboard?color=white" alt="Version">
   <img src="https://img.shields.io/github/last-commit/xtditom/YourDynamicDashboard" alt="Last Commit">
   <img src="https://img.shields.io/github/stars/xtditom/YourDynamicDashboard?logo=github&color=white" alt="Stars">
-  <br>
+</div>
+
+<div align="center">
   <img src="https://img.shields.io/chrome-web-store/v/fckmlnagohleefboaleepppikpdkckjn" alt="Chrome Web Store Version">
   <img src="https://img.shields.io/chrome-web-store/users/fckmlnagohleefboaleepppikpdkckjn" alt="Chrome Web Store Users">
   <img src="https://img.shields.io/amo/v/yourdynamicdashboard?color=orange" alt="Mozilla Addons Version">
