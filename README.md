@@ -282,9 +282,7 @@ Features planned for upcoming major releases:
 
 1. **Fully Draggable Grid:** Move the clock, weather, and quote modules anywhere on the screen.
 2. **Time-based Theme Change:** Theme changes based on Day & Night time.
-3. **Search History:** Stores Search History in localstorage.
-4. **Image Search:** Use image search on supported engines.
-5. **Fix remaining bugs:** Fixing remaining bugs & issues.
+3. **Fix remaining bugs:** Fixing remaining bugs & issues.
 
 ---
 
