@@ -80,8 +80,8 @@ export class Search {
         if (!val) return;
 
         if (this.currentFilteredHistory && this.currentFilteredHistory.length > 0) {
-          // Execute top match with its saved engine
-          this._executeViaEngine(this.currentFilteredHistory[0].query, this.currentFilteredHistory[0].engineId);
+          // Execute top match with the CURRENTLY ACTIVE engine
+          this._executeViaEngine(this.currentFilteredHistory[0].query, this.current.id);
         } else {
           // Fallback to normal search
           this.handleSubmit(new Event("submit"));
@@ -227,12 +227,12 @@ export class Search {
       li.appendChild(text);
       li.appendChild(time);
 
-      // mousedown fires before blur — execute via item's OWN saved engineId
+      // mousedown fires before blur — execute via CURRENTLY ACTIVE engine
       li.addEventListener("mousedown", (e) => {
         e.preventDefault();
         clearTimeout(this._blurTimer);
         this._removeHistoryDropdown();
-        this._executeViaEngine(item.query, item.engineId);
+        this._executeViaEngine(item.query, this.current.id);
       });
 
       ul.appendChild(li);
