@@ -57,6 +57,9 @@ export const CONFIG = {
       shortcuts: "_blank",
       searchOpen: "_blank",
     },
+    searchHistory: [],
+    searchHistoryPaused: false,
+    searchAutoDeleteDays: 365,
   },
   paths: {
     icons: "assets/icons/",

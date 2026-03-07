@@ -74,12 +74,12 @@ export class QuoteWidget {
         break;
       case "search-weather":
         searchAnim  = "popup-scale-entry";
-        searchDelay = "0.15s"; // appears before weather (0.3s) and before pinned task (0.5s)
+        searchDelay = "0.22s"; // appears before weather (0.3s) and before pinned task (0.5s)
         weatherAnim = "popup-scale-entry";
         break;
       case "search-quote":
         searchAnim  = "popup-scale-entry";
-        searchDelay = "0.15s"; // appears before quote (0.3s) and before pinned task (0.5s)
+        searchDelay = "0.22s"; // appears before quote (0.3s) and before pinned task (0.5s)
         quoteAnim   = "popup-scale-entry";
         break;
       case "weather-quote":
