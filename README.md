@@ -291,6 +291,8 @@ Features planned for upcoming major releases:
 - [ ] **Fully Draggable Grid:** Move the clock, weather, and quote modules anywhere on the screen.
 - [ ] **Time-based Theme Change:** Theme changes based on Day & Night time.
 - [ ] **Fix remaining bugs:** Fixing remaining bugs & issues.
+- [ ] **More Apps & Tools:** Adding new Google Apps, AI & Socials.
+- [ ] **BG Blur:** An option to adjust blur of the Background.
 
 ---
 
