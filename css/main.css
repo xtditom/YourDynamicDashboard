@@ -2372,7 +2372,7 @@ body.gradient-mode-active:not(.gradient-dark)
   transform: translateX(16px);
 }
 
-/* --- 12. WELCOME MODAL V2.1.0 --- */
+/* --- 12. WELCOME MODAL V2.2.0 --- */
 #welcome-modal-overlay {
   position: fixed;
   top: 0;
