@@ -118,4 +118,4 @@ try {
   if (p) p.remove();
 }
 
-// src/theme-init.js YourDynamicDashboard V2.1 (Ditom Baroi Antu - 2025-26)
+// src/theme-init.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)

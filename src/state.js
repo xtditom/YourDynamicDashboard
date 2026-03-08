@@ -76,4 +76,4 @@ class StateManager {
 
 export const state = new StateManager();
 
-// src/state.js YourDynamicDashboard V2.1 (Ditom Baroi Antu - 2025-26)
+// src/state.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)

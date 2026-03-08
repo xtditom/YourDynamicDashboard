@@ -2166,4 +2166,4 @@ export class SettingsManager {
   }
 }
 
-// src/modules/settings.js YourDynamicDashboard V2.1 (Ditom Baroi Antu - 2025-26)
+// src/modules/settings.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)

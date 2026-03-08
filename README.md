@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">🚀 YourDynamicDashboard (v2.1.0)</h1>
+  <h1 align="center">🚀 YourDynamicDashboard (v2.2.0 Pre)</h1>
   <p align="center">
     <strong>The Polish, Privacy & Productivity Update.</strong><br>
     Transform your new tab into a powerful, privacy-first command center.<br>

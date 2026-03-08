@@ -141,4 +141,4 @@ if (currentYear > 2025) {
   yearSpan.textContent = `2025 - ${currentYear}`;
 }
 
-// src/main.js YourDynamicDashboard V2.1 (Ditom Baroi Antu - 2025-26)
+// src/main.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)

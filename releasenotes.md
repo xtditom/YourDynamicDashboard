@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.2.0] - 2026-03-08 (PERFORMANCE & SCALING UPDATE)
+
+The **Performance & Scaling Update** is here. We completely rebuilt the mobile responsive engine, integrated a proper database for heavy storage, and introduced a highly requested, privacy-focused Search History system.
+
+### ✨ New Features
+
+* **Local Search History:** Implemented a powerful, native-feeling search history system with real-time filtering, intelligent autocomplete, and customizable auto-delete timeframes. 100% locally stored for absolute privacy.
+* **Custom Shortcut Icons:** You can now upload and set your own custom image icons for individual web shortcuts via the settings editor.
+
+### 🚀 Improvements
+
+* **IndexedDB Integration:** Upgraded the backend storage architecture. High-resolution custom background images are now safely routed to IndexedDB, permanently preventing `localStorage` quota crashes.
+* **Mobile Scaling Engine:** Ripped out the old fixed-width constraints and implemented a master CSS fluid-scaling system. The dashboard now perfectly adapts to extreme mobile and small-screen environments without overlapping.
+* **Layout Flexibility:** Added a new setting to dock the Shortcuts bar to either the Top or Bottom of the screen.
+* **Widget Control Expansion:** Expanded the widget visibility settings with more granular combinations (e.g., Search Only, Search & Quote, Weather & Quote).
+* **Gradient UI Refinement:** Recalculated transparency and blur logic to provide much higher visual clarity and text contrast when using gradient themes.
+
+### 🔧 Fixes
+
+* **FOUC Eradicated:** Solved the "Flash Of Unstyled Content" (FOUC) bug. The dashboard now pre-loads styling correctly, eliminating the jarring visual jump on startup.
+* **Advanced Colors Logic:** Fixed the UI state logic that was allowing the Advanced Colors editor to improperly conflict with Gradient and Dark modes.
+* **Animation & Stability Polish:** Cleaned up overlapping transition delays, removed conflicting CSS constraints, and squashed minor layout bugs across various popups and modals.
+
+---
+
 ## [2.1.0] - 2026-02-24 (**MASSIVE UPDATE**)
 
 The **Polish, Privacy & Productivity Update** is here! We rebuilt the UI interactions, squashed critical storage bugs, and added massive customization features to give you total control over your dashboard.

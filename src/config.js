@@ -588,4 +588,4 @@ export const DEFAULT_KEY_MAP = {
   voice: { key: "v", enabled: true, fixed: true },
 };
 
-// src/config.js YourDynamicDashboard V2.1 (Ditom Baroi Antu - 2025-26)
+// src/config.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
