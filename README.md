@@ -193,7 +193,7 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 
 ### ⚡ Manual Installation
 
-#### 🟢 Chromium Browsers (Chrome, Edge, Brave, etc.)
+#### 🟢 Chromium Browsers (Chrome, Edge, Brave, Dia, etc.)
 
 <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-v2.1.0-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
