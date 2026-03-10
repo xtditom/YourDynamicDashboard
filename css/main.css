@@ -8,7 +8,7 @@
 }
 
 :root {
-  /* Light Mode (Default) */
+  
   --bg-primary: #bdbdbd;
   --bg-secondary: #ffffff;
   --bg-tertiary: #ffffff;
@@ -25,14 +25,13 @@
   --icon-opacity: 1;
   --glow-color: rgba(0, 0, 0, 0.8);
 
-  /* Gradient Defaults */
   --gradient-color-1: #89f7fe;
   --gradient-color-2: #66a6ff;
 }
 
 body[data-theme="dark"],
 html[data-theme="dark"] body {
-  /* Dark Mode Overrides */
+  
   --bg-primary: #000000;
   --bg-secondary: #3a3a3a;
   --bg-tertiary: #2d2d2d;
@@ -52,7 +51,7 @@ html[data-theme="dark"] body {
 
 :root,
 body[data-theme="dark"] {
-  /* Dark Gradient Theme (Requires Light Text) */
+  
   --text-color: #ffffff;
   --text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
   --widget-bg: rgba(0, 0, 0, 0.15);
@@ -60,7 +59,7 @@ body[data-theme="dark"] {
 }
 
 body[data-theme="light"] {
-  /* Light Gradient Theme (Requires Dark Text) */
+  
   --text-color: #1a1a1a;
   --text-shadow: none;
   --widget-bg: rgba(255, 255, 255, 0.4);
@@ -80,10 +79,24 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  isolation: isolate; 
 }
 
 body:not(.loaded) {
   transition: none !important;
+}
+
+#bg-blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  backdrop-filter: blur(var(--bg-blur, 0px));
+  -webkit-backdrop-filter: blur(var(--bg-blur, 0px));
+  transition: backdrop-filter 0.5s ease;
 }
 
 /* --- 2. CORE ANIMATIONS --- */
@@ -130,7 +143,6 @@ body:not(.loaded) {
   }
 }
 
-/* Dropdown Animations */
 @keyframes dd-intro {
   from {
     opacity: 0;
@@ -153,7 +165,6 @@ body:not(.loaded) {
   }
 }
 
-/* Utility Classes */
 .hidden {
   display: none !important;
 }
@@ -182,7 +193,6 @@ body:not(.loaded) {
   }
 }
 
-/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -221,7 +231,7 @@ body:not(.loaded) {
   gap: 1.5rem;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1270px) {
   .layout-container {
     flex-direction: column;
     justify-content: center;
@@ -259,6 +269,17 @@ body.transparency-active #search-dropdown {
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+html.high-bg-blur .widget-container,
+html.high-bg-blur .popup-container,
+html.high-bg-blur .corner-button,
+html.high-bg-blur .shortcut-icon,
+html.high-bg-blur #search-dropdown,
+html.high-bg-blur .settings-dropdown,
+html.high-bg-blur .dropdown-item {
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
 }
 
 body[data-theme="dark"].transparency-active .widget-container,
@@ -332,7 +353,6 @@ body.gradient-mode-active #quote-author {
     transform 0.5s ease-in-out;
 }
 
-/* Digital Clock */
 #digital-clock-container {
   display: flex;
   align-items: baseline;
@@ -346,7 +366,6 @@ body.gradient-mode-active #quote-author {
   width: 100%;
 }
 
-/* Date Row */
 #clock-date-row {
   display: flex;
   justify-content: space-between;
@@ -362,7 +381,6 @@ body.gradient-mode-active #quote-author {
   transition: opacity 1.5s ease;
 }
 
-/* Clock Animations & Logic */
 #clock-hours,
 #clock-minutes,
 #clock-seconds {
@@ -408,10 +426,10 @@ body:not(.loaded) #analog-clock-container {
 .clock-separator {
   transition: opacity 1.5s ease-in-out;
   transition-delay: 400ms;
-  opacity: 0.85; /* Target opacity after fade */
+  opacity: 0.85; 
 }
 body.loaded .clock-separator {
-  animation: fade-in-out 2s infinite 2s; /* Starts blinking after 2s fade sequence */
+  animation: fade-in-out 2s infinite 2s; 
 }
 
 @keyframes fade-in-out {
@@ -435,7 +453,6 @@ body.loaded .clock-separator {
   }
 }
 
-/* Analog Clock */
 .analog-active {
   height: auto;
   min-height: 300px;
@@ -484,6 +501,15 @@ body.loaded .clock-separator {
   opacity: 1;
   transform: scale(1);
   display: flex;
+}
+
+@keyframes digitalFadeIn {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.master-clock-container.clock-switched.digital-active #digital-clock-container {
+  animation: digitalFadeIn 1.8s cubic-bezier(0.19, 1, 0.22, 1) both;
 }
 
 #analog-clock-container {
@@ -537,7 +563,6 @@ body.loaded .clock-separator {
   transition: transform 1.8s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
-/* Greeting */
 .text-container {
   margin-top: 0.85rem;
   text-align: center;
@@ -577,6 +602,15 @@ body.loaded .clock-separator {
   background-color: var(--bg-interactive);
   outline: none;
 }
+#welcome-text.hidden {
+  display: none !important;
+}
+#welcome-text:empty::before {
+  content: "Click here to Edit";
+  opacity: 0.5;
+  font-style: italic;
+  pointer-events: none;
+}
 body.loaded #welcome-text,
 body.loaded #clock-ampm {
   transition-delay: 1s;
@@ -590,7 +624,6 @@ body.loaded #clock-ampm {
   max-width: 90vw;
 }
 
-/* Weather Widget */
 #weather-widget {
   padding: 1.5rem;
   display: flex;
@@ -674,7 +707,6 @@ body:not(.loaded) #weather-widget {
   letter-spacing: -0.05em;
 }
 
-/* One-Time Weather Setup UI */
 #weather-setup-ui {
   display: flex;
   flex-direction: column;
@@ -721,7 +753,6 @@ body:not(.loaded) #weather-widget {
   cursor: pointer;
 }
 
-/* Quote Widget */
 #quote-widget {
   padding: 1.5rem;
   display: flex;
@@ -752,7 +783,6 @@ body:not(.loaded) #weather-widget {
   opacity: 0 !important;
 }
 
-/* Search Widget */
 #search-form {
   display: flex;
   padding: 0.75rem;
@@ -832,7 +862,6 @@ body:not(.loaded) #search-form {
   background-color: var(--bg-interactive-hover);
 }
 
-/* Voice Search Button */
 #voice-search-btn {
   background: transparent;
   border: none;
@@ -866,7 +895,6 @@ body:not(.loaded) #search-form {
   }
 }
 
-/* Search Dropdown */
 #search-dropdown {
   position: absolute;
   top: 75px;
@@ -1865,7 +1893,6 @@ body.has-custom-bg .toggle-switch .slider:before {
   color: var(--text-primary);
 }
 
-/* Settings Dropdown background overrides for special modes - Options Only */
 body.has-custom-bg .settings-dropdown option,
 body.gradient-mode-active .settings-dropdown option {
   background-color: #000000;
@@ -2407,7 +2434,6 @@ body.gradient-mode-active:not(.gradient-dark)
   font-family: "Inter", system-ui, sans-serif;
 }
 
-/* Header */
 .modal-header {
   text-align: center;
   margin-bottom: 2rem;
@@ -2447,7 +2473,6 @@ body.gradient-mode-active:not(.gradient-dark)
   opacity: 0.9;
 }
 
-/* 3-Column Feature Row */
 .feature-row-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2457,7 +2482,7 @@ body.gradient-mode-active:not(.gradient-dark)
 .feature-card {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-top: 3px solid #3b82f6; /* Accent line */
+  border-top: 3px solid #3b82f6; 
   padding: 1.2rem;
   border-radius: 12px;
   transition:
@@ -2493,7 +2518,6 @@ body.gradient-mode-active:not(.gradient-dark)
   line-height: 1.4;
 }
 
-/* Bottom Split Section */
 .modal-split-bottom {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
@@ -2529,7 +2553,6 @@ body.gradient-mode-active:not(.gradient-dark)
   font-size: 0.85rem;
 }
 
-/* Tags */
 .tags-container {
   display: flex;
   flex-wrap: wrap;
@@ -2556,7 +2579,6 @@ body.gradient-mode-active:not(.gradient-dark)
   font-weight: bold;
 }
 
-/* Footer & Close */
 .modal-footer {
   margin-top: 2rem;
   text-align: center;
@@ -2602,7 +2624,6 @@ body.gradient-mode-active:not(.gradient-dark)
   color: #fff;
 }
 
-/* Mobile Recalculation */
 @media (max-width: 800px) {
   #welcome-modal {
     width: 95%;
@@ -2845,7 +2866,6 @@ body.force-white-text:not(.has-custom-bg) .apps-footer {
   color: #000000 !important;
 }
 
-/* Update Search History controls in light gradient mode */
 body.force-white-text:not(.has-custom-bg) #sh-filter-input,
 body.force-white-text:not(.has-custom-bg) .sh-auto-delete-select {
   background-color: rgba(255, 255, 255, 0.1) !important;
@@ -2901,11 +2921,8 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   box-shadow: 0 0 8px var(--accent-color);
 }
 
-/* css/main.css YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26) */
-
 /* --- SEARCH HISTORY --- */
 
-/* History icon button (injected next to voice btn) */
 #history-modal-btn {
   background: none;
   border: none;
@@ -2924,7 +2941,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   transform: scale(1.2);
 }
 
-/* Layer 1 — Quick history dropdown */
 #sh-quick-dropdown {
   position: fixed;
   z-index: 9999;
@@ -2972,7 +2988,7 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   color: var(--text-secondary);
   flex-shrink: 0;
 }
-/* "Full Search History" footer row in the quick dropdown */
+
 .sh-full-history-btn {
   display: flex !important;
   align-items: center;
@@ -2990,7 +3006,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   background-color: var(--bg-hover-translucent);
 }
 
-/* Layer 2 — Full-screen modal overlay */
 #sh-modal-overlay {
   position: fixed;
   inset: 0;
@@ -3034,7 +3049,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   }
 }
 
-/* Modal header */
 .sh-modal-header {
   display: flex;
   align-items: center;
@@ -3101,7 +3115,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   color: var(--text-primary);
 }
 
-/* Filter row */
 .sh-filter-row {
   padding: 10px 18px;
   flex-shrink: 0;
@@ -3126,7 +3139,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   color: var(--text-secondary);
 }
 
-/* Scrollable list container */
 #sh-list-container {
   overflow-y: auto;
   flex: 1;
@@ -3140,7 +3152,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   border-radius: 4px;
 }
 
-/* Group headers */
 .sh-group-header {
   padding: 14px 18px 10px;
   font-size: 0.72rem;
@@ -3154,7 +3165,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   opacity: 0.75;
 }
 
-/* History rows */
 .sh-row {
   display: grid;
   grid-template-columns: 26px 1fr auto auto;
@@ -3208,7 +3218,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   color: #e53e3e;
 }
 
-/* Empty / no-results message */
 .sh-empty-msg {
   text-align: center;
   color: var(--text-secondary);
@@ -3218,7 +3227,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   opacity: 0.75;
 }
 
-/* Title + info-button row inside the modal header */
 .sh-title-wrap {
   display: flex;
   align-items: center;
@@ -3251,7 +3259,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   background-color: var(--bg-hover-translucent);
 }
 
-/* Controls row: toggle + auto-delete + clear-all */
 .sh-controls-row {
   display: flex;
   align-items: center;
@@ -3259,7 +3266,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   flex-wrap: wrap;
 }
 
-/* Auto Delete label + select */
 .sh-auto-delete-wrap {
   display: flex;
   align-items: center;
@@ -3288,18 +3294,28 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   color: var(--text-primary);
 }
 
-/* Override old header layout to support two-row structure */
 .sh-modal-header {
   flex-wrap: wrap;
   row-gap: 8px;
 }
 
+/* --- HIGH BLUR UI OVERRIDES (MAX SPECIFICITY) --- */
+html.high-bg-blur body.has-custom-bg .widget-container,
+html.high-bg-blur body.has-custom-bg .popup-container,
+html.high-bg-blur body.has-custom-bg .corner-button,
+html.high-bg-blur body.has-custom-bg .shortcut-icon,
+html.high-bg-blur body.has-custom-bg #search-dropdown,
+html.high-bg-blur body.has-custom-bg .settings-dropdown,
+html.high-bg-blur body.has-custom-bg .dropdown-item {
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
 /* --- MASTER LEVEL MOBILE & SMALL SCREEN SCALING --- */
 
-/* Tablet & Smaller Desktop */
 @media (max-width: 900px) {
   html {
-    font-size: 14px; /* Shrinks all rem-based sizes globally */
+    font-size: 14px; 
   }
   .layout-container {
     padding: 1.5rem;
@@ -3307,7 +3323,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   }
 }
 
-/* Mobile Devices */
 @media (max-width: 600px) {
   html {
     font-size: 12px;
@@ -3373,7 +3388,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
     right: 1rem;
   }
 
-  /* UNIVERSAL MODAL & POPUP STRICT SHRINK */
   .popup-container,
   .modal-box,
   .sh-modal,
@@ -3381,7 +3395,7 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
     width: calc(100vw - 2rem) !important;
     max-width: 320px !important;
     padding: 1rem !important;
-    max-height: 60vh !important; /* Strict global height cap */
+    max-height: 60vh !important; 
     overflow-y: auto !important;
   }
 
@@ -3400,15 +3414,13 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
     transform-origin: bottom left !important;
   }
 
-  /* Even tighter heights for utility popups */
   #apps-popup,
   #settings-popup,
   #todo-popup,
   #ai-tools-popup {
-    max-height: 55vh !important;
+    max-height: 42vh !important;
   }
 
-  /* SHRINK MODAL INTERNALS */
   .popup-container h2,
   .modal-box h2,
   .sh-modal h3,
@@ -3446,7 +3458,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
     transform-origin: right center;
   }
 
-  /* SHRINK APPS & AI TOOLS */
   .app-icon {
     width: 36px !important;
     height: 36px !important;
@@ -3454,10 +3465,16 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   .app-name {
     font-size: 0.75rem !important;
   }
+  #apps-grid {
+    gap: 2px !important;
+  }
+  #ai-tools-popup {
+    max-height: 75vh !important;
+  }
   .ai-tool-icon {
     width: 20px !important;
-    height: 20px !important;
-    margin-right: 0.5rem !important;
+    height: 28px !important;
+    margin-right: 1.5rem !important;
   }
   .tool-tab-button {
     font-size: 0.85rem !important;
@@ -3468,9 +3485,8 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
     font-size: 0.85rem !important;
   }
 
-  /* EXACT FIX FOR EDIT MODE OVERLAP */
   #ai-tools-popup.edit-mode .ai-tool-item {
-    padding-left: 2.75rem !important; /* Forces text away from the X */
+    padding-left: 2.75rem !important; 
   }
   #ai-tools-popup.edit-mode .edit-overlay {
     width: 20px !important;
@@ -3480,7 +3496,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
     transform: translateY(-50%) !important;
   }
 
-  /* HISTORY MODAL HEADER FIX */
   .sh-modal-header {
     flex-direction: column !important;
     align-items: stretch !important;
@@ -3501,12 +3516,11 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
     padding: 2px 4px !important;
   }
 
-  /* UNIVERSAL DROPDOWN SHRINK */
   #search-dropdown,
   #sh-quick-dropdown {
-    width: 100% !important;
-    left: 0 !important;
-    max-height: 45vh !important;
+    width: 80% !important;
+    left: 10% !important;
+    max-height: 16.7vh !important;
     overflow-y: auto !important;
   }
   .dropdown-grid {
@@ -3514,7 +3528,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   }
 }
 
-/* Ultra Small Screens (e.g., iPhone SE) */
 @media (max-width: 380px) {
   html {
     font-size: 10px;
@@ -3544,7 +3557,6 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   }
 }
 
-/* Height constraints (Landscape mobile or very short windows) */
 @media (max-height: 600px) {
   .layout-container {
     gap: 0.5rem;
@@ -3562,10 +3574,10 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   }
   #quote-widget {
     display: none !important;
-  } /* Hide non-essentials on zero vertical space */
+  } 
   .corner-button {
     transform: scale(0.85);
-  } /* Shrink corner buttons */
+  } 
   .popup-container,
   .modal-box,
   .sh-modal,
@@ -3573,3 +3585,18 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
     max-height: 85vh !important;
   }
 }
+
+@media (max-width: 500px), (max-height: 700px) {
+  #shortcuts-container {
+    bottom: 7rem;
+    gap: 0.5rem;
+  }
+  #shortcuts-container.position-top {
+    top: 7rem;
+  }
+  .shortcut-icon {
+    width: 48px;
+    height: 48px;
+  }
+}
+/* [css/main.css] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) */

@@ -85,18 +85,27 @@ document.addEventListener("DOMContentLoaded", () => {
     if (key === "zenMode") {
       document.body.classList.toggle("zen-mode", value);
     }
+    if (key === "showEditableText") {
+      const welcomeEl = document.getElementById("welcome-text");
+      if (welcomeEl) welcomeEl.classList.toggle("hidden", value === false);
+    }
   });
 
   // --- WELCOME TEXT ---
   const welcomeEl = document.getElementById("welcome-text");
   if (welcomeEl) {
-    welcomeEl.textContent = state.get("welcomeText");
-    welcomeEl.addEventListener("blur", () =>
-      state.set("welcomeText", welcomeEl.textContent),
-    );
+    welcomeEl.textContent = state.get("welcomeText") || "";
+    welcomeEl.classList.toggle("hidden", state.get("showEditableText") === false);
+    
+    welcomeEl.addEventListener("blur", () => {
+      if (welcomeEl.textContent.trim() === "") welcomeEl.innerHTML = "";
+      state.set("welcomeText", welcomeEl.textContent);
+    });
 
     welcomeEl.addEventListener("input", () => {
-      if (welcomeEl.textContent.length > 35) {
+      if (welcomeEl.textContent.trim() === "") {
+        welcomeEl.innerHTML = "";
+      } else if (welcomeEl.textContent.length > 35) {
         welcomeEl.textContent = welcomeEl.textContent.substring(0, 35);
         const range = document.createRange();
         const sel = window.getSelection();
@@ -140,5 +149,4 @@ const currentYear = new Date().getFullYear();
 if (currentYear > 2025) {
   yearSpan.textContent = `2025 - ${currentYear}`;
 }
-
-// src/main.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/main.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

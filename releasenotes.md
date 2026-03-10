@@ -12,6 +12,8 @@ The **Performance & Scaling Update** is here. We rebuilt the mobile-responsive e
 
 * **Local Search History:** Implemented a powerful, native-feeling search history system with real-time filtering, and customizable auto-delete timeframes. 100% locally stored for absolute privacy.
 * **Custom Shortcut Icons:** You can now upload and set your own custom image icons for individual web shortcuts via the settings.
+* **Background Blur Control:** Added a dedicated setting to adjust the blur intensity of custom background images, allowing for perfect text and widget readability.
+* **UI Visibility Toggles:** You can now hide the main Greeting and the Editable Text elements directly from the settings menu. Both features can also be mapped to custom keyboard shortcuts for instant toggling.
 
 ### 🚀 Improvements
 
@@ -20,6 +22,12 @@ The **Performance & Scaling Update** is here. We rebuilt the mobile-responsive e
 * **Layout Flexibility:** Added a new setting to dock the Shortcuts bar to either the Top or Bottom of the screen.
 * **Widget Control Expansion:** Expanded the widget visibility settings with more granular combinations (e.g., Search Only, Search & Quote, Weather & Quote, etc).
 * **Gradient UI Refinement:** Recalculated transparency and blur logic to provide more visual clarity and text contrast when using gradient themes.
+
+### 🔧 Fixes
+
+* **FOUC Eradicated:** Solved the "Flash Of Unstyled Content" (FOUC) bug. The dashboard now pre-loads styling correctly, eliminating the jarring visual jump on startup (Still may show for 0.01s in some cases).
+* **Advanced Colors Logic:** Fixed the UI state logic that was allowing the Advanced Colors editor to improperly conflict with Gradient and BG active modes.
+* **Animation & Stability Polish:** Cleaned up overlapping transition delays, removed conflicting CSS constraints, and squashed minor layout bugs across various popups and modals.
 
 ### 🔧 Fixes
 

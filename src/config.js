@@ -572,7 +572,6 @@ export const SEARCH_SUGGESTIONS = [
   "How LLMs are changing software engineering",
 ];
 
-// DEFAULT SHORTCUTS
 export const DEFAULT_KEY_MAP = {
   todo: { key: "t", enabled: true },
   ai: { key: "a", enabled: true },
@@ -583,9 +582,10 @@ export const DEFAULT_KEY_MAP = {
   date: { key: "d", enabled: false },
   autoTheme: { key: "e", enabled: false },
   tempDisplay: { key: "f", enabled: false },
+  hideGreetings: { key: "j", enabled: false },
+  showEditableText: { key: "k", enabled: false },
   numKeys: { key: "1-9", enabled: true, fixed: true },
   zen: { key: "z", enabled: true, fixed: true },
   voice: { key: "v", enabled: true, fixed: true },
 };
-
-// src/config.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/config.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

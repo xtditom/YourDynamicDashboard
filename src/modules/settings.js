@@ -32,7 +32,6 @@ const ALIEN_DARK = {
 
 const THEMES = {
   normal: [
-    // YOUR CUSTOM DEFAULT LIGHT
     {
       id: "default-light",
       type: "light",
@@ -56,7 +55,7 @@ const THEMES = {
         "--bg-primary": "#0a0a0a",
         "--bg-secondary": "#3a3a3a",
         "--bg-tertiary": "#2d2d2d",
-        "--accent-color": "#ffffffff",
+        "--accent-color": "#ffffff",
         "--text-primary": "#f9fafb",
         "--text-secondary": "#d1d5db",
         "--text-placeholder": "#9ca3af",
@@ -253,6 +252,7 @@ export class SettingsManager {
       clockType: document.getElementById("clock-type-toggle"),
       clockFormat: document.getElementById("clock-format-toggle"),
       clockFormatRow: document.getElementById("clock-format-row"),
+      hideGreetings: document.getElementById("hide-greetings-toggle"),
       dateToggle: document.getElementById("date-visibility-toggle"),
       tempUnit: document.getElementById("temp-unit-toggle"),
       todo: document.getElementById("todo-visibility-toggle"),
@@ -262,6 +262,7 @@ export class SettingsManager {
       dark: document.getElementById("dark-mode-toggle"),
       autoThemeToggle: document.getElementById("auto-theme-toggle"),
       glowToggle: document.getElementById("glow-effect-toggle"),
+      editableTextToggle: document.getElementById("editable-text-toggle"),
       widgetControl: document.getElementById("widget-control-select"),
       colorControls: document.getElementById("advanced-color-controls"),
       themeColorNote: document.getElementById("theme-color-note"),
@@ -300,6 +301,8 @@ export class SettingsManager {
       linkDirClose: document.getElementById("link-direction-modal-close"),
       linkDirList: document.getElementById("link-direction-list"),
       linkDirReset: document.getElementById("reset-link-direction-btn"),
+      bgBlurSelect: document.getElementById("bg-blur-select"),
+      blurRow: document.getElementById("blur-intensity-row"),
     };
 
     if (!this.els.btn) return;
@@ -307,7 +310,6 @@ export class SettingsManager {
   }
 
   init() {
-    // Ensure glowToggle is available
     if (!this.els.glowToggle) {
       this.els.glowToggle = document.getElementById("glow-effect-toggle");
     }
@@ -342,6 +344,11 @@ export class SettingsManager {
           this.els.dateToggle.checked = value;
         }
       }
+      if (key === "hideGreetings") {
+        if (this.els.hideGreetings) {
+          this.els.hideGreetings.checked = value === true;
+        }
+      }
       if (key === "clockType") {
         if (this.els.clockType) {
           this.els.clockType.checked = value === "analog";
@@ -349,17 +356,15 @@ export class SettingsManager {
         this.updateClockFormatState();
       }
       if (key === "glowEffect") {
-        const isGlowOn = value !== false; // Default true if undefined
+        const isGlowOn = value !== false;
         if (this.els.glowToggle) this.els.glowToggle.checked = isGlowOn;
         document.body.classList.toggle("no-glow", !isGlowOn);
 
-        // Disable/Enable Glow Color Picker
         const glowPicker = document.getElementById("glow-color-picker");
         if (glowPicker) {
           glowPicker.disabled = !isGlowOn;
           glowPicker.style.opacity = isGlowOn ? "1" : "0.5";
           glowPicker.style.cursor = isGlowOn ? "pointer" : "not-allowed";
-          // Optional: Disable the parent row opacity for better visual cue
           const parentRow = glowPicker.closest(".setting-row");
           if (parentRow) {
             if (!isGlowOn) parentRow.classList.add("disabled");
@@ -373,6 +378,7 @@ export class SettingsManager {
   loadInitialState() {
     this.bindSimpleToggle(this.els.clockType, "clockType", "analog");
     this.bindSimpleToggle(this.els.clockFormat, "clockFormat", "24");
+    this.bindSimpleToggle(this.els.hideGreetings, "hideGreetings", false);
     this.bindSimpleToggle(this.els.dateToggle, "showDate", false);
     this.bindSimpleToggle(this.els.tempUnit, "tempUnit", "imperial");
     this.bindSimpleToggle(this.els.tempDisplayToggle, "tempDisplayMode", true);
@@ -380,17 +386,16 @@ export class SettingsManager {
     this.bindSimpleToggle(this.els.apps, "showApps", true);
     this.bindSimpleToggle(this.els.ai, "showAiTools", true);
     this.bindSimpleToggle(this.els.autoThemeToggle, "autoTheme", false);
+    this.bindSimpleToggle(this.els.editableTextToggle, "showEditableText", true);
 
     if (this.els.shortcutsPosition) {
       this.els.shortcutsPosition.value = state.get("shortcutsPosition") || "bottom";
-      // Handle legacy state
       if (state.get("showShortcuts") === false && !state.get("shortcutsPosition")) {
         this.els.shortcutsPosition.value = "hide";
         state.set("shortcutsPosition", "hide");
       }
     }
 
-    // Explicitly bind glow toggle with default TRUE
     this.bindSimpleToggle(this.els.glowToggle, "glowEffect", true);
 
     if (this.els.dark) {
@@ -399,6 +404,23 @@ export class SettingsManager {
 
     if (this.els.widgetControl) this.els.widgetControl.value = state.get("widgetControl") || "all";
     if (this.els.locInput) this.els.locInput.value = state.get("yd_city") || "";
+
+    if (this.els.bgBlurSelect) {
+      const savedBlur = state.get("bgBlurIntensity") || "0";
+      this.els.bgBlurSelect.value = savedBlur;
+      
+      const blurMap = {
+        "0": 0, "10": 2, "20": 4, "30": 6, "40": 8, "50": 10
+      };
+      const blurPx = blurMap[savedBlur] || 0;
+      document.documentElement.style.setProperty("--bg-blur", blurPx + "px");
+
+      if (savedBlur === "10" || savedBlur === "20" || savedBlur === "30" || savedBlur === "40" || savedBlur === "50") {
+        document.documentElement.classList.add("high-bg-blur");
+      } else {
+        document.documentElement.classList.remove("high-bg-blur");
+      }
+    }
 
     const bg = state.get("backgroundImage");
     const randomBgMode = state.get("randomBgMode");
@@ -410,7 +432,6 @@ export class SettingsManager {
     } else if (randomBgMode === "freeze") {
       document.body.classList.add("has-custom-bg");
       if (randomBgTime === -1) {
-        // Save Forever - don't expire
         if (state.get("savedBgUrl")) {
           document.body.style.backgroundImage = `url(${state.get("savedBgUrl")})`;
         } else if (bg) {
@@ -418,7 +439,6 @@ export class SettingsManager {
         }
         if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
       } else if (randomBgTime && Date.now() - randomBgTime > 259200000) {
-        // If 72 hours passed, unfreeze and go back to random
         state.set("randomBgMode", "random");
         this.fetchRandomBackground("random");
       } else if (state.get("savedBgUrl")) {
@@ -447,7 +467,6 @@ export class SettingsManager {
     this.updateRandomBgButtons();
     this.updateAutoThemeGlowState();
 
-    // Apply initial glow state (Default to TRUE if undefined)
     const currentGlow = state.get("glowEffect");
     const isGlowOn = currentGlow !== false;
     document.body.classList.toggle("no-glow", !isGlowOn);
@@ -504,10 +523,8 @@ export class SettingsManager {
     const lat = state.get("yd_lat");
     const lon = state.get("yd_lon");
 
-    // Check if location is set (based on weather.js logic)
     const hasLocation = city && lat && lon && lat !== "0" && lon !== "0";
 
-    // Weather is hidden when these options are selected
     const weatherHidden = ["search-only", "quote-only", "search-quote", "nothing"].includes(widgetControl);
     const shouldDisable = weatherHidden || !hasLocation;
 
@@ -568,6 +585,25 @@ export class SettingsManager {
       setTimeout(() => this.els.btn.classList.remove("animating"), 400);
     });
 
+    if (this.els.bgBlurSelect) {
+      this.els.bgBlurSelect.addEventListener("change", (e) => {
+        const val = e.target.value;
+        state.set("bgBlurIntensity", val);
+        
+        const blurMap = {
+          "0": 0, "10": 2, "20": 4, "30": 6, "40": 8, "50": 10
+        };
+        const blurPx = blurMap[val] || 0;
+        document.documentElement.style.setProperty("--bg-blur", blurPx + "px");
+
+        if (val === "10" || val === "20" || val === "30" || val === "40" || val === "50") {
+          document.documentElement.classList.add("high-bg-blur");
+        } else {
+          document.documentElement.classList.remove("high-bg-blur");
+        }
+      });
+    }
+
     document.addEventListener("click", (e) => {
       if (
         this.els.popup.classList.contains("visible") &&
@@ -577,7 +613,6 @@ export class SettingsManager {
     });
     this.els.popup.addEventListener("click", (e) => e.stopPropagation());
 
-    // Direct Debug Listener for Glow
     const glowToggle = document.getElementById("glow-effect-toggle");
     if (glowToggle) {
       glowToggle.addEventListener("change", (e) => {
@@ -621,7 +656,6 @@ export class SettingsManager {
           : THEMES.normal.find((t) => t.id === "default-light");
         this.applyNormalTheme(targetTheme);
 
-        // Complete Theme Task
         import("../utils.js").then((utils) => {
           utils.completeDefaultTask("dt-5");
         });
@@ -636,7 +670,6 @@ export class SettingsManager {
           state.set("autoTheme", false);
         }
 
-        // Complete Theme Task
         import("../utils.js").then((utils) => {
           utils.completeDefaultTask("dt-5");
         });
@@ -648,7 +681,6 @@ export class SettingsManager {
         if (e.target.classList.contains("color-picker")) {
           this.disableAutoTheme();
 
-          // Complete Theme Task
           import("../utils.js").then((utils) => {
             utils.completeDefaultTask("dt-5");
           });
@@ -865,6 +897,8 @@ export class SettingsManager {
       date: "Toggle Date",
       autoTheme: "Toggle Auto Theme",
       tempDisplay: "Toggle Temp Display",
+      hideGreetings: "Toggle Greetings",
+      showEditableText: "Toggle Editable Text",
       numKeys: "Keys for Shortcuts",
       zen: "Key for Zen Mode",
       voice: "Key for Voice Search",
@@ -924,7 +958,6 @@ export class SettingsManager {
         e.stopPropagation();
         const newMap = { ...state.get("keyMap") };
 
-        // Preserve fixed property if it exists
         const currentData = newMap[action] || DEFAULT_KEY_MAP[action];
         newMap[action] = {
           ...currentData,
@@ -1018,7 +1051,6 @@ export class SettingsManager {
     note.className = "settings-note";
     note.style.marginTop = "1rem";
 
-    // Manual creation to avoid innerHTML
     const p = document.createElement("p");
     p.appendChild(document.createTextNode("Keys "));
     const strong1 = document.createElement("strong");
@@ -1076,7 +1108,7 @@ export class SettingsManager {
       const isNewTab = currentTarget === "_blank";
 
       const row = document.createElement("div");
-      row.className = "key-row"; // Reuse key-row styling
+      row.className = "key-row";
 
       const label = document.createElement("span");
       label.textContent = labelText;
@@ -1189,7 +1221,6 @@ export class SettingsManager {
         btn.addEventListener("click", () => {
           this.disableAutoTheme();
           this.applyNormalTheme(theme);
-          // Complete Theme Task
           import("../utils.js").then((utils) => {
             utils.completeDefaultTask("dt-5");
           });
@@ -1215,29 +1246,24 @@ export class SettingsManager {
 
   applyNormalTheme(theme, skipBgWipe = false) {
     if (!skipBgWipe) {
-      // 1. Nuke the database and preloader flag
       secondStorage.deleteImage().catch(err => console.error(err));
       localStorage.removeItem("has_idb_bg");
       
-      // 2. Clear legacy local storage states
       state.set("backgroundImage", null);
       state.set("randomBgMode", null);
       state.set("savedBgUrl", null);
       state.set("bgSavedDate", null);
       
-      // 3. Aggressively strip the inline styles
       document.body.style.removeProperty("background-image");
       document.body.style.removeProperty("background-size");
       document.body.style.removeProperty("background-position");
       
-      // Search and destroy injected <style> tags from theme-init.js
       document.querySelectorAll("style").forEach(styleEl => {
         if (styleEl.textContent.includes("background-image: url")) {
           styleEl.remove();
         }
       });
       
-      // 4. Reset UI states
       document.body.classList.remove("has-custom-bg");
       if (this.els.removeBg) this.els.removeBg.classList.add("hidden");
       this.updateRandomBgButtons();
@@ -1289,29 +1315,24 @@ export class SettingsManager {
 
   applyGradientTheme(theme, save = true, skipBgWipe = false) {
     if (!skipBgWipe) {
-      // 1. Nuke the database and preloader flag
       secondStorage.deleteImage().catch(err => console.error(err));
       localStorage.removeItem("has_idb_bg");
       
-      // 2. Clear legacy local storage states
       state.set("backgroundImage", null);
       state.set("randomBgMode", null);
       state.set("savedBgUrl", null);
       state.set("bgSavedDate", null);
       
-      // 3. Aggressively strip the inline styles
       document.body.style.removeProperty("background-image");
       document.body.style.removeProperty("background-size");
       document.body.style.removeProperty("background-position");
       
-      // Search and destroy injected <style> tags from theme-init.js
       document.querySelectorAll("style").forEach(styleEl => {
         if (styleEl.textContent.includes("background-image: url")) {
           styleEl.remove();
         }
       });
       
-      // 4. Reset UI states
       document.body.classList.remove("has-custom-bg");
       if (this.els.removeBg) this.els.removeBg.classList.add("hidden");
       this.updateRandomBgButtons();
@@ -1341,7 +1362,6 @@ export class SettingsManager {
     document.body.classList.add("gradient-mode-active");
     document.body.classList.add("transparency-active");
 
-    // Add specific class for Dark/Light Gradient and set data-theme
     document.body.classList.remove("gradient-dark", "gradient-light");
     if (theme.type === "dark") {
       document.body.classList.add("gradient-dark");
@@ -1516,7 +1536,7 @@ export class SettingsManager {
           closeAndClean();
         });
     } else {
-      triggerNativeGPS(); // Fallback if modal fails to load
+      triggerNativeGPS();
     }
   }
 
@@ -1526,9 +1546,6 @@ export class SettingsManager {
       this.els.themeColorNote.style.display = "none";
     }
 
-    // Advanced Colors Disable Logic is handled inside updateAutoThemeGlowState
-
-    // Disable Glow Toggle & Picker in Gradient Mode
     const glowPicker = document.getElementById("glow-color-picker");
     if (this.els.glowToggle) {
       this.els.glowToggle.disabled = isGradient;
@@ -1537,7 +1554,6 @@ export class SettingsManager {
       if (isGradient) {
         if (glowRow) glowRow.classList.add("disabled");
 
-        // Also disable the picker explicitly if in gradient mode
         if (glowPicker) {
           glowPicker.disabled = true;
           glowPicker.style.opacity = "0.5";
@@ -1548,7 +1564,6 @@ export class SettingsManager {
       } else {
         if (glowRow) glowRow.classList.remove("disabled");
 
-        // Re-evaluate picker state based on toggle value
         const isGlowOn = this.els.glowToggle.checked;
         if (glowPicker) {
           glowPicker.disabled = !isGlowOn;
@@ -1604,7 +1619,6 @@ export class SettingsManager {
           if (isGradient) this.applyGradientTheme(theme);
           else this.applyNormalTheme(theme);
 
-          // Complete theme task
           import("../utils.js").then((utils) => {
             utils.completeDefaultTask("dt-5");
           });
@@ -1619,7 +1633,7 @@ export class SettingsManager {
   bindSimpleToggle(el, key, trueValue) {
     if (!el) return;
     const current = state.get(key);
-    if (key === "showDate") {
+    if (key === "showDate" || key === "hideGreetings") {
       if (current === undefined || current === null) {
         state.set(key, false);
         el.checked = false;
@@ -1678,7 +1692,6 @@ export class SettingsManager {
 
       const objectUrl = URL.createObjectURL(file);
 
-      // 1. Instant UI Update
       document.body.classList.add("has-custom-bg");
       document.body.style.setProperty("background-image", `url("${objectUrl}")`, "important");
       document.body.style.setProperty("background-size", "cover", "important");
@@ -1687,18 +1700,15 @@ export class SettingsManager {
       this.updateRandomBgButtons();
       this.updateAutoThemeGlowState();
 
-      // 2. Strict IndexedDB Save (Silent Failure on Block)
       try {
         await secondStorage.saveImage(file);
         localStorage.setItem("has_idb_bg", "true");
         
-        // Nuke legacy storage and blur logic to prevent conflicts
         state.set("randomBgMode", null);
         state.set("backgroundImage", null);
         localStorage.removeItem("lowResBg"); 
       } catch (idbErr) {
         console.warn("IndexedDB blocked by browser shields. Failing silently without modal.", idbErr);
-        // Silent failure: UI remains updated until page refresh
       }
 
       this.els.bgInput.value = "";
@@ -1713,7 +1723,6 @@ export class SettingsManager {
       document.body.style.removeProperty("background-size");
       document.body.style.removeProperty("background-position");
       
-      // Search and destroy injected <style> tags from theme-init.js
       document.querySelectorAll("style").forEach(styleEl => {
         if (styleEl.textContent.includes("background-image: url")) {
           styleEl.remove();
@@ -1766,7 +1775,6 @@ export class SettingsManager {
       dragHandle.title = "Drag to reorder";
       dragHandle.textContent = "☰";
 
-      // Icon
       const iconContainer = document.createElement("div");
       iconContainer.className = "icon-container";
       iconContainer.style.position = "relative";
@@ -1852,7 +1860,7 @@ export class SettingsManager {
             
             img.src = dataUrl;
             this.updateShortcut(index, nameInput.value, urlInput.value, dataUrl);
-            resetBtn.style.display = ""; // Show reset button
+            resetBtn.style.display = "";
           };
           tempImg.src = ev.target.result;
         };
@@ -2072,13 +2080,20 @@ export class SettingsManager {
     const hasBg = document.body.classList.contains("has-custom-bg");
     const isGradient = document.body.classList.contains("gradient-mode-active");
 
+    if (this.els.blurRow) {
+      if (hasBg) {
+        this.els.blurRow.classList.remove("hidden");
+      } else {
+        this.els.blurRow.classList.add("hidden");
+      }
+    }
+
     if (this.els.autoThemeToggle) {
       this.els.autoThemeToggle.disabled = hasBg;
       const parentRow = this.els.autoThemeToggle.closest(".setting-row");
       if (parentRow) parentRow.style.opacity = hasBg ? "0.5" : "1";
     }
 
-    // Disable glow toggle if custom background OR gradient mode is active
     const disabledControls = hasBg || isGradient;
     if (this.els.glowToggle) {
       this.els.glowToggle.disabled = disabledControls;
@@ -2086,7 +2101,6 @@ export class SettingsManager {
       if (parentRow) parentRow.style.opacity = disabledControls ? "0.5" : "1";
     }
 
-    // Disable Advanced Colors section
     const advancedColorsContainer = document.getElementById(
       "advanced-color-controls",
     );
@@ -2103,7 +2117,7 @@ export class SettingsManager {
         advancedColorsContainer.style.opacity = "0.5";
         colorInputs.forEach(input => input.disabled = true);
         if (themeColorNote) {
-          themeColorNote.style.color = "#ff6b6b"; // Warning color
+          themeColorNote.style.color = "#ff6b6b";
           themeColorNote.style.fontWeight = "bold";
         }
         if (advancedColorWarning) {
@@ -2115,7 +2129,7 @@ export class SettingsManager {
         advancedColorsContainer.style.opacity = "1";
         colorInputs.forEach(input => input.disabled = false);
         if (themeColorNote) {
-          themeColorNote.style.color = ""; // Revert to CSS default
+          themeColorNote.style.color = "";
           themeColorNote.style.fontWeight = "normal";
         }
         if (advancedColorWarning) {
@@ -2124,8 +2138,6 @@ export class SettingsManager {
       }
     }
 
-    // Disable glow strictly if custom background active
-    // (Gradient text shadows are handled via CSS)
     if (hasBg) {
       document.body.classList.add("no-glow");
     } else {
@@ -2165,5 +2177,4 @@ export class SettingsManager {
     }
   }
 }
-
-// src/modules/settings.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/settings.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

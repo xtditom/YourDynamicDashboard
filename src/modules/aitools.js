@@ -24,7 +24,6 @@ export class AiTools {
   init() {
     this.renderAll();
 
-    // Main Toggle with ANIMATION
     this.els.btn.addEventListener("click", (e) => {
       e.stopPropagation();
       this.toggle();
@@ -34,13 +33,11 @@ export class AiTools {
       setTimeout(() => this.els.btn.classList.remove("animating"), 400);
     });
 
-    // Edit Button
     this.els.editBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       this.toggleEditMode();
     });
 
-    // Tab Switching
     this.els.tabs.forEach((tab) => {
       tab.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -70,7 +67,6 @@ export class AiTools {
   }
 
   initializeOrderState() {
-    // AI Tools Order
     let aiOrder = state.get("aiToolsOrder");
 
     const configAiIds = AI_TOOLS.map((t) => t.id);
@@ -85,7 +81,6 @@ export class AiTools {
       }
     }
 
-    // Social Tools Order
     let socialOrder = state.get("socialToolsOrder");
     const configSocialIds = SOCIAL_LINKS.map((t) => t.id);
     if (!socialOrder) {
@@ -219,7 +214,6 @@ export class AiTools {
       const img = document.createElement("img");
       img.src = pathPrefix + tool.icon;
 
-      // Edit Overlay
       if (this.isEditMode) {
         const overlay = document.createElement("div");
         overlay.className = "edit-overlay";
@@ -325,5 +319,4 @@ export class AiTools {
     }
   }
 }
-
-// src/modules/aitools.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/aitools.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

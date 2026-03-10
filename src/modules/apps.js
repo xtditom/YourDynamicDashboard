@@ -189,5 +189,4 @@ export class AppGrid {
     this.els.btn.classList.toggle("hidden", !show);
   }
 }
-
-// src/modules/apps.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/apps.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

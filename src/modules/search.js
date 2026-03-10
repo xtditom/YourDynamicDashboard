@@ -56,7 +56,6 @@ export class Search {
 
       this.renderHistoryDropdown(this.currentFilteredHistory);
 
-      // Auto-fill suggestion ONLY if there is exactly 1 match
       if (
         this.currentFilteredHistory.length === 1 && 
         e.inputType !== "deleteContentBackward" && 
@@ -80,16 +79,13 @@ export class Search {
         if (!val) return;
 
         if (this.currentFilteredHistory && this.currentFilteredHistory.length > 0) {
-          // Execute top match with the CURRENTLY ACTIVE engine
           this._executeViaEngine(this.currentFilteredHistory[0].query, this.current.id);
         } else {
-          // Fallback to normal search
           this.handleSubmit(new Event("submit"));
         }
       }
     });
 
-    // Layer 1: show quick-history dropdown on focus
     this.els.input.addEventListener("focus", () => {
       const history = state.get("searchHistory") || [];
       this.currentFilteredHistory = history.slice(0, 5);
@@ -142,13 +138,10 @@ export class Search {
 
     let history = state.get("searchHistory") || [];
 
-    // Prune entries older than the configured auto-delete window
     history = history.filter((item) => now - item.timestamp < maxAge);
 
-    // Prepend newest entry (duplicates allowed)
     history.unshift({ query, engineId, timestamp: now });
 
-    // Enforce 1000-item cap
     history = history.slice(0, 1000);
 
     state.set("searchHistory", history);
@@ -176,15 +169,18 @@ export class Search {
       ul.innerHTML = "";
     }
 
-    // Conditional blur for custom-bg / gradient themes
     if (document.body.classList.contains("has-custom-bg") || document.body.classList.contains("gradient-mode-active")) {
-      ul.style.setProperty("backdrop-filter", "blur(40px)", "important");
-      ul.style.setProperty("-webkit-backdrop-filter", "blur(40px)", "important");
+      if (!document.documentElement.classList.contains("high-bg-blur")) {
+        ul.style.setProperty("backdrop-filter", "blur(40px)", "important");
+        ul.style.setProperty("-webkit-backdrop-filter", "blur(40px)", "important");
+      } else {
+        ul.style.setProperty("backdrop-filter", "blur(3px)", "important");
+        ul.style.setProperty("-webkit-backdrop-filter", "blur(3px)", "important");
+      }
       const isDark = document.body.getAttribute("data-theme") === "dark";
       ul.style.setProperty("background-color", "var(--widget-bg)", "important");
       ul.style.setProperty("color", isDark ? "#ffffff" : "#000000", "important");
 
-      // Hide quotes if dropdown is NEW
       if (isNew) {
         const quoteWidget = document.getElementById("quote-widget");
         if (quoteWidget) {
@@ -204,7 +200,6 @@ export class Search {
     top5.forEach((item) => {
       const li = document.createElement("li");
 
-      // Engine icon
       const icon = document.createElement("img");
       const engineIcon = this._resolveEngineIcon(item.engineId);
       icon.src = CONFIG.paths.search + engineIcon;
@@ -213,12 +208,10 @@ export class Search {
       icon.height = 16;
       icon.onerror = () => { icon.style.display = "none"; };
 
-      // Query text
       const text = document.createElement("span");
       text.className = "sh-qd-text";
       text.textContent = item.query;
 
-      // Time
       const time = document.createElement("span");
       time.className = "sh-qd-time";
       time.textContent = this._formatTime(item.timestamp);
@@ -227,7 +220,6 @@ export class Search {
       li.appendChild(text);
       li.appendChild(time);
 
-      // mousedown fires before blur — execute via CURRENTLY ACTIVE engine
       li.addEventListener("mousedown", (e) => {
         e.preventDefault();
         clearTimeout(this._blurTimer);
@@ -238,7 +230,6 @@ export class Search {
       ul.appendChild(li);
     });
 
-    // "Full Search History" footer item
     const footerLi = document.createElement("li");
     footerLi.className = "sh-full-history-btn";
     footerLi.textContent = "Full Search History";
@@ -250,7 +241,6 @@ export class Search {
     });
     ul.appendChild(footerLi);
 
-    // Position under the search input
     const inputRect = this.els.input.getBoundingClientRect();
     ul.style.top   = inputRect.bottom + window.scrollY + "px";
     ul.style.left  = inputRect.left   + window.scrollX + "px";
@@ -276,7 +266,6 @@ export class Search {
   }
 
   _restoreQuotes() {
-    // Only restore if BOTH dropdowns are closed/hidden
     const mainHidden = this.els.dropdown.classList.contains("hidden") || this.els.dropdown.classList.contains("closing");
     const historyHidden = !this._historyDropdownEl || this._historyDropdownEl.classList.contains("closing");
 
@@ -291,7 +280,6 @@ export class Search {
 
   // --- SECTION: LAYER 2 — FULL HISTORY MODAL ---
   buildHistoryModal() {
-    // Idempotent: remove existing modal first
     const existing = document.getElementById("sh-modal-overlay");
     if (existing) existing.remove();
 
@@ -307,19 +295,16 @@ export class Search {
 
     if (document.body.classList.contains("force-white-text") && !document.body.classList.contains("has-custom-bg")) {
       modal.style.color = "#ffffff";
-      // Force child text elements to inherit white if needed
       modal.style.setProperty("--text-primary", "#ffffff"); 
       modal.style.setProperty("--text-secondary", "rgba(255,255,255,0.7)");
     }
 
-    // ── Header ──────────────────────────────────────────────────────────────
     const header = document.createElement("div");
     header.className = "sh-modal-header";
 
     const titleWrap = document.createElement("div");
     titleWrap.className = "sh-title-wrap";
 
-    // ⓘ Info button — placed BEFORE the title
     const infoBtn = document.createElement("button");
     infoBtn.className = "sh-info-btn";
     infoBtn.title = "About Search History";
@@ -350,11 +335,9 @@ export class Search {
     titleWrap.appendChild(infoBtn);
     titleWrap.appendChild(title);
 
-    // ── Controls row (toggle + auto-delete select + clear all) ──────────────
     const controls = document.createElement("div");
     controls.className = "sh-controls-row";
 
-    // "Don't save searches" toggle
     const ghostLabel = document.createElement("label");
     ghostLabel.className = "sh-ghost-toggle";
     const ghostCheck = document.createElement("input");
@@ -368,7 +351,6 @@ export class Search {
       state.set("searchHistoryPaused", ghostCheck.checked);
     });
 
-    // Auto Delete select
     const autoDeleteWrap = document.createElement("label");
     autoDeleteWrap.className = "sh-auto-delete-wrap";
     const autoDeleteLabel = document.createElement("span");
@@ -388,7 +370,6 @@ export class Search {
     autoDeleteSelect.addEventListener("change", () => {
       const newDays = parseInt(autoDeleteSelect.value, 10);
       state.set("searchAutoDeleteDays", newDays);
-      // Purge items now exceeding the new limit
       const cutoff = Date.now() - newDays * 24 * 60 * 60 * 1000;
       const h = (state.get("searchHistory") || []).filter(
         (item) => item.timestamp >= cutoff,
@@ -399,7 +380,6 @@ export class Search {
     autoDeleteWrap.appendChild(autoDeleteLabel);
     autoDeleteWrap.appendChild(autoDeleteSelect);
 
-    // Clear All button
     const clearBtn = document.createElement("button");
     clearBtn.className = "sh-clear-btn";
     clearBtn.textContent = "Clear All";
@@ -425,7 +405,6 @@ export class Search {
     controls.appendChild(autoDeleteWrap);
     controls.appendChild(clearBtn);
 
-    // Close button
     const closeBtn = document.createElement("button");
     closeBtn.className = "sh-close-btn";
     closeBtn.textContent = "×";
@@ -436,7 +415,6 @@ export class Search {
     header.appendChild(controls);
     header.appendChild(closeBtn);
 
-    // ── Filter row ──────────────────────────────────────────────────────────
     const filterRow = document.createElement("div");
     filterRow.className = "sh-filter-row";
     const filterInput = document.createElement("input");
@@ -445,7 +423,6 @@ export class Search {
     filterInput.placeholder = "Filter history…";
     filterRow.appendChild(filterInput);
 
-    // ── List container ──────────────────────────────────────────────────────
     const listContainer = document.createElement("div");
     listContainer.id = "sh-list-container";
 
@@ -500,7 +477,6 @@ export class Search {
       return;
     }
 
-    // Group items
     const groups = new Map();
     history.forEach((item) => {
       const groupKey = this._getHistoryGroup(item.timestamp);
@@ -518,7 +494,6 @@ export class Search {
         const row = document.createElement("div");
         row.className = "sh-row";
 
-        // Engine icon
         const icon = document.createElement("img");
         icon.src = CONFIG.paths.search + this._resolveEngineIcon(item.engineId);
         icon.alt = item.engineId || "";
@@ -527,7 +502,6 @@ export class Search {
         icon.className = "sh-row-icon";
         icon.onerror = () => { icon.style.display = "none"; };
 
-        // Query text — executes via item's OWN saved engineId
         const queryEl = document.createElement("span");
         queryEl.className = "sh-row-query";
         queryEl.textContent = item.query;
@@ -538,12 +512,10 @@ export class Search {
           this._executeViaEngine(item.query, item.engineId);
         });
 
-        // Time (HH:MM)
         const timeEl = document.createElement("span");
         timeEl.className = "sh-row-time";
         timeEl.textContent = this._formatTime(item.timestamp);
 
-        // Delete button — uses index-independent timestamp comparison
         const delBtn = document.createElement("button");
         delBtn.className = "sh-delete-btn";
         delBtn.textContent = "×";
@@ -565,14 +537,12 @@ export class Search {
     });
   }
 
-  // Executes a search using a specific engineId regardless of the active provider
   _executeViaEngine(query, engineId) {
     let provider = null;
     for (const type of ["engines", "platforms"]) {
       provider = SEARCH_PROVIDERS[type].find((p) => p.id === engineId);
       if (provider) break;
     }
-    // Fall back to the currently active provider if not found
     if (!provider) {
       provider = SEARCH_PROVIDERS[this.current.type].find(
         (p) => p.id === this.current.id,
@@ -863,8 +833,13 @@ export class Search {
 
     const body = document.body;
     if (body.classList.contains("has-custom-bg") || body.classList.contains("gradient-mode-active")) {
-      this.els.dropdown.style.setProperty("backdrop-filter", "blur(40px)", "important");
-      this.els.dropdown.style.setProperty("-webkit-backdrop-filter", "blur(40px)", "important");
+      if (!document.documentElement.classList.contains("high-bg-blur")) {
+        this.els.dropdown.style.setProperty("backdrop-filter", "blur(40px)", "important");
+        this.els.dropdown.style.setProperty("-webkit-backdrop-filter", "blur(40px)", "important");
+      } else {
+        this.els.dropdown.style.setProperty("backdrop-filter", "blur(3px)", "important");
+        this.els.dropdown.style.setProperty("-webkit-backdrop-filter", "blur(3px)", "important");
+      }
       const isDark = body.getAttribute("data-theme") === "dark";
       this.els.dropdown.style.setProperty("background-color", "var(--widget-bg)", "important");
       this.els.dropdown.style.setProperty("color", isDark ? "#ffffff" : "#000000", "important");
@@ -915,7 +890,6 @@ export class Search {
     );
     if (!provider) return;
 
-    // Save to history before navigating
     this.saveSearch(query, this.current.id);
 
     let url;
@@ -928,5 +902,4 @@ export class Search {
     window.location.href = url;
   }
 }
-
-// src/modules/search.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/search.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

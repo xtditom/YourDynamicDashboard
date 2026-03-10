@@ -50,12 +50,7 @@ export class QuoteWidget {
     const showQuote   = ["all", "quote-only",  "search-quote",  "weather-quote"].includes(control);
 
     // --- Animation assignments per mode ---
-    // "only" → popup-scale-entry (spotlight entrance, 0.3s delay via CSS)
-    // "search-weather" / "search-quote" → Search pops at 0.15s, secondary widget keeps CSS default 0.3s
-    // "weather-quote" → weather fades down, quote fades up — they meet
-    // "all" → fade-down for weather, popup-scale for search, fade-up for quote
     let weatherAnim = null, searchAnim = null, quoteAnim = null;
-    // searchDelay: overrides the CSS animation-delay inline (null = use CSS default)
     let searchDelay = null;
     switch (control) {
       case "all":
@@ -74,31 +69,28 @@ export class QuoteWidget {
         break;
       case "search-weather":
         searchAnim  = "popup-scale-entry";
-        searchDelay = "0.22s"; // appears before weather (0.3s) and before pinned task (0.5s)
+        searchDelay = "0.22s";
         weatherAnim = "popup-scale-entry";
         break;
       case "search-quote":
         searchAnim  = "popup-scale-entry";
-        searchDelay = "0.22s"; // appears before quote (0.3s) and before pinned task (0.5s)
+        searchDelay = "0.22s";
         quoteAnim   = "popup-scale-entry";
         break;
       case "weather-quote":
-        weatherAnim = "fade-down"; // slides down from above
-        quoteAnim   = "fade-up";   // slides up from below — they meet in center
+        weatherAnim = "fade-down";
+        quoteAnim   = "fade-up";  
         break;
     }
 
-    // Helper: reset classes, optionally override animation-delay inline, then apply animation class
     const animate = (el, animClass, inlineDelay = null) => {
       if (!el) return;
       el.classList.remove("fade-up", "fade-down", "popup-scale-entry");
-      // Apply inline delay override (null clears any previous inline override → CSS default takes over)
       el.style.animationDelay = inlineDelay || "";
-      void el.offsetWidth; // force reflow to restart animation
+      void el.offsetWidth;
       if (animClass) el.classList.add(animClass);
     };
 
-    // Search widget
     if (this.els.search) {
       if (showSearch) {
         this.els.search.classList.remove("hidden");
@@ -110,7 +102,6 @@ export class QuoteWidget {
       }
     }
 
-    // Weather widget
     if (this.els.weather) {
       if (showWeather) {
         this.els.weather.classList.remove("hidden");
@@ -121,7 +112,6 @@ export class QuoteWidget {
       }
     }
 
-    // Quote widget
     if (this.els.widget) {
       if (showQuote) {
         this.els.widget.classList.remove("hidden");
@@ -132,9 +122,7 @@ export class QuoteWidget {
       }
     }
 
-    // "Nothing" mode — hide right column, center left content
     document.body.classList.toggle("widgets-hidden", control === "nothing");
   }
 }
-
-// src/modules/quotes.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/quotes.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

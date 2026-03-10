@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">🚀 YourDynamicDashboard (v2.2.0 Pre)</h1>
+  <h1 align="center">🚀 YourDynamicDashboard (v2.2.0)</h1>
   <p align="center">
     <strong>The Polish, Privacy & Productivity Update.</strong><br>
     Transform your new tab into a powerful, privacy-first command center.<br>
@@ -290,8 +290,8 @@ Features planned for upcoming major releases:
 
 - [ ] **Fully Draggable Grid:** Move the clock, weather, and quote modules anywhere on the screen.
 - [ ] **Time-based Theme Change:** Theme changes based on Day & Night time.
+- [ ] **Fonts:** Adding Various fonts to enhance the experience.
 - [ ] **More Apps & Tools:** Adding new Google Apps, AI & Socials.
-- [ ] **BG Blur:** An option to adjust blur of the Background.
 - [ ] **Resolution Selection:** An option to select device resolution.
 - [ ] **Language Options:** Adding multiple languages for better UX.
 - [ ] **Fix remaining bugs:** Fixing remaining bugs & issues.

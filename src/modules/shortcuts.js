@@ -83,7 +83,6 @@ export class Shortcuts {
   updateVisibility() {
     if (!this.container) return;
     
-    // Handle migrations from legacy showShortcuts
     let position = state.get("shortcutsPosition");
     if (!position) {
       const showLegacy = state.get("showShortcuts");
@@ -108,5 +107,4 @@ export class Shortcuts {
     }
   }
 }
-
-// src/modules/shortcuts.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/shortcuts.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

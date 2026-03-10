@@ -34,9 +34,8 @@ export function showCustomModal(
       align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.3s;
     `;
 
-    // 2. Create Modal Box
     const box = document.createElement("div");
-    box.className = "modal-box"; // Uses existing CSS
+    box.className = "modal-box";
     box.style.cssText = `
       max-width: 400px; text-align: center;
       transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -132,9 +131,8 @@ export function showCustomPrompt(message, defaultValue = "") {
       align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.3s;
     `;
 
-    // 2. Create Modal Box
     const box = document.createElement("div");
-    box.className = "modal-box"; // Uses existing CSS
+    box.className = "modal-box";
     box.style.cssText = `
       width: 400px; max-width: 90%; text-align: left;
       transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -304,5 +302,4 @@ export function progressDefaultTasks() {
     }
   }
 }
-
-// src/utils.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/utils.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

@@ -45,6 +45,20 @@ try {
   var bgTime = localStorage.getItem("randomBgTime");
   var imgUrl = null;
 
+  var bgBlur = localStorage.getItem("bgBlurIntensity");
+  if (bgBlur) {
+    var cleanBlur = bgBlur.replace(/^"|"$/g, "");
+    var blurMap = { "0": 0, "10": 2, "20": 4, "30": 6, "40": 8, "50": 10 };
+    var blurPx = blurMap[cleanBlur] || 0;
+    document.documentElement.style.setProperty("--bg-blur", blurPx + "px");
+
+    if (cleanBlur === "10" || cleanBlur === "20" || cleanBlur === "30" || cleanBlur === "40" || cleanBlur === "50") {
+      document.documentElement.classList.add("high-bg-blur");
+    } else {
+      document.documentElement.classList.remove("high-bg-blur");
+    }
+  }
+
   if (bgMode === '"freeze"') {
     if (bgTime === "null" || bgTime === '"-1"' || Date.now() - parseInt(bgTime) <= 259200000) {
       imgUrl = (savedBg && savedBg !== '"null"') ? savedBg : ((bg && bg !== '"null"') ? bg : null);
@@ -117,5 +131,4 @@ try {
   var p = document.getElementById("idb-preloader");
   if (p) p.remove();
 }
-
-// src/theme-init.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/theme-init.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

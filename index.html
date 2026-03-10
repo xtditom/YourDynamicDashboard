@@ -21,89 +21,98 @@
     />
   </head>
   <body>
+    <div id="bg-blur-overlay"></div>
     <div id="welcome-modal-overlay" class="hidden">
       <div id="welcome-modal" class="v2-1-modal">
         <button id="welcome-modal-close">&times;</button>
 
         <div class="modal-header">
           <div class="badge-container">
-            <span class="version-badge">YourDynamicDashboard v2</span>
+            <span class="version-badge">YourDynamicDashboard v2.2</span>
           </div>
-          <h1>The Polish, Privacy & Productivity Update</h1>
-          <p>Massive customization. Better interactions. Stricter privacy.</p>
+          <h1>The Performance & Scaling Update</h1>
+          <p>
+            Rebuilt mobile engine, smart storage, and a powerful local search
+            history.
+          </p>
         </div>
 
         <div class="modal-content-v2">
-          <div class="section-title">✨ Key Interactions</div>
+          <div class="section-title">✨ Key Features</div>
           <div class="feature-row-3">
             <div class="feature-card new-glow">
               <div class="card-header">
-                <span class="icon">📌</span>
-                <h3>Pinned Tasks</h3>
+                <span class="icon">🔍</span>
+                <h3>Search History</h3>
               </div>
               <p>
-                Keep your highest-priority items locked at the top of your To-Do
-                list.
+                A native-feeling, privacy-first search history with real-time
+                filtering and auto-delete.
               </p>
             </div>
             <div class="feature-card new-glow">
               <div class="card-header">
-                <span class="icon">🖱️</span>
-                <h3>Drag & Drop</h3>
+                <span class="icon">🖼️</span>
+                <h3>Custom Icons</h3>
               </div>
               <p>
-                Freely reorder To-Do tasks, AI Tools, and Google Apps with your
-                mouse.
+                Upload and set your own custom image icons for individual web
+                shortcuts.
               </p>
             </div>
             <div class="feature-card new-glow">
               <div class="card-header">
-                <span class="icon">🎲</span>
-                <h3>Random BG</h3>
+                <span class="icon">💧</span>
+                <h3>BG Blur Control</h3>
               </div>
               <p>
-                Fetch fresh wallpapers automatically, and
-                <strong>Freeze</strong> the ones you love.
+                Adjust the blur intensity of your custom backgrounds for perfect
+                UI readability.
               </p>
             </div>
           </div>
 
           <div class="modal-split-bottom">
             <div class="info-group">
-              <div class="section-title">🎨 Make It Yours</div>
+              <div class="section-title">🚀 More Control</div>
               <ul class="detail-list modern-list">
                 <li>
-                  <span class="list-icon">🌟</span>
+                  <span class="list-icon">📱</span>
                   <div>
-                    <strong>Glow Control:</strong>
+                    <strong>Mobile Scaling:</strong>
                     <span
-                      >Toggle clock glow & pulsing effects directly in
-                      Settings.</span
+                      >Master CSS fluid-scaling adapts perfectly to small
+                      screens.</span
                     >
                   </div>
                 </li>
                 <li>
-                  <span class="list-icon">☢️</span>
+                  <span class="list-icon">↕️</span>
                   <div>
-                    <strong>Toxic Palettes:</strong>
-                    <span>New 'Radioactive' & 'Phosphor' themes.</span>
-                  </div>
-                </li>
-                <li>
-                  <span class="list-icon">🌡️</span>
-                  <div>
-                    <strong>Weather Expansion:</strong>
+                    <strong>Layout Flexibility:</strong>
                     <span
-                      >Widget now displays daily Min & Max temperatures.</span
+                      >Dock your Shortcuts bar to either the Top or Bottom of
+                      the screen.</span
                     >
                   </div>
                 </li>
                 <li>
-                  <span class="list-icon">🔗</span>
+                  <span class="list-icon">🎛️</span>
                   <div>
-                    <strong>Link Direction:</strong>
+                    <strong>Widget Expansion:</strong>
                     <span
-                      >Control exactly how and where your shortcuts open.</span
+                      >More granular combinations (e.g., Search & Quote, Weather
+                      & Quote).</span
+                    >
+                  </div>
+                </li>
+                <li>
+                  <span class="list-icon">👁️</span>
+                  <div>
+                    <strong>UI Toggles:</strong>
+                    <span
+                      >Hide greetings and editable text instantly via settings
+                      or shortcut keys.</span
                     >
                   </div>
                 </li>
@@ -111,18 +120,15 @@
             </div>
 
             <div class="info-group">
-              <div class="section-title">🚀 Core Improvements</div>
+              <div class="section-title">🔧 Core Fixes</div>
               <div class="tags-container tight-tags">
-                <span class="tag alert-tag">Privacy First</span>
-                <span class="tag alert-tag">Improved Logic</span>
-                <span class="tag alert-tag-2">Visual Clarity</span>
-                <span class="tag alert-tag-2">Smart Onboarding</span>
-                <span class="tag">Modals Show</span>
-                <span class="tag">Voice Fix</span>
-                <span class="tag">Fluid Animations</span>
-                <span class="tag">Icon Visibility Fix</span>
-                <span class="tag">New Icons</span>
-                <span class="tag">Storage Fixes</span>
+                <span class="tag alert-tag">IndexedDB Storage</span>
+                <span class="tag alert-tag">FOUC Eradicated</span>
+                <span class="tag alert-tag-2">Gradient Clarity</span>
+                <span class="tag alert-tag-2">Animation Polish</span>
+                <span class="tag">Color Logic Fix</span>
+                <span class="tag">Mobile Responsive</span>
+                <span class="tag">Layout Bugs Fixed</span>
               </div>
             </div>
           </div>
@@ -414,6 +420,17 @@
               ></span
             ></label>
           </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Hide Greetings</span
+              ><small>Hide the greeting message.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="hide-greetings-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
           <div class="api-key-section">
             <div class="label">
               <span>Weather Location</span>
@@ -520,6 +537,17 @@
               <option value="weather-quote">Weather &amp; Quote</option>
               <option value="nothing">Nothing</option>
             </select>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Show Editable Text</span
+              ><small>Display custom text under greeting.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="editable-text-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
           </div>
           <div class="setting-row">
             <div class="label">
@@ -682,6 +710,30 @@
                   Random
                 </button>
               </div>
+            </div>
+            <div class="setting-row hidden" id="blur-intensity-row">
+              <div class="label">
+                <span>Blur Intensity</span
+                ><small>Blur the background image.</small>
+              </div>
+              <select
+                id="bg-blur-select"
+                class="settings-dropdown"
+                style="
+                  padding: 5px;
+                  border-radius: 5px;
+                  background: var(--bg-interactive);
+                  color: var(--text-primary);
+                  border: none;
+                "
+              >
+                <option value="0">Off</option>
+                <option value="10">10%</option>
+                <option value="20">20%</option>
+                <option value="30">30%</option>
+                <option value="40">40%</option>
+                <option value="50">50%</option>
+              </select>
             </div>
             <div class="setting-row">
               <div class="label">
@@ -1066,13 +1118,6 @@
             </p>
           </div>
           <div class="info-item">
-            <strong> 📝 Editable Text</strong>
-            <p>
-              Keep the <b>Editable Text</b> field (under Greeting text) empty to
-              remove it.
-            </p>
-          </div>
-          <div class="info-item">
             <strong>⌨️ Key Shortcuts</strong>
             <p>
               Use <b>keyboard shortcuts</b> to navigate faster. Press
@@ -1126,7 +1171,6 @@
       </div>
     </div>
 
-    <!-- Link Direction Modal -->
     <div id="link-direction-modal-overlay" class="hidden">
       <div class="modal-box">
         <button class="modal-close" id="link-direction-modal-close">
@@ -1134,9 +1178,7 @@
         </button>
         <h2>Link Direction</h2>
         <p class="modal-subtitle">Choose where your links open.</p>
-        <div id="link-direction-list" class="key-grid">
-          <!-- Content injected by JS -->
-        </div>
+        <div id="link-direction-list" class="key-grid"></div>
         <div class="modal-footer">
           <button id="reset-link-direction-btn" class="settings-button danger">
             Reset to Defaults
@@ -1242,5 +1284,4 @@
     <script type="module" src="src/main.js"></script>
   </body>
 </html>
-
-<!-- index.html YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) -->
+<!-- [index.html] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) -->

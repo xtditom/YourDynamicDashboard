@@ -51,6 +51,12 @@ export class KeyboardManager {
     } else if (isEnabled("tempDisplay")) {
       const current = state.get("tempDisplayMode");
       state.set("tempDisplayMode", !current);
+    } else if (isEnabled("hideGreetings")) {
+      const current = state.get("hideGreetings");
+      state.set("hideGreetings", !current);
+    } else if (isEnabled("showEditableText")) {
+      const current = state.get("showEditableText");
+      state.set("showEditableText", !current);
     }
 
     // --- NEW: Zen Mode Shortcut ---
@@ -67,7 +73,6 @@ export class KeyboardManager {
         this.clickButton("voice-search-btn");
       }
     } else if (e.key === "Escape") this.closeAllPopups();
-    // Numeric Launchers (1-9)
     else if (key >= "1" && key <= "9") {
       if (isActionEnabled("numKeys")) {
         this.launchShortcut(parseInt(key) - 1);
@@ -104,5 +109,4 @@ export class KeyboardManager {
     if (document.activeElement) document.activeElement.blur();
   }
 }
-
-// src/modules/keyboard.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/keyboard.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)

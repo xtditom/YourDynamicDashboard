@@ -32,6 +32,7 @@ export class Clock {
     this.updateGreeting();
 
     this.toggleDateRow(state.get("showDate") === true);
+    this.toggleGreetings(state.get("hideGreetings") === true);
 
     // --- NEW: Click Greeting to Set Name ---
     if (this.els.greeting) {
@@ -41,8 +42,16 @@ export class Clock {
     }
 
     state.subscribe((key, value) => {
-      if (key === "clockType" || key === "clockFormat") this.update();
+      if (key === "clockType" || key === "clockFormat") {
+        this.update();
+        if (key === "clockType" && this.els.master) {
+          this.els.master.classList.remove("clock-switched");
+          void this.els.master.offsetWidth;
+          this.els.master.classList.add("clock-switched");
+        }
+      }
       if (key === "showDate") this.toggleDateRow(value);
+      if (key === "hideGreetings") this.toggleGreetings(value);
       if (key === "userName") {
         this.currentGreeting = "";
         this.updateGreeting();
@@ -74,6 +83,12 @@ export class Clock {
   toggleDateRow(show) {
     if (this.els.dateRow) {
       this.els.dateRow.classList.toggle("hidden", !show);
+    }
+  }
+
+  toggleGreetings(hide) {
+    if (this.els.greeting) {
+      this.els.greeting.style.display = hide ? "none" : "";
     }
   }
 
@@ -205,5 +220,4 @@ export class Clock {
     }, speed);
   }
 }
-
-// src/modules/clock.js YourDynamicDashboard v2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/clock.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
