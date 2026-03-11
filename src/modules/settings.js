@@ -1745,8 +1745,7 @@ export class SettingsManager {
     this.els.restore.addEventListener("click", () =>
       this.els.restoreInput.click(),
     );
-    this.els.restoreInput.addEventListener("change", (e) => this.restore(e));
-    this.els.reset.addEventListener("click", async () => {
+    this.els.restoreInput.addEventListener("change", (e) => this.restore(e));    this.els.reset.addEventListener("click", async () => {
       if (
         await showCustomModal(
           "Resetting all deletes everything. Make sure you have backed up your settings. Are you sure you want to continue?",
@@ -1754,10 +1753,15 @@ export class SettingsManager {
           true,
         )
       ) {
+        try {
+          await secondStorage.deleteImage();
+        } catch (e) {
+          console.error("Failed to wipe IndexedDB:", e);
+        }
         localStorage.clear();
         location.reload();
       }
-    });
+    });;
   }
 
   renderShortcutEditor() {
