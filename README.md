@@ -1,15 +1,13 @@
 <div align="center">
   <h1 align="center">🚀 YourDynamicDashboard (v2.2.0)</h1>
   <p align="center">
-    <strong>The Polish, Privacy & Productivity Update.</strong><br>
-    Transform your new tab into a powerful, privacy-first command center.<br>
-    Featuring Voice Search, Zen Mode, Drag & Drop, and Instant Weather.
+    <strong>The Performance & Scaling Update.</strong><br>
+    Transform your new tab into a powerful, customizable,<br> minimalist & privacy-first command center.<br>
     <br />
-    <br />
-    <a href="#-features-v210"><strong>Features</strong></a> ·
+    <a href="#-features-of-v2"><strong>Features</strong></a> ·
     <a href="#%EF%B8%8F-installation-guide"><strong>Installation</strong></a> ·
     <a href="#-future-plans"><strong>Future Plans</strong></a> ·
-    <a href="#-mode--theme-overview"><strong>Extension Preview</strong></a>
+    <a href="#-the-showcase"><strong>Extension Preview</strong></a>
   </p>
 </div>
 
@@ -57,22 +55,22 @@
 
 Most New Tab Page/ Dashboards are either too simple (just a clock) or too cluttered (ads and news feeds). **YDD** strikes the perfect balance:
 
-* **🔒 Privacy First:** No tracking. Your data (To-Do lists, links, settings) lives on your computer, not our servers.
+* **🔒 Privacy First:** No tracking. Your data (Search History, To-Do lists, links, settings) lives on your computer, not our servers.
 * **🏎️ Speed:** Built with vanilla JavaScript. No heavy frameworks. Loads instantly.
 * **🎨 Aesthetics:** Glassmorphism UI, animated gradients, and full color control.
 
 ---
 
-## ✨ Features (v2.1)
+## ✨ Features of V2
 
-YourDynamicDashboard has been heavily upgraded with the "Polish & Productivity" patch.
+YourDynamicDashboard has been heavily upgraded with the "Performance & Scaling" patch.
 
 | Category | Premium Features |
 | :--- | :--- |
-| **🤖 Interaction** | <li>**Drag & Drop Engine:** Reorder To-Do tasks, AI Tools, and Google Apps seamlessly.</li><li>**Voice Search ("Jarvis Mode"):** Hands-free control with privacy-browser fallback support.</li><li>**Zen Mode:** Press `Z` to banish all clutter. Only the clock and wallpaper remain.</li><li>**God Mode:** Full keyboard navigation (`1-9`, `T`, `A`, `S`) for power users.</li> |
-| **🎨 Personalization** | <li>**Random Backgrounds:** Fetch fresh wallpapers automatically, and **Freeze** the ones you love.</li><li>**Glow Control:** Toggle the clock's glow and pulsing effects directly in Settings.</li><li>**Toxic Palettes:** New  'Radioactive' and 'Phosphor' theme presets.</li><li>**Personal Greeting:** Double-click the text to set your nickname.</li> |
-| **☁️ Utilities** | <li>**Advanced Weather:** Live local weather including daily Min/Max temperatures. No API keys required.</li><li>**Smart Search:** Switch engines (Google, Bing, DuckDuckGo) or platforms (YouTube, Reddit) instantly.</li><li>**Interactive Onboarding:** Smart, reactive tasks guide new users through hidden features.</li> |
-| **⚡ Quick Access** | <li>**Pinned Tasks:** Keep your highest-priority To-Do items locked at the top of your list.</li><li>**Link Direction:** Control exactly how and where your shortcut links open.</li><li>**AI Tools Menu:** Quick links to ChatGPT, Gemini, Grok, Claude, and more.</li> |
+| **🤖 Interaction** | <li>**Local Search History:** Native-feeling, privacy-first search history with real-time filtering and auto-delete.</li><li>**Drag & Drop Engine:** Reorder To-Do tasks, AI Tools, and Google Apps seamlessly.</li><li>**Voice Search ("Jarvis Mode"):** Hands-free control with privacy-browser fallback support.</li><li>**Zen Mode:** Press `Z` to banish all clutter. Only the clock and wallpaper remain.</li> |
+| **🎨 Personalization** | <li>**Custom Icons:** Upload and set your own image icons for individual web shortcuts.</li><li>**BG Blur Control:** Adjust the blur intensity of custom backgrounds for perfect UI readability.</li><li>**Random Backgrounds:** Fetch fresh wallpapers automatically, and **Freeze** the ones you love.</li><li>**Toxic Palettes:** New  'Radioactive' and 'Phosphor' theme presets.</li> |
+| **☁️ Utilities** | <li>**Advanced Weather:** Live local weather including daily Min/Max temperatures. No API keys required.</li><li>**Smart Search:** Switch engines (Google, Bing, DuckDuckGo) or platforms (YouTube, Reddit) instantly.</li><li>**Widget Expansion:** More granular visibility combinations (e.g., Search & Quote, Weather & Quote).</li> |
+| **⚡ Quick Access** | <li>**UI Toggles:** Hide greetings and editable text instantly via settings or custom shortcut keys.</li><li>**Link Direction:** Control exactly how and where your shortcut links open.</li><li>**Layout Flexibility:** Dock your Shortcuts bar to either the Top or Bottom of the screen.</li> |
 
 ### 🎨 The Showcase
 <table>
@@ -196,11 +194,11 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 #### 🟢 Chromium Browsers (Chrome, Edge, Brave, etc.)
 
 <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
-    <img src="https://img.shields.io/badge/Download%20Latest%20Version-v2.1.0-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
+    <img src="https://img.shields.io/badge/Download%20Latest%20Version-v2.2.0-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
 </a>
 
 **1. Download & Prepare**
-1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.1.0/YourDynamicDashboard-V2.1.zip)
+1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.2.0/YourDynamicDashboard-V2.2.zip)
 2.  **Unzip** the folder to a **permanent location** (e.g., `Downloads/YDD`).
     > ⚠️ **Important:** Do not delete or move this folder after installing, or the extension will stop working.
 
@@ -214,7 +212,7 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 #### 🦊 Gecko Browsers (Firefox, Zen, Waterfox, etc.)
 
 **1. Download & Prepare**
-1.  Download the latest `.xpi` release from above. Or, Direct download: [![Download XPI](https://img.shields.io/badge/Download-XPI-orange.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.1.0/YourDynamicDashboard-V2.1.xpi)
+1.  Download the latest `.xpi` release from above. Or, Direct download: [![Download XPI](https://img.shields.io/badge/Download-XPI-orange.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.2.0/YourDynamicDashboard-V2.2.xpi)
 2.  Keep the `.xpi` file in a **safe location** (e.g., `Downloads/YDD`).
     > ⚠️ **Important:** Do not delete or move this file after installing, or the extension will stop working.
 
@@ -229,12 +227,12 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 
 ## ⚙️ Configuration
 
-**Good news!** As of v2.1.0, **configuration is essentially zero.**
+**Good news!** As of v2.2.0, **configuration is essentially zero.**
 
 * **Weather:** Auto-detects your approximate location securely.
     * *Prefer manual?* Go to **Settings > Functions > Custom Location** and type your city.
 * **Search:** Click the Engine/Platform icon in the search bar to switch between Google, Bing, YouTube, etc.
-* **Shortcuts:** Use the Settings panel to add/edit/delete shortcuts.
+* **Shortcuts:** Use the Settings panel to add/edit/delete shortcuts and upload custom icons.
 
 ---
 
@@ -275,7 +273,7 @@ See the [LICENSE](LICENSE) file for the full legal text and details.
 With **YourDynamicDashboard**, you are the product owner, not the product.
 
 * **No Analytics:** We do not track you.
-* **Local Storage:** Your todos, shortcuts, and themes stay on your PC.
+* **Local Storage:** Your history, todos, shortcuts, and themes stay on your PC.
 * **Icons:** Icons sourced from various open-source libraries.
 * **Voice Search:** Processed locally by your browser's Web Speech API; audio is never sent to us.
 * **Weather Data:** We use [Open-Meteo](https://open-meteo.com/), a privacy-focused open-source weather provider.
