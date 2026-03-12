@@ -13,16 +13,26 @@
 
 <div align="center">
   <img src="https://img.shields.io/github/license/xtditom/YourDynamicDashboard" alt="License">
-  <img src="https://img.shields.io/github/v/release/xtditom/YourDynamicDashboard?color=white" alt="Version">
+  <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest" target="_blank">
+    <img src="https://img.shields.io/github/v/release/xtditom/YourDynamicDashboard?color=white" alt="Version">
+  </a>
   <img src="https://img.shields.io/github/last-commit/xtditom/YourDynamicDashboard" alt="Last Commit">
   <img src="https://img.shields.io/github/stars/xtditom/YourDynamicDashboard?logo=github&color=white" alt="Stars">
 </div>
 
 <div align="center">
-  <img src="https://img.shields.io/chrome-web-store/v/fckmlnagohleefboaleepppikpdkckjn" alt="Chrome Web Store Version">
-  <img src="https://img.shields.io/chrome-web-store/users/fckmlnagohleefboaleepppikpdkckjn" alt="Chrome Web Store Users">
-  <img src="https://img.shields.io/amo/v/yourdynamicdashboard?color=orange" alt="Mozilla Addons Version">
-  <img src="https://img.shields.io/amo/users/yourdynamicdashboard?color=orange" alt="Mozilla Addons Users">
+  <a href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn" target="_blank">
+    <img src="https://img.shields.io/chrome-web-store/v/fckmlnagohleefboaleepppikpdkckjn" alt="Chrome Web Store Version">
+  </a>
+  <a href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn" target="_blank">
+    <img src="https://img.shields.io/chrome-web-store/users/fckmlnagohleefboaleepppikpdkckjn" alt="Chrome Web Store Users">
+  </a>
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/" target="_blank">
+    <img src="https://img.shields.io/amo/v/yourdynamicdashboard?color=orange" alt="Mozilla Addons Version">
+  </a>
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/" target="_blank">
+    <img src="https://img.shields.io/amo/users/yourdynamicdashboard?color=orange" alt="Mozilla Addons Users">
+  </a>
 </div>
 
 <table>
