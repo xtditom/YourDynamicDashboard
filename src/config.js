@@ -41,7 +41,7 @@ export const CONFIG = {
       },
     ],
     welcomeText: "Click to edit",
-    searchProvider: { id: "google", type: "engines" },
+    searchProvider: { id: "perplexity", type: "engines" },
     hiddenTools: {
       "ai-deepseek": true,
       "ai-qwen": true,
@@ -428,11 +428,11 @@ export const SEARCH_PROVIDERS = {
       icon: "brave.png",
     },
     {
-      id: "duckduckgo",
-      name: "DuckDuckGo",
-      url: "https://duckduckgo.com/",
+      id: "perplexity",
+      name: "Perplexity",
+      url: "https://www.perplexity.ai/",
       queryParam: "q",
-      icon: "duckduckgo.png",
+      icon: "perplexity.png",
     },
     {
       id: "yandex",
