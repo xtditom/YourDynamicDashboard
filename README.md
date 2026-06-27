@@ -53,7 +53,7 @@
 <br>
 <div align="center">
   <h3>🔴 For a Live Test:</h3>
-  <a href="https://xtditom.github.io/YourDynamicDashboard/" target="_blank" rel="noopener noreferrer">
+  <a href="https://ditom.me/YourDynamicDashboard/" target="_blank" rel="noopener noreferrer">
     <img src="assets/badges/live-test-badge.svg" alt="Live Demo - Try it now in your browser" height="40">
   </a>
 </div>
