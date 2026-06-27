@@ -5,9 +5,10 @@
     Transform your new tab into a powerful, customizable,<br> minimalist & privacy-first command center.<br>
     <br />
     <a href="#-features-of-v2"><strong>Features</strong></a> ·
-    <a href="#%EF%B8%8F-installation-guide"><strong>Installation</strong></a> ·
-    <a href="#-future-plans"><strong>Future Plans</strong></a> ·
-    <a href="#-the-showcase"><strong>Extension Preview</strong></a>
+    <a href="#-the-showcase"><strong>Extension Preview</strong></a> .
+    <a href="https://ditom.me/ydd"><strong>YDD Landing Page</strong></a> .
+        <a href="#%EF%B8%8F-installation-guide"><strong>Installation</strong></a> ·
+    <a href="#-future-plans"><strong>Future Plans</strong></a>
   </p>
 </div>
 
