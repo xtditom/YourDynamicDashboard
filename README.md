@@ -126,10 +126,10 @@ YourDynamicDashboard has been heavily upgraded with the "Performance & Scaling" 
     <img src="https://img.shields.io/badge/Get%20it%20on-Chrome%20Web%20Store-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white" height="40">
   </a>
   <a href="https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec" target="_blank">
-    <img src="https://img.shields.io/badge/Get%20it%20on-Microsoft%20Edge%20Store-648F31.svg?style=for-the-badge&logo=microsoft&logoColor=white" alt="Microsoft Edge Store" height="40">
+    <img src="https://img.shields.io/badge/Get%20it%20on-Microsoft%20Edge%20Store-648F31?style=for-the-badge&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTExLjQgMEgwdjExLjRoMTEuNFYwek0yNCAwSDEyLjZ2MTEuNEgyNFYwek0xMS40IDEyLjZIMFYyNGgxMS40VjEyLjZ6TTI0IDEyLjZIMTIuNlYyNEgyNFYxMi42eiIvPjwvc3ZnPg%3D%3D" alt="Microsoft Edge Store" height="40">
   </a>
   <a href="https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/" target="_blank">
-  <img src="https://img.shields.io/badge/Get%20it%20on-Firefox%20Add--ons-E66000.svg?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Firefox Add-ons">
+    <img src="https://img.shields.io/badge/Get%20it%20on-Firefox%20Add--ons-E66000?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Firefox Add-ons" height="40">
   </a>
 </p>
 
