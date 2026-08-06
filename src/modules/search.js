@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { CONFIG, SEARCH_PROVIDERS, SEARCH_SUGGESTIONS } from "../config.js";
 import { showCustomModal } from "../utils.js";
+import { BANG_MAP } from "./palette.js";
 
 export class Search {
   constructor() {
@@ -41,6 +42,18 @@ export class Search {
       this.updateButtons();
       
       const val = e.target.value;
+
+      // --- Reactive Bang Search Engine Switcher (!yt , !g , !sp , !ddg , etc.) ---
+      if (val.endsWith(" ") && (val.startsWith("!") || val.startsWith("/"))) {
+        const bangKey = val.trim().substring(1).toLowerCase();
+        const target = BANG_MAP[bangKey];
+        if (target) {
+          this.setProvider(target.id, target.type);
+          this.els.input.value = "";
+          return;
+        }
+      }
+
       const lowerVal = val.toLowerCase();
       const history = state.get("searchHistory") || [];
 

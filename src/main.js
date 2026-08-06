@@ -9,6 +9,7 @@ import { AiTools } from "./modules/aitools.js";
 import { Shortcuts } from "./modules/shortcuts.js";
 import { SettingsManager } from "./modules/settings.js";
 import { KeyboardManager } from "./modules/keyboard.js";
+import { CommandPalette } from "./modules/palette.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   try {
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     new Shortcuts();
     new SettingsManager();
     new KeyboardManager();
+    new CommandPalette();
 
     manageWelcomePopup();
   } catch (error) {

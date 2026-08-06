@@ -12,6 +12,21 @@ export class KeyboardManager {
   handleKey(e) {
     if (e.repeat) return;
 
+    const key = e.key.toLowerCase();
+
+    // Global Command Palette Shortcut: Ctrl+K or Cmd+K
+    if ((e.ctrlKey || e.metaKey) && key === "k") {
+      e.preventDefault();
+      if (window.YD_CommandPalette) {
+        if (window.YD_CommandPalette.isOpen) {
+          window.YD_CommandPalette.close();
+        } else {
+          window.YD_CommandPalette.open();
+        }
+      }
+      return;
+    }
+
     const tag = e.target.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) {
       if (e.key === "Escape") e.target.blur();
@@ -19,7 +34,6 @@ export class KeyboardManager {
     }
 
     const map = state.get("keyMap");
-    const key = e.key.toLowerCase();
 
     const isEnabled = (action) =>
       map && map[action] && map[action].enabled && map[action].key === key;
