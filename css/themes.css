@@ -1,0 +1,267 @@
+/* --- 4. TRANSPARENCY MODES & THEMES --- */
+body.transparency-active .widget-container,
+body.transparency-active .popup-container,
+body.transparency-active .corner-button,
+body.transparency-active .shortcut-icon,
+body.transparency-active #search-dropdown {
+  background-color: rgba(255, 255, 255, 0.15);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+html.high-bg-blur .widget-container,
+html.high-bg-blur .popup-container,
+html.high-bg-blur .corner-button,
+html.high-bg-blur .shortcut-icon,
+html.high-bg-blur #search-dropdown,
+html.high-bg-blur .settings-dropdown,
+html.high-bg-blur .dropdown-item {
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
+body[data-theme="dark"].transparency-active .widget-container,
+body[data-theme="dark"].transparency-active .popup-container,
+body[data-theme="dark"].transparency-active .corner-button,
+body[data-theme="dark"].transparency-active .shortcut-icon,
+body[data-theme="dark"].transparency-active #search-dropdown {
+  background-color: rgba(40, 40, 40, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.gradient-mode-active {
+  background: linear-gradient(
+    var(--gradient-angle, 45deg),
+    var(--gradient-color-1),
+    var(--gradient-color-2),
+    var(--gradient-color-1)
+  );
+  background-size: 300% 300%;
+  animation: gradient-animation 9.25s var(--gradient-timing, ease) infinite;
+}
+
+body[style*="background-image"].gradient-mode-active {
+  background-size: cover !important;
+  animation: none !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+body.gradient-mode-active.transparency-active .widget-container,
+body.gradient-mode-active.transparency-active .popup-container,
+body.gradient-mode-active.transparency-active .corner-button,
+body.gradient-mode-active.transparency-active .shortcut-icon,
+body.gradient-mode-active.transparency-active #search-dropdown {
+  background-color: var(--widget-bg);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--widget-border);
+}
+
+body.gradient-mode-active .widget-container {
+  background-color: var(--widget-bg);
+  border: 1px solid var(--widget-border);
+}
+
+body.gradient-mode-active #digital-clock-container,
+body.gradient-mode-active #digital-clock-container *,
+body.gradient-mode-active #clock-date-row,
+body.gradient-mode-active #greeting-text,
+body.gradient-mode-active #quote-text,
+body.gradient-mode-active #quote-author {
+  color: var(--text-color) !important;
+  text-shadow: var(--text-shadow) !important;
+  animation: none !important;
+}
+
+/* --- THEME PRESETS & SAVED THEMES --- */
+#normal-themes-container,
+#gradient-themes-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+.theme-preset-button {
+  height: 40px;
+  border: 2px solid var(--bg-interactive);
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.theme-preset-button.gradient {
+  color: white !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.theme-preset-button.active,
+.theme-preset-button:hover {
+  border-color: var(--accent-color);
+  transform: scale(1.05);
+}
+
+#saved-themes-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 0.75rem;
+}
+.saved-preset-button {
+  height: 40px;
+  border: 1px dashed var(--border-color);
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.saved-preset-button:hover {
+  border-color: var(--accent-color);
+  color: var(--text-primary);
+}
+.saved-preset-button.filled {
+  border-style: solid;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.saved-preset-button .delete-preset {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  background: #e53e3e;
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.saved-preset-button:hover .delete-preset {
+  opacity: 1;
+}
+
+/* --- X. CUSTOM BG / RANDOM BG OVERRIDES --- */
+body.has-custom-bg::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.25) !important;
+  z-index: -1;
+}
+
+body.has-custom-bg {
+  --text-primary: #ffffff !important;
+  --text-secondary: #e0e0e0 !important;
+  --text-placeholder: #b0b0b0 !important;
+  --accent-color: #ffffff !important;
+  --bg-primary: transparent !important;
+  --bg-secondary: rgba(20, 20, 20, 0.4) !important;
+  --bg-tertiary: rgba(0, 0, 0, 0.45) !important;
+  --bg-interactive: rgba(255, 255, 255, 0.15) !important;
+  --bg-interactive-hover: rgba(255, 255, 255, 0.25) !important;
+  --bg-hover-translucent: rgba(255, 255, 255, 0.1) !important;
+  --border-color: rgba(255, 255, 255, 0.15) !important;
+  --glow-color: rgba(255, 255, 255, 0.5) !important;
+  --text-color: #ffffff !important;
+  --text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.7) !important;
+  --widget-bg: rgba(20, 20, 20, 0.4) !important;
+  --widget-border: rgba(255, 255, 255, 0.15) !important;
+}
+
+body.has-custom-bg #digital-clock-container,
+body.has-custom-bg #clock-date-row,
+body.has-custom-bg #greeting-text,
+body.has-custom-bg #welcome-text,
+body.has-custom-bg #quote-text,
+body.has-custom-bg #quote-author {
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+body.has-custom-bg #custom-location-input::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+body.has-custom-bg .widget-container,
+body.has-custom-bg .popup-container,
+body.has-custom-bg .corner-button,
+body.has-custom-bg .shortcut-icon,
+body.has-custom-bg #search-dropdown {
+  background-color: rgba(20, 20, 20, 0.4) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.has-custom-bg #clock-hours,
+body.has-custom-bg #clock-minutes,
+body.has-custom-bg #clock-seconds {
+  animation: none !important;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.7) !important;
+}
+
+body.has-custom-bg #analog-clock-svg {
+  animation: none !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7)) !important;
+}
+
+/* --- Smart Icon Inversion for Dark Backgrounds --- */
+body.dark-popups:not(.gradient-mode-active) img[src$="/x.png"],
+body.dark-popups:not(.gradient-mode-active) img[src*="chatgpt.png"],
+body.dark-popups:not(.gradient-mode-active) img[src*="grok.png"],
+body.dark-popups:not(.gradient-mode-active) img[src*="notebooklm.png"],
+body.has-custom-bg img[src$="/x.png"],
+body.has-custom-bg img[src*="chatgpt.png"],
+body.has-custom-bg img[src*="grok.png"],
+body.has-custom-bg img[src*="notebooklm.png"],
+body.gradient-dark img[src$="/x.png"],
+body.gradient-dark img[src*="chatgpt.png"],
+body.gradient-dark img[src*="grok.png"],
+body.gradient-dark img[src*="notebooklm.png"] {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* --- Keep Smart Icons Inverted on Hover --- */
+body.dark-popups:not(.gradient-mode-active)
+  .ai-tool-item:hover
+  .ai-tool-icon
+  img[src$="/x.png"],
+body.dark-popups:not(.gradient-mode-active)
+  .ai-tool-item:hover
+  .ai-tool-icon
+  img[src*="chatgpt.png"],
+body.dark-popups:not(.gradient-mode-active)
+  .ai-tool-item:hover
+  .ai-tool-icon
+  img[src*="grok.png"],
+body.dark-popups:not(.gradient-mode-active)
+  .app-item:hover
+  .app-icon[src*="notebooklm.png"],
+body.has-custom-bg .ai-tool-item:hover .ai-tool-icon img[src$="/x.png"],
+body.has-custom-bg .ai-tool-item:hover .ai-tool-icon img[src*="chatgpt.png"],
+body.has-custom-bg .ai-tool-item:hover .ai-tool-icon img[src*="grok.png"],
+body.has-custom-bg .app-item:hover .app-icon[src*="notebooklm.png"],
+body.gradient-dark .ai-tool-item:hover .ai-tool-icon img[src$="/x.png"],
+body.gradient-dark .ai-tool-item:hover .ai-tool-icon img[src*="chatgpt.png"],
+body.gradient-dark .ai-tool-item:hover .ai-tool-icon img[src*="grok.png"],
+body.gradient-dark .app-item:hover .app-icon[src*="notebooklm.png"] {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* [css/themes.css] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) */

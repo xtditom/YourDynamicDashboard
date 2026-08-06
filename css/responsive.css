@@ -1,0 +1,275 @@
+/* --- MASTER LEVEL MOBILE & SMALL SCREEN SCALING --- */
+@media (max-width: 900px) {
+  html {
+    font-size: 14px; 
+  }
+  .layout-container {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  html {
+    font-size: 12px;
+  }
+  .layout-container {
+    padding: 1rem;
+    gap: 1.25rem;
+  }
+
+  .master-clock-container {
+    width: 100% !important;
+    max-width: 100vw;
+  }
+  .widget-container {
+    width: 100% !important;
+    max-width: 100%;
+    padding: 1.25rem;
+  }
+
+  #digital-clock-container {
+    font-size: clamp(3rem, 16vw, 5rem) !important;
+  }
+  #current-temp {
+    font-size: clamp(2rem, 10vw, 2.75rem) !important;
+  }
+  #greeting-text {
+    font-size: clamp(1.5rem, 7vw, 2rem) !important;
+  }
+
+  #analog-clock-container {
+    width: 200px !important;
+    height: 200px !important;
+  }
+  .analog-active {
+    min-height: 220px !important;
+  }
+
+  #weather-widget {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .weather-current {
+    margin-left: 0;
+    align-self: flex-end;
+    margin-top: -1.25rem;
+  }
+
+  .top-left {
+    top: 1rem;
+    left: 1rem;
+  }
+  .bottom-left {
+    bottom: 1rem;
+    left: 1rem;
+  }
+  .top-right {
+    top: 1rem;
+    right: 1rem;
+  }
+  .bottom-right {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .popup-container,
+  .modal-box,
+  .sh-modal,
+  .v2-1-modal {
+    width: calc(100vw - 2rem) !important;
+    max-width: 320px !important;
+    padding: 1rem !important;
+    max-height: 60vh !important; 
+    overflow-y: auto !important;
+  }
+
+  .popup-container {
+    left: 1rem !important;
+    right: auto !important;
+  }
+  #settings-popup,
+  #apps-popup {
+    right: 1rem !important;
+    left: auto !important;
+    transform-origin: bottom right !important;
+  }
+  #todo-popup,
+  #ai-tools-popup {
+    transform-origin: bottom left !important;
+  }
+
+  #apps-popup,
+  #settings-popup,
+  #todo-popup,
+  #ai-tools-popup {
+    max-height: 42vh !important;
+  }
+
+  .popup-container h2,
+  .modal-box h2,
+  .sh-modal h3,
+  .v2-1-modal h1 {
+    font-size: 1.15rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .setting-row,
+  .info-item,
+  .sh-row {
+    padding: 0.4rem !important;
+  }
+  .setting-row .label span {
+    font-size: 0.85rem !important;
+  }
+  .settings-button,
+  .sh-clear-btn {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.8rem !important;
+  }
+  #todo-input {
+    padding: 0.5rem !important;
+    font-size: 0.85rem !important;
+  }
+  .todo-item {
+    padding: 0.4rem !important;
+    font-size: 0.85rem !important;
+  }
+  .settings-header {
+    font-size: 0.8rem !important;
+    margin-bottom: 0 !important;
+  }
+  .toggle-switch {
+    transform: scale(0.85);
+    transform-origin: right center;
+  }
+
+  .app-icon {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .app-name {
+    font-size: 0.75rem !important;
+  }
+  #apps-grid {
+    gap: 2px !important;
+  }
+  #ai-tools-popup {
+    max-height: 75vh !important;
+  }
+  .ai-tool-icon {
+    width: 20px !important;
+    height: 28px !important;
+    margin-right: 1.5rem !important;
+  }
+  .tool-tab-button {
+    font-size: 0.85rem !important;
+    padding: 0.5rem !important;
+  }
+  .ai-tool-item {
+    padding: 0.5rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  #ai-tools-popup.edit-mode .ai-tool-item {
+    padding-left: 2.75rem !important; 
+  }
+  #ai-tools-popup.edit-mode .edit-overlay {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 1rem !important;
+    left: 0.5rem !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .sh-modal-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+  .sh-title-wrap {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .sh-controls-row {
+    width: 100%;
+    justify-content: space-between;
+    gap: 5px;
+  }
+  .sh-auto-delete-select {
+    font-size: 0.75rem !important;
+    padding: 2px 4px !important;
+  }
+
+  #search-dropdown,
+  #sh-quick-dropdown {
+    width: 80% !important;
+    left: 10% !important;
+    max-height: 16.7vh !important;
+    overflow-y: auto !important;
+  }
+  .dropdown-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  html {
+    font-size: 10px;
+  }
+  .layout-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  #analog-clock-container {
+    width: 150px !important;
+    height: 150px !important;
+  }
+  .dropdown-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .weather-current {
+    margin-top: -0.75rem;
+    align-self: flex-end;
+  }
+  #current-temp {
+    font-size: 2.2rem !important;
+  }
+  .popup-container,
+  .modal-box,
+  .sh-modal {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-height: 600px) {
+  .layout-container {
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  #digital-clock-container {
+    font-size: clamp(3rem, 12vh, 5.5rem) !important;
+  }
+  .analog-active {
+    min-height: 180px !important;
+  }
+  #analog-clock-container {
+    width: 140px !important;
+    height: 140px !important;
+  }
+  #quote-widget {
+    display: none !important;
+  } 
+  .corner-button {
+    transform: scale(0.85);
+  } 
+  .popup-container,
+  .modal-box,
+  .sh-modal,
+  .v2-1-modal {
+    max-height: 85vh !important;
+  }
+}
+
+/* [css/responsive.css] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) */

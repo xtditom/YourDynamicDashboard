@@ -1,0 +1,63 @@
+/* --- 1. RESET & VARIABLES --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-primary: #bdbdbd;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #ffffff;
+  --bg-interactive: #686868;
+  --bg-interactive-hover: #9b9b9b;
+  --bg-hover-translucent: rgba(0, 0, 0, 0.15);
+  --text-primary: #1a1a1a;
+  --text-secondary: #65676b;
+  --text-placeholder: #8a8d91;
+  --border-color: #ced0d4;
+  --accent-color: #1a1a1a;
+  --switch-bg: #bcc0c4;
+  --icon-filter: grayscale(0%);
+  --icon-opacity: 1;
+  --glow-color: rgba(0, 0, 0, 0.8);
+
+  --gradient-color-1: #89f7fe;
+  --gradient-color-2: #66a6ff;
+}
+
+body[data-theme="dark"],
+html[data-theme="dark"] body {
+  --bg-primary: #000000;
+  --bg-secondary: #3a3a3a;
+  --bg-tertiary: #2d2d2d;
+  --bg-interactive: #686868;
+  --bg-interactive-hover: #9b9b9b;
+  --bg-hover-translucent: rgba(255, 255, 255, 0.05);
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-placeholder: #9ca3af;
+  --border-color: #5a5a5a;
+  --accent-color: #a1a1a1;
+  --switch-bg: var(--bg-interactive);
+  --icon-filter: grayscale(100%) brightness(1);
+  --icon-opacity: 0.8;
+  --glow-color: rgba(255, 255, 255, 0.7);
+}
+
+:root,
+body[data-theme="dark"] {
+  --text-color: #ffffff;
+  --text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
+  --widget-bg: rgba(0, 0, 0, 0.15);
+  --widget-border: rgba(255, 255, 255, 0.1);
+}
+
+body[data-theme="light"] {
+  --text-color: #1a1a1a;
+  --text-shadow: none;
+  --widget-bg: rgba(255, 255, 255, 0.4);
+  --widget-border: rgba(0, 0, 0, 0.05);
+}
+
+/* [css/variables.css] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) */

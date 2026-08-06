@@ -1,0 +1,211 @@
+/* --- 13. COMMAND PALETTE --- */
+#cp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10500;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10vh;
+  animation: cpOverlayIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+#cp-modal-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s;
+}
+
+@keyframes cpOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cp-modal {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  width: min(600px, 92vw);
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  animation: cpModalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes cpModalIn {
+  from {
+    transform: translateY(-20px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.cp-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.cp-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.cp-search-icon {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+#cp-search-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  outline: none;
+  font-family: inherit;
+}
+
+#cp-search-input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.cp-esc-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background-color: var(--bg-interactive);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  text-transform: uppercase;
+  font-family: monospace;
+}
+
+#cp-command-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#cp-command-list::-webkit-scrollbar {
+  width: 6px;
+}
+#cp-command-list::-webkit-scrollbar-thumb {
+  background-color: var(--bg-interactive);
+  border-radius: 4px;
+}
+
+.cp-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.cp-item:hover,
+.cp-item.active {
+  background-color: var(--bg-hover-translucent);
+}
+
+.cp-item.active {
+  box-shadow: inset 3px 0 0 var(--accent-color);
+}
+
+.cp-item-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cp-item-icon {
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.cp-item-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.cp-item-badge {
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: bold;
+  background-color: var(--bg-interactive);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 0 var(--border-color);
+}
+
+.cp-empty-msg {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.search-cp-badge {
+  background-color: var(--bg-interactive);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  font-family: monospace;
+  font-size: 0.64rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-right: 6px;
+  margin-left: 2px;
+  opacity: 0.75;
+  transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
+  box-shadow: 0 1px 0 var(--border-color);
+  flex-shrink: 0;
+}
+.search-cp-badge:hover {
+  opacity: 1;
+  background-color: var(--bg-interactive-hover);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 540px) {
+  .search-cp-badge {
+    display: none !important;
+  }
+}
+
+/* [css/palette.css] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) */
