@@ -260,6 +260,14 @@ export class CommandPalette {
   }
 
   registerEvents() {
+    const badge = document.getElementById("search-cp-badge");
+    if (badge) {
+      badge.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.open();
+      });
+    }
+
     this.els.overlay.addEventListener("click", (e) => {
       if (e.target === this.els.overlay) {
         this.close();
