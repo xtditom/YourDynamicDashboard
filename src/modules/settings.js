@@ -30,7 +30,8 @@ const ALIEN_DARK = {
   "--icon-opacity": "0.9",
 };
 
-const THEMES = {
+export const THEMES = {
+
   normal: [
     {
       id: "default-light",
@@ -237,12 +238,18 @@ const THEMES = {
 
 export class SettingsManager {
   static instance = null;
+  static THEMES = null;
 
   constructor() {
     if (SettingsManager.instance) {
       return SettingsManager.instance;
     }
     SettingsManager.instance = this;
+    SettingsManager.THEMES = THEMES;
+
+    // Expose for full settings modal module
+    window.__settingsManagerInstance = this;
+    window.__YDD_THEMES = THEMES;
 
     this.els = {
       btn: document.getElementById("settings-toggle-button"),
@@ -1682,56 +1689,62 @@ export class SettingsManager {
     if (this.els.locDetect) {
       this.els.locDetect.addEventListener("click", () => this.detectLocation());
     }
-    this.els.uploadBg.addEventListener("click", () => {
-      this.els.bgInput.value = "";
-      this.els.bgInput.click();
-    });
-    this.els.bgInput.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const objectUrl = URL.createObjectURL(file);
-
-      document.body.classList.add("has-custom-bg");
-      document.body.style.setProperty("background-image", `url("${objectUrl}")`, "important");
-      document.body.style.setProperty("background-size", "cover", "important");
-      document.body.style.setProperty("background-position", "center", "important");
-      if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
-      this.updateRandomBgButtons();
-      this.updateAutoThemeGlowState();
-
-      try {
-        await secondStorage.saveImage(file);
-        localStorage.setItem("has_idb_bg", "true");
-        
-        state.set("randomBgMode", null);
-        state.set("backgroundImage", null);
-        localStorage.removeItem("lowResBg"); 
-      } catch (idbErr) {
-        console.warn("IndexedDB blocked by browser shields. Failing silently without modal.", idbErr);
-      }
-
-      this.els.bgInput.value = "";
-    });
-    this.els.removeBg.addEventListener("click", () => {
-      secondStorage.deleteImage().catch(err => console.error(err));
-      state.set("backgroundImage", null);
-      state.set("randomBgMode", null);
-      localStorage.removeItem("has_idb_bg");
-      document.body.classList.remove("has-custom-bg");
-      document.body.style.removeProperty("background-image");
-      document.body.style.removeProperty("background-size");
-      document.body.style.removeProperty("background-position");
-      
-      document.querySelectorAll("style").forEach(styleEl => {
-        if (styleEl.textContent.includes("background-image: url")) {
-          styleEl.remove();
-        }
+    if (this.els.uploadBg) {
+      this.els.uploadBg.addEventListener("click", () => {
+        this.els.bgInput.value = "";
+        this.els.bgInput.click();
       });
-      this.els.removeBg.classList.add("hidden");
-      this.updateRandomBgButtons();
-      this.updateAutoThemeGlowState();
-    });
+    }
+    if (this.els.bgInput) {
+      this.els.bgInput.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const objectUrl = URL.createObjectURL(file);
+
+        document.body.classList.add("has-custom-bg");
+        document.body.style.setProperty("background-image", `url("${objectUrl}")`, "important");
+        document.body.style.setProperty("background-size", "cover", "important");
+        document.body.style.setProperty("background-position", "center", "important");
+        if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
+        this.updateRandomBgButtons();
+        this.updateAutoThemeGlowState();
+
+        try {
+          await secondStorage.saveImage(file);
+          localStorage.setItem("has_idb_bg", "true");
+          
+          state.set("randomBgMode", null);
+          state.set("backgroundImage", null);
+          localStorage.removeItem("lowResBg"); 
+        } catch (idbErr) {
+          console.warn("IndexedDB blocked by browser shields. Failing silently without modal.", idbErr);
+        }
+
+        this.els.bgInput.value = "";
+      });
+    }
+    if (this.els.removeBg) {
+      this.els.removeBg.addEventListener("click", () => {
+        secondStorage.deleteImage().catch(err => console.error(err));
+        state.set("backgroundImage", null);
+        state.set("randomBgMode", null);
+        localStorage.removeItem("has_idb_bg");
+        document.body.classList.remove("has-custom-bg");
+        document.body.style.removeProperty("background-image");
+        document.body.style.removeProperty("background-size");
+        document.body.style.removeProperty("background-position");
+        
+        document.querySelectorAll("style").forEach(styleEl => {
+          if (styleEl.textContent.includes("background-image: url")) {
+            styleEl.remove();
+          }
+        });
+        this.els.removeBg.classList.add("hidden");
+        this.updateRandomBgButtons();
+        this.updateAutoThemeGlowState();
+      });
+    }
     if (this.els.shortcutForm) {
       this.els.shortcutForm.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -1741,27 +1754,34 @@ export class SettingsManager {
         inputs[1].value = "";
       });
     }
-    this.els.backup.addEventListener("click", () => this.backup());
-    this.els.restore.addEventListener("click", () =>
-      this.els.restoreInput.click(),
-    );
-    this.els.restoreInput.addEventListener("change", (e) => this.restore(e));    this.els.reset.addEventListener("click", async () => {
-      if (
-        await showCustomModal(
-          "Resetting all deletes everything. Make sure you have backed up your settings. Are you sure you want to continue?",
-          true,
-          true,
-        )
-      ) {
-        try {
-          await secondStorage.deleteImage();
-        } catch (e) {
-          console.error("Failed to wipe IndexedDB:", e);
+    if (this.els.backup) {
+      this.els.backup.addEventListener("click", () => this.backup());
+    }
+    if (this.els.restore && this.els.restoreInput) {
+      this.els.restore.addEventListener("click", () =>
+        this.els.restoreInput.click(),
+      );
+      this.els.restoreInput.addEventListener("change", (e) => this.restore(e));
+    }
+    if (this.els.reset) {
+      this.els.reset.addEventListener("click", async () => {
+        if (
+          await showCustomModal(
+            "Resetting all deletes everything. Make sure you have backed up your settings. Are you sure you want to continue?",
+            true,
+            true,
+          )
+        ) {
+          try {
+            await secondStorage.deleteImage();
+          } catch (e) {
+            console.error("Failed to wipe IndexedDB:", e);
+          }
+          localStorage.clear();
+          location.reload();
         }
-        localStorage.clear();
-        location.reload();
-      }
-    });;
+      });
+    }
   }
 
   renderShortcutEditor() {

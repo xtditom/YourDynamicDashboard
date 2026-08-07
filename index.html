@@ -348,47 +348,58 @@
 
     <div id="settings-popup" class="popup-container">
       <div style="position: relative; text-align: center; margin-bottom: 1rem">
-        <h2 style="margin: 0; display: inline-block">Tab Settings</h2>
         <button
           id="info-btn"
-          title="Tips & Tricks"
-          style="
-            position: absolute;
-            right: 0;
-            top: 0;
-            background: none;
-            border: none;
-            color: var(--accent-color);
-            cursor: pointer;
-          "
+          title="Tips &amp; Tricks"
+          style="position: absolute; left: 0; top: 0"
         >
           <svg
             height="24"
             width="24"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 256 256"
-            fill="currentColor"
+            fill="#ffffff"
           >
             <path
-              d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z"
+              d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
             />
+          </svg>
+        </button>
+        <h2 style="margin: 0; display: inline-block">Mini Settings</h2>
+        <button
+          id="open-full-settings-btn"
+          title="Open Full Settings"
+          style="position: absolute; right: 0; top: 0"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
           </svg>
         </button>
       </div>
 
       <div class="settings-tabs">
         <button id="functions-tab" class="settings-tab-button active">
-          Functions
+          Quick
         </button>
-        <button id="appearance-tab" class="settings-tab-button">
-          Appearance
-        </button>
-        <button id="shortcuts-tab" class="settings-tab-button">
-          Shortcuts
-        </button>
+        <button id="appearance-tab" class="settings-tab-button">Widgets</button>
+        <button id="shortcuts-tab" class="settings-tab-button">Weather</button>
       </div>
 
       <div class="settings-content">
+        <!-- Quick Tab -->
         <div id="functions-content" class="settings-pane active">
           <div class="setting-row">
             <div class="label">
@@ -396,16 +407,6 @@
             </div>
             <label class="toggle-switch"
               ><input type="checkbox" id="clock-type-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
-          </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Day & Date</span><small>Display the day and date.</small>
-            </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="date-visibility-toggle" /><span
                 class="slider"
               ></span
             ></label>
@@ -422,6 +423,16 @@
           </div>
           <div class="setting-row">
             <div class="label">
+              <span>Day & Date</span><small>Display the day and date.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="date-visibility-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-row">
+            <div class="label">
               <span>Hide Greetings</span
               ><small>Hide the greeting message.</small>
             </div>
@@ -431,87 +442,31 @@
               ></span
             ></label>
           </div>
-          <div class="api-key-section">
-            <div class="label">
-              <span>Weather Location</span>
-            </div>
-            <div class="api-key-input-wrapper" style="display: flex; gap: 8px">
-              <input
-                type="text"
-                id="custom-location-input"
-                placeholder="Enter city name..."
-                style="flex: 1"
-              />
-              <button id="save-location-btn" class="settings-button">
-                Save
-              </button>
-              <button
-                id="settings-gps-btn"
-                class="settings-button"
-                title="Detect My Location"
-                style="
-                  padding: 0 12px;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                "
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18">
-                  <g fill="none" fill-rule="evenodd">
-                    <path
-                      d="M18 0v18H0V0zM9.445 17.443l-.008.002-.053.026-.015.003-.011-.003-.053-.026c-.008-.003-.014-.001-.018.004l-.003.007-.013.321.004.015.008.01.078.056.011.003.009-.003.078-.056.009-.012.003-.013-.013-.32a.016.016 0 0 0-.013-.014m.199-.085-.01.002-.139.07-.007.007-.003.008.014.323.004.009.006.005.15.07c.009.003.017 0 .022-.006l.003-.01-.026-.46c-.002-.009-.007-.015-.015-.016m-.536.001a.017.017 0 0 0-.02.005l-.005.01-.025.46c0 .009.005.015.013.018l.011-.001.151-.07.007-.006.003-.008.013-.322-.002-.009-.008-.008z"
-                    />
-                    <path
-                      fill="currentColor"
-                      fill-rule="nonzero"
-                      d="M5.04 12.48a.75.75 0 0 1 .42 1.44c-.375.11-.645.225-.818.33.178.107.46.227.852.339C6.36 14.836 7.6 15 9 15s2.64-.164 3.506-.411c.392-.112.674-.232.852-.339-.173-.105-.443-.22-.818-.33a.75.75 0 0 1 .42-1.44c.501.146.96.334 1.313.575.326.224.727.615.727 1.195 0 .587-.411.98-.743 1.205-.358.241-.827.43-1.34.576C11.884 16.327 10.5 16.5 9 16.5s-2.885-.173-3.918-.469c-.512-.146-.981-.335-1.34-.576C3.332 15.23 2.92 14.836 2.92 14.25c0-.58.401-.971.727-1.195.353-.241.812-.428 1.313-.575M9 1.5a5.625 5.625 0 0 1 5.625 5.625c0 1.926-1.05 3.492-2.137 4.605A12.3 12.3 0 0 1 11.098 12.94c-.446.335-1.464.962-1.464.962a1.283 1.283 0 0 1-1.268 0s-1.018-.627-1.464-.962a12.217 12.217 0 0 1-1.39-1.21C4.425 10.617 3.375 9.051 3.375 7.125A5.625 5.625 0 0 1 9 1.5m0 4.125a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"
-                    />
-                  </g>
-                </svg>
-              </button>
-            </div>
-          </div>
           <div class="setting-row">
             <div class="label">
-              <span>Temperature Unit</span><small>Toggle for Fahrenheit.</small>
+              <span>Dark Mode</span><small>Enable the dark theme.</small>
             </div>
             <label class="toggle-switch"
-              ><input type="checkbox" id="temp-unit-toggle" /><span
+              ><input type="checkbox" id="dark-mode-toggle" /><span
                 class="slider"
               ></span
             ></label>
           </div>
           <div class="setting-row">
             <div class="label">
-              <span>Temperature Display</span
-              ><small>Switch between Min-Max and Feels like.</small>
+              <span>Show Editable Text</span
+              ><small>Display custom text under greeting.</small>
             </div>
             <label class="toggle-switch"
-              ><input type="checkbox" id="temp-display-toggle" /><span
+              ><input type="checkbox" id="editable-text-toggle" /><span
                 class="slider"
               ></span
             ></label>
           </div>
+        </div>
 
-          <div class="setting-row">
-            <div class="label">
-              <span>Shortcut Keys</span
-              ><small>Customize keyboard controls.</small>
-            </div>
-            <button id="edit-keys-btn" class="settings-button">Open</button>
-          </div>
-
-          <div class="setting-row">
-            <div class="label">
-              <span>Link Direction</span><small>Set where links open.</small>
-            </div>
-            <button id="edit-link-direction-btn" class="settings-button">
-              Open
-            </button>
-          </div>
-
-          <div class="settings-divider"></div>
-          <h3 class="settings-header">Element Control</h3>
+        <!-- Widgets Tab -->
+        <div id="appearance-content" class="settings-pane">
           <div class="setting-row">
             <div class="label">
               <span>Widget Control</span>
@@ -537,17 +492,6 @@
               <option value="weather-quote">Weather &amp; Quote</option>
               <option value="nothing">Nothing</option>
             </select>
-          </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Show Editable Text</span
-              ><small>Display custom text under greeting.</small>
-            </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="editable-text-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
           </div>
           <div class="setting-row">
             <div class="label">
@@ -582,287 +526,6 @@
               ></span
             ></label>
           </div>
-
-          <div class="settings-divider"></div>
-          <h3 class="settings-header">Backup & Restore</h3>
-          <div class="backup-controls">
-            <button id="backup-button" class="settings-button">Backup</button>
-            <button id="restore-button" class="settings-button">Restore</button>
-            <input
-              type="file"
-              id="restore-file-input"
-              accept=".json"
-              class="hidden"
-            />
-            <button id="reset-button" class="settings-button danger">
-              Reset All
-            </button>
-          </div>
-          <div class="settings-divider"></div>
-          <h3 class="settings-header">Others</h3>
-          <div class="about-section">
-            <div class="about-row">
-              <button id="check-for-updates-btn" class="icon-button">
-                <svg
-                  stroke="currentColor"
-                  fill="currentColor"
-                  height="24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  id="mdi-update"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z"
-                  />
-                </svg>
-                <span>Check for Updates</span>
-              </button>
-            </div>
-            <div class="about-row">
-              <button id="github-repo-btn" class="icon-button">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path
-                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
-                  />
-                </svg>
-                <span>GitHub</span>
-              </button>
-              <a
-                href="privacy-policy.html"
-                rel="noopener noreferrer"
-                class="icon-button"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.25 5C17.5866 5 14.992 4.05652 12.45 2.15C12.1833 1.95 11.8167 1.95 11.55 2.15C9.00797 4.05652 6.41341 5 3.75 5C3.33579 5 3 5.33579 3 5.75V11C3 16.0012 5.95756 19.6757 11.7251 21.9478C11.9018 22.0174 12.0982 22.0174 12.2749 21.9478C18.0424 19.6757 21 16.0012 21 11V5.75C21 5.33579 20.6642 5 20.25 5ZM16.7568 9.30287L10.7568 14.8029C10.4608 15.0742 10.0036 15.0643 9.71967 14.7803L7.21967 12.2803C6.92678 11.9874 6.92678 11.5126 7.21967 11.2197C7.51256 10.9268 7.98744 10.9268 8.28033 11.2197L10.2726 13.2119L15.7432 8.19714C16.0485 7.91724 16.523 7.93787 16.8029 8.24321C17.0828 8.54855 17.0621 9.02297 16.7568 9.30287Z"
-                    fill="currentColor"
-                  />
-                </svg>
-                <span>Privacy Policy</span>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div id="appearance-content" class="settings-pane">
-          <div id="theme-color-note" class="settings-note">
-            <p>
-              Advanced Colors will work when the 'Dark Mode' is off and you are
-              not using "Gradient Theme".
-            </p>
-          </div>
-          <div id="standard-theme-controls">
-            <div class="setting-row">
-              <div class="label">
-                <span>Dark Mode</span><small>Enable the dark theme</small>
-              </div>
-              <label class="toggle-switch"
-                ><input type="checkbox" id="dark-mode-toggle" /><span
-                  class="slider"
-                ></span
-              ></label>
-            </div>
-            <div class="setting-row">
-              <div class="label">
-                <span>Custom BG</span><small>Upload an image</small>
-              </div>
-              <div class="background-controls">
-                <button id="upload-bg-button" class="settings-button">
-                  Upload
-                </button>
-                <input
-                  type="file"
-                  id="bg-file-input"
-                  accept="image/*"
-                  class="hidden"
-                />
-                <button id="remove-bg-button" class="settings-button hidden">
-                  Remove
-                </button>
-              </div>
-            </div>
-            <div class="setting-row">
-              <div class="label">
-                <span>Random BG</span
-                ><small>Fetch image from Lorem Picsum.</small>
-              </div>
-              <div class="background-controls">
-                <button
-                  id="random-bg-freeze-btn"
-                  class="settings-button hidden"
-                >
-                  Freeze
-                </button>
-                <button id="random-bg-rnd-btn" class="settings-button">
-                  Random
-                </button>
-              </div>
-            </div>
-            <div class="setting-row hidden" id="blur-intensity-row">
-              <div class="label">
-                <span>Blur Intensity</span
-                ><small>Blur the background image.</small>
-              </div>
-              <select
-                id="bg-blur-select"
-                class="settings-dropdown"
-                style="
-                  padding: 5px;
-                  border-radius: 5px;
-                  background: var(--bg-interactive);
-                  color: var(--text-primary);
-                  border: none;
-                "
-              >
-                <option value="0">Off</option>
-                <option value="10">10%</option>
-                <option value="20">20%</option>
-                <option value="30">30%</option>
-                <option value="40">40%</option>
-                <option value="50">50%</option>
-              </select>
-            </div>
-            <div class="setting-row">
-              <div class="label">
-                <span>Auto Theme</span
-                ><small>Randomize theme on every new tab.</small>
-              </div>
-              <label class="toggle-switch"
-                ><input type="checkbox" id="auto-theme-toggle" /><span
-                  class="slider"
-                ></span
-              ></label>
-            </div>
-            <div class="setting-row">
-              <div class="label">
-                <span>Glow Effect</span
-                ><small>Toggle clock glow & pulsing.</small>
-              </div>
-              <label class="toggle-switch"
-                ><input type="checkbox" id="glow-effect-toggle" /><span
-                  class="slider"
-                ></span
-              ></label>
-            </div>
-          </div>
-
-          <div class="settings-divider"></div>
-          <h3 class="settings-header">Theme Presets</h3>
-          <div id="normal-themes-container"></div>
-
-          <div class="settings-divider"></div>
-          <h3 class="settings-header">Gradient Theme Presets</h3>
-          <div id="gradient-themes-container"></div>
-
-          <div class="settings-divider"></div>
-          <h3 class="settings-header">Saved Presets</h3>
-          <div
-            class="setting-row"
-            style="background: transparent; padding: 0 0 10px 0"
-          >
-            <button id="save-current-theme-btn" class="settings-button">
-              Save Current Theme
-            </button>
-          </div>
-          <div id="saved-themes-container"></div>
-
-          <div id="advanced-color-controls">
-            <div class="settings-divider"></div>
-            <h3 class="settings-header">Advanced Colors</h3>
-            <p
-              id="advanced-color-warning"
-              class="settings-note hidden"
-              style="
-                color: var(--text-secondary);
-                font-weight: bold;
-                margin-top: 7px;
-                margin-bottom: 15px;
-              "
-            >
-              (Switch to Normal Theme to use Advanced Colors)
-            </p>
-            <div class="setting-row">
-              <div class="label">
-                <span>Primary Background</span
-                ><small>Set color for the theme</small>
-              </div>
-              <input type="color" id="bg-primary-picker" class="color-picker" />
-            </div>
-            <div class="setting-row">
-              <div class="label"><small>Widgets Background</small></div>
-              <input
-                type="color"
-                id="bg-secondary-picker"
-                class="color-picker"
-              />
-            </div>
-            <div class="setting-row">
-              <div class="label"><small>Popups Background</small></div>
-              <input
-                type="color"
-                id="bg-tertiary-picker"
-                class="color-picker"
-              />
-            </div>
-            <div class="setting-row">
-              <div class="label"><small>Accent Color</small></div>
-              <input
-                type="color"
-                id="theme-color-picker"
-                class="color-picker"
-              />
-            </div>
-            <div class="setting-row">
-              <div class="label">
-                <span>Primary Text</span
-                ><small>Set color for Primary Text</small>
-              </div>
-              <input
-                type="color"
-                id="text-primary-picker"
-                class="color-picker"
-              />
-            </div>
-            <div class="setting-row">
-              <div class="label"><small>Secondary Text</small></div>
-              <input
-                type="color"
-                id="text-secondary-picker"
-                class="color-picker"
-              />
-            </div>
-            <div class="setting-row">
-              <div class="label"><small>SearchBox Text</small></div>
-              <input
-                type="color"
-                id="text-placeholder-picker"
-                class="color-picker"
-              />
-            </div>
-            <div class="setting-row">
-              <div class="label">
-                <span>Glow Effect</span
-                ><small>Set Clock's glow effect color</small>
-              </div>
-              <input type="color" id="glow-color-picker" class="color-picker" />
-            </div>
-          </div>
-        </div>
-
-        <div id="shortcuts-content" class="settings-pane">
           <div class="setting-row">
             <div class="label">
               <span>Shortcuts Position</span>
@@ -884,26 +547,68 @@
               <option value="hide">Hide</option>
             </select>
           </div>
-          <div id="shortcuts-editor-list"></div>
-          <form id="add-shortcut-form">
-            <h3 class="settings-header">Add New Shortcut</h3>
-            <div class="add-shortcut-inputs">
-              <input
-                type="text"
-                id="shortcut-name-input"
-                placeholder="Name (e.g., Google)"
-                maxlength="35"
-                required
-              />
-              <input
-                type="text"
-                id="shortcut-url-input"
-                placeholder="URL (e.g., https://google.com)"
-                required
-              />
+        </div>
+
+        <!-- Weather Tab -->
+        <div id="shortcuts-content" class="settings-pane">
+          <div class="api-key-section">
+            <div class="label">
+              <span>Weather Location</span>
             </div>
-            <button type="submit" class="settings-button">Add Shortcut</button>
-          </form>
+            <div class="api-key-input-wrapper" style="display: flex; gap: 8px">
+              <input
+                type="text"
+                id="custom-location-input"
+                placeholder="Enter city name..."
+                style="flex: 1"
+              />
+              <button id="save-location-btn" class="settings-button">
+                Save
+              </button>
+              <button
+                id="settings-gps-btn"
+                class="settings-button"
+                title="Detect My Location"
+                style="
+                  padding: 0 12px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+                  <g fill="none" fill-rule="evenodd">
+                    <path
+                      fill="currentColor"
+                      fill-rule="nonzero"
+                      d="M5.04 12.48a.75.75 0 0 1 .42 1.44c-.375.11-.645.225-.818.33.178.107.46.227.852.339C6.36 14.836 7.6 15 9 15s2.64-.164 3.506-.411c.392-.112.674-.232.852-.339-.173-.105-.443-.22-.818-.33a.75.75 0 0 1 .42-1.44c.501.146.96.334 1.313.575.326.224.727.615.727 1.195 0 .587-.411.98-.743 1.205-.358.241-.827.43-1.34.576C11.884 16.327 10.5 16.5 9 16.5s-2.885-.173-3.918-.469c-.512-.146-.981-.335-1.34-.576C3.332 15.23 2.92 14.836 2.92 14.25c0-.58.401-.971.727-1.195.353-.241.812-.428 1.313-.575M9 1.5a5.625 5.625 0 0 1 5.625 5.625c0 1.926-1.05 3.492-2.137 4.605A12.3 12.3 0 0 1 11.098 12.94c-.446.335-1.464.962-1.464.962a1.283 1.283 0 0 1-1.268 0s-1.018-.627-1.464-.962a12.217 12.217 0 0 1-1.39-1.21C4.425 10.617 3.375 9.051 3.375 7.125A5.625 5.625 0 0 1 9 1.5m0 4.125a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"
+                    />
+                  </g>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Temperature Unit</span><small>Toggle for Fahrenheit.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="temp-unit-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Temperature Display</span
+              ><small>Switch between Min-Max and Feels like.</small>
+            </div>
+            <label class="toggle-switch"
+              ><input type="checkbox" id="temp-display-toggle" /><span
+                class="slider"
+              ></span
+            ></label>
+          </div>
         </div>
       </div>
 
@@ -1061,7 +766,12 @@
             autocomplete="off"
           />
 
-          <span class="search-cp-badge" id="search-cp-badge" title="Open Command Palette (Ctrl+K)">Ctrl+K</span>
+          <span
+            class="search-cp-badge"
+            id="search-cp-badge"
+            title="Open Command Palette (Ctrl+K)"
+            >Ctrl+K</span
+          >
 
           <button type="button" id="voice-search-btn" title="Voice Search">
             <svg

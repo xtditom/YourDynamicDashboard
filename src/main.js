@@ -8,6 +8,7 @@ import { AppGrid } from "./modules/apps.js";
 import { AiTools } from "./modules/aitools.js";
 import { Shortcuts } from "./modules/shortcuts.js";
 import { SettingsManager } from "./modules/settings.js";
+import { FullSettingsModal } from "./modules/settingsModal.js";
 import { KeyboardManager } from "./modules/keyboard.js";
 import { CommandPalette } from "./modules/palette.js";
 
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     new AiTools();
     new Shortcuts();
     new SettingsManager();
+    new FullSettingsModal();
     new KeyboardManager();
     new CommandPalette();
 

@@ -1,0 +1,296 @@
+/* ===== FULL SETTINGS MODAL ===== */
+
+/* --- Overlay --- */
+#full-settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+#full-settings-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- Modal Window --- */
+#full-settings-modal {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 680px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  position: absolute;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+#full-settings-modal.is-dragging {
+  user-select: none;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+/* --- Titlebar (drag handle) --- */
+.fs-titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+}
+.fs-titlebar:active,
+#full-settings-modal.is-dragging .fs-titlebar {
+  cursor: grabbing;
+}
+.fs-titlebar h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.fs-titlebar h2 .fs-title-icon {
+  font-size: 1.3rem;
+}
+.fs-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+  flex-shrink: 0;
+}
+.fs-close-btn:hover {
+  background-color: var(--bg-interactive);
+  color: var(--text-primary);
+}
+
+/* --- Tabs --- */
+.fs-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 1rem;
+  flex-shrink: 0;
+}
+.fs-tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.75rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.fs-tab-btn:hover {
+  color: var(--text-primary);
+}
+.fs-tab-btn.active {
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+}
+
+/* --- Content Area --- */
+.fs-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+}
+.fs-content::-webkit-scrollbar {
+  width: 6px;
+}
+.fs-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.fs-content::-webkit-scrollbar-thumb {
+  background-color: var(--bg-interactive);
+  border-radius: 3px;
+}
+.fs-content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent-color);
+}
+
+/* --- Panes --- */
+.fs-pane {
+  display: none;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.fs-pane.active {
+  display: flex;
+}
+
+/* --- Sections --- */
+.fs-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.fs-section-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* --- Theme grid inside full modal --- */
+.fs-themes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+.fs-saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 0.75rem;
+}
+
+/* --- Color picker grid --- */
+.fs-color-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* --- Shortcut editor in full modal --- */
+.fs-shortcuts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* --- Key editor & link direction in full modal --- */
+.fs-key-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.fs-key-grid::-webkit-scrollbar {
+  width: 5px;
+}
+.fs-key-grid::-webkit-scrollbar-thumb {
+  background: var(--bg-interactive);
+  border-radius: 3px;
+}
+
+/* --- Backup controls in full modal --- */
+.fs-backup-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* --- About section --- */
+.fs-about-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* --- Footer --- */
+.fs-footer {
+  color: var(--text-secondary);
+  border-top: 1px solid var(--bg-interactive);
+  text-align: center;
+  font-size: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  flex-shrink: 0;
+}
+.fs-footer p {
+  margin: 0;
+  line-height: 1.4;
+}
+.fs-footer a {
+  color: inherit;
+}
+
+/* --- Open Full Settings & Info buttons in mini popup --- */
+#open-full-settings-btn,
+#info-btn {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+}
+#open-full-settings-btn:hover,
+#info-btn:hover {
+  background-color: var(--bg-interactive);
+  transform: scale(1.1);
+}
+
+/* --- Responsive --- */
+@media (max-width: 700px) {
+  #full-settings-modal {
+    width: 96%;
+    max-height: 90vh;
+    border-radius: 12px;
+  }
+  .fs-titlebar {
+    padding: 0.75rem 1rem;
+  }
+  .fs-content {
+    padding: 1rem;
+  }
+  .fs-tab-btn {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.25rem;
+  }
+  .fs-color-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .fs-tabs {
+    padding: 0 0.5rem;
+  }
+  .fs-tab-btn {
+    font-size: 0.75rem;
+  }
+}
+
+/* [css/settings-modal.css] YourDynamicDashboard V2.3 (Ditom Baroi Antu - 2025-26) */
