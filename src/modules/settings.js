@@ -30,13 +30,24 @@ const ALIEN_DARK = {
   "--icon-opacity": "0.9",
 };
 
-export const THEMES = {
+export function getThemeRightColor(theme) {
+  if (!theme || !theme.colors) return "#ffffff";
+  if (theme.id === "theme-3" || theme.name === "Azure Sky") return "#006EFF";
+  if (theme.id === "theme-7" || theme.name === "Phosphor") return "#91AA5B";
+  return (
+    theme.colors["--accent-color"] ||
+    theme.colors["--text-primary"] ||
+    "#ffffff"
+  );
+}
+window.__getThemeRightColor = getThemeRightColor;
 
+export const THEMES = {
   normal: [
     {
       id: "default-light",
       type: "light",
-      name: "Default Light",
+      name: "Light",
       colors: {
         "--bg-primary": "#c3c3c3",
         "--bg-secondary": "#ffffff",
@@ -51,7 +62,7 @@ export const THEMES = {
     {
       id: "default-dark",
       type: "default-dark",
-      name: "Default Dark",
+      name: "Dark",
       colors: {
         "--bg-primary": "#0a0a0a",
         "--bg-secondary": "#3a3a3a",
@@ -325,6 +336,7 @@ export class SettingsManager {
     this.setupEventListeners();
     this.renderThemes();
     this.renderSavedThemes();
+    this.renderMiniThemes();
     this.renderShortcutEditor();
 
     state.subscribe((key, value) => {
@@ -362,6 +374,22 @@ export class SettingsManager {
         }
         this.updateClockFormatState();
       }
+      if (key === "userSavedThemes") {
+        this.renderSavedThemes();
+        this.renderMiniThemes();
+      }
+      if (key === "keyMap") {
+        this.renderKeyEditor();
+      }
+      if (
+        key === "gradientModeActive" ||
+        key === "backgroundImage" ||
+        key === "randomBgMode" ||
+        key === "normalThemeId" ||
+        key === "gradientThemeId"
+      ) {
+        this.updateAutoThemeGlowState();
+      }
       if (key === "glowEffect") {
         const isGlowOn = value !== false;
         if (this.els.glowToggle) this.els.glowToggle.checked = isGlowOn;
@@ -393,11 +421,19 @@ export class SettingsManager {
     this.bindSimpleToggle(this.els.apps, "showApps", true);
     this.bindSimpleToggle(this.els.ai, "showAiTools", true);
     this.bindSimpleToggle(this.els.autoThemeToggle, "autoTheme", false);
-    this.bindSimpleToggle(this.els.editableTextToggle, "showEditableText", true);
+    this.bindSimpleToggle(
+      this.els.editableTextToggle,
+      "showEditableText",
+      true,
+    );
 
     if (this.els.shortcutsPosition) {
-      this.els.shortcutsPosition.value = state.get("shortcutsPosition") || "bottom";
-      if (state.get("showShortcuts") === false && !state.get("shortcutsPosition")) {
+      this.els.shortcutsPosition.value =
+        state.get("shortcutsPosition") || "bottom";
+      if (
+        state.get("showShortcuts") === false &&
+        !state.get("shortcutsPosition")
+      ) {
         this.els.shortcutsPosition.value = "hide";
         state.set("shortcutsPosition", "hide");
       }
@@ -409,20 +445,32 @@ export class SettingsManager {
       this.els.dark.checked = state.get("darkMode") === true;
     }
 
-    if (this.els.widgetControl) this.els.widgetControl.value = state.get("widgetControl") || "all";
+    if (this.els.widgetControl)
+      this.els.widgetControl.value = state.get("widgetControl") || "all";
     if (this.els.locInput) this.els.locInput.value = state.get("yd_city") || "";
 
     if (this.els.bgBlurSelect) {
       const savedBlur = state.get("bgBlurIntensity") || "0";
       this.els.bgBlurSelect.value = savedBlur;
-      
+
       const blurMap = {
-        "0": 0, "10": 2, "20": 4, "30": 6, "40": 8, "50": 10
+        0: 0,
+        10: 2,
+        20: 4,
+        30: 6,
+        40: 8,
+        50: 10,
       };
       const blurPx = blurMap[savedBlur] || 0;
       document.documentElement.style.setProperty("--bg-blur", blurPx + "px");
 
-      if (savedBlur === "10" || savedBlur === "20" || savedBlur === "30" || savedBlur === "40" || savedBlur === "50") {
+      if (
+        savedBlur === "10" ||
+        savedBlur === "20" ||
+        savedBlur === "30" ||
+        savedBlur === "40" ||
+        savedBlur === "50"
+      ) {
         document.documentElement.classList.add("high-bg-blur");
       } else {
         document.documentElement.classList.remove("high-bg-blur");
@@ -463,13 +511,16 @@ export class SettingsManager {
       document.body.classList.remove("has-custom-bg");
     }
 
-    secondStorage.getImage().then((blob) => {
-      if (blob) {
-        document.body.classList.add("has-custom-bg");
-        if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
-        this.updateAutoThemeGlowState();
-      }
-    }).catch(err => console.error("IndexedDB load error:", err));
+    secondStorage
+      .getImage()
+      .then((blob) => {
+        if (blob) {
+          document.body.classList.add("has-custom-bg");
+          if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
+          this.updateAutoThemeGlowState();
+        }
+      })
+      .catch((err) => console.error("IndexedDB load error:", err));
 
     this.updateRandomBgButtons();
     this.updateAutoThemeGlowState();
@@ -532,7 +583,12 @@ export class SettingsManager {
 
     const hasLocation = city && lat && lon && lat !== "0" && lon !== "0";
 
-    const weatherHidden = ["search-only", "quote-only", "search-quote", "nothing"].includes(widgetControl);
+    const weatherHidden = [
+      "search-only",
+      "quote-only",
+      "search-quote",
+      "nothing",
+    ].includes(widgetControl);
     const shouldDisable = weatherHidden || !hasLocation;
 
     [this.els.tempUnit, this.els.tempDisplayToggle].forEach((toggleEl) => {
@@ -578,9 +634,30 @@ export class SettingsManager {
   setupEventListeners() {
     this.els.btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      this.els.popup.classList.toggle("visible");
-      this.renderShortcutEditor();
       this.els.btn.classList.add("animating");
+
+      const fullModal = window.__fullSettingsModalInstance;
+      const isFullOpen = fullModal && fullModal.isOpen;
+      const isMiniOpen =
+        this.els.popup && this.els.popup.classList.contains("visible");
+
+      if (isFullOpen) {
+        fullModal.close();
+        state.set("lastSettingsView", "full");
+      } else if (isMiniOpen) {
+        this.els.popup.classList.remove("visible");
+        state.set("lastSettingsView", "mini");
+      } else {
+        const lastView = state.get("lastSettingsView") || "mini";
+        if (lastView === "full" && fullModal) {
+          fullModal.open();
+        } else {
+          this.els.popup.classList.add("visible");
+          state.set("lastSettingsView", "mini");
+        }
+      }
+
+      this.renderShortcutEditor();
 
       // --- DYNAMIC VIBE: DELETE FIRST DEFAULT TASK ---
       if (state.get("defaultTasksPinned")) {
@@ -596,14 +673,25 @@ export class SettingsManager {
       this.els.bgBlurSelect.addEventListener("change", (e) => {
         const val = e.target.value;
         state.set("bgBlurIntensity", val);
-        
+
         const blurMap = {
-          "0": 0, "10": 2, "20": 4, "30": 6, "40": 8, "50": 10
+          0: 0,
+          10: 2,
+          20: 4,
+          30: 6,
+          40: 8,
+          50: 10,
         };
         const blurPx = blurMap[val] || 0;
         document.documentElement.style.setProperty("--bg-blur", blurPx + "px");
 
-        if (val === "10" || val === "20" || val === "30" || val === "40" || val === "50") {
+        if (
+          val === "10" ||
+          val === "20" ||
+          val === "30" ||
+          val === "40" ||
+          val === "50"
+        ) {
           document.documentElement.classList.add("high-bg-blur");
         } else {
           document.documentElement.classList.remove("high-bg-blur");
@@ -614,9 +702,12 @@ export class SettingsManager {
     document.addEventListener("click", (e) => {
       if (
         this.els.popup.classList.contains("visible") &&
-        !this.els.popup.contains(e.target)
-      )
+        !this.els.popup.contains(e.target) &&
+        !this.els.btn.contains(e.target)
+      ) {
         this.els.popup.classList.remove("visible");
+        state.set("lastSettingsView", "mini");
+      }
     });
     this.els.popup.addEventListener("click", (e) => e.stopPropagation());
 
@@ -825,55 +916,8 @@ export class SettingsManager {
     this.setupMiscListeners();
 
     if (this.els.randomBgFreeze) {
-      this.els.randomBgFreeze.addEventListener("click", async () => {
-        const currentMode = state.get("randomBgMode");
-        if (currentMode === "freeze") {
-          state.set("randomBgMode", "random");
-          state.set("randomBgTime", null);
-          this.fetchRandomBackground();
-        } else {
-          const result = await showCustomModal(
-            "Freeze current background? You can save it for 72 hours or forever.",
-            false,
-            false,
-            [
-              { text: "Save Forever", value: "forever", width: "140px" },
-              { text: "72 Hours", value: "ok", width: "120px" },
-              {
-                text: "Cancel",
-                value: "cancel",
-                width: "100px",
-                style:
-                  "background: var(--bg-interactive); color: var(--text-primary);",
-              },
-            ],
-          );
-
-          if (result === "cancel" || !result) return;
-
-          state.set("randomBgMode", "freeze");
-          if (result === "forever") {
-            state.set("randomBgTime", -1);
-          } else {
-            state.set("randomBgTime", Date.now());
-          }
-
-          if (
-            !state.get("savedBgUrl") ||
-            !document.body.classList.contains("has-custom-bg")
-          ) {
-            this.fetchRandomBackground();
-          } else {
-            this.updateRandomBgButtons();
-          }
-
-          const message =
-            result === "forever"
-              ? "Background is saved forever! It won't change until you manually update it."
-              : "Background is freezed for the next 72 hours.";
-
-          setTimeout(() => showCustomModal(message), 10);
-        }
+      this.els.randomBgFreeze.addEventListener("click", () => {
+        this.freezeRandomBackground();
       });
     }
     if (this.els.randomBgRnd) {
@@ -1209,68 +1253,136 @@ export class SettingsManager {
   }
 
   renderSavedThemes() {
-    if (!this.els.savedContainer) return;
-    this.els.savedContainer.innerHTML = "";
+    if (this.els.savedContainer) {
+      this.els.savedContainer.innerHTML = "";
+      const savedThemes = state.get("userSavedThemes") || [];
+
+      for (let i = 0; i < 5; i++) {
+        const theme = savedThemes[i];
+        const btn = document.createElement("div");
+        btn.className = "saved-preset-button";
+
+        if (theme) {
+          btn.classList.add("filled");
+          btn.textContent = theme.name;
+          const isAzureSky = theme.name === "Azure Sky" || theme.id === "theme-3";
+          const isPhosphor = theme.name === "Phosphor" || theme.id === "theme-7";
+          const rightColor = isAzureSky ? "#006EFF" : (isPhosphor ? "#91AA5B" : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]));
+          btn.style.background = `linear-gradient(to top right, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+          btn.style.color = "#ffffff";
+          btn.style.textShadow =
+            "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
+
+          btn.addEventListener("click", () => {
+            this.disableAutoTheme();
+            this.applyNormalTheme(theme);
+            import("../utils.js").then((utils) => {
+              utils.completeDefaultTask("dt-5");
+            });
+          });
+
+          const del = document.createElement("div");
+          del.className = "delete-preset";
+          del.textContent = "×";
+          del.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const newSaved = savedThemes.filter((_, idx) => idx !== i);
+            newSaved.forEach((t, idx) => (t.name = `Preset ${idx + 1}`));
+            state.set("userSavedThemes", newSaved);
+            this.renderSavedThemes();
+          });
+          btn.appendChild(del);
+        } else {
+          btn.textContent = "Empty";
+        }
+        this.els.savedContainer.appendChild(btn);
+      }
+    }
+    this.renderMiniThemes();
+  }
+
+  renderMiniThemes() {
+    const container = document.getElementById("mini-themes-grid");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const targetNormalIds = ["theme-1", "theme-7", "theme-5"]; // YDD Standard, Phosphor, Sakura
+    const targetGradientIds = ["glacier", "bio-lime", "deep-space"]; // Glacier, Bio Lime, Deep Space
+
+    targetNormalIds.forEach((id) => {
+      const theme = THEMES.normal.find((t) => t.id === id);
+      if (!theme) return;
+      const btn = document.createElement("button");
+      btn.className = "mini-theme-swatch";
+      btn.title = theme.name;
+      const isAzureSky = theme.name === "Azure Sky" || theme.id === "theme-3";
+      const isPhosphor = theme.name === "Phosphor" || theme.id === "theme-7";
+      const rightColor = isAzureSky ? "#006EFF" : (isPhosphor ? "#91AA5B" : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]));
+      btn.style.background = `linear-gradient(to top right, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+      btn.addEventListener("click", () => {
+        this.disableAutoTheme();
+        this.applyNormalTheme(theme);
+      });
+      container.appendChild(btn);
+    });
+
+    targetGradientIds.forEach((id) => {
+      const theme = THEMES.gradient.find((t) => t.id === id);
+      if (!theme) return;
+      const btn = document.createElement("button");
+      btn.className = "mini-theme-swatch";
+      btn.title = theme.name;
+      btn.style.background = `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]})`;
+      btn.addEventListener("click", () => {
+        this.disableAutoTheme();
+        this.applyGradientTheme(theme);
+      });
+      container.appendChild(btn);
+    });
+
     const savedThemes = state.get("userSavedThemes") || [];
-
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
       const theme = savedThemes[i];
-      const btn = document.createElement("div");
-      btn.className = "saved-preset-button";
-
+      const btn = document.createElement("button");
+      btn.className = "mini-theme-swatch";
       if (theme) {
-        btn.classList.add("filled");
-        btn.textContent = theme.name;
-        btn.style.background = theme.colors["--bg-primary"];
-        btn.style.color = theme.colors["--text-primary"];
-        btn.style.borderColor = theme.colors["--accent-color"];
-
+        btn.title = theme.name;
+        const rightColor = window.__getThemeRightColor
+          ? window.__getThemeRightColor(theme)
+          : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]);
+        btn.style.background = `linear-gradient(to top right, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
         btn.addEventListener("click", () => {
           this.disableAutoTheme();
           this.applyNormalTheme(theme);
-          import("../utils.js").then((utils) => {
-            utils.completeDefaultTask("dt-5");
-          });
         });
-
-        const del = document.createElement("div");
-        del.className = "delete-preset";
-        del.textContent = "×";
-        del.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const newSaved = savedThemes.filter((_, idx) => idx !== i);
-          newSaved.forEach((t, idx) => (t.name = `Preset ${idx + 1}`));
-          state.set("userSavedThemes", newSaved);
-          this.renderSavedThemes();
-        });
-        btn.appendChild(del);
       } else {
-        btn.textContent = "Empty";
+        btn.classList.add("empty");
+        btn.title = `Preset ${i + 1} (Empty)`;
       }
-      this.els.savedContainer.appendChild(btn);
+      container.appendChild(btn);
     }
   }
 
   applyNormalTheme(theme, skipBgWipe = false) {
     if (!skipBgWipe) {
-      secondStorage.deleteImage().catch(err => console.error(err));
+      secondStorage.deleteImage().catch((err) => console.error(err));
       localStorage.removeItem("has_idb_bg");
-      
+
       state.set("backgroundImage", null);
       state.set("randomBgMode", null);
       state.set("savedBgUrl", null);
       state.set("bgSavedDate", null);
-      
+
       document.body.style.removeProperty("background-image");
       document.body.style.removeProperty("background-size");
       document.body.style.removeProperty("background-position");
-      
-      document.querySelectorAll("style").forEach(styleEl => {
+
+      document.querySelectorAll("style").forEach((styleEl) => {
         if (styleEl.textContent.includes("background-image: url")) {
           styleEl.remove();
         }
       });
-      
+
       document.body.classList.remove("has-custom-bg");
       if (this.els.removeBg) this.els.removeBg.classList.add("hidden");
       this.updateRandomBgButtons();
@@ -1322,24 +1434,24 @@ export class SettingsManager {
 
   applyGradientTheme(theme, save = true, skipBgWipe = false) {
     if (!skipBgWipe) {
-      secondStorage.deleteImage().catch(err => console.error(err));
+      secondStorage.deleteImage().catch((err) => console.error(err));
       localStorage.removeItem("has_idb_bg");
-      
+
       state.set("backgroundImage", null);
       state.set("randomBgMode", null);
       state.set("savedBgUrl", null);
       state.set("bgSavedDate", null);
-      
+
       document.body.style.removeProperty("background-image");
       document.body.style.removeProperty("background-size");
       document.body.style.removeProperty("background-position");
-      
-      document.querySelectorAll("style").forEach(styleEl => {
+
+      document.querySelectorAll("style").forEach((styleEl) => {
         if (styleEl.textContent.includes("background-image: url")) {
           styleEl.remove();
         }
       });
-      
+
       document.body.classList.remove("has-custom-bg");
       if (this.els.removeBg) this.els.removeBg.classList.add("hidden");
       this.updateRandomBgButtons();
@@ -1481,70 +1593,131 @@ export class SettingsManager {
     }
   }
 
+  async freezeRandomBackground() {
+    const currentMode = state.get("randomBgMode");
+    if (currentMode === "freeze") {
+      state.set("randomBgMode", "random");
+      state.set("randomBgTime", null);
+      await this.fetchRandomBackground();
+    } else {
+      const result = await showCustomModal(
+        "Freeze current background? You can save it for 72 hours or forever.",
+        false,
+        false,
+        [
+          { text: "Save Forever", value: "forever", width: "140px" },
+          { text: "72 Hours", value: "ok", width: "120px" },
+          {
+            text: "Cancel",
+            value: "cancel",
+            width: "100px",
+            style:
+              "background: var(--bg-interactive); color: var(--text-primary);",
+          },
+        ],
+      );
+
+      if (result === "cancel" || !result) return;
+
+      state.set("randomBgMode", "freeze");
+      if (result === "forever") {
+        state.set("randomBgTime", -1);
+      } else {
+        state.set("randomBgTime", Date.now());
+      }
+
+      if (
+        !state.get("savedBgUrl") ||
+        !document.body.classList.contains("has-custom-bg")
+      ) {
+        await this.fetchRandomBackground();
+      } else {
+        this.updateRandomBgButtons();
+      }
+
+      const message =
+        result === "forever"
+          ? "Background is saved forever! It won't change until you manually update it."
+          : "Background is freezed for the next 72 hours.";
+
+      setTimeout(() => showCustomModal(message), 10);
+    }
+    if (window.__fullSettingsModalInstance) {
+      window.__fullSettingsModalInstance._updateBgState();
+    }
+  }
+
   async detectLocation() {
     if (!navigator.geolocation) {
       showCustomModal("Geolocation not supported by your browser.");
       return;
     }
 
-    const triggerNativeGPS = () => {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const gpsLat = pos.coords.latitude;
-          const gpsLon = pos.coords.longitude;
-          const gpsCity = await this.reverseGeocode(gpsLat, gpsLon);
-          state.set("yd_city", gpsCity);
-          state.set("yd_lat", gpsLat);
-          state.set("yd_lon", gpsLon);
-          state.set("locationUpdate", Date.now());
-          if (this.els.locInput) this.els.locInput.value = gpsCity;
-        },
-        (err) =>
-          showCustomModal(
-            "Geolocation error: " +
-              err.message +
-              ". Please enable location services.",
-          ),
-      );
-    };
-
+    // If user previously opted out of our consent modal, go straight
+    // to the browser's native location prompt
     if (localStorage.getItem("hideGpsConsent") === "true") {
-      triggerNativeGPS();
+      this._requestBrowserLocation();
       return;
     }
 
-    const modal = document.getElementById("gps-consent-modal-overlay");
-    const agreeBtn = document.getElementById("gps-consent-agree");
-    const cancelBtn = document.getElementById("gps-consent-cancel");
-    const checkbox = document.getElementById("gps-consent-checkbox");
+    // Show our own privacy-info consent modal first
+    const result = await showCustomModal(
+      "Your coordinates are used strictly to fetch local weather data. " +
+        "When you proceed, your browser will securely ping Open-Meteo " +
+        "(for weather) and BigDataCloud (for the city name).\n\n" +
+        "This data is saved locally on your device. We do not track you " +
+        "in the background, and we have no server to store your location data.",
+      false,
+      false,
+      [
+        { text: "I Agree", value: "agree", width: "130px" },
+        { text: "Always Allow", value: "always", width: "130px" },
+        {
+          text: "Cancel",
+          value: "cancel",
+          width: "100px",
+          style:
+            "background: var(--bg-interactive); color: var(--text-primary);",
+        },
+      ],
+    );
 
-    if (modal) {
-      modal.classList.remove("hidden");
+    if (result === "cancel" || !result) return;
 
-      const closeAndClean = () => {
-        modal.classList.add("hidden");
-        agreeBtn.replaceWith(agreeBtn.cloneNode(true));
-        cancelBtn.replaceWith(cancelBtn.cloneNode(true));
-      };
-
-      document
-        .getElementById("gps-consent-agree")
-        .addEventListener("click", () => {
-          if (checkbox.checked) {
-            localStorage.setItem("hideGpsConsent", "true");
-          }
-          closeAndClean();
-          triggerNativeGPS();
-        });
-
-      document
-        .getElementById("gps-consent-cancel")
-        .addEventListener("click", () => {
-          closeAndClean();
-        });
-    } else {
-      triggerNativeGPS();
+    if (result === "always") {
+      localStorage.setItem("hideGpsConsent", "true");
     }
+
+    // This triggers the browser's native "Allow location?" prompt
+    this._requestBrowserLocation();
+  }
+
+  /** Calls the standard Web Geolocation API — the browser handles the permission prompt. */
+  _requestBrowserLocation() {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const gpsLat = pos.coords.latitude;
+        const gpsLon = pos.coords.longitude;
+        const gpsCity = await this.reverseGeocode(gpsLat, gpsLon);
+        state.set("yd_city", gpsCity);
+        state.set("yd_lat", gpsLat);
+        state.set("yd_lon", gpsLon);
+        state.set("locationUpdate", Date.now());
+        if (this.els.locInput) this.els.locInput.value = gpsCity;
+        if (
+          window.__fullSettingsModalInstance &&
+          window.__fullSettingsModalInstance.els.fsLocInput
+        ) {
+          window.__fullSettingsModalInstance.els.fsLocInput.value = gpsCity;
+        }
+      },
+      (err) =>
+        showCustomModal(
+          "Geolocation error: " +
+            err.message +
+            ". Please enable location services.",
+        ),
+    );
   }
 
   updateWarningText() {
@@ -1615,11 +1788,18 @@ export class SettingsManager {
         btn.className = `theme-preset-button ${isGradient ? "gradient" : ""}`;
         btn.textContent = theme.name;
         if (isGradient) {
-          btn.style.background = `linear-gradient(45deg, ${theme.colors[0]}, ${theme.colors[1]})`;
+          btn.style.background = `linear-gradient(to top right, ${theme.colors[0]} 50%, ${theme.colors[1]} 50%)`;
+          btn.style.color = "#ffffff";
+          btn.style.textShadow =
+            "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
         } else {
-          btn.style.background = theme.colors["--bg-primary"];
-          btn.style.color = theme.colors["--text-primary"];
-          btn.style.borderColor = theme.colors["--accent-color"];
+          const isAzureSky = theme.name === "Azure Sky" || theme.id === "theme-3";
+          const isPhosphor = theme.name === "Phosphor" || theme.id === "theme-7";
+          const rightColor = isAzureSky ? "#006EFF" : (isPhosphor ? "#91AA5B" : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]));
+          btn.style.background = `linear-gradient(to top right, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+          btn.style.color = "#ffffff";
+          btn.style.textShadow =
+            "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
         }
         btn.addEventListener("click", () => {
           this.disableAutoTheme();
@@ -1698,51 +1878,13 @@ export class SettingsManager {
     if (this.els.bgInput) {
       this.els.bgInput.addEventListener("change", async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
-
-        const objectUrl = URL.createObjectURL(file);
-
-        document.body.classList.add("has-custom-bg");
-        document.body.style.setProperty("background-image", `url("${objectUrl}")`, "important");
-        document.body.style.setProperty("background-size", "cover", "important");
-        document.body.style.setProperty("background-position", "center", "important");
-        if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
-        this.updateRandomBgButtons();
-        this.updateAutoThemeGlowState();
-
-        try {
-          await secondStorage.saveImage(file);
-          localStorage.setItem("has_idb_bg", "true");
-          
-          state.set("randomBgMode", null);
-          state.set("backgroundImage", null);
-          localStorage.removeItem("lowResBg"); 
-        } catch (idbErr) {
-          console.warn("IndexedDB blocked by browser shields. Failing silently without modal.", idbErr);
-        }
-
+        if (file) await this.handleBgUpload(file);
         this.els.bgInput.value = "";
       });
     }
     if (this.els.removeBg) {
       this.els.removeBg.addEventListener("click", () => {
-        secondStorage.deleteImage().catch(err => console.error(err));
-        state.set("backgroundImage", null);
-        state.set("randomBgMode", null);
-        localStorage.removeItem("has_idb_bg");
-        document.body.classList.remove("has-custom-bg");
-        document.body.style.removeProperty("background-image");
-        document.body.style.removeProperty("background-size");
-        document.body.style.removeProperty("background-position");
-        
-        document.querySelectorAll("style").forEach(styleEl => {
-          if (styleEl.textContent.includes("background-image: url")) {
-            styleEl.remove();
-          }
-        });
-        this.els.removeBg.classList.add("hidden");
-        this.updateRandomBgButtons();
-        this.updateAutoThemeGlowState();
+        this.removeCustomBg();
       });
     }
     if (this.els.shortcutForm) {
@@ -1764,23 +1906,86 @@ export class SettingsManager {
       this.els.restoreInput.addEventListener("change", (e) => this.restore(e));
     }
     if (this.els.reset) {
-      this.els.reset.addEventListener("click", async () => {
-        if (
-          await showCustomModal(
-            "Resetting all deletes everything. Make sure you have backed up your settings. Are you sure you want to continue?",
-            true,
-            true,
-          )
-        ) {
-          try {
-            await secondStorage.deleteImage();
-          } catch (e) {
-            console.error("Failed to wipe IndexedDB:", e);
-          }
-          localStorage.clear();
-          location.reload();
-        }
-      });
+      this.els.reset.addEventListener("click", () => this.resetAll());
+    }
+  }
+
+  async handleBgUpload(file) {
+    if (!file) return;
+    const objectUrl = URL.createObjectURL(file);
+
+    document.body.classList.add("has-custom-bg");
+    document.body.style.setProperty(
+      "background-image",
+      `url("${objectUrl}")`,
+      "important",
+    );
+    document.body.style.setProperty(
+      "background-size",
+      "cover",
+      "important",
+    );
+    document.body.style.setProperty(
+      "background-position",
+      "center",
+      "important",
+    );
+    if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
+    state.set("randomBgMode", null);
+    state.set("backgroundImage", null);
+    localStorage.removeItem("lowResBg");
+    this.updateRandomBgButtons();
+    this.updateAutoThemeGlowState();
+
+    try {
+      await secondStorage.saveImage(file);
+      localStorage.setItem("has_idb_bg", "true");
+    } catch (idbErr) {
+      console.warn("IndexedDB blocked by browser shields.", idbErr);
+    }
+    if (window.__fullSettingsModalInstance) {
+      window.__fullSettingsModalInstance._updateBgState();
+    }
+  }
+
+  removeCustomBg() {
+    secondStorage.deleteImage().catch((err) => console.error(err));
+    state.set("backgroundImage", null);
+    state.set("randomBgMode", null);
+    localStorage.removeItem("has_idb_bg");
+    document.body.classList.remove("has-custom-bg");
+    document.body.style.removeProperty("background-image");
+    document.body.style.removeProperty("background-size");
+    document.body.style.removeProperty("background-position");
+
+    document.querySelectorAll("style").forEach((styleEl) => {
+      if (styleEl.textContent.includes("background-image: url")) {
+        styleEl.remove();
+      }
+    });
+    if (this.els.removeBg) this.els.removeBg.classList.add("hidden");
+    this.updateRandomBgButtons();
+    this.updateAutoThemeGlowState();
+    if (window.__fullSettingsModalInstance) {
+      window.__fullSettingsModalInstance._updateBgState();
+    }
+  }
+
+  async resetAll() {
+    if (
+      await showCustomModal(
+        "Resetting all deletes everything. Make sure you have backed up your settings. Are you sure you want to continue?",
+        true,
+        true,
+      )
+    ) {
+      try {
+        await secondStorage.deleteImage();
+      } catch (e) {
+        console.error("Failed to wipe IndexedDB:", e);
+      }
+      localStorage.clear();
+      location.reload();
     }
   }
 
@@ -1808,7 +2013,7 @@ export class SettingsManager {
       const img = document.createElement("img");
       img.src = s.customIcon || s.icon || getIconUrl(s.url);
       img.className = "icon";
-      
+
       const fileInput = document.createElement("input");
       fileInput.type = "file";
       fileInput.accept = "image/*";
@@ -1818,7 +2023,7 @@ export class SettingsManager {
       iconContainer.appendChild(fileInput);
 
       iconContainer.addEventListener("click", () => fileInput.click());
-      
+
       const inputsDiv = document.createElement("div");
       inputsDiv.className = "inputs";
 
@@ -1838,7 +2043,7 @@ export class SettingsManager {
       const triggerSave = () => {
         this.updateShortcut(index, nameInput.value, urlInput.value);
       };
-      
+
       nameInput.addEventListener("blur", triggerSave);
       nameInput.addEventListener("change", triggerSave);
       urlInput.addEventListener("blur", triggerSave);
@@ -1853,10 +2058,14 @@ export class SettingsManager {
       const resetBtn = document.createElement("button");
       resetBtn.className = "action-btn reset";
       resetBtn.title = "Reset Icon";
-      const resetSvgString = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>';
-      const resetParsedSvg = new DOMParser().parseFromString(resetSvgString, 'image/svg+xml');
+      const resetSvgString =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>';
+      const resetParsedSvg = new DOMParser().parseFromString(
+        resetSvgString,
+        "image/svg+xml",
+      );
       resetBtn.appendChild(resetParsedSvg.documentElement);
-      
+
       if (!s.customIcon) {
         resetBtn.style.display = "none";
       }
@@ -1867,7 +2076,7 @@ export class SettingsManager {
         img.src = autoIcon;
         resetBtn.style.display = "none";
       });
-      
+
       fileInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -1881,9 +2090,14 @@ export class SettingsManager {
             const ctx = canvas.getContext("2d");
             ctx.drawImage(tempImg, 0, 0, 256, 256);
             const dataUrl = canvas.toDataURL("image/png");
-            
+
             img.src = dataUrl;
-            this.updateShortcut(index, nameInput.value, urlInput.value, dataUrl);
+            this.updateShortcut(
+              index,
+              nameInput.value,
+              urlInput.value,
+              dataUrl,
+            );
             resetBtn.style.display = "";
           };
           tempImg.src = ev.target.result;
@@ -1897,7 +2111,10 @@ export class SettingsManager {
       delBtn.title = "Delete";
       const delSvgString =
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      const delParsedSvg = new DOMParser().parseFromString(delSvgString, 'image/svg+xml');
+      const delParsedSvg = new DOMParser().parseFromString(
+        delSvgString,
+        "image/svg+xml",
+      );
       delBtn.appendChild(delParsedSvg.documentElement);
 
       actionsDiv.appendChild(resetBtn);
@@ -1939,7 +2156,13 @@ export class SettingsManager {
     this.renderShortcutEditor();
   }
 
-  updateShortcut(index, name, url, customIconData = undefined, removeCustomIcon = false) {
+  updateShortcut(
+    index,
+    name,
+    url,
+    customIconData = undefined,
+    removeCustomIcon = false,
+  ) {
     url = url.trim();
     if (!/^https?:\/\//i.test(url)) url = "https://" + url;
     const current = [...(state.get("userShortcuts") || [])];
@@ -1947,13 +2170,13 @@ export class SettingsManager {
       current[index].name = name.substring(0, 35);
       const oldUrl = current[index].url;
       current[index].url = url;
-      
+
       if (!current[index].customIcon && !customIconData) {
         if (oldUrl !== url) {
           current[index].icon = getIconUrl(url);
         }
       }
-      
+
       if (customIconData !== undefined && customIconData !== null) {
         current[index].customIcon = customIconData;
       }
@@ -2022,21 +2245,29 @@ export class SettingsManager {
     }
 
     const applyBg = (url) => {
-      secondStorage.deleteImage().catch(err => console.error(err));
+      secondStorage.deleteImage().catch((err) => console.error(err));
       localStorage.removeItem("has_idb_bg");
       localStorage.removeItem("lowResBg");
-      
-      document.querySelectorAll("style").forEach(styleEl => {
+
+      document.querySelectorAll("style").forEach((styleEl) => {
         if (styleEl.textContent.includes("background-image: url")) {
           styleEl.remove();
         }
       });
 
       document.body.classList.add("has-custom-bg");
-      document.body.style.setProperty("background-image", `url("${url}")`, "important");
+      document.body.style.setProperty(
+        "background-image",
+        `url("${url}")`,
+        "important",
+      );
       document.body.style.setProperty("background-size", "cover", "important");
-      document.body.style.setProperty("background-position", "center", "important");
-      
+      document.body.style.setProperty(
+        "background-position",
+        "center",
+        "important",
+      );
+
       state.set("backgroundImage", url);
       if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
 
@@ -2046,7 +2277,7 @@ export class SettingsManager {
 
       if (targetBtn) {
         targetBtn.textContent = "";
-        originalNodes.forEach(node => targetBtn.appendChild(node));
+        originalNodes.forEach((node) => targetBtn.appendChild(node));
         targetBtn.disabled = false;
       }
     };
@@ -2064,7 +2295,7 @@ export class SettingsManager {
     } catch (err) {
       if (targetBtn) {
         targetBtn.textContent = "";
-        originalNodes.forEach(node => targetBtn.appendChild(node));
+        originalNodes.forEach((node) => targetBtn.appendChild(node));
         targetBtn.disabled = false;
       }
     }
@@ -2139,7 +2370,7 @@ export class SettingsManager {
         advancedColorsContainer.classList.add("advanced-colors-disabled");
         advancedColorsContainer.classList.add("disabled");
         advancedColorsContainer.style.opacity = "0.5";
-        colorInputs.forEach(input => input.disabled = true);
+        colorInputs.forEach((input) => (input.disabled = true));
         if (themeColorNote) {
           themeColorNote.style.color = "#ff6b6b";
           themeColorNote.style.fontWeight = "bold";
@@ -2151,7 +2382,7 @@ export class SettingsManager {
         advancedColorsContainer.classList.remove("advanced-colors-disabled");
         advancedColorsContainer.classList.remove("disabled");
         advancedColorsContainer.style.opacity = "1";
-        colorInputs.forEach(input => input.disabled = false);
+        colorInputs.forEach((input) => (input.disabled = false));
         if (themeColorNote) {
           themeColorNote.style.color = "";
           themeColorNote.style.fontWeight = "normal";

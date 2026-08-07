@@ -42,8 +42,9 @@
 
 /* --- Titlebar (drag handle) --- */
 .fs-titlebar {
+  position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--border-color);
@@ -62,12 +63,43 @@
   font-weight: 600;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  text-align: center;
 }
 .fs-titlebar h2 .fs-title-icon {
   font-size: 1.3rem;
 }
+.fs-nav-btn {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+  flex-shrink: 0;
+}
+.fs-nav-btn:hover {
+  background-color: var(--bg-interactive);
+  color: var(--text-primary);
+}
 .fs-close-btn {
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   color: var(--text-secondary);

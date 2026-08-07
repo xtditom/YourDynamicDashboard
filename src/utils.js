@@ -31,7 +31,7 @@ export function showCustomModal(
     overlay.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.7); display: flex; justify-content: center;
-      align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.3s;
+      align-items: center; z-index: 12000; opacity: 0; transition: opacity 0.3s;
     `;
 
     const box = document.createElement("div");
@@ -52,7 +52,7 @@ export function showCustomModal(
 
     const text = document.createElement("p");
     text.style.cssText =
-      "color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem;";
+      "color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; white-space: pre-line;";
 
     if (isCelebration) {
       text.style.fontSize = "1.2rem";
@@ -116,6 +116,7 @@ export function showCustomModal(
 
     overlay.offsetHeight;
     overlay.classList.remove("hidden");
+    overlay.style.display = "flex";
     overlay.style.opacity = "1";
     box.style.transform = "scale(1)";
   });
@@ -128,7 +129,7 @@ export function showCustomPrompt(message, defaultValue = "") {
     overlay.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.7); display: flex; justify-content: center;
-      align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.3s;
+      align-items: center; z-index: 12000; opacity: 0; transition: opacity 0.3s;
     `;
 
     const box = document.createElement("div");
@@ -185,6 +186,7 @@ export function showCustomPrompt(message, defaultValue = "") {
 
     overlay.offsetHeight;
     overlay.classList.remove("hidden");
+    overlay.style.display = "flex";
     overlay.style.opacity = "1";
     box.style.transform = "scale(1)";
 

@@ -391,166 +391,40 @@
       </div>
 
       <div class="settings-tabs">
-        <button id="functions-tab" class="settings-tab-button active">
-          Quick
-        </button>
-        <button id="appearance-tab" class="settings-tab-button">Widgets</button>
-        <button id="shortcuts-tab" class="settings-tab-button">Weather</button>
+        <button id="quick-tab" class="settings-tab-button active">Quick</button>
+        <button id="look-tab" class="settings-tab-button">Look</button>
       </div>
 
       <div class="settings-content">
         <!-- Quick Tab -->
-        <div id="functions-content" class="settings-pane active">
+        <div id="quick-content" class="settings-pane active">
           <div class="setting-row">
             <div class="label">
               <span>Analog Clock</span><small>Use the analog clock.</small>
             </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="clock-type-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="clock-type-toggle" />
+              <span class="slider"></span>
+            </label>
           </div>
           <div class="setting-row" id="clock-format-row">
             <div class="label">
               <span>Clock Format</span><small>Toggle for 24-hour format.</small>
             </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="clock-format-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="clock-format-toggle" />
+              <span class="slider"></span>
+            </label>
           </div>
           <div class="setting-row">
             <div class="label">
-              <span>Day & Date</span><small>Display the day and date.</small>
+              <span>Temperature Display</span><small>Switch between Min-Max and Feels like.</small>
             </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="date-visibility-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="temp-display-toggle" />
+              <span class="slider"></span>
+            </label>
           </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Hide Greetings</span
-              ><small>Hide the greeting message.</small>
-            </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="hide-greetings-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
-          </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Dark Mode</span><small>Enable the dark theme.</small>
-            </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="dark-mode-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
-          </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Show Editable Text</span
-              ><small>Display custom text under greeting.</small>
-            </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="editable-text-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
-          </div>
-        </div>
-
-        <!-- Widgets Tab -->
-        <div id="appearance-content" class="settings-pane">
-          <div class="setting-row">
-            <div class="label">
-              <span>Widget Control</span>
-              <small>Control widget visibility.</small>
-            </div>
-            <select
-              id="widget-control-select"
-              class="settings-dropdown"
-              style="
-                padding: 5px;
-                border-radius: 5px;
-                background: var(--bg-interactive);
-                color: var(--text-primary);
-                border: none;
-              "
-            >
-              <option value="all">All Visible</option>
-              <option value="search-only">Search Only</option>
-              <option value="weather-only">Weather Only</option>
-              <option value="quote-only">Quote Only</option>
-              <option value="search-weather">Search &amp; Weather</option>
-              <option value="search-quote">Search &amp; Quote</option>
-              <option value="weather-quote">Weather &amp; Quote</option>
-              <option value="nothing">Nothing</option>
-            </select>
-          </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Show To-Do List</span
-              ><small>Display the To-Do List button.</small>
-            </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="todo-visibility-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
-          </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Show Google Apps</span
-              ><small>Display the Google Apps button.</small>
-            </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="apps-visibility-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
-          </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Show AI Tools & Socials</span
-              ><small>Display the AI Tools & Socials button.</small>
-            </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="ai-tools-visibility-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
-          </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Shortcuts Position</span>
-              <small>Position or hide the shortcuts bar.</small>
-            </div>
-            <select
-              id="shortcuts-position-select"
-              class="settings-dropdown"
-              style="
-                padding: 5px;
-                border-radius: 5px;
-                background: var(--bg-interactive);
-                color: var(--text-primary);
-                border: none;
-              "
-            >
-              <option value="bottom">Bottom</option>
-              <option value="top">Top</option>
-              <option value="hide">Hide</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Weather Tab -->
-        <div id="shortcuts-content" class="settings-pane">
           <div class="api-key-section">
             <div class="label">
               <span>Weather Location</span>
@@ -590,24 +464,124 @@
           </div>
           <div class="setting-row">
             <div class="label">
-              <span>Temperature Unit</span><small>Toggle for Fahrenheit.</small>
+              <span>Widget Control</span>
+              <small>Control widget visibility.</small>
             </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="temp-unit-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
+            <select
+              id="widget-control-select"
+              class="settings-dropdown"
+              style="
+                padding: 5px;
+                border-radius: 5px;
+                background: var(--bg-interactive);
+                color: var(--text-primary);
+                border: none;
+              "
+            >
+              <option value="all">All Visible</option>
+              <option value="search-only">Search Only</option>
+              <option value="weather-only">Weather Only</option>
+              <option value="quote-only">Quote Only</option>
+              <option value="search-weather">Search &amp; Weather</option>
+              <option value="search-quote">Search &amp; Quote</option>
+              <option value="weather-quote">Weather &amp; Quote</option>
+              <option value="nothing">Nothing</option>
+            </select>
           </div>
           <div class="setting-row">
             <div class="label">
-              <span>Temperature Display</span
-              ><small>Switch between Min-Max and Feels like.</small>
+              <span>Shortcuts Position</span>
+              <small>Position or hide the shortcuts bar.</small>
             </div>
-            <label class="toggle-switch"
-              ><input type="checkbox" id="temp-display-toggle" /><span
-                class="slider"
-              ></span
-            ></label>
+            <select
+              id="shortcuts-position-select"
+              class="settings-dropdown"
+              style="
+                padding: 5px;
+                border-radius: 5px;
+                background: var(--bg-interactive);
+                color: var(--text-primary);
+                border: none;
+              "
+            >
+              <option value="bottom">Bottom</option>
+              <option value="top">Top</option>
+              <option value="hide">Hide</option>
+            </select>
+          </div>
+          <div class="setting-row" style="margin-top: 0.5rem; justify-content: center;">
+            <button
+              id="check-for-updates-btn"
+              class="settings-button"
+              style="
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+              "
+            >
+              <svg
+                stroke="currentColor"
+                fill="currentColor"
+                height="18"
+                width="18"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z"
+                />
+              </svg>
+              <span>Check for Updates</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Look Tab -->
+        <div id="look-content" class="settings-pane">
+          <div class="setting-row">
+            <div class="label">
+              <span>Dark / Light</span><small>Enable dark theme.</small>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="dark-mode-toggle" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Custom Background</span><small>Upload your custom wallpaper.</small>
+            </div>
+            <div style="display: flex; gap: 8px">
+              <button id="upload-bg-button" class="settings-button">Upload</button>
+              <input type="file" id="bg-file-input" accept="image/*" class="hidden" />
+              <button id="remove-bg-button" class="settings-button hidden">Remove</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Random Background</span><small>Unsplash wallpaper features.</small>
+            </div>
+            <div style="display: flex; gap: 8px">
+              <button id="random-bg-rnd-btn" class="settings-button" title="Get new random wallpaper">New BG</button>
+              <button id="random-bg-freeze-btn" class="settings-button" title="Freeze current wallpaper">Freeze</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Glow Effect</span><small>Toggle clock glow &amp; pulsing.</small>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="glow-effect-toggle" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row" style="flex-direction: column; align-items: stretch; margin-top: 0.5rem;">
+            <div class="label" style="margin-bottom: 4px;">
+              <span>Themes &amp; Presets</span><small>Click to apply theme or saved preset.</small>
+            </div>
+            <div id="mini-themes-grid" class="mini-themes-grid"></div>
           </div>
         </div>
       </div>
@@ -910,23 +884,44 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        display: flex;
+        background: rgba(0, 0, 0, 0.75);
+        display: none;
         justify-content: center;
         align-items: center;
-        z-index: 3000;
-        opacity: 1;
-        transition: opacity 0.3s;
+        z-index: 12000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
       "
     >
-      <div class="modal-box" style="max-width: 400px; text-align: center">
-        <h2 style="color: var(--accent-color); margin-bottom: 1rem">
+      <div
+        class="modal-box"
+        style="
+          max-width: 440px;
+          width: 90%;
+          text-align: center;
+          background: #1e1e1e;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 16px;
+          padding: 2rem;
+          box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+        "
+      >
+        <h2
+          style="
+            color: #ffffff;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            text-align: center;
+          "
+        >
           Location Access
         </h2>
         <p
           style="
-            color: var(--text-secondary);
-            font-size: 0.95rem;
+            color: var(--text-secondary, #a0a0a0);
+            font-size: 0.92rem;
+            line-height: 1.55;
             margin-bottom: 1rem;
             text-align: left;
           "
@@ -937,8 +932,9 @@
         </p>
         <p
           style="
-            color: var(--text-secondary);
-            font-size: 0.95rem;
+            color: var(--text-secondary, #a0a0a0);
+            font-size: 0.92rem;
+            line-height: 1.55;
             margin-bottom: 1.5rem;
             text-align: left;
           "
@@ -963,18 +959,30 @@
           <label
             for="gps-consent-checkbox"
             style="
-              color: var(--text-primary);
-              font-size: 0.9rem;
+              color: var(--accent-color, #006eff);
+              font-size: 0.92rem;
+              font-weight: 500;
               cursor: pointer;
             "
-            >Don't show this warning again</label
+            >Don’t show this warning again</label
           >
         </div>
-        <div style="display: flex; gap: 10px; justify-content: center">
+        <div style="display: flex; gap: 12px; justify-content: center; width: 100%;">
           <button
             id="gps-consent-agree"
             class="settings-button"
-            style="width: 120px"
+            style="
+              flex: 1;
+              max-width: 150px;
+              padding: 0.75rem 1rem;
+              border-radius: 8px;
+              background-color: #555555;
+              color: #ffffff;
+              font-weight: 600;
+              font-size: 0.92rem;
+              border: none;
+              cursor: pointer;
+            "
           >
             I Agree
           </button>
@@ -982,9 +990,16 @@
             id="gps-consent-cancel"
             class="settings-button"
             style="
-              width: 120px;
-              background-color: var(--bg-interactive);
-              color: var(--text-primary);
+              flex: 1;
+              max-width: 150px;
+              padding: 0.75rem 1rem;
+              border-radius: 8px;
+              background-color: var(--bg-interactive, rgba(255, 255, 255, 0.08));
+              color: var(--accent-color, #006eff);
+              font-weight: 600;
+              font-size: 0.92rem;
+              border: none;
+              cursor: pointer;
             "
           >
             Cancel

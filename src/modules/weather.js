@@ -77,7 +77,11 @@ export class Weather {
   }
 
   async detectLocation() {
-    new SettingsManager().detectLocation();
+    if (window.__settingsManagerInstance) {
+      window.__settingsManagerInstance.detectLocation();
+    } else {
+      new SettingsManager().detectLocation();
+    }
   }
 
   // --- SECTION: LOCATION LOGIC ---

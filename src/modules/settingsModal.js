@@ -25,6 +25,8 @@ export class FullSettingsModal {
     // Element cache
     this.els = {};
 
+    window.__fullSettingsModalInstance = this;
+
     // Bound handlers for cleanup
     this._onMouseMove = this._handleDragMove.bind(this);
     this._onMouseUp = this._handleDragEnd.bind(this);
@@ -42,8 +44,10 @@ export class FullSettingsModal {
       if (k === "className") el.className = v;
       else if (k === "textContent") el.textContent = v;
       else if (k === "innerHTML") el.innerHTML = v;
-      else if (k.startsWith("on")) el.addEventListener(k.slice(2).toLowerCase(), v);
-      else if (k === "style" && typeof v === "object") Object.assign(el.style, v);
+      else if (k.startsWith("on"))
+        el.addEventListener(k.slice(2).toLowerCase(), v);
+      else if (k === "style" && typeof v === "object")
+        Object.assign(el.style, v);
       else el.setAttribute(k, v);
     });
     children.forEach((c) => {
@@ -74,8 +78,12 @@ export class FullSettingsModal {
 
   _section(title, children = []) {
     const sec = this._el("div", { className: "fs-section" });
-    sec.appendChild(this._el("h3", { className: "fs-section-title", textContent: title }));
-    children.forEach((c) => { if (c) sec.appendChild(c); });
+    sec.appendChild(
+      this._el("h3", { className: "fs-section-title", textContent: title }),
+    );
+    children.forEach((c) => {
+      if (c) sec.appendChild(c);
+    });
     return sec;
   }
 
@@ -105,29 +113,44 @@ export class FullSettingsModal {
 
   build() {
     // Overlay
-    this.overlay = this._el("div", { id: "full-settings-overlay", className: "hidden" });
+    this.overlay = this._el("div", {
+      id: "full-settings-overlay",
+      className: "hidden",
+    });
 
     // Modal
     this.modal = this._el("div", { id: "full-settings-modal" });
 
     // Titlebar
     const titlebar = this._el("div", { className: "fs-titlebar" });
-    titlebar.appendChild(this._el("h2", {}, [
+    const miniBtn = this._el("button", {
+      id: "open-mini-settings-btn",
+      className: "fs-nav-btn",
+      title: "Switch to Mini Settings",
+      innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
+    });
+    this.els.miniBtn = miniBtn;
+
+    const titleH2 = this._el("h2", {}, [
       this._el("span", { className: "fs-title-icon", textContent: "⚙" }),
       document.createTextNode("Full Settings"),
-    ]));
-    const closeBtn = this._el("button", { className: "fs-close-btn", textContent: "×", title: "Close" });
+    ]);
+    const closeBtn = this._el("button", {
+      className: "fs-close-btn",
+      textContent: "×",
+      title: "Close",
+    });
     this.els.closeBtn = closeBtn;
-    titlebar.appendChild(closeBtn);
+    titlebar.append(miniBtn, titleH2, closeBtn);
     this.els.titlebar = titlebar;
 
     // Tabs
     const tabs = this._el("div", { className: "fs-tabs" });
     const tabDefs = [
-      { id: "fs-tab-general", label: "⚙ General" },
-      { id: "fs-tab-appearance", label: "🎨 Appearance" },
-      { id: "fs-tab-shortcuts", label: "🔗 Shortcuts" },
-      { id: "fs-tab-data", label: "📦 Data" },
+      { id: "fs-tab-general", label: "General" },
+      { id: "fs-tab-appearance", label: "Appearance" },
+      { id: "fs-tab-shortcuts", label: "Shortcuts" },
+      { id: "fs-tab-data", label: "Extras" },
     ];
     this.els.tabBtns = [];
     tabDefs.forEach((def, i) => {
@@ -149,12 +172,14 @@ export class FullSettingsModal {
     const shortcutsPane = this.buildShortcutsPane();
     const dataPane = this.buildDataPane();
 
-    [generalPane, appearancePane, shortcutsPane, dataPane].forEach((pane, i) => {
-      pane.classList.add("fs-pane");
-      if (i === 0) pane.classList.add("active");
-      this.els.panes.push(pane);
-      content.appendChild(pane);
-    });
+    [generalPane, appearancePane, shortcutsPane, dataPane].forEach(
+      (pane, i) => {
+        pane.classList.add("fs-pane");
+        if (i === 0) pane.classList.add("active");
+        this.els.panes.push(pane);
+        content.appendChild(pane);
+      },
+    );
 
     // Footer
     const footer = this._el("div", { className: "fs-footer" });
@@ -181,24 +206,35 @@ export class FullSettingsModal {
     const formatToggle = this._toggle("fs-clock-format-toggle");
     const dateToggle = this._toggle("fs-date-toggle");
     const greetToggle = this._toggle("fs-hide-greetings-toggle");
-    const editableToggle = this._toggle("fs-editable-text-toggle");
 
     this.els.fsClockType = clockToggle.input;
     this.els.fsClockFormat = formatToggle.input;
     this.els.fsDateToggle = dateToggle.input;
     this.els.fsHideGreetings = greetToggle.input;
-    this.els.fsEditableText = editableToggle.input;
 
-    const formatRow = this._row("Clock Format", "Toggle for 24-hour format.", formatToggle.wrapper);
+    const formatRow = this._row(
+      "Clock Format",
+      "Toggle for 24-hour format.",
+      formatToggle.wrapper,
+    );
     this.els.fsClockFormatRow = formatRow;
 
-    pane.appendChild(this._section("Clock & Display", [
-      this._row("Analog Clock", "Use the analog clock.", clockToggle.wrapper),
-      formatRow,
-      this._row("Day & Date", "Display the day and date.", dateToggle.wrapper),
-      this._row("Hide Greetings", "Hide the greeting message.", greetToggle.wrapper),
-      this._row("Show Editable Text", "Display custom text under greeting.", editableToggle.wrapper),
-    ]));
+    pane.appendChild(
+      this._section("Clock & Display", [
+        this._row("Analog Clock", "Use the analog clock.", clockToggle.wrapper),
+        formatRow,
+        this._row(
+          "Day & Date",
+          "Display the day and date.",
+          dateToggle.wrapper,
+        ),
+        this._row(
+          "Hide Greetings",
+          "Hide the greeting message.",
+          greetToggle.wrapper,
+        ),
+      ]),
+    );
 
     // Weather
     const locInput = this._el("input", {
@@ -207,12 +243,20 @@ export class FullSettingsModal {
       placeholder: "Enter city name...",
       style: { flex: "1" },
     });
-    const locSave = this._el("button", { className: "settings-button", textContent: "Save" });
+    const locSave = this._el("button", {
+      className: "settings-button",
+      textContent: "Save",
+    });
     const locGps = this._el("button", {
       className: "settings-button",
       title: "Detect My Location",
       innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><g fill="none" fill-rule="evenodd"><path d="M18 0v18H0V0z"/><path fill="currentColor" fill-rule="nonzero" d="M5.04 12.48a.75.75 0 0 1 .42 1.44c-.375.11-.645.225-.818.33.178.107.46.227.852.339C6.36 14.836 7.6 15 9 15s2.64-.164 3.506-.411c.392-.112.674-.232.852-.339-.173-.105-.443-.22-.818-.33a.75.75 0 0 1 .42-1.44c.501.146.96.334 1.313.575.326.224.727.615.727 1.195 0 .587-.411.98-.743 1.205-.358.241-.827.43-1.34.576C11.884 16.327 10.5 16.5 9 16.5s-2.885-.173-3.918-.469c-.512-.146-.981-.335-1.34-.576C3.332 15.23 2.92 14.836 2.92 14.25c0-.58.401-.971.727-1.195.353-.241.812-.428 1.313-.575M9 1.5a5.625 5.625 0 0 1 5.625 5.625c0 1.926-1.05 3.492-2.137 4.605A12.3 12.3 0 0 1 11.098 12.94c-.446.335-1.464.962-1.464.962a1.283 1.283 0 0 1-1.268 0s-1.018-.627-1.464-.962a12.217 12.217 0 0 1-1.39-1.21C4.425 10.617 3.375 9.051 3.375 7.125A5.625 5.625 0 0 1 9 1.5m0 4.125a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/></g></svg>`,
-      style: { padding: "0 12px", display: "flex", alignItems: "center", justifyContent: "center" },
+      style: {
+        padding: "0 12px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      },
     });
 
     this.els.fsLocInput = locInput;
@@ -220,8 +264,14 @@ export class FullSettingsModal {
     this.els.fsLocGps = locGps;
 
     const locRow = this._el("div", { className: "api-key-section" });
-    locRow.appendChild(this._el("div", { className: "label" }, [this._el("span", { textContent: "Weather Location" })]));
-    const locWrapper = this._el("div", { style: { display: "flex", gap: "8px" } });
+    locRow.appendChild(
+      this._el("div", { className: "label" }, [
+        this._el("span", { textContent: "Weather Location" }),
+      ]),
+    );
+    const locWrapper = this._el("div", {
+      style: { display: "flex", gap: "8px" },
+    });
     locWrapper.append(locInput, locSave, locGps);
     locRow.appendChild(locWrapper);
 
@@ -230,11 +280,21 @@ export class FullSettingsModal {
     this.els.fsTempUnit = tempToggle.input;
     this.els.fsTempDisplay = tempDisplay.input;
 
-    pane.appendChild(this._section("Weather", [
-      locRow,
-      this._row("Temperature Unit", "Toggle for Fahrenheit.", tempToggle.wrapper),
-      this._row("Temperature Display", "Switch between Min-Max and Feels like.", tempDisplay.wrapper),
-    ]));
+    pane.appendChild(
+      this._section("Weather", [
+        locRow,
+        this._row(
+          "Temperature Unit",
+          "Toggle for Fahrenheit.",
+          tempToggle.wrapper,
+        ),
+        this._row(
+          "Temperature Display",
+          "Switch between Min-Max and Feels like.",
+          tempDisplay.wrapper,
+        ),
+      ]),
+    );
 
     // Controls
     const widgetSelect = this._dropdown("fs-widget-control", [
@@ -256,10 +316,16 @@ export class FullSettingsModal {
     ]);
     this.els.fsShortcutsPosition = posSelect;
 
-    pane.appendChild(this._section("Controls", [
-      this._row("Widget Control", "Control widget visibility.", widgetSelect),
-      this._row("Shortcuts Position", "Position or hide the shortcuts bar.", posSelect),
-    ]));
+    pane.appendChild(
+      this._section("Controls", [
+        this._row("Widget Control", "Control widget visibility.", widgetSelect),
+        this._row(
+          "Shortcuts Position",
+          "Position or hide the shortcuts bar.",
+          posSelect,
+        ),
+      ]),
+    );
 
     // Link Direction (inline)
     const linkDirContainer = this._el("div", { className: "fs-key-grid" });
@@ -271,7 +337,9 @@ export class FullSettingsModal {
     const keyNoteContainer = this._el("div");
     this.els.fsKeyList = keyContainer;
     this.els.fsKeyNoteContainer = keyNoteContainer;
-    pane.appendChild(this._section("Keyboard Shortcuts", [keyContainer, keyNoteContainer]));
+    pane.appendChild(
+      this._section("Keyboard Shortcuts", [keyContainer, keyNoteContainer]),
+    );
 
     return pane;
   }
@@ -289,16 +357,39 @@ export class FullSettingsModal {
     this.els.fsAutoTheme = autoToggle.input;
     this.els.fsGlow = glowToggle.input;
 
-    pane.appendChild(this._section("Theme", [
-      this._row("Dark Mode", "Enable the dark theme.", darkToggle.wrapper),
-      this._row("Auto Theme", "Randomize theme on every new tab.", autoToggle.wrapper),
-      this._row("Glow Effect", "Toggle clock glow & pulsing.", glowToggle.wrapper),
-    ]));
+    pane.appendChild(
+      this._section("Theme", [
+        this._row("Dark Mode", "Enable the dark theme.", darkToggle.wrapper),
+        this._row(
+          "Auto Theme",
+          "Randomize theme on every new tab.",
+          autoToggle.wrapper,
+        ),
+        this._row(
+          "Glow Effect",
+          "Toggle clock glow & pulsing.",
+          glowToggle.wrapper,
+        ),
+      ]),
+    );
 
     // Background
-    const uploadBtn = this._el("button", { className: "settings-button", id: "fs-upload-bg", textContent: "Upload" });
-    const bgFileInput = this._el("input", { type: "file", accept: "image/*", className: "hidden", id: "fs-bg-file-input" });
-    const removeBtn = this._el("button", { className: "settings-button hidden", id: "fs-remove-bg", textContent: "Remove" });
+    const uploadBtn = this._el("button", {
+      className: "settings-button",
+      id: "fs-upload-bg",
+      textContent: "Upload",
+    });
+    const bgFileInput = this._el("input", {
+      type: "file",
+      accept: "image/*",
+      className: "hidden",
+      id: "fs-bg-file-input",
+    });
+    const removeBtn = this._el("button", {
+      className: "settings-button hidden",
+      id: "fs-remove-bg",
+      textContent: "Remove",
+    });
     this.els.fsUploadBg = uploadBtn;
     this.els.fsBgInput = bgFileInput;
     this.els.fsRemoveBg = removeBtn;
@@ -306,25 +397,44 @@ export class FullSettingsModal {
     const bgControls = this._el("div", { className: "background-controls" });
     bgControls.append(uploadBtn, bgFileInput, removeBtn);
 
-    const freezeBtn = this._el("button", { className: "settings-button hidden", id: "fs-freeze-btn", textContent: "Freeze" });
-    const rndBtn = this._el("button", { className: "settings-button", id: "fs-rnd-btn", textContent: "Random" });
+    const freezeBtn = this._el("button", {
+      className: "settings-button hidden",
+      id: "fs-freeze-btn",
+      textContent: "Freeze",
+    });
+    const rndBtn = this._el("button", {
+      className: "settings-button",
+      id: "fs-rnd-btn",
+      textContent: "Random",
+    });
     this.els.fsFreezeBtn = freezeBtn;
     this.els.fsRndBtn = rndBtn;
     const rndControls = this._el("div", { className: "background-controls" });
     rndControls.append(freezeBtn, rndBtn);
 
     const blurSelect = this._dropdown("fs-blur-select", [
-      ["0", "Off"], ["10", "10%"], ["20", "20%"], ["30", "30%"], ["40", "40%"], ["50", "50%"],
+      ["0", "Off"],
+      ["10", "10%"],
+      ["20", "20%"],
+      ["30", "30%"],
+      ["40", "40%"],
+      ["50", "50%"],
     ]);
     this.els.fsBlurSelect = blurSelect;
-    const blurRow = this._row("Blur Intensity", "Blur the background image.", blurSelect);
+    const blurRow = this._row(
+      "Blur Intensity",
+      "Blur the background image.",
+      blurSelect,
+    );
     this.els.fsBlurRow = blurRow;
 
-    pane.appendChild(this._section("Background", [
-      this._row("Custom BG", "Upload an image.", bgControls),
-      this._row("Random BG", "Fetch image from Lorem Picsum.", rndControls),
-      blurRow,
-    ]));
+    pane.appendChild(
+      this._section("Background", [
+        this._row("Custom BG", "Upload an image.", bgControls),
+        this._row("Random BG", "Fetch image from Lorem Picsum.", rndControls),
+        blurRow,
+      ]),
+    );
 
     // Normal themes
     const normalGrid = this._el("div", { className: "fs-themes-grid" });
@@ -337,25 +447,44 @@ export class FullSettingsModal {
     pane.appendChild(this._section("Gradient Theme Presets", [gradientGrid]));
 
     // Saved presets
-    const saveBtn = this._el("button", { className: "settings-button", textContent: "Save Current Theme" });
+    const saveBtn = this._el("button", {
+      className: "settings-button",
+      textContent: "Save Current Theme",
+    });
     this.els.fsSaveThemeBtn = saveBtn;
     const savedGrid = this._el("div", { className: "fs-saved-grid" });
     this.els.fsSavedThemes = savedGrid;
-    pane.appendChild(this._section("Saved Presets", [
-      this._el("div", { className: "setting-row", style: { background: "transparent", padding: "0 0 10px 0" } }, [saveBtn]),
-      savedGrid,
-    ]));
+    pane.appendChild(
+      this._section("Saved Presets", [
+        this._el(
+          "div",
+          {
+            className: "setting-row",
+            style: { background: "transparent", padding: "0 0 10px 0" },
+          },
+          [saveBtn],
+        ),
+        savedGrid,
+      ]),
+    );
 
     // Advanced Colors
     const colorNote = this._el("p", {
       className: "settings-note hidden",
       id: "fs-color-warning",
       textContent: "(Switch to Normal Theme to use Advanced Colors)",
-      style: { color: "var(--text-secondary)", fontWeight: "bold", marginBottom: "10px" },
+      style: {
+        color: "var(--text-secondary)",
+        fontWeight: "bold",
+        marginBottom: "10px",
+      },
     });
     this.els.fsColorWarning = colorNote;
 
-    const colorGrid = this._el("div", { className: "fs-color-grid", id: "fs-advanced-colors" });
+    const colorGrid = this._el("div", {
+      className: "fs-color-grid",
+      id: "fs-advanced-colors",
+    });
     this.els.fsColorControls = colorGrid;
 
     const colorDefs = [
@@ -369,7 +498,11 @@ export class FullSettingsModal {
       { id: "fs-glow-color-picker", label: "Glow Color" },
     ];
     colorDefs.forEach((def) => {
-      const picker = this._el("input", { type: "color", id: def.id, className: "color-picker" });
+      const picker = this._el("input", {
+        type: "color",
+        id: def.id,
+        className: "color-picker",
+      });
       colorGrid.appendChild(this._row(def.label, null, picker));
     });
 
@@ -390,23 +523,52 @@ export class FullSettingsModal {
     ]);
     this.els.fsScPosition = posSelect;
 
-    pane.appendChild(this._section("Position", [
-      this._row("Shortcuts Position", "Position or hide the shortcuts bar.", posSelect),
-    ]));
+    pane.appendChild(
+      this._section("Position", [
+        this._row(
+          "Shortcuts Position",
+          "Position or hide the shortcuts bar.",
+          posSelect,
+        ),
+      ]),
+    );
 
-    const listContainer = this._el("div", { className: "fs-shortcuts-list", id: "fs-shortcuts-editor-list" });
+    const listContainer = this._el("div", {
+      className: "fs-shortcuts-list",
+      id: "fs-shortcuts-editor-list",
+    });
     this.els.fsShortcutList = listContainer;
     pane.appendChild(this._section("Your Shortcuts", [listContainer]));
 
     // Add shortcut form
     const form = this._el("form", { id: "fs-add-shortcut-form" });
-    form.appendChild(this._el("h3", { className: "settings-header", textContent: "Add New Shortcut" }));
+    form.appendChild(
+      this._el("h3", {
+        className: "settings-header",
+        textContent: "Add New Shortcut",
+      }),
+    );
     const inputsDiv = this._el("div", { className: "add-shortcut-inputs" });
-    const nameInput = this._el("input", { type: "text", placeholder: "Name (e.g., Google)", maxlength: "35", required: "" });
-    const urlInput = this._el("input", { type: "text", placeholder: "URL (e.g., https://google.com)", required: "" });
+    const nameInput = this._el("input", {
+      type: "text",
+      placeholder: "Name (e.g., Google)",
+      maxlength: "35",
+      required: "",
+    });
+    const urlInput = this._el("input", {
+      type: "text",
+      placeholder: "URL (e.g., https://google.com)",
+      required: "",
+    });
     inputsDiv.append(nameInput, urlInput);
     form.appendChild(inputsDiv);
-    form.appendChild(this._el("button", { type: "submit", className: "settings-button", textContent: "Add Shortcut" }));
+    form.appendChild(
+      this._el("button", {
+        type: "submit",
+        className: "settings-button",
+        textContent: "Add Shortcut",
+      }),
+    );
     this.els.fsShortcutForm = form;
     this.els.fsScNameInput = nameInput;
     this.els.fsScUrlInput = urlInput;
@@ -429,24 +591,70 @@ export class FullSettingsModal {
     this.els.fsAppsToggle = appsToggle.input;
     this.els.fsAiToggle = aiToggle.input;
 
-    pane.appendChild(this._section("Visibility", [
-      this._row("Show To-Do List", "Display the To-Do List button.", todoToggle.wrapper),
-      this._row("Show Google Apps", "Display the Google Apps button.", appsToggle.wrapper),
-      this._row("Show AI Tools & Socials", "Display the AI Tools & Socials button.", aiToggle.wrapper),
-    ]));
+    pane.appendChild(
+      this._section("Visibility", [
+        this._row(
+          "Show To-Do List",
+          "Display the To-Do List button.",
+          todoToggle.wrapper,
+        ),
+        this._row(
+          "Show Google Apps",
+          "Display the Google Apps button.",
+          appsToggle.wrapper,
+        ),
+        this._row(
+          "Show AI Tools & Socials",
+          "Display the AI Tools & Socials button.",
+          aiToggle.wrapper,
+        ),
+      ]),
+    );
 
     // Voice Search toggle
     const voiceToggle = this._toggle("fs-hide-voice-toggle");
     this.els.fsHideVoice = voiceToggle.input;
-    pane.appendChild(this._section("Search", [
-      this._row("Hide Voice Search", "Hide the microphone button.", voiceToggle.wrapper),
-    ]));
+    pane.appendChild(
+      this._section("Search", [
+        this._row(
+          "Hide Voice Search",
+          "Hide the microphone button.",
+          voiceToggle.wrapper,
+        ),
+      ]),
+    );
+
+    // Display & Content
+    const editableToggle = this._toggle("fs-editable-text-toggle");
+    this.els.fsEditableText = editableToggle.input;
+    pane.appendChild(
+      this._section("Display & Content", [
+        this._row(
+          "Show Editable Text",
+          "Display custom text under greeting.",
+          editableToggle.wrapper,
+        ),
+      ]),
+    );
 
     // Backup & Restore
-    const backupBtn = this._el("button", { className: "settings-button", textContent: "Backup" });
-    const restoreBtn = this._el("button", { className: "settings-button", textContent: "Restore" });
-    const restoreInput = this._el("input", { type: "file", accept: ".json", className: "hidden" });
-    const resetBtn = this._el("button", { className: "settings-button danger", textContent: "Reset All" });
+    const backupBtn = this._el("button", {
+      className: "settings-button",
+      textContent: "Backup",
+    });
+    const restoreBtn = this._el("button", {
+      className: "settings-button",
+      textContent: "Restore",
+    });
+    const restoreInput = this._el("input", {
+      type: "file",
+      accept: ".json",
+      className: "hidden",
+    });
+    const resetBtn = this._el("button", {
+      className: "settings-button danger",
+      textContent: "Reset All",
+    });
     this.els.fsBackup = backupBtn;
     this.els.fsRestore = restoreBtn;
     this.els.fsRestoreInput = restoreInput;
@@ -493,6 +701,19 @@ export class FullSettingsModal {
       if (e.target === this.overlay) this.close();
     });
 
+    if (this.els.miniBtn) {
+      this.els.miniBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.close();
+        this.isOpen = false;
+        state.set("lastSettingsView", "mini");
+        const sm = this._sm();
+        if (sm && sm.els.popup) {
+          sm.els.popup.classList.add("visible");
+        }
+      });
+    }
+
     // Tab switching
     this.els.tabBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -505,7 +726,9 @@ export class FullSettingsModal {
     });
 
     // Drag
-    this.els.titlebar.addEventListener("mousedown", (e) => this._handleDragStart(e));
+    this.els.titlebar.addEventListener("mousedown", (e) =>
+      this._handleDragStart(e),
+    );
 
     // Open full settings button (in mini popup)
     const openBtn = document.getElementById("open-full-settings-btn");
@@ -520,12 +743,18 @@ export class FullSettingsModal {
     this._bindToggle(this.els.fsTempUnit, "tempUnit", "imperial");
     this._bindToggle(this.els.fsTempDisplay, "tempDisplayMode", true);
 
-    this.els.fsWidgetControl.addEventListener("change", (e) => state.set("widgetControl", e.target.value));
-    this.els.fsShortcutsPosition.addEventListener("change", (e) => state.set("shortcutsPosition", e.target.value));
+    this.els.fsWidgetControl.addEventListener("change", (e) =>
+      state.set("widgetControl", e.target.value),
+    );
+    this.els.fsShortcutsPosition.addEventListener("change", (e) =>
+      state.set("shortcutsPosition", e.target.value),
+    );
 
     // Location search
     this.els.fsLocSave.addEventListener("click", () => this._searchLocation());
-    this.els.fsLocInput.addEventListener("keydown", (e) => { if (e.key === "Enter") this._searchLocation(); });
+    this.els.fsLocInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") this._searchLocation();
+    });
     this.els.fsLocGps.addEventListener("click", () => {
       const sm = this._sm();
       if (sm) sm.detectLocation();
@@ -539,9 +768,17 @@ export class FullSettingsModal {
       if (sm) {
         const target = this.els.fsDark.checked
           ? sm.constructor.THEMES?.normal?.find((t) => t.id === "default-dark")
-          : sm.constructor.THEMES?.normal?.find((t) => t.id === "default-light");
+          : sm.constructor.THEMES?.normal?.find(
+              (t) => t.id === "default-light",
+            );
         // Fallback: use direct theme application
-        sm.applyNormalTheme?.(target || { id: this.els.fsDark.checked ? "default-dark" : "default-light", colors: {}, type: this.els.fsDark.checked ? "default-dark" : "light" });
+        sm.applyNormalTheme?.(
+          target || {
+            id: this.els.fsDark.checked ? "default-dark" : "default-light",
+            colors: {},
+            type: this.els.fsDark.checked ? "default-dark" : "light",
+          },
+        );
       }
     });
 
@@ -560,49 +797,55 @@ export class FullSettingsModal {
     });
 
     // BG upload
-    this.els.fsUploadBg.addEventListener("click", () => { this.els.fsBgInput.value = ""; this.els.fsBgInput.click(); });
-    this.els.fsBgInput.addEventListener("change", (e) => {
+    this.els.fsUploadBg.addEventListener("click", () => {
+      this.els.fsBgInput.value = "";
+      this.els.fsBgInput.click();
+    });
+    this.els.fsBgInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
       const sm = this._sm();
-      if (sm && sm.els.bgInput) {
-        // Delegate to SettingsManager by proxying the file
-        const dt = new DataTransfer();
-        dt.items.add(e.target.files[0]);
-        sm.els.bgInput.files = dt.files;
-        sm.els.bgInput.dispatchEvent(new Event("change"));
-        this._updateBgState();
+      if (sm && typeof sm.handleBgUpload === "function") {
+        await sm.handleBgUpload(file);
       }
+      this._updateBgState();
+      this.els.fsBgInput.value = "";
     });
     this.els.fsRemoveBg.addEventListener("click", () => {
       const sm = this._sm();
-      if (sm && sm.els.removeBg) {
-        sm.els.removeBg.click();
-        this._updateBgState();
+      if (sm && typeof sm.removeCustomBg === "function") {
+        sm.removeCustomBg();
       }
+      this._updateBgState();
     });
 
     // Random BG
-    this.els.fsRndBtn.addEventListener("click", () => {
+    this.els.fsRndBtn.addEventListener("click", async () => {
       const sm = this._sm();
       if (sm) {
         state.set("randomBgMode", "random");
-        sm.fetchRandomBackground();
+        await sm.fetchRandomBackground();
         this._updateBgState();
       }
     });
-    this.els.fsFreezeBtn.addEventListener("click", () => {
+    this.els.fsFreezeBtn.addEventListener("click", async () => {
       const sm = this._sm();
-      if (sm && sm.els.randomBgFreeze) {
-        sm.els.randomBgFreeze.click();
-        setTimeout(() => this._updateBgState(), 100);
+      if (sm && typeof sm.freezeRandomBackground === "function") {
+        await sm.freezeRandomBackground();
+        this._updateBgState();
       }
     });
 
     // Blur
     this.els.fsBlurSelect.addEventListener("change", (e) => {
       state.set("bgBlurIntensity", e.target.value);
-      const blurMap = { "0": 0, "10": 2, "20": 4, "30": 6, "40": 8, "50": 10 };
-      document.documentElement.style.setProperty("--bg-blur", (blurMap[e.target.value] || 0) + "px");
-      if (e.target.value !== "0") document.documentElement.classList.add("high-bg-blur");
+      const blurMap = { 0: 0, 10: 2, 20: 4, 30: 6, 40: 8, 50: 10 };
+      document.documentElement.style.setProperty(
+        "--bg-blur",
+        (blurMap[e.target.value] || 0) + "px",
+      );
+      if (e.target.value !== "0")
+        document.documentElement.classList.add("high-bg-blur");
       else document.documentElement.classList.remove("high-bg-blur");
     });
 
@@ -610,6 +853,15 @@ export class FullSettingsModal {
     if (this.els.fsColorControls) {
       this.els.fsColorControls.addEventListener("input", (e) => {
         if (!e.target.classList.contains("color-picker")) return;
+        const hasBg =
+          document.body.classList.contains("has-custom-bg") ||
+          !!state.get("backgroundImage") ||
+          !!state.get("randomBgMode");
+        const isGradient =
+          document.body.classList.contains("gradient-mode-active") ||
+          state.get("gradientModeActive") === true;
+        if (hasBg || isGradient) return;
+
         const sm = this._sm();
         if (sm) sm.disableAutoTheme();
 
@@ -629,6 +881,7 @@ export class FullSettingsModal {
           state.set(`custom-${cssVar}`, e.target.value);
         }
         state.set("normalThemeId", "custom");
+        this._updateColorControlsState();
       });
     }
 
@@ -642,7 +895,9 @@ export class FullSettingsModal {
     });
 
     // ─── Shortcuts tab events ───
-    this.els.fsScPosition.addEventListener("change", (e) => state.set("shortcutsPosition", e.target.value));
+    this.els.fsScPosition.addEventListener("change", (e) =>
+      state.set("shortcutsPosition", e.target.value),
+    );
 
     this.els.fsShortcutForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -670,18 +925,25 @@ export class FullSettingsModal {
       const sm = this._sm();
       if (sm) sm.backup();
     });
-    this.els.fsRestore.addEventListener("click", () => this.els.fsRestoreInput.click());
+    this.els.fsRestore.addEventListener("click", () =>
+      this.els.fsRestoreInput.click(),
+    );
     this.els.fsRestoreInput.addEventListener("change", (e) => {
       const sm = this._sm();
       if (sm) sm.restore(e);
     });
     this.els.fsReset.addEventListener("click", async () => {
       const sm = this._sm();
-      if (sm && sm.els.reset) sm.els.reset.click();
+      if (sm && typeof sm.resetAll === "function") {
+        await sm.resetAll();
+      }
     });
 
     this.els.fsUpdateBtn.addEventListener("click", () => {
-      window.open("https://github.com/xtditom/YourDynamicDashboard/releases/latest", "_blank");
+      window.open(
+        "https://github.com/xtditom/YourDynamicDashboard/releases/latest",
+        "_blank",
+      );
     });
     this.els.fsGhBtn.addEventListener("click", () => {
       window.open("https://github.com/xtditom/YourDynamicDashboard", "_blank");
@@ -696,7 +958,14 @@ export class FullSettingsModal {
         if (key === "tempUnit") {
           state.set(key, input.checked ? "imperial" : "metric");
         } else {
-          state.set(key, input.checked ? trueValue : (key === "clockFormat" ? "12" : "digital"));
+          state.set(
+            key,
+            input.checked
+              ? trueValue
+              : key === "clockFormat"
+                ? "12"
+                : "digital",
+          );
         }
       }
     });
@@ -708,6 +977,25 @@ export class FullSettingsModal {
     state.subscribe((key, value) => {
       if (!this.isOpen) return;
       this._syncToggle(key, value);
+      if (key === "keyMap") {
+        this._renderKeyEditor();
+      }
+      if (key === "userSavedThemes") {
+        this._renderSavedThemes();
+      }
+      if (
+        key === "gradientModeActive" ||
+        key === "backgroundImage" ||
+        key === "randomBgMode" ||
+        key === "normalThemeId" ||
+        key === "gradientThemeId" ||
+        key === "autoTheme" ||
+        key === "darkMode"
+      ) {
+        this._syncColorPickers();
+        this._updateColorControlsState();
+        this._updateBgState();
+      }
     });
   }
 
@@ -733,12 +1021,14 @@ export class FullSettingsModal {
       map[key].el.checked = map[key].check;
     }
 
-    if (key === "widgetControl") this.els.fsWidgetControl.value = value || "all";
+    if (key === "widgetControl")
+      this.els.fsWidgetControl.value = value || "all";
     if (key === "shortcutsPosition") {
       this.els.fsShortcutsPosition.value = value || "bottom";
       this.els.fsScPosition.value = value || "bottom";
     }
-    if (key === "yd_city" && this.els.fsLocInput) this.els.fsLocInput.value = value || "";
+    if (key === "yd_city" && this.els.fsLocInput)
+      this.els.fsLocInput.value = value || "";
 
     // Clock format row disabled when analog
     if (key === "clockType") {
@@ -771,7 +1061,8 @@ export class FullSettingsModal {
 
     // Dropdowns
     this.els.fsWidgetControl.value = state.get("widgetControl") || "all";
-    this.els.fsShortcutsPosition.value = state.get("shortcutsPosition") || "bottom";
+    this.els.fsShortcutsPosition.value =
+      state.get("shortcutsPosition") || "bottom";
     this.els.fsScPosition.value = state.get("shortcutsPosition") || "bottom";
     this.els.fsLocInput.value = state.get("yd_city") || "";
     this.els.fsBlurSelect.value = state.get("bgBlurIntensity") || "0";
@@ -804,6 +1095,7 @@ export class FullSettingsModal {
     this.populateAll();
     this.overlay.classList.remove("hidden");
     this.isOpen = true;
+    state.set("lastSettingsView", "full");
 
     // Reset position to center
     this.modal.style.transform = "";
@@ -814,6 +1106,7 @@ export class FullSettingsModal {
   close() {
     this.overlay.classList.add("hidden");
     this.isOpen = false;
+    state.set("lastSettingsView", "full");
   }
 
   // ─── Drag ──────────────────────────────────────────────────
@@ -861,7 +1154,7 @@ export class FullSettingsModal {
     this.els.fsLocSave.textContent = "...";
     try {
       const res = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`,
       );
       const data = await res.json();
       if (data.results && data.results.length > 0) {
@@ -872,9 +1165,13 @@ export class FullSettingsModal {
         state.set("locationUpdate", Date.now());
         this.els.fsLocInput.value = loc.name;
         this.els.fsLocSave.textContent = "Saved";
-        setTimeout(() => { this.els.fsLocSave.textContent = "Save"; }, 2000);
+        setTimeout(() => {
+          this.els.fsLocSave.textContent = "Save";
+        }, 2000);
       } else {
-        showCustomModal(`Could not find any city with name "${city}". Try another name.`);
+        showCustomModal(
+          `Could not find any city with name "${city}". Try another name.`,
+        );
         this.els.fsLocSave.textContent = "Save";
       }
     } catch {
@@ -891,8 +1188,6 @@ export class FullSettingsModal {
     const sm = this._sm();
     if (!sm) return;
 
-    // We access THEMES via the settings module. They're available on the module scope.
-    // We'll call the SettingsManager's internal rendering approach.
     const renderGrid = (container, themes, isGradient) => {
       container.innerHTML = "";
       themes.forEach((theme) => {
@@ -900,18 +1195,33 @@ export class FullSettingsModal {
         btn.className = `theme-preset-button ${isGradient ? "gradient" : ""}`;
         btn.textContent = theme.name;
         if (isGradient) {
-          btn.style.background = `linear-gradient(45deg, ${theme.colors[0]}, ${theme.colors[1]})`;
+          btn.style.background = `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]})`;
+          btn.style.color = "#ffffff";
+          btn.style.textShadow =
+            "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
         } else {
-          btn.style.background = theme.colors["--bg-primary"];
-          btn.style.color = theme.colors["--text-primary"];
-          btn.style.borderColor = theme.colors["--accent-color"];
+          const rightColor = window.__getThemeRightColor
+            ? window.__getThemeRightColor(theme)
+            : theme.id === "theme-3"
+              ? "#006EFF"
+              : theme.id === "theme-7"
+                ? "#91AA5B"
+                : theme.colors["--accent-color"];
+          btn.style.background = `linear-gradient(135deg, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+          btn.style.color = "#ffffff";
+          btn.style.textShadow =
+            "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
+          btn.style.borderColor = "var(--border-color)";
         }
         btn.addEventListener("click", () => {
           sm.disableAutoTheme();
           if (isGradient) sm.applyGradientTheme(theme);
           else sm.applyNormalTheme(theme);
-          // Re-sync pickers
-          setTimeout(() => this._syncColorPickers(), 50);
+          // Re-sync pickers and disabled states
+          setTimeout(() => {
+            this._syncColorPickers();
+            this._updateColorControlsState();
+          }, 50);
         });
         container.appendChild(btn);
       });
@@ -936,16 +1246,24 @@ export class FullSettingsModal {
       const btn = document.createElement("div");
       btn.className = "saved-preset-button";
       if (theme) {
+        const rightColor = window.__getThemeRightColor
+          ? window.__getThemeRightColor(theme)
+          : theme.colors["--accent-color"];
         btn.classList.add("filled");
         btn.textContent = theme.name;
-        btn.style.background = theme.colors["--bg-primary"];
-        btn.style.color = theme.colors["--text-primary"];
-        btn.style.borderColor = theme.colors["--accent-color"];
+        btn.style.background = `linear-gradient(135deg, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+        btn.style.color = "#ffffff";
+        btn.style.textShadow =
+          "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
+        btn.style.borderColor = "var(--border-color)";
         btn.addEventListener("click", () => {
           if (sm) {
             sm.disableAutoTheme();
             sm.applyNormalTheme(theme);
-            setTimeout(() => this._syncColorPickers(), 50);
+            setTimeout(() => {
+              this._syncColorPickers();
+              this._updateColorControlsState();
+            }, 50);
           }
         });
         const del = document.createElement("div");
@@ -983,20 +1301,30 @@ export class FullSettingsModal {
     Object.entries(mapping).forEach(([cssVar, pickerId]) => {
       const el = document.getElementById(pickerId);
       if (el) {
-        const val = state.get(`custom-${cssVar}`) || getComputedStyle(document.body).getPropertyValue(cssVar).trim();
+        const val =
+          state.get(`custom-${cssVar}`) ||
+          getComputedStyle(document.body).getPropertyValue(cssVar).trim();
         if (val) el.value = val;
       }
     });
   }
 
   _updateColorControlsState() {
-    const hasBg = document.body.classList.contains("has-custom-bg");
-    const isGradient = document.body.classList.contains("gradient-mode-active");
+    const hasBg =
+      document.body.classList.contains("has-custom-bg") ||
+      !!state.get("backgroundImage") ||
+      !!state.get("randomBgMode");
+    const isGradient =
+      document.body.classList.contains("gradient-mode-active") ||
+      state.get("gradientModeActive") === true;
     const disabled = hasBg || isGradient;
 
     if (this.els.fsColorControls) {
-      this.els.fsColorControls.style.opacity = disabled ? "0.5" : "1";
-      this.els.fsColorControls.querySelectorAll("input").forEach((i) => (i.disabled = disabled));
+      this.els.fsColorControls.style.opacity = disabled ? "0.4" : "1";
+      this.els.fsColorControls.style.pointerEvents = disabled ? "none" : "auto";
+      this.els.fsColorControls
+        .querySelectorAll("input")
+        .forEach((i) => (i.disabled = disabled));
     }
     if (this.els.fsColorWarning) {
       this.els.fsColorWarning.classList.toggle("hidden", !disabled);
@@ -1006,7 +1334,10 @@ export class FullSettingsModal {
   // ─── Background State ─────────────────────────────────────
 
   _updateBgState() {
-    const hasBg = document.body.classList.contains("has-custom-bg");
+    const hasBg =
+      document.body.classList.contains("has-custom-bg") ||
+      !!state.get("backgroundImage") ||
+      !!state.get("randomBgMode");
     const mode = state.get("randomBgMode");
 
     if (this.els.fsRemoveBg) {
@@ -1022,6 +1353,8 @@ export class FullSettingsModal {
         this.els.fsFreezeBtn.style.color = "";
         this.els.fsFreezeBtn.classList.remove("hidden");
       } else {
+        this.els.fsFreezeBtn.textContent = "Freeze";
+        this.els.fsFreezeBtn.style.color = "";
         this.els.fsFreezeBtn.classList.add("hidden");
       }
     }
@@ -1041,20 +1374,49 @@ export class FullSettingsModal {
     const shortcuts = state.get("userShortcuts") || [];
 
     shortcuts.forEach((s, index) => {
-      const div = this._el("div", { className: "shortcut-editor-item", draggable: "true" });
+      const div = this._el("div", {
+        className: "shortcut-editor-item",
+        draggable: "true",
+      });
       div.dataset.index = index;
 
-      const handle = this._el("div", { className: "drag-handle", title: "Drag to reorder", textContent: "☰" });
+      const handle = this._el("div", {
+        className: "drag-handle",
+        title: "Drag to reorder",
+        textContent: "☰",
+      });
 
-      const iconContainer = this._el("div", { className: "icon-container", style: { position: "relative", cursor: "pointer" }, title: "Click to upload custom icon" });
-      const img = this._el("img", { src: s.customIcon || s.icon || getIconUrl(s.url), className: "icon" });
-      const fileInput = this._el("input", { type: "file", accept: "image/*", style: { display: "none" } });
+      const iconContainer = this._el("div", {
+        className: "icon-container",
+        style: { position: "relative", cursor: "pointer" },
+        title: "Click to upload custom icon",
+      });
+      const img = this._el("img", {
+        src: s.customIcon || s.icon || getIconUrl(s.url),
+        className: "icon",
+      });
+      const fileInput = this._el("input", {
+        type: "file",
+        accept: "image/*",
+        style: { display: "none" },
+      });
       iconContainer.append(img, fileInput);
       iconContainer.addEventListener("click", () => fileInput.click());
 
       const inputsDiv = this._el("div", { className: "inputs" });
-      const nameInput = this._el("input", { type: "text", className: "name-input", value: s.name, placeholder: "Name", maxlength: "35" });
-      const urlInput = this._el("input", { type: "text", className: "url-input", value: s.url, placeholder: "URL" });
+      const nameInput = this._el("input", {
+        type: "text",
+        className: "name-input",
+        value: s.name,
+        placeholder: "Name",
+        maxlength: "35",
+      });
+      const urlInput = this._el("input", {
+        type: "text",
+        className: "url-input",
+        value: s.url,
+        placeholder: "URL",
+      });
       inputsDiv.append(nameInput, urlInput);
 
       const triggerSave = () => {
@@ -1065,11 +1427,18 @@ export class FullSettingsModal {
       urlInput.addEventListener("blur", triggerSave);
 
       const actionsDiv = this._el("div", { className: "actions" });
-      const delBtn = this._el("button", { className: "action-btn delete", title: "Delete" });
-      delBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const delBtn = this._el("button", {
+        className: "action-btn delete",
+        title: "Delete",
+      });
+      delBtn.innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       delBtn.addEventListener("click", () => {
         const sm = this._sm();
-        if (sm) { sm.deleteShortcut(index); this._renderShortcutEditor(); }
+        if (sm) {
+          sm.deleteShortcut(index);
+          this._renderShortcutEditor();
+        }
       });
 
       fileInput.addEventListener("change", (e) => {
@@ -1080,12 +1449,19 @@ export class FullSettingsModal {
           const tempImg = new Image();
           tempImg.onload = () => {
             const canvas = document.createElement("canvas");
-            canvas.width = 256; canvas.height = 256;
+            canvas.width = 256;
+            canvas.height = 256;
             canvas.getContext("2d").drawImage(tempImg, 0, 0, 256, 256);
             const dataUrl = canvas.toDataURL("image/png");
             img.src = dataUrl;
             const sm = this._sm();
-            if (sm) sm.updateShortcut(index, nameInput.value, urlInput.value, dataUrl);
+            if (sm)
+              sm.updateShortcut(
+                index,
+                nameInput.value,
+                urlInput.value,
+                dataUrl,
+              );
           };
           tempImg.src = ev.target.result;
         };
@@ -1096,14 +1472,20 @@ export class FullSettingsModal {
       div.append(handle, iconContainer, inputsDiv, actionsDiv);
 
       // Drag & drop
-      div.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/plain", index); div.classList.add("dragging"); });
+      div.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", index);
+        div.classList.add("dragging");
+      });
       div.addEventListener("dragend", () => div.classList.remove("dragging"));
       div.addEventListener("dragover", (e) => e.preventDefault());
       div.addEventListener("drop", (e) => {
         e.preventDefault();
         const from = parseInt(e.dataTransfer.getData("text/plain"));
         const sm = this._sm();
-        if (sm) { sm.reorderShortcuts(from, index); this._renderShortcutEditor(); }
+        if (sm) {
+          sm.reorderShortcuts(from, index);
+          this._renderShortcutEditor();
+        }
       });
 
       list.appendChild(div);
@@ -1118,18 +1500,32 @@ export class FullSettingsModal {
     container.innerHTML = "";
     if (this.els.fsKeyNoteContainer) this.els.fsKeyNoteContainer.innerHTML = "";
 
+    if (this._activeKeyCleanup) {
+      this._activeKeyCleanup();
+    }
+
     const map = state.get("keyMap");
     const labels = {
-      todo: "Toggle To-Do", ai: "Toggle AI Tools", apps: "Toggle Google Apps",
-      settings: "Toggle Settings", search: "Focus On Search", clock: "Toggle Clock Mode",
-      date: "Toggle Date", autoTheme: "Toggle Auto Theme", tempDisplay: "Toggle Temp Display",
-      hideGreetings: "Toggle Greetings", showEditableText: "Toggle Editable Text",
-      numKeys: "Keys for Shortcuts", zen: "Key for Zen Mode", voice: "Key for Voice Search",
+      todo: "Toggle To-Do",
+      ai: "Toggle AI Tools",
+      apps: "Toggle Google Apps",
+      settings: "Toggle Settings",
+      search: "Focus On Search",
+      clock: "Toggle Clock Mode",
+      date: "Toggle Date",
+      autoTheme: "Toggle Auto Theme",
+      tempDisplay: "Toggle Temp Display",
+      hideGreetings: "Toggle Greetings",
+      showEditableText: "Toggle Editable Text",
+      numKeys: "Keys for Shortcuts",
+      zen: "Key for Zen Mode",
+      voice: "Key for Voice Search",
     };
 
     Object.entries(labels).forEach(([action, labelText]) => {
       let data = map[action];
-      if (!data || typeof data !== "object") data = DEFAULT_KEY_MAP[action] || { key: "?", enabled: false };
+      if (!data || typeof data !== "object")
+        data = DEFAULT_KEY_MAP[action] || { key: "?", enabled: false };
 
       const row = this._el("div", { className: "key-row" });
       row.appendChild(this._el("span", { textContent: labelText }));
@@ -1140,20 +1536,99 @@ export class FullSettingsModal {
         const status = this._el("span", {
           className: `key-fixed-status ${data.enabled ? "active" : "inactive"}`,
           textContent: data.enabled ? "ACTIVE" : "INACTIVE",
-          style: { fontWeight: "bold", padding: "0.4rem 1rem", minWidth: "60px", textAlign: "center", fontSize: "0.85rem", color: data.enabled ? "var(--accent-color)" : "var(--text-secondary)" },
+          style: {
+            fontWeight: "bold",
+            padding: "0.4rem 1rem",
+            minWidth: "60px",
+            textAlign: "center",
+            fontSize: "0.85rem",
+            color: data.enabled
+              ? "var(--accent-color)"
+              : "var(--text-secondary)",
+          },
         });
         controls.appendChild(status);
       } else {
         const btn = this._el("button", {
           className: `key-btn ${!data.enabled ? "disabled" : ""}`,
-          textContent: data.key.toUpperCase(),
+          textContent: (data.key || "?").toUpperCase(),
         });
         btn.disabled = !data.enabled;
+
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (this._activeKeyCleanup) this._activeKeyCleanup();
+
+          const originalText = btn.textContent;
+          btn.textContent = "...";
+          btn.classList.add("listening");
+          btn.style.borderColor = "var(--accent-color)";
+
+          const handler = (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            document.removeEventListener("keydown", handler, true);
+            this._activeKeyCleanup = null;
+            btn.classList.remove("listening");
+            btn.style.borderColor = "";
+
+            const pressedKey = event.key.toLowerCase();
+            if (event.key === "Escape") {
+              btn.textContent = originalText;
+              return;
+            }
+            if (
+              (pressedKey >= "1" && pressedKey <= "9") ||
+              pressedKey === "z" ||
+              pressedKey === "v"
+            ) {
+              btn.textContent = "Reserved!";
+              btn.style.borderColor = "#e53e3e";
+              setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.borderColor = "";
+              }, 1000);
+              return;
+            }
+            const currentMap = state.get("keyMap");
+            const existingAction = Object.keys(currentMap).find((k) => {
+              const item = currentMap[k];
+              const itemKey = typeof item === "object" ? item.key : item;
+              return itemKey === pressedKey && k !== action && item.enabled;
+            });
+
+            if (existingAction) {
+              btn.textContent = "Taken!";
+              btn.style.borderColor = "#e53e3e";
+              setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.borderColor = "";
+              }, 1000);
+              return;
+            }
+            const newMap = { ...currentMap };
+            newMap[action] = { key: pressedKey, enabled: true };
+            state.set("keyMap", newMap);
+            this._renderKeyEditor();
+          };
+
+          this._activeKeyCleanup = () => {
+            document.removeEventListener("keydown", handler, true);
+            btn.textContent = originalText;
+            btn.classList.remove("listening");
+            btn.style.borderColor = "";
+            this._activeKeyCleanup = null;
+          };
+          document.addEventListener("keydown", handler, { capture: true });
+        });
+
         controls.appendChild(btn);
       }
 
       // Toggle
-      const toggleLabel = this._el("label", { className: "toggle-switch mini" });
+      const toggleLabel = this._el("label", {
+        className: "toggle-switch mini",
+      });
       const checkbox = this._el("input", { type: "checkbox" });
       checkbox.checked = data.enabled;
       toggleLabel.append(checkbox, this._el("span", { className: "slider" }));
@@ -1170,9 +1645,14 @@ export class FullSettingsModal {
     });
 
     // Note
-    const note = this._el("div", { className: "settings-note", style: { marginTop: "1rem" } });
-    note.innerHTML = "<p>Keys <strong>1-9</strong> are reserved for <strong>Shortcuts</strong><br>Press <strong>Z</strong> for <strong>Zen Mode</strong>, <strong>V</strong> for <strong>Voice Search</strong></p>";
-    if (this.els.fsKeyNoteContainer) this.els.fsKeyNoteContainer.appendChild(note);
+    const note = this._el("div", {
+      className: "settings-note",
+      style: { marginTop: "1rem" },
+    });
+    note.innerHTML =
+      "<p>Keys <strong>1-9</strong> are reserved for <strong>Shortcuts</strong><br>Press <strong>Z</strong> for <strong>Zen Mode</strong>, <strong>V</strong> for <strong>Voice Search</strong></p>";
+    if (this.els.fsKeyNoteContainer)
+      this.els.fsKeyNoteContainer.appendChild(note);
     else container.appendChild(note);
   }
 
@@ -1184,9 +1664,17 @@ export class FullSettingsModal {
     container.innerHTML = "";
 
     let targets = state.get("linkTargets");
-    if (!targets) { targets = { ...CONFIG.defaults.linkTargets }; state.set("linkTargets", targets); }
+    if (!targets) {
+      targets = { ...CONFIG.defaults.linkTargets };
+      state.set("linkTargets", targets);
+    }
 
-    const labels = { ai: "AI Tools & Socials", apps: "Google Apps", shortcuts: "Shortcuts", searchOpen: "Search Open Button" };
+    const labels = {
+      ai: "AI Tools & Socials",
+      apps: "Google Apps",
+      shortcuts: "Shortcuts",
+      searchOpen: "Search Open Button",
+    };
 
     Object.entries(labels).forEach(([key, labelText]) => {
       const isNewTab = (targets[key] || "_blank") === "_blank";
@@ -1194,9 +1682,16 @@ export class FullSettingsModal {
       row.appendChild(this._el("span", { textContent: labelText }));
 
       const controls = this._el("div", { className: "key-controls" });
-      controls.appendChild(this._el("span", { textContent: isNewTab ? "New Tab" : "Same Tab", style: { marginRight: "10px", fontSize: "0.9em", opacity: "0.8" } }));
+      controls.appendChild(
+        this._el("span", {
+          textContent: isNewTab ? "New Tab" : "Same Tab",
+          style: { marginRight: "10px", fontSize: "0.9em", opacity: "0.8" },
+        }),
+      );
 
-      const toggleLabel = this._el("label", { className: "toggle-switch mini" });
+      const toggleLabel = this._el("label", {
+        className: "toggle-switch mini",
+      });
       const checkbox = this._el("input", { type: "checkbox" });
       checkbox.checked = isNewTab;
       toggleLabel.append(checkbox, this._el("span", { className: "slider" }));

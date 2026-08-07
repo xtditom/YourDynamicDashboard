@@ -36,6 +36,7 @@ export class Search {
 
     state.subscribe((key) => {
       if (key === "linkTargets") this.updateButtons();
+      if (key === "hideVoiceSearch") this.updateVoiceButton();
     });
 
     this.els.input.addEventListener("input", (e) => {
@@ -117,18 +118,15 @@ export class Search {
 
     // --- Voice Search Logic ---
     if (this.els.voiceBtn) {
-      if (state.get("hideVoiceSearch") === true) {
-        this.els.voiceBtn.style.display = "none";
-      } else if (
+      if (
         "webkitSpeechRecognition" in window ||
         "SpeechRecognition" in window
       ) {
         this.els.voiceBtn.addEventListener("click", () =>
           this.toggleVoiceSearch(),
         );
-      } else {
-        this.els.voiceBtn.style.display = "none";
       }
+      this.updateVoiceButton();
     }
 
     document.addEventListener("click", (e) => {
@@ -618,6 +616,18 @@ export class Search {
   }
 
   // --- SECTION: VOICE SEARCH ---
+  updateVoiceButton() {
+    if (!this.els.voiceBtn) return;
+    const hide = state.get("hideVoiceSearch") === true;
+    const isSupported =
+      "webkitSpeechRecognition" in window || "SpeechRecognition" in window;
+    if (hide || !isSupported) {
+      this.els.voiceBtn.style.display = "none";
+    } else {
+      this.els.voiceBtn.style.display = "";
+    }
+  }
+
   toggleVoiceSearch() {
     if (this.isListening) {
       this.stopVoiceSearch();

@@ -144,7 +144,14 @@ export class CommandPalette {
         name: "Reset Dashboard to Defaults",
         icon: "⚠️",
         shortcut: "",
-        action: () => this.clickBtn("reset-button")
+        action: () => {
+          const sm = window.__settingsManagerInstance;
+          if (sm && typeof sm.resetAll === "function") {
+            sm.resetAll();
+          } else {
+            this.clickBtn("reset-button");
+          }
+        },
       },
       {
         id: "submenu-apps",

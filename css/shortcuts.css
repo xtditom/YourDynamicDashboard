@@ -182,47 +182,84 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
 .shortcut-editor-item .action-btn.delete:hover {
   color: #e53e3e;
 }
-#add-shortcut-form {
-  border-top: 1px solid var(--bg-interactive);
-  padding-top: 1rem;
-}
-#add-shortcut-form .settings-header {
-  margin-bottom: 1rem !important;
-  margin-top: 0.5rem;
-  position: relative;
-  z-index: 5;
-}
-#add-shortcut-form .add-shortcut-inputs {
+#add-shortcut-form,
+#fs-add-shortcut-form {
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  padding-top: 1.25rem;
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-}
-#add-shortcut-form input {
-  border: none;
-  background-color: var(--bg-interactive);
-  color: var(--text-primary);
-  padding: 0.75rem;
-  border-radius: 8px;
-  outline: none;
-}
-#add-shortcut-form input::placeholder {
-  color: var(--text-secondary);
-}
-#add-shortcut-form button {
+  align-items: center;
   width: 100%;
+}
+#add-shortcut-form .settings-header,
+#fs-add-shortcut-form .settings-header,
+#fs-add-shortcut-form h3 {
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 1rem !important;
+  margin-top: 0.25rem;
+  letter-spacing: 0.02em;
 }
-
-body.gradient-mode-active.gradient-dark #add-shortcut-form input,
-body.gradient-mode-active.gradient-dark #add-shortcut-form input::placeholder {
-  color: #ffffff;
+#add-shortcut-form .add-shortcut-inputs,
+#fs-add-shortcut-form .add-shortcut-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+  width: 100%;
+  max-width: 480px;
 }
-body.gradient-mode-active:not(.gradient-dark) #add-shortcut-form input,
-body.gradient-mode-active:not(.gradient-dark)
-  #add-shortcut-form
-  input::placeholder {
-  color: #000000;
+#add-shortcut-form input,
+#fs-add-shortcut-form input {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--bg-interactive, rgba(255, 255, 255, 0.08));
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  outline: none;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+#add-shortcut-form input:focus,
+#fs-add-shortcut-form input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+#add-shortcut-form input::placeholder,
+#fs-add-shortcut-form input::placeholder {
+  color: var(--text-placeholder, #888888);
+  font-size: 0.88rem;
+}
+#add-shortcut-form button,
+#fs-add-shortcut-form button {
+  width: 100%;
+  max-width: 480px;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background-color: var(--bg-interactive, rgba(255, 255, 255, 0.08));
+  color: var(--accent-color);
+  font-weight: 600;
+  font-size: 0.92rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#add-shortcut-form button:hover,
+#fs-add-shortcut-form button:hover {
+  background-color: var(--bg-tertiary, rgba(255, 255, 255, 0.14));
+  transform: translateY(-1px);
+}
+#add-shortcut-form button:active,
+#fs-add-shortcut-form button:active {
+  transform: translateY(0);
 }
 
 body.gradient-mode-active.gradient-dark #custom-location-input::placeholder {

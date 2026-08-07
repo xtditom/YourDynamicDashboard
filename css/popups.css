@@ -869,16 +869,35 @@ body.gradient-mode-active .settings-dropdown option {
   border-top: 1px solid var(--border-color) !important;
 }
 
-.ai-tools-footer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
-  width: 100%;
+/* --- Mini Settings Theme Swatches --- */
+.mini-themes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+.mini-theme-swatch {
+  height: 38px;
+  border-radius: 8px;
+  border: 2px solid var(--border-color, rgba(255, 255, 255, 0.2));
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+}
+.mini-theme-swatch:hover {
+  transform: scale(1.05);
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.mini-theme-swatch.empty {
+  border: 2px dashed var(--border-color, rgba(255, 255, 255, 0.3));
+  background: transparent !important;
+  cursor: default;
+  opacity: 0.4;
 }
 
 /* [css/popups.css] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) */

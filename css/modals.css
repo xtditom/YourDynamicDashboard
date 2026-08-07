@@ -202,9 +202,14 @@
   opacity: 1;
   transition: opacity 0.3s ease;
 }
-#welcome-modal-overlay.hidden {
+#welcome-modal-overlay.hidden,
+#gps-consent-modal-overlay.hidden {
   opacity: 0;
   pointer-events: none;
+  display: none !important;
+}
+#gps-consent-modal-overlay {
+  z-index: 12000 !important;
 }
 #welcome-modal {
   background: linear-gradient(145deg, #121212, #0a0a0a);

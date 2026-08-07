@@ -102,6 +102,7 @@ body.gradient-mode-active #quote-author {
 .theme-preset-button:hover {
   border-color: var(--accent-color);
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 #saved-themes-container {
@@ -126,6 +127,8 @@ body.gradient-mode-active #quote-author {
 .saved-preset-button:hover {
   border-color: var(--accent-color);
   color: var(--text-primary);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 .saved-preset-button.filled {
   border-style: solid;
@@ -182,6 +185,27 @@ body.has-custom-bg {
   --text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.7) !important;
   --widget-bg: rgba(20, 20, 20, 0.4) !important;
   --widget-border: rgba(255, 255, 255, 0.15) !important;
+}
+
+body.has-custom-bg .theme-preset-button,
+body.has-custom-bg .mini-theme-swatch,
+body.has-custom-bg .saved-preset-button,
+body.gradient-dark .theme-preset-button,
+body.gradient-dark .mini-theme-swatch,
+body.gradient-dark .saved-preset-button {
+  border: 2px solid #ffffff !important;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+body.has-custom-bg .theme-preset-button:hover,
+body.has-custom-bg .mini-theme-swatch:hover,
+body.has-custom-bg .saved-preset-button:hover,
+body.gradient-dark .theme-preset-button:hover,
+body.gradient-dark .mini-theme-swatch:hover,
+body.gradient-dark .saved-preset-button:hover {
+  border-color: #000000 !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
 body.has-custom-bg #digital-clock-container,
