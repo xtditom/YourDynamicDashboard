@@ -783,9 +783,8 @@ export class FullSettingsModal {
     });
 
     this.els.fsAutoTheme.addEventListener("change", () => {
-      const sm = this._sm();
       if (this.els.fsAutoTheme.checked) {
-        if (sm) sm.applyRandomTheme();
+        state.set("autoTheme", true);
       } else {
         state.set("autoTheme", false);
       }

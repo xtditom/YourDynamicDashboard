@@ -1,4 +1,8 @@
 try {
+  if (localStorage.getItem("zenMode") === "true") {
+    document.documentElement.classList.add("zen-mode-preload");
+  }
+
   var THEME_COLORS = {
     "default-light": "#c3c3c3",
     "default-dark": "#030303",

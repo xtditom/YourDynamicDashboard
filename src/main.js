@@ -11,52 +11,56 @@ import { SettingsManager } from "./modules/settings.js";
 import { FullSettingsModal } from "./modules/settingsModal.js";
 import { KeyboardManager } from "./modules/keyboard.js";
 import { CommandPalette } from "./modules/palette.js";
+import { ZenModeController } from "./modules/zenMode.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  try {
-    new Clock();
-    new Weather();
-    new Search();
-    new QuoteWidget();
-
-    // --- Data Migration: v2.0.2 to v2.1.0 (To-Do List) ---
+  const initialize = (name, factory) => {
     try {
-      const oldTodosJson = localStorage.getItem("todos");
-      if (oldTodosJson) {
-        const parsed = JSON.parse(oldTodosJson);
-        if (
-          Array.isArray(parsed) &&
-          parsed.length > 0 &&
-          typeof parsed[0] === "string"
-        ) {
-          console.log("Migrating older To-Do list format to v2.1 objects...");
-          const migrated = parsed.map((taskString, index) => ({
-            id: Date.now() + index,
-            text: taskString,
-            completed: false,
-            pinned: false,
-          }));
-          localStorage.setItem("todos", JSON.stringify(migrated));
-          console.log("V2.1 To-Do Migration Complete.");
-        }
-      }
-    } catch (e) {
-      console.warn("Failed to migrate old To-Do lists:", e);
+      return factory();
+    } catch (error) {
+      console.error(`[YDD] ${name} failed to initialize:`, error);
+      return null;
     }
+  };
 
-    new TodoManager();
-    new AppGrid();
-    new AiTools();
-    new Shortcuts();
-    new SettingsManager();
-    new FullSettingsModal();
-    new KeyboardManager();
-    new CommandPalette();
+  initialize("Zen Mode", () => new ZenModeController());
+  initialize("Clock", () => new Clock());
+  initialize("Weather", () => new Weather());
+  initialize("Search", () => new Search());
+  initialize("Quote", () => new QuoteWidget());
 
-    manageWelcomePopup();
-  } catch (error) {
-    console.error("CRITICAL MODULE ERROR:", error);
-  }
+  // --- Data Migration: v2.0.2 to v2.1.0 (To-Do List) ---
+  initialize("To-Do migration", () => {
+    const oldTodosJson = localStorage.getItem("todos");
+    if (oldTodosJson) {
+      const parsed = JSON.parse(oldTodosJson);
+      if (
+        Array.isArray(parsed) &&
+        parsed.length > 0 &&
+        typeof parsed[0] === "string"
+      ) {
+        console.log("Migrating older To-Do list format to v2.1 objects...");
+        const migrated = parsed.map((taskString, index) => ({
+          id: Date.now() + index,
+          text: taskString,
+          completed: false,
+          pinned: false,
+        }));
+        localStorage.setItem("todos", JSON.stringify(migrated));
+        console.log("V2.1 To-Do Migration Complete.");
+      }
+    }
+  });
+
+  initialize("To-Do", () => new TodoManager());
+  initialize("Google Apps", () => new AppGrid());
+  initialize("AI Tools", () => new AiTools());
+  initialize("Shortcuts", () => new Shortcuts());
+  initialize("Settings", () => new SettingsManager());
+  initialize("Full Settings", () => new FullSettingsModal());
+  initialize("Keyboard", () => new KeyboardManager());
+  initialize("Command Palette", () => new CommandPalette());
+  initialize("Welcome popup", () => manageWelcomePopup());
 
   // --- VISUAL CONTROLLER ---
   if (state.get("transparencyActive"))
@@ -85,9 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!state.get("gradientModeActive")) {
         document.body.setAttribute("data-theme", value ? "dark" : "light");
       }
-    }
-    if (key === "zenMode") {
-      document.body.classList.toggle("zen-mode", value);
     }
     if (key === "showEditableText") {
       const welcomeEl = document.getElementById("welcome-text");
@@ -138,7 +139,7 @@ function manageWelcomePopup() {
   const versionKey = "welcomeShown_v2.0_widescreen";
   const alreadyShown = localStorage.getItem(versionKey);
 
-  if (!alreadyShown) {
+  if (!alreadyShown && state.get("zenMode") !== true) {
     overlay.classList.remove("hidden");
   }
 

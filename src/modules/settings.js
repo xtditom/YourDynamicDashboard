@@ -2,6 +2,11 @@ import { state } from "../state.js";
 import { getIconUrl, showCustomModal } from "../utils.js";
 import { DEFAULT_KEY_MAP, CONFIG } from "../config.js";
 import { secondStorage } from "../secondStorage.js";
+import {
+  clearYddLocalStorage,
+  getYddStorageEntries,
+  validateYddStorageEntries,
+} from "../storageKeys.js";
 
 // --- ALIEN DNA (Glass Palettes) ---
 const ALIEN_LIGHT = {
@@ -619,7 +624,6 @@ export class SettingsManager {
     } else {
       this.applyNormalTheme(random, skipBgWipe);
     }
-    state.set("autoTheme", true);
   }
 
   disableAutoTheme() {
@@ -763,7 +767,7 @@ export class SettingsManager {
     if (this.els.autoThemeToggle) {
       this.els.autoThemeToggle.addEventListener("change", () => {
         if (this.els.autoThemeToggle.checked) {
-          this.applyRandomTheme();
+          state.set("autoTheme", true);
         } else {
           state.set("autoTheme", false);
         }
@@ -1984,7 +1988,7 @@ export class SettingsManager {
       } catch (e) {
         console.error("Failed to wipe IndexedDB:", e);
       }
-      localStorage.clear();
+      clearYddLocalStorage();
       location.reload();
     }
   }
@@ -2204,35 +2208,141 @@ export class SettingsManager {
     this.renderShortcutEditor();
   }
 
-  backup() {
-    const data = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      data[key] = localStorage.getItem(key);
+  async backup() {
+    try {
+      let backgroundBlob = null;
+      try {
+        backgroundBlob = await secondStorage.getImage();
+      } catch (error) {
+        if (localStorage.getItem("has_idb_bg") === "true") throw error;
+        console.warn("IndexedDB was unavailable during backup:", error);
+      }
+      const data = {
+        format: "YourDynamicDashboard",
+        version: 2,
+        createdAt: new Date().toISOString(),
+        localStorage: getYddStorageEntries(),
+        backgroundImage: backgroundBlob
+          ? await this.blobToDataUrl(backgroundBlob)
+          : null,
+      };
+      const blob = new Blob([JSON.stringify(data)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ydd-backup.json";
+      a.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    } catch (error) {
+      console.error("Backup failed:", error);
+      showCustomModal(
+        "The backup could not be created. Your data was not changed.",
+      );
     }
-    const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "ydd-backup.json";
-    a.click();
   }
-  restore(e) {
+
+  async restore(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
+
+    let previousEntries = {};
+    let previousBackground = null;
+    let mutationStarted = false;
+    try {
+      previousEntries = getYddStorageEntries();
       try {
-        const data = JSON.parse(event.target.result);
-        Object.keys(data).forEach((key) =>
-          localStorage.setItem(key, data[key]),
-        );
-        location.reload();
-      } catch (err) {
-        showCustomModal("Invalid Backup File");
+        previousBackground = await secondStorage.getImage();
+      } catch (error) {
+        if (localStorage.getItem("has_idb_bg") === "true") {
+          throw new Error(
+            "The existing background could not be read safely before restore.",
+            { cause: error },
+          );
+        }
+        console.warn("IndexedDB was unavailable before restore:", error);
       }
-    };
-    reader.readAsText(file);
+      const data = JSON.parse(await file.text());
+      const isCurrentFormat =
+        data?.format === "YourDynamicDashboard" && data?.version === 2;
+      const entries = validateYddStorageEntries(
+        isCurrentFormat ? data.localStorage : data,
+      );
+
+      let restoredBackground = null;
+      if (isCurrentFormat && data.backgroundImage !== null) {
+        if (
+          typeof data.backgroundImage !== "string" ||
+          !data.backgroundImage.startsWith("data:image/")
+        ) {
+          throw new TypeError("Invalid background image in backup.");
+        }
+        restoredBackground = await this.dataUrlToBlob(data.backgroundImage);
+      }
+
+      mutationStarted = true;
+      clearYddLocalStorage();
+      Object.entries(entries).forEach(([key, value]) =>
+        localStorage.setItem(key, value),
+      );
+
+      if (isCurrentFormat) {
+        if (restoredBackground) {
+          await secondStorage.saveImage(restoredBackground);
+          localStorage.setItem("has_idb_bg", "true");
+        } else {
+          await secondStorage.deleteImage();
+          localStorage.removeItem("has_idb_bg");
+        }
+      } else if (entries.has_idb_bg === "true" && !previousBackground) {
+        localStorage.removeItem("has_idb_bg");
+      }
+
+      location.reload();
+    } catch (error) {
+      console.error("Restore failed:", error);
+      let rollbackSucceeded = true;
+      if (mutationStarted) {
+        try {
+          clearYddLocalStorage();
+          Object.entries(previousEntries).forEach(([key, value]) =>
+            localStorage.setItem(key, value),
+          );
+          if (previousBackground) {
+            await secondStorage.saveImage(previousBackground);
+          } else {
+            await secondStorage.deleteImage();
+          }
+        } catch (rollbackError) {
+          rollbackSucceeded = false;
+          console.error("Restore rollback failed:", rollbackError);
+        }
+      }
+      showCustomModal(
+        rollbackSucceeded
+          ? "Invalid or incomplete backup. Your current data was preserved."
+          : "Restore failed and some previous data could not be recovered. " +
+            "Reload the tab before making more changes.",
+      );
+    } finally {
+      e.target.value = "";
+    }
+  }
+
+  blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async dataUrlToBlob(dataUrl) {
+    const response = await fetch(dataUrl);
+    if (!response.ok) throw new TypeError("Could not decode backup background.");
+    return response.blob();
   }
 
   async fetchRandomBackground() {

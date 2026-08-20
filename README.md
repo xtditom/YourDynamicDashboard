@@ -78,7 +78,7 @@ YourDynamicDashboard has been heavily upgraded with the "Performance & Scaling" 
 
 | Category | Premium Features |
 | :--- | :--- |
-| **🤖 Interaction** | <li>**Local Search History:** Native-feeling, privacy-first search history with real-time filtering and auto-delete.</li><li>**Drag & Drop Engine:** Reorder To-Do tasks, AI Tools, and Google Apps seamlessly.</li><li>**Voice Search ("Jarvis Mode"):** Hands-free control with privacy-browser fallback support.</li><li>**Zen Mode:** Press `Z` to banish all clutter. Only the clock and wallpaper remain.</li> |
+| **🤖 Interaction** | <li>**Local Search History:** Native-feeling, privacy-first search history with real-time filtering and auto-delete.</li><li>**Drag & Drop Engine:** Reorder To-Do tasks, AI Tools, and Google Apps seamlessly.</li><li>**Voice Search ("Jarvis Mode"):** Hands-free control with privacy-browser fallback support.</li><li>**Zen Mode:** Press `Z` to hide border controls and shortcuts while keeping the clock, greeting, weather, search, quote, and wallpaper visible.</li> |
 | **🎨 Personalization** | <li>**Custom Icons:** Upload and set your own image icons for individual web shortcuts.</li><li>**BG Blur Control:** Adjust the blur intensity of custom backgrounds for perfect UI readability.</li><li>**Random Backgrounds:** Fetch fresh wallpapers automatically, and **Freeze** the ones you love.</li><li>**Toxic Palettes:** New  'Radioactive' and 'Phosphor' theme presets.</li> |
 | **☁️ Utilities** | <li>**Advanced Weather:** Live local weather including daily Min/Max temperatures. No API keys required.</li><li>**Smart Search:** Switch engines (Google, Bing, DuckDuckGo) or platforms (YouTube, Reddit) instantly.</li><li>**Widget Expansion:** More granular visibility combinations (e.g., Search & Quote, Weather & Quote).</li> |
 | **⚡ Quick Access** | <li>**UI Toggles:** Hide greetings and editable text instantly via settings or custom shortcut keys.</li><li>**Link Direction:** Control exactly how and where your shortcut links open.</li><li>**Layout Flexibility:** Dock your Shortcuts bar to either the Top or Bottom of the screen.</li> |
@@ -254,7 +254,7 @@ Navigate like a pro without touching your mouse.
 | Key | Action |
 | :--- | :--- |
 | **`V`** | **Voice Search:** Activate microphone instantly. |
-| **`Z`** | **Zen Mode:** Toggle distractions On/Off. |
+| **`Z`** | **Zen Mode:** Hide/show border controls and shortcuts while keeping the dashboard widgets visible. |
 | **`/`** | **Focus Search:** Jump to the search bar. |
 | **`T`** | Toggle **To-Do List**. |
 | **`A`** | Toggle **AI / Social Tools**. |

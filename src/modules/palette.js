@@ -32,11 +32,14 @@ export const BANG_MAP = {
   "quora": { id: "quora", type: "platforms" }
 };
 
+const RESERVED_COMMAND_IDS = ["check-updates", "help-palette", "help-info"];
+
 export class CommandPalette {
   constructor() {
     this.isOpen = false;
     this.activeIndex = 0;
     this.currentMenu = "main"; // "main", "apps", "ai", "socials"
+    this._helpModalClose = null;
 
     // 1. Core main commands
     this.mainCommands = [
@@ -46,6 +49,77 @@ export class CommandPalette {
         icon: "❓",
         shortcut: "",
         action: () => this.openHelpModal()
+      },
+      {
+        id: "settings-full",
+        name: "Open Full Settings",
+        icon: "⚙️",
+        shortcut: () => this.getShortcutLabel("settings"),
+        action: () => window.__fullSettingsModalInstance?.open()
+      },
+      {
+        id: "zen-mode",
+        name: "Toggle Zen Mode",
+        icon: "🧘",
+        shortcut: () => this.getShortcutLabel("zen"),
+        action: () => state.set("zenMode", !state.get("zenMode"))
+      },
+      {
+        id: "voice-search",
+        name: "Start / Stop Voice Search",
+        icon: "🎙️",
+        shortcut: () => this.getShortcutLabel("voice"),
+        action: () => window.YD_Search?.toggleVoiceSearch()
+      },
+      {
+        id: "clock-type",
+        name: "Toggle Digital / Analog Clock",
+        icon: "🕒",
+        shortcut: () => this.getShortcutLabel("clock"),
+        action: () =>
+          state.set(
+            "clockType",
+            state.get("clockType") === "analog" ? "digital" : "analog",
+          )
+      },
+      {
+        id: "date-visibility",
+        name: "Toggle Date Visibility",
+        icon: "📅",
+        shortcut: () => this.getShortcutLabel("date"),
+        action: () => this.toggleBooleanState("showDate", false)
+      },
+      {
+        id: "auto-theme",
+        name: "Toggle Auto Theme",
+        icon: "🌅",
+        shortcut: () => this.getShortcutLabel("autoTheme"),
+        action: () => {
+          if (!document.body.classList.contains("has-custom-bg")) {
+            this.toggleBooleanState("autoTheme", false);
+          }
+        }
+      },
+      {
+        id: "temperature-display",
+        name: "Toggle Temperature Display",
+        icon: "🌡️",
+        shortcut: () => this.getShortcutLabel("tempDisplay"),
+        action: () => this.toggleBooleanState("tempDisplayMode", false)
+      },
+      {
+        id: "greeting-visibility",
+        name: "Toggle Greeting Visibility",
+        icon: "👋",
+        shortcut: () => this.getShortcutLabel("hideGreetings"),
+        action: () => this.toggleBooleanState("hideGreetings", false)
+      },
+      {
+        id: "editable-text-visibility",
+        name: "Toggle Editable Text Visibility",
+        icon: "✏️",
+        shortcut: () => this.getShortcutLabel("showEditableText"),
+        action: () => this.toggleBooleanState("showEditableText", true)
       },
       {
         id: "check-updates",
@@ -251,7 +325,7 @@ export class CommandPalette {
             <span class="cp-search-icon">🔍</span>
             <input type="text" id="cp-search-input" placeholder="Type a command or search... (Esc to close)" autocomplete="off" />
           </div>
-          <span class="cp-esc-badge">Esc</span>
+          <button type="button" class="cp-esc-badge" aria-label="Close command palette" title="Close command palette">Esc</button>
         </div>
         <div id="cp-command-list"></div>
       </div>
@@ -262,7 +336,8 @@ export class CommandPalette {
     this.els = {
       overlay,
       input: overlay.querySelector("#cp-search-input"),
-      list: overlay.querySelector("#cp-command-list")
+      list: overlay.querySelector("#cp-command-list"),
+      escapeBtn: overlay.querySelector(".cp-esc-badge")
     };
   }
 
@@ -279,6 +354,14 @@ export class CommandPalette {
       if (e.target === this.els.overlay) {
         this.close();
       }
+    });
+
+    this.els.escapeBtn.addEventListener("click", () => this.close());
+    this.els.overlay.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      e.stopPropagation();
+      this.close();
     });
 
     this.els.input.addEventListener("input", (e) => {
@@ -304,9 +387,6 @@ export class CommandPalette {
         if (isSearch) return;
 
         this.execute();
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        this.close();
       } else if (e.key === "Backspace" && this.els.input.value === "" && this.currentMenu !== "main") {
         e.preventDefault();
         this.switchMenu("main");
@@ -354,17 +434,58 @@ export class CommandPalette {
     }, 50);
   }
 
+  getCommandUsage() {
+    const usage = state.get("commandUsage");
+    if (!usage || typeof usage !== "object" || Array.isArray(usage)) return {};
+
+    return Object.fromEntries(
+      Object.entries(usage).filter(
+        ([, count]) => Number.isFinite(count) && count > 0,
+      ),
+    );
+  }
+
+  orderCommands(commands) {
+    const usage = this.getCommandUsage();
+    const indexed = commands.map((command, index) => ({ command, index }));
+
+    indexed.sort((a, b) => {
+      const aReserved = RESERVED_COMMAND_IDS.indexOf(a.command.id);
+      const bReserved = RESERVED_COMMAND_IDS.indexOf(b.command.id);
+
+      if (aReserved !== -1 || bReserved !== -1) {
+        if (aReserved === -1) return 1;
+        if (bReserved === -1) return -1;
+        return aReserved - bReserved;
+      }
+
+      const usageDifference = (usage[b.command.id] || 0) - (usage[a.command.id] || 0);
+      return usageDifference || a.index - b.index;
+    });
+
+    return indexed.map(({ command }) => command);
+  }
+
+  recordCommandUsage(command) {
+    if (!command?.id || command.id === "cp-back-button") return;
+
+    const usage = this.getCommandUsage();
+    const current = usage[command.id] || 0;
+    usage[command.id] = Math.min(current + 1, Number.MAX_SAFE_INTEGER);
+    state.set("commandUsage", usage);
+  }
+
   filter(text) {
     const query = text.toLowerCase().trim();
 
     if (this.currentMenu === "main" && query !== "") {
       // Unified search crawls all commands across all categories
-      const allSearchable = [
+      const allSearchable = this.orderCommands([
         ...this.mainCommands.filter(c => c.id !== "submenu-apps" && c.id !== "submenu-ai" && c.id !== "submenu-socials"),
         ...this.appCommands,
         ...this.aiCommands,
         ...this.socialCommands
-      ];
+      ]);
       this.filteredCommands = allSearchable.filter(c => 
         c.name.toLowerCase().includes(query) || 
         c.id.toLowerCase().includes(query)
@@ -372,13 +493,13 @@ export class CommandPalette {
     } else {
       let baseList = [];
       if (this.currentMenu === "main") {
-        baseList = this.mainCommands;
+        baseList = this.orderCommands(this.mainCommands);
       } else if (this.currentMenu === "apps") {
-        baseList = this.appCommands;
+        baseList = this.orderCommands(this.appCommands);
       } else if (this.currentMenu === "ai") {
-        baseList = this.aiCommands;
+        baseList = this.orderCommands(this.aiCommands);
       } else if (this.currentMenu === "socials") {
-        baseList = this.socialCommands;
+        baseList = this.orderCommands(this.socialCommands);
       }
 
       if (!query) {
@@ -435,10 +556,20 @@ export class CommandPalette {
       left.appendChild(name);
       item.appendChild(left);
 
-      if (c.shortcut) {
+      const shortcut =
+        typeof c.shortcut === "function" ? c.shortcut() : c.shortcut;
+      if (shortcut) {
         const badge = document.createElement("span");
         badge.className = "cp-item-badge";
-        badge.textContent = c.shortcut;
+        badge.textContent = shortcut;
+        const shortcutAction = this.getCommandShortcutAction(c);
+        const binding = shortcutAction
+          ? state.get("keyMap")?.[shortcutAction]
+          : null;
+        if (binding && !binding.enabled) {
+          badge.classList.add("is-disabled");
+          badge.title = `Shortcut ${shortcut} is disabled in Settings`;
+        }
         item.appendChild(badge);
       }
 
@@ -457,12 +588,21 @@ export class CommandPalette {
 
   execute() {
     const cmd = this.filteredCommands[this.activeIndex];
-    if (cmd && cmd.action) {
-      if (cmd.id !== "submenu-apps" && cmd.id !== "submenu-ai" && cmd.id !== "submenu-socials" && cmd.id !== "cp-back-button") {
-        this.close();
-      }
-      cmd.action();
+    if (cmd) this.executeCommand(cmd);
+  }
+
+  executeCommand(command) {
+    if (!command?.action) return false;
+    if (
+      !["submenu-apps", "submenu-ai", "submenu-socials", "cp-back-button"].includes(
+        command.id,
+      )
+    ) {
+      this.close();
     }
+    this.recordCommandUsage(command);
+    command.action();
+    return true;
   }
 
   clickBtn(id) {
@@ -517,8 +657,7 @@ export class CommandPalette {
   }
 
   openHelpModal() {
-    const existing = document.getElementById("cp-help-modal-overlay");
-    if (existing) existing.remove();
+    this.closeHelpModal();
 
     const overlay = document.createElement("div");
     overlay.id = "cp-help-modal-overlay";
@@ -584,17 +723,58 @@ export class CommandPalette {
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
-    const closeHandler = () => overlay.remove();
-
-    overlay.querySelector("#cp-help-modal-close").addEventListener("click", closeHandler);
-    overlay.addEventListener("click", closeHandler);
-
     const escHandler = (e) => {
       if (e.key === "Escape") {
         closeHandler();
-        document.removeEventListener("keydown", escHandler);
       }
     };
+    const closeHandler = () => {
+      document.removeEventListener("keydown", escHandler);
+      overlay.remove();
+      if (this._helpModalClose === closeHandler) {
+        this._helpModalClose = null;
+      }
+    };
+
+    this._helpModalClose = closeHandler;
+    overlay
+      .querySelector("#cp-help-modal-close")
+      .addEventListener("click", closeHandler);
+    overlay.addEventListener("click", closeHandler);
     document.addEventListener("keydown", escHandler);
+  }
+
+  getShortcutLabel(action) {
+    const binding = state.get("keyMap")?.[action];
+    if (!binding?.key) return "";
+    return binding.key.toUpperCase();
+  }
+
+  getCommandShortcutAction(command) {
+    const aliases = {
+      "settings-full": "settings",
+      "zen-mode": "zen",
+      "voice-search": "voice",
+      "clock-type": "clock",
+      "date-visibility": "date",
+      "auto-theme": "autoTheme",
+      "temperature-display": "tempDisplay",
+      "greeting-visibility": "hideGreetings",
+      "editable-text-visibility": "showEditableText",
+    };
+    return aliases[command?.id] || command?.id || null;
+  }
+
+  toggleBooleanState(key, defaultValue) {
+    const current = state.get(key);
+    state.set(key, !(typeof current === "boolean" ? current : defaultValue));
+  }
+
+  closeHelpModal() {
+    if (this._helpModalClose) {
+      this._helpModalClose();
+      return;
+    }
+    document.getElementById("cp-help-modal-overlay")?.remove();
   }
 }

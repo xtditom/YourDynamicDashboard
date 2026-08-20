@@ -49,6 +49,8 @@ export const CONFIG = {
       "social-linkedin": true,
     },
     autoTheme: false,
+    zenMode: false,
+    zenNoticeAcknowledged: false,
     darkMode: true,
     normalThemeId: "default-dark",
     linkTargets: {
@@ -60,6 +62,7 @@ export const CONFIG = {
     searchHistory: [],
     searchHistoryPaused: false,
     searchAutoDeleteDays: 365,
+    commandUsage: {},
   },
   paths: {
     icons: "assets/icons/",

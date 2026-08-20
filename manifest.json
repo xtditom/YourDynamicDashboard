@@ -6,6 +6,7 @@
   "author": "Ditom Baroi Antu",
   "homepage_url": "https://github.com/xtditom/YourDynamicDashboard",
   "short_name": "YDD",
+  "permissions": ["geolocation"],
   "chrome_url_overrides": {
     "newtab": "index.html"
   },

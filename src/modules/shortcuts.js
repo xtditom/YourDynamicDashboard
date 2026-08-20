@@ -95,14 +95,18 @@ export class Shortcuts {
       }
     }
 
+    document.body.classList.remove("shortcuts-at-top", "shortcuts-at-bottom");
+
     if (position === "hide") {
       this.container.classList.add("hidden");
     } else {
       this.container.classList.remove("hidden");
       if (position === "top") {
         this.container.classList.add("position-top");
+        document.body.classList.add("shortcuts-at-top");
       } else {
         this.container.classList.remove("position-top");
+        document.body.classList.add("shortcuts-at-bottom");
       }
     }
   }

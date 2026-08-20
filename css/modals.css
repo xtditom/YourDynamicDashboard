@@ -436,6 +436,8 @@
   }
 }
 
+html.zen-mode-preload .corner-button,
+html.zen-mode-preload #shortcuts-container,
 body.zen-mode .corner-button,
 body.zen-mode #shortcuts-container {
   opacity: 0 !important;

@@ -27,6 +27,9 @@ export class KeyboardManager {
       return;
     }
 
+    // Do not collide with browser/OS shortcuts such as Ctrl+S or Alt+Left.
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
     const tag = e.target.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) {
       if (e.key === "Escape") e.target.blur();
@@ -75,8 +78,10 @@ export class KeyboardManager {
 
     // --- NEW: Zen Mode Shortcut ---
     else if (key === "z") {
-      if (isActionEnabled("zen")) {
-        const current = state.get("zenMode");
+      const current = state.get("zenMode");
+      // Once Zen Mode is active, Z is always an escape hatch even if the
+      // shortcut was disabled before the tab was reloaded.
+      if (current || isActionEnabled("zen")) {
         state.set("zenMode", !current);
       }
     }
@@ -95,8 +100,27 @@ export class KeyboardManager {
   }
 
   clickButton(id) {
+    if (
+      state.get("zenMode") &&
+      [
+        "todo-toggle-button",
+        "ai-tools-toggle-button",
+        "apps-toggle-button",
+        "settings-toggle-button",
+      ].includes(id)
+    ) {
+      return;
+    }
     const btn = document.getElementById(id);
-    if (btn && !btn.classList.contains("hidden")) {
+    const style = btn ? window.getComputedStyle(btn) : null;
+    if (
+      btn &&
+      !btn.disabled &&
+      !btn.hidden &&
+      !btn.classList.contains("hidden") &&
+      style.display !== "none" &&
+      style.visibility !== "hidden"
+    ) {
       btn.click();
       btn.classList.add("active-press");
       setTimeout(() => btn.classList.remove("active-press"), 200);
@@ -104,6 +128,7 @@ export class KeyboardManager {
   }
 
   launchShortcut(index) {
+    if (state.get("zenMode")) return;
     const shortcuts = state.get("userShortcuts");
     if (shortcuts && shortcuts[index]) {
       window.location.href = shortcuts[index].url;
