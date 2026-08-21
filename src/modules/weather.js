@@ -56,12 +56,12 @@ export class Weather {
     this.syncRefreshTimer();
 
     state.subscribe((key) => {
-      if (
-        key === "tempUnit" ||
-        key === "locationUpdate" ||
-        key === "tempDisplayMode"
-      ) {
-        if (!document.hidden) this.fetchData(key === "tempDisplayMode");
+      if (key === "tempUnit") {
+        if (!document.hidden) this.renderCachedData();
+      } else if (key === "tempDisplayMode") {
+        if (!document.hidden) this.renderCachedData();
+      } else if (key === "locationUpdate") {
+        if (!document.hidden) this.fetchData();
       }
       if (key === "widgetControl") this.syncRefreshTimer();
     });
@@ -196,11 +196,9 @@ export class Weather {
         return;
       }
 
-      const unit =
-        state.get("tempUnit") === "imperial" ? "fahrenheit" : "celsius";
       const controller = new AbortController();
       this._weatherController = controller;
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=${unit}&timezone=auto`;
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=celsius&timezone=auto`;
 
       const res = await fetch(url, { signal: controller.signal });
       if (!res.ok) throw new Error(`Weather request failed (${res.status})`);
@@ -225,6 +223,7 @@ export class Weather {
       if (!validCurrent || !validDaily) throw new TypeError("Invalid weather response");
       if (requestId !== this._weatherRequestId) return;
       this.lastData = data;
+      this.lastCoords = coords;
       this.render(current, daily, coords);
     } catch (error) {
       if (error?.name === "AbortError" || requestId !== this._weatherRequestId) return;
@@ -235,11 +234,32 @@ export class Weather {
   }
 
   // --- SECTION: RENDERING ---
+  renderCachedData() {
+    if (!this.lastData || !this.lastCoords) return;
+    this.render(
+      this.lastData.current,
+      this.lastData.daily,
+      this.lastCoords,
+    );
+  }
+
+  toDisplayTemperature(value) {
+    const celsius = Number(value);
+    if (!Number.isFinite(celsius)) return value;
+    return state.get("tempUnit") === "imperial"
+      ? (celsius * 9) / 5 + 32
+      : celsius;
+  }
+
   render(current, daily, coords) {
     if (!current) return;
     const code = current.weather_code;
     const wmo = this.getWmo(code);
     const unitSym = state.get("tempUnit") === "imperial" ? "°F" : "°C";
+    const currentTemperature = this.toDisplayTemperature(current.temperature_2m);
+    const apparentTemperature = this.toDisplayTemperature(current.apparent_temperature);
+    const minTemperature = this.toDisplayTemperature(daily?.temperature_2m_min?.[0]);
+    const maxTemperature = this.toDisplayTemperature(daily?.temperature_2m_max?.[0]);
 
     if (this.els.condition) this.els.condition.textContent = wmo.desc;
     if (this.els.humidity)
@@ -247,7 +267,7 @@ export class Weather {
     if (this.els.bar)
       this.els.bar.style.width = `${current.relative_humidity_2m}%`;
     if (this.els.temp)
-      this.els.temp.textContent = `${Math.round(current.temperature_2m)}°`;
+      this.els.temp.textContent = `${Math.round(currentTemperature)}°`;
 
     if (this.els.feelsLike) {
       if (
@@ -256,9 +276,9 @@ export class Weather {
         daily.temperature_2m_max &&
         daily.temperature_2m_min
       ) {
-        this.els.feelsLike.textContent = `Min: ${Math.round(daily.temperature_2m_min[0])}° | Max: ${Math.round(daily.temperature_2m_max[0])}°`;
+        this.els.feelsLike.textContent = `Min: ${Math.round(minTemperature)}° | Max: ${Math.round(maxTemperature)}°`;
       } else {
-        this.els.feelsLike.textContent = `Feels like ${Math.round(current.apparent_temperature)}${unitSym}`;
+        this.els.feelsLike.textContent = `Feels like ${Math.round(apparentTemperature)}${unitSym}`;
       }
     }
 

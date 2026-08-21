@@ -82,6 +82,11 @@ export class ZenModeController {
     understandButton.className = "zen-notice-understand hidden";
     understandButton.textContent = "I understand";
 
+    const timer = document.createElement("div");
+    timer.className = "zen-notice-timer";
+    timer.setAttribute("aria-hidden", "true");
+    notice.style.setProperty("--zen-notice-duration", `${AUTO_CLOSE_DELAY}ms`);
+
     const unlockClose = () => {
       closeButton.disabled = false;
       closeButton.title = "Close";
@@ -100,7 +105,7 @@ export class ZenModeController {
     });
 
     content.append(title, message, understandButton);
-    notice.append(closeButton, content);
+    notice.append(closeButton, content, timer);
     document.body.appendChild(notice);
     this.notice = notice;
 

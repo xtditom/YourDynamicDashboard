@@ -581,6 +581,7 @@ export const DEFAULT_KEY_MAP = {
   ai: { key: "a", enabled: true },
   apps: { key: "g", enabled: true },
   settings: { key: "s", enabled: true },
+  miniSettings: { key: "m", enabled: true },
   search: { key: "/", enabled: true },
   clock: { key: "c", enabled: false },
   date: { key: "d", enabled: false },

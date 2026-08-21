@@ -15,6 +15,29 @@
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
+.zen-notice-timer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 0 0 14px 14px;
+  background: var(--accent-color);
+  transform-origin: left center;
+  animation: zen-notice-countdown var(--zen-notice-duration, 10s) linear
+    forwards;
+}
+
+@keyframes zen-notice-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 .zen-mode-notice.visible {
   opacity: 1;
   transform: translateY(0);

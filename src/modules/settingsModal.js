@@ -17,7 +17,8 @@ const KEY_LABELS = Object.freeze({
   todo: "Toggle To-Do",
   ai: "Toggle AI Tools",
   apps: "Toggle Google Apps",
-  settings: "Toggle Settings",
+  settings: "Toggle Full Settings",
+  miniSettings: "Toggle Mini Settings",
   search: "Focus On Search",
   clock: "Toggle Clock Mode",
   date: "Toggle Date",
@@ -317,15 +318,16 @@ export class FullSettingsModal {
     const locInput = this._el("input", {
       type: "text",
       id: "fs-location-input",
+      className: "fs-location-input",
       placeholder: "Enter city name...",
-      style: { flex: "1" },
+      style: { flex: "3 1 0" },
     });
     const locSave = this._el("button", {
-      className: "settings-button",
+      className: "settings-button fs-location-action",
       textContent: "Save",
     });
     const locGps = this._el("button", {
-      className: "settings-button",
+      className: "settings-button fs-location-action",
       title: "Detect My Location",
       innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><g fill="none" fill-rule="evenodd"><path d="M18 0v18H0V0z"/><path fill="currentColor" fill-rule="nonzero" d="M5.04 12.48a.75.75 0 0 1 .42 1.44c-.375.11-.645.225-.818.33.178.107.46.227.852.339C6.36 14.836 7.6 15 9 15s2.64-.164 3.506-.411c.392-.112.674-.232.852-.339-.173-.105-.443-.22-.818-.33a.75.75 0 0 1 .42-1.44c.501.146.96.334 1.313.575.326.224.727.615.727 1.195 0 .587-.411.98-.743 1.205-.358.241-.827.43-1.34.576C11.884 16.327 10.5 16.5 9 16.5s-2.885-.173-3.918-.469c-.512-.146-.981-.335-1.34-.576C3.332 15.23 2.92 14.836 2.92 14.25c0-.58.401-.971.727-1.195.353-.241.812-.428 1.313-.575M9 1.5a5.625 5.625 0 0 1 5.625 5.625c0 1.926-1.05 3.492-2.137 4.605A12.3 12.3 0 0 1 11.098 12.94c-.446.335-1.464.962-1.464.962a1.283 1.283 0 0 1-1.268 0s-1.018-.627-1.464-.962a12.217 12.217 0 0 1-1.39-1.21C4.425 10.617 3.375 9.051 3.375 7.125A5.625 5.625 0 0 1 9 1.5m0 4.125a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/></g></svg>`,
       style: {
@@ -1924,8 +1926,9 @@ export class FullSettingsModal {
 
     Object.entries(labels).forEach(([action, labelText]) => {
       let data = map[action];
-      if (!data || typeof data !== "object")
+      if (!data || typeof data !== "object") {
         data = DEFAULT_KEY_MAP[action] || { key: "?", enabled: false };
+      }
 
       const row = this._el("div", { className: "key-row" });
       row.appendChild(this._el("span", { textContent: labelText }));

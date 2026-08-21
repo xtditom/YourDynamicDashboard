@@ -1012,7 +1012,7 @@ export class Search {
 
     const result = await showCustomModal(message, false, false, [
       {
-        text: "Hide Forever",
+        text: "Hide",
         value: "hide",
         width: "120px",
         style:

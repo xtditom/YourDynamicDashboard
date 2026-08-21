@@ -44,6 +44,14 @@ export class KeyboardManager {
     const isActionEnabled = (action) =>
       map && map[action] ? map[action].enabled : true;
 
+    if (state.get("zenMode") && key === "z") {
+      if (isActionEnabled("zen")) {
+        e.preventDefault();
+        state.set("zenMode", false);
+      }
+      return;
+    }
+
     if (isEnabled("search")) {
       e.preventDefault();
       const search = document.getElementById("search-input");
@@ -54,7 +62,8 @@ export class KeyboardManager {
     } else if (isEnabled("todo")) this.clickButton("todo-toggle-button");
     else if (isEnabled("ai")) this.clickButton("ai-tools-toggle-button");
     else if (isEnabled("apps")) this.clickButton("apps-toggle-button");
-    else if (isEnabled("settings")) this.clickButton("settings-toggle-button");
+    else if (isEnabled("settings")) this.openFullSettings();
+    else if (isEnabled("miniSettings")) this.openMiniSettings();
     else if (isEnabled("clock")) {
       const current = state.get("clockType");
       state.set("clockType", current === "analog" ? "digital" : "analog");
@@ -78,12 +87,7 @@ export class KeyboardManager {
 
     // --- NEW: Zen Mode Shortcut ---
     else if (key === "z") {
-      const current = state.get("zenMode");
-      // Once Zen Mode is active, Z is always an escape hatch even if the
-      // shortcut was disabled before the tab was reloaded.
-      if (current || isActionEnabled("zen")) {
-        state.set("zenMode", !current);
-      }
+      if (isActionEnabled("zen")) state.set("zenMode", true);
     }
 
     // --- NEW: Voice Search Shortcut (V) ---
@@ -134,6 +138,24 @@ export class KeyboardManager {
       const targets = state.get("linkTargets") || {};
       window.open(shortcuts[index].url, targets.shortcuts || "_blank");
     }
+  }
+
+  openFullSettings() {
+    if (state.get("zenMode")) return;
+    window.__fullSettingsModalInstance?.open();
+  }
+
+  openMiniSettings() {
+    if (state.get("zenMode")) return;
+    const fullModal = window.__fullSettingsModalInstance;
+    const miniPopup = document.getElementById("settings-popup");
+    const miniButton = document.getElementById("settings-toggle-button");
+    if (fullModal?.isOpen) fullModal.close();
+    if (!miniPopup) return;
+    miniPopup.classList.add("visible");
+    miniPopup.setAttribute("aria-hidden", "false");
+    miniButton?.setAttribute("aria-expanded", "true");
+    state.set("lastSettingsView", "mini");
   }
 
   closeAllPopups() {

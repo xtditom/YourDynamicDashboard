@@ -265,6 +265,24 @@
   transform: scale(1.1);
 }
 
+.fs-location-input {
+  min-width: 0;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  background-color: var(--bg-interactive);
+  color: var(--text-primary);
+  padding: 0.5rem;
+  font: inherit;
+}
+.fs-location-input::placeholder {
+  color: var(--text-secondary);
+}
+.fs-location-action {
+  min-width: 0;
+  flex: 1 1 0;
+}
+
 /* --- Backup controls in full modal --- */
 .fs-backup-controls {
   display: flex;

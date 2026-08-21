@@ -33,6 +33,10 @@ export const BANG_MAP = {
 };
 
 const RESERVED_COMMAND_IDS = ["check-updates", "help-palette", "help-info"];
+const BACKGROUND_COMMAND_IDS = new Set([
+  "bg-remove",
+  "bg-random-freeze",
+]);
 
 export class CommandPalette {
   constructor() {
@@ -310,7 +314,42 @@ export class CommandPalette {
   init() {
     this.createDomElements();
     this.registerEvents();
+    state.subscribe((key) => {
+      if (
+        key === "hideVoiceSearch" ||
+        key === "backgroundImage" ||
+        key === "randomBgMode" ||
+        key === "savedBgUrl"
+      ) {
+        this.filter(this.els.input?.value || "");
+      }
+    });
     window.YD_CommandPalette = this;
+  }
+
+  hasActiveBackground() {
+    return Boolean(
+      document.body.classList.contains("has-custom-bg") ||
+        state.get("backgroundImage") ||
+        state.get("randomBgMode") ||
+        localStorage.getItem("has_idb_bg") === "true",
+    );
+  }
+
+  isCommandVisible(command) {
+    if (command?.id === "voice-search") {
+      return state.get("hideVoiceSearch") !== true;
+    }
+
+    if (!BACKGROUND_COMMAND_IDS.has(command?.id)) return true;
+    if (command.id === "bg-random-freeze") {
+      return ["random", "freeze"].includes(state.get("randomBgMode"));
+    }
+    return this.hasActiveBackground();
+  }
+
+  getVisibleCommands(commands) {
+    return commands.filter((command) => this.isCommandVisible(command));
   }
 
   createDomElements() {
@@ -518,12 +557,12 @@ export class CommandPalette {
 
     if (this.currentMenu === "main" && query !== "") {
       // Unified search crawls all commands across all categories
-      const allSearchable = this.orderCommands([
+      const allSearchable = this.orderCommands(this.getVisibleCommands([
         ...this.mainCommands.filter(c => c.id !== "submenu-apps" && c.id !== "submenu-ai" && c.id !== "submenu-socials"),
         ...this.appCommands,
         ...this.aiCommands,
         ...this.socialCommands
-      ]);
+      ]));
       this.filteredCommands = allSearchable.filter(c => 
         c.name.toLowerCase().includes(query) || 
         c.id.toLowerCase().includes(query)
@@ -531,7 +570,7 @@ export class CommandPalette {
     } else {
       let baseList = [];
       if (this.currentMenu === "main") {
-        baseList = this.orderCommands(this.mainCommands);
+        baseList = this.orderCommands(this.getVisibleCommands(this.mainCommands));
       } else if (this.currentMenu === "apps") {
         baseList = this.orderCommands(this.appCommands);
       } else if (this.currentMenu === "ai") {
