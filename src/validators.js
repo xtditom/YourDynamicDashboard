@@ -1,4 +1,4 @@
-export const MAX_SHORTCUTS = 9;
+export const MAX_SHORTCUTS = 20;
 export const MAX_SHORTCUT_NAME_LENGTH = 35;
 export const MAX_SHORTCUT_URL_LENGTH = 2048;
 

@@ -1,7 +1,11 @@
 import { state } from "../state.js";
 import { showCustomModal, getIconUrl } from "../utils.js";
 import { CONFIG, DEFAULT_KEY_MAP } from "../config.js";
-import { getBindableKey, validateImageBlob } from "../validators.js";
+import {
+  getBindableKey,
+  validateImageBlob,
+  MAX_SHORTCUTS,
+} from "../validators.js";
 
 const KEY_LABELS = Object.freeze({
   todo: "Toggle To-Do",
@@ -621,7 +625,9 @@ export class FullSettingsModal {
       id: "fs-shortcuts-editor-list",
     });
     this.els.fsShortcutList = listContainer;
-    pane.appendChild(this._section("Your Shortcuts", [listContainer]));
+    pane.appendChild(
+      this._section(`Your Shortcuts (up to ${MAX_SHORTCUTS})`, [listContainer]),
+    );
 
     // Add shortcut form
     const form = this._el("form", { id: "fs-add-shortcut-form" });

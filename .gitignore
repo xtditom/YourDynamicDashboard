@@ -2,6 +2,9 @@
 .DS_Store
 Thumbs.db
 
+# Ignore files
+MainREADME.md
+
 # Log files
 *.log
 npm-debug.log*
