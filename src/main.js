@@ -12,6 +12,7 @@ import { FullSettingsModal } from "./modules/settingsModal.js";
 import { KeyboardManager } from "./modules/keyboard.js";
 import { CommandPalette } from "./modules/palette.js";
 import { ZenModeController } from "./modules/zenMode.js";
+import { initializeDefaultTasks } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const initialize = (name, factory) => {
@@ -52,6 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  initialize("Welcome tasks", () => initializeDefaultTasks());
+
   initialize("To-Do", () => new TodoManager());
   initialize("Google Apps", () => new AppGrid());
   initialize("AI Tools", () => new AiTools());
@@ -68,7 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (state.get("gradientModeActive")) {
     document.body.classList.add("gradient-mode-active");
+    const gradientId = state.get("gradientThemeId") || "gradient";
+    document.body.setAttribute("data-theme-id", `gradient-${gradientId}`);
+    document.documentElement.setAttribute("data-theme-id", `gradient-${gradientId}`);
   } else {
+    const normalThemeId = state.get("normalThemeId") || "default-dark";
+    document.body.setAttribute("data-theme-id", normalThemeId);
+    document.documentElement.setAttribute("data-theme-id", normalThemeId);
     if (state.get("darkMode")) document.body.setAttribute("data-theme", "dark");
   }
 
@@ -78,6 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (key === "gradientModeActive") {
       document.body.classList.toggle("gradient-mode-active", value);
+      const themeId = value
+        ? `gradient-${state.get("gradientThemeId") || "gradient"}`
+        : state.get("normalThemeId") || "default-dark";
+      document.body.setAttribute("data-theme-id", themeId);
+      document.documentElement.setAttribute("data-theme-id", themeId);
       if (!value) {
         document.body.setAttribute(
           "data-theme",
@@ -138,15 +152,53 @@ function manageWelcomePopup() {
 
   const versionKey = "welcomeShown_v2.0_widescreen";
   const alreadyShown = localStorage.getItem(versionKey);
+  const previousFocus = document.activeElement;
+  overlay.inert = true;
+  const closeWelcome = () => {
+    overlay.classList.add("hidden");
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.inert = true;
+    document.removeEventListener("keydown", onKeyDown);
+    if (previousFocus?.focus) window.setTimeout(() => previousFocus.focus(), 0);
+    localStorage.setItem(versionKey, "true");
+  };
+  const onKeyDown = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeWelcome();
+      return;
+    }
+    if (event.key === "Tab") {
+      const focusable = overlay.querySelectorAll("button, a[href], input, select, textarea");
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+    if (key === "normalThemeId" || key === "gradientThemeId") {
+      const themeId = state.get("gradientModeActive")
+        ? `gradient-${state.get("gradientThemeId") || "gradient"}`
+        : state.get("normalThemeId") || "default-dark";
+      document.body.setAttribute("data-theme-id", themeId);
+      document.documentElement.setAttribute("data-theme-id", themeId);
+    }
+  };
 
   if (!alreadyShown && state.get("zenMode") !== true) {
     overlay.classList.remove("hidden");
+    overlay.setAttribute("aria-hidden", "false");
+    overlay.inert = false;
+    document.addEventListener("keydown", onKeyDown);
+    window.setTimeout(() => closeBtn.focus(), 0);
   }
 
-  closeBtn.addEventListener("click", () => {
-    overlay.classList.add("hidden");
-    localStorage.setItem(versionKey, "true");
-  });
+  closeBtn.addEventListener("click", closeWelcome);
 }
 
 const yearSpan = document.getElementById("copyright-year");
@@ -154,4 +206,4 @@ const currentYear = new Date().getFullYear();
 if (currentYear > 2025) {
   yearSpan.textContent = `2025 - ${currentYear}`;
 }
-// [src/main.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/main.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

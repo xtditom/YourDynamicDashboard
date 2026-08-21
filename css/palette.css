@@ -33,6 +33,7 @@ body.gradient-dark.transparency-active .cp-modal {
 }
 
 #cp-modal-overlay.hidden {
+  display: flex !important;
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
@@ -129,7 +130,8 @@ body.gradient-dark.transparency-active .cp-modal {
   background-color: var(--bg-interactive-hover);
   border-color: var(--accent-color);
   transform: translateY(-1px);
-  outline: none;
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 #cp-command-list {
@@ -249,4 +251,4 @@ body.gradient-dark.transparency-active .cp-modal {
   }
 }
 
-/* [css/palette.css] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) */
+/* [css/palette.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

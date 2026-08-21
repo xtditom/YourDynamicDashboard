@@ -34,17 +34,21 @@ try {
   var gm = localStorage.getItem("gradientModeActive");
   var thId = (localStorage.getItem("normalThemeId") || '"default-dark"').replace(/^"|"$/g, "");
 
-  if (dm === null || dm === "true") {
+  if (gm !== "true" && (dm === null || dm === "true")) {
     document.documentElement.setAttribute("data-theme", "dark");
+    document.documentElement.setAttribute("data-theme-id", thId);
     document.documentElement.style.setProperty("--bg-primary", THEME_COLORS[thId] || "#030303");
     document.documentElement.style.backgroundColor = THEME_COLORS[thId] || "#030303";
   } 
   else if (gm === "true") {
     document.documentElement.classList.add("gradient-mode-active");
+    var gradientId = (localStorage.getItem("gradientThemeId") || "gradient").replace(/^"|"$/g, "");
+    document.documentElement.setAttribute("data-theme-id", "gradient-" + gradientId);
     document.documentElement.style.backgroundColor = "#302b63"; 
   } 
   else {
     document.documentElement.setAttribute("data-theme", "light");
+    document.documentElement.setAttribute("data-theme-id", thId);
     if (thId === "custom") {
       var rawBgp = localStorage.getItem("custom---bg-primary");
       if (rawBgp) {
@@ -161,4 +165,4 @@ try {
   var p = document.getElementById("idb-preloader");
   if (p) p.remove();
 }
-// [src/theme-init.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/theme-init.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

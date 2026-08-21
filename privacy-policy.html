@@ -187,7 +187,7 @@
       <header>
         <h1>Privacy Policy</h1>
         <p class="subtitle">YourDynamicDashboard Extension</p>
-        <span class="last-updated">Last Updated: March 11, 2026</span>
+        <span class="last-updated">Last Updated: August 21, 2026</span>
       </header>
 
       <main>
@@ -292,7 +292,9 @@
                 microphone icon or press 'V'. We use your browser's native
                 <code>Web Speech API</code>. Audio is processed by your browser
                 vendor (e.g., Google for Chrome) to convert speech to text. We
-                do not record or store your voice.
+                do not record or store your voice. Depending on browser support,
+                processing may happen locally or through the browser vendor's
+                speech service; YDD does not force or control that choice.
               </p>
             </div>
             <div class="info-card">
@@ -341,7 +343,9 @@
             with the following third-party services. While we do not send
             personal identifiers, please note that communicating with any web
             server natively exposes standard network requests (like your IP
-            address) to that service.
+            address) to that service. The dashboard requests Google Fonts for
+            its interface typography. Built-in and custom shortcut icons may
+            also use Google's favicon service.
           </p>
 
           <div class="info-grid">
@@ -367,11 +371,18 @@
             <div class="info-card">
               <h3>Google Favicons</h3>
               <p>
-                Used to fetch the small icons for the custom websites you add to
-                your Shortcuts bar.
+                Used to fetch shortcut icons, including the built-in shortcuts
+                and custom websites added to your Shortcuts bar.
               </p>
             </div>
             <div class="info-card">
+              <h3>Google Fonts</h3>
+              <p>
+                Used to load the dashboard's interface typefaces. The browser
+                requests these font files from Google's font delivery service.
+              </p>
+            </div>
+            <div class="info-card full-width">
               <h3>Picsum.photos</h3>
               <p>
                 Used to fetch random, high-quality background images if you

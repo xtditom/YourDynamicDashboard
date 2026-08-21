@@ -45,6 +45,13 @@ html[data-theme="dark"] body {
   --glow-color: rgba(255, 255, 255, 0.7);
 }
 
+/* Only the built-in default Dark theme uses monochrome icon treatment. */
+body[data-theme="dark"][data-theme-id]:not([data-theme-id="default-dark"]),
+html[data-theme="dark"][data-theme-id]:not([data-theme-id="default-dark"]) body {
+  --icon-filter: grayscale(0%);
+  --icon-opacity: 1;
+}
+
 :root,
 body[data-theme="dark"] {
   --text-color: #ffffff;
@@ -60,4 +67,4 @@ body[data-theme="light"] {
   --widget-border: rgba(0, 0, 0, 0.05);
 }
 
-/* [css/variables.css] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) */
+/* [css/variables.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

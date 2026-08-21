@@ -6,11 +6,11 @@ Do not treat this README as a stable-release manual. Store listings and packaged
 
 ## Development status
 
-- Development version: `2.2.0` codebase, with ongoing fixes and feature work.
+- Development version: `3.0.0` codebase, with ongoing fixes and feature work.
 - Build system: none. The extension is loaded directly from source.
 - Runtime: browser DOM, Web Storage, IndexedDB, Fetch, Web Speech API, and optional geolocation.
 - Frameworks: none; modules are native ES modules.
-- Automated test suite: not currently included. Use the syntax checks and manual browser verification below.
+- Automated test suite: not currently included in this source snapshot; use the syntax checks and manual browser verification below.
 - Data policy: settings, shortcuts, themes, search history, tasks, and backgrounds are intended to remain local to the browser.
 
 ## Requirements
@@ -144,7 +144,7 @@ Do not commit generated build output, browser profiles, local screenshots, or pr
 
 ## License and privacy
 
-YDD is licensed under GPLv3; see [LICENSE](LICENSE). The project is designed for local-first use. Weather uses Open-Meteo, favicon URLs may use Google’s favicon service, and voice recognition is provided by the browser’s Web Speech API. See [privacy-policy.html](privacy-policy.html) for the user-facing policy.
+YDD is licensed under GPLv3; see [LICENSE](LICENSE). The project is designed for local-first use. Weather uses Open-Meteo, shortcut icons may use Google’s favicon service, and the dashboard typography uses Google Fonts. Voice recognition is provided by the browser’s Web Speech API (with processing location determined by the browser). See [privacy-policy.html](privacy-policy.html) for the user-facing policy.
 
 ## Stable-release references
 

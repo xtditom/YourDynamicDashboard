@@ -1,5 +1,11 @@
 import { state } from "../state.js";
-import { showCustomModal, getIconUrl } from "../utils.js";
+import {
+  chooseGeocodingResult,
+  getGeocodingResults,
+  getIconUrl,
+  makeKeyboardInteractive,
+  showCustomModal,
+} from "../utils.js";
 import { CONFIG, DEFAULT_KEY_MAP } from "../config.js";
 import {
   getBindableKey,
@@ -74,6 +80,8 @@ export class FullSettingsModal {
     this.els = {};
     this._activeKeyCleanup = null;
     this._previousFocus = null;
+    this._locationRequestId = 0;
+    this._locationController = null;
 
     window.__fullSettingsModalInstance = this;
 
@@ -113,6 +121,11 @@ export class FullSettingsModal {
     const labelDiv = this._el("div", { className: "label" });
     labelDiv.appendChild(this._el("span", { textContent: label }));
     if (desc) labelDiv.appendChild(this._el("small", { textContent: desc }));
+    const controlId = control?.querySelector?.("[id]")?.id;
+    if (controlId) {
+      labelDiv.id = `${controlId}-label`;
+      control.querySelector("[id]")?.setAttribute("aria-labelledby", labelDiv.id);
+    }
     row.appendChild(labelDiv);
     if (control) row.appendChild(control);
     return row;
@@ -167,6 +180,8 @@ export class FullSettingsModal {
     this.overlay = this._el("div", {
       id: "full-settings-overlay",
       className: "hidden",
+      "aria-hidden": "true",
+      role: "presentation",
     });
 
     // Modal
@@ -215,6 +230,9 @@ export class FullSettingsModal {
         className: `fs-tab-btn ${i === 0 ? "active" : ""}`,
         textContent: def.label,
         "data-tab": def.id,
+        role: "tab",
+        "aria-selected": i === 0 ? "true" : "false",
+        "aria-controls": def.id,
       });
       this.els.tabBtns.push(btn);
       tabs.appendChild(btn);
@@ -231,6 +249,7 @@ export class FullSettingsModal {
 
     [generalPane, appearancePane, shortcutsPane, dataPane].forEach(
       (pane, i) => {
+        pane.id = tabDefs[i].id;
         pane.classList.add("fs-pane");
         if (i === 0) pane.classList.add("active");
         this.els.panes.push(pane);
@@ -251,6 +270,7 @@ export class FullSettingsModal {
     this.modal.append(titlebar, tabs, content, footer);
     this.overlay.appendChild(this.modal);
     document.body.appendChild(this.overlay);
+    this.overlay.inert = true;
   }
 
   // ─── General Pane ──────────────────────────────────────────
@@ -801,6 +821,8 @@ export class FullSettingsModal {
         const sm = this._sm();
         if (sm && sm.els.popup) {
           sm.els.popup.classList.add("visible");
+          sm.els.popup.setAttribute("aria-hidden", "false");
+          sm.els.btn?.setAttribute("aria-expanded", "true");
         }
       });
     }
@@ -810,8 +832,10 @@ export class FullSettingsModal {
       btn.addEventListener("click", () => {
         const idx = this.els.tabBtns.indexOf(btn);
         this.els.tabBtns.forEach((b) => b.classList.remove("active"));
+        this.els.tabBtns.forEach((b) => b.setAttribute("aria-selected", "false"));
         this.els.panes.forEach((p) => p.classList.remove("active"));
         btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
         if (this.els.panes[idx]) this.els.panes[idx].classList.add("active");
       });
     });
@@ -1202,11 +1226,17 @@ export class FullSettingsModal {
     if (this.isOpen) return;
     // Close the mini popup if open
     const miniPopup = document.getElementById("settings-popup");
-    if (miniPopup) miniPopup.classList.remove("visible");
+    if (miniPopup) {
+      miniPopup.classList.remove("visible");
+      miniPopup.setAttribute("aria-hidden", "true");
+      document.getElementById("settings-toggle-button")?.setAttribute("aria-expanded", "false");
+    }
 
     this._previousFocus = document.activeElement;
     this.populateAll();
     this.overlay.classList.remove("hidden");
+    this.overlay.inert = false;
+    this.overlay.setAttribute("aria-hidden", "false");
     this.isOpen = true;
     window.addEventListener("keydown", this._onDialogKeyDown, true);
     document.addEventListener("keydown", this._onDialogKeyDown, true);
@@ -1226,6 +1256,8 @@ export class FullSettingsModal {
     window.removeEventListener("keydown", this._onDialogKeyDown, true);
     document.removeEventListener("keydown", this._onDialogKeyDown, true);
     this.overlay.classList.add("hidden");
+    this.overlay.inert = true;
+    this.overlay.setAttribute("aria-hidden", "true");
     this.isOpen = false;
     state.set("lastSettingsView", "full");
     const previousFocus = this._previousFocus;
@@ -1307,35 +1339,53 @@ export class FullSettingsModal {
   async _searchLocation() {
     const city = this.els.fsLocInput.value.trim();
     if (!city) return;
+    const requestId = ++this._locationRequestId;
+    this._locationController?.abort();
+    const controller = new AbortController();
+    this._locationController = controller;
     this.els.fsLocInput.disabled = true;
     this.els.fsLocSave.textContent = "...";
     try {
       const res = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`,
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=5&language=en&format=json`,
+        { signal: controller.signal },
       );
-      const data = await res.json();
-      if (data.results && data.results.length > 0) {
-        const loc = data.results[0];
+      if (!res.ok) throw new Error(`Geocoding request failed (${res.status})`);
+      const results = getGeocodingResults(await res.json());
+      if (requestId !== this._locationRequestId) return;
+      if (results.length === 0) {
+        showCustomModal(
+          `Could not find any city with name "${city}". Try another name.`,
+        );
+        return;
+      }
+      const loc = await chooseGeocodingResult(results, city);
+      if (requestId !== this._locationRequestId || !loc) return;
+      {
         state.set("yd_city", loc.name);
-        state.set("yd_lat", loc.latitude);
-        state.set("yd_lon", loc.longitude);
+        state.set("yd_lat", Number(loc.latitude));
+        state.set("yd_lon", Number(loc.longitude));
         state.set("locationUpdate", Date.now());
         this.els.fsLocInput.value = loc.name;
         this.els.fsLocSave.textContent = "Saved";
         setTimeout(() => {
-          this.els.fsLocSave.textContent = "Save";
+          if (requestId === this._locationRequestId) {
+            this.els.fsLocSave.textContent = "Save";
+          }
         }, 2000);
-      } else {
-        showCustomModal(
-          `Could not find any city with name "${city}". Try another name.`,
-        );
-        this.els.fsLocSave.textContent = "Save";
       }
-    } catch {
-      showCustomModal("Connection error. Check your internet.");
-      this.els.fsLocSave.textContent = "Save";
+    } catch (error) {
+      if (error?.name !== "AbortError" && requestId === this._locationRequestId) {
+        console.error("Geocoding Error:", error);
+        showCustomModal("Could not look up that location. Check your connection and try again.");
+      }
     } finally {
-      this.els.fsLocInput.disabled = false;
+      if (requestId === this._locationRequestId) {
+        this.els.fsLocInput.disabled = false;
+        if (this.els.fsLocSave && this.els.fsLocSave.textContent === "...") {
+          this.els.fsLocSave.textContent = "Save";
+        }
+      }
     }
   }
 
@@ -1429,7 +1479,7 @@ export class FullSettingsModal {
         btn.style.textShadow =
           "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
         btn.style.borderColor = "var(--border-color)";
-        btn.addEventListener("click", async () => {
+        const applySavedTheme = async () => {
           if (sm) {
             if (await sm.applySelectedTheme(theme)) {
               setTimeout(() => {
@@ -1438,10 +1488,13 @@ export class FullSettingsModal {
               }, 50);
             }
           }
-        });
-        const del = document.createElement("div");
+        };
+        btn.addEventListener("click", applySavedTheme);
+        makeKeyboardInteractive(btn, applySavedTheme, `Apply ${theme.name}`);
+        const del = document.createElement("button");
         del.className = "delete-preset";
         del.textContent = "×";
+        del.setAttribute("aria-label", `Delete ${theme.name}`);
         del.addEventListener("click", (e) => {
           e.stopPropagation();
           const newSaved = savedThemes.filter((_, idx) => idx !== i);
@@ -1625,6 +1678,7 @@ export class FullSettingsModal {
       const img = this._el("img", {
         src: s.customIcon || s.icon || getIconUrl(s.url),
         className: "icon",
+        alt: `${s.name} icon`,
       });
       const fileInput = this._el("input", {
         type: "file",
@@ -1632,7 +1686,9 @@ export class FullSettingsModal {
         style: { display: "none" },
       });
       iconContainer.append(img, fileInput);
-      iconContainer.addEventListener("click", () => fileInput.click());
+      const chooseIcon = () => fileInput.click();
+      iconContainer.addEventListener("click", chooseIcon);
+      makeKeyboardInteractive(iconContainer, chooseIcon, `Change ${s.name} icon`);
 
       const inputsDiv = this._el("div", { className: "inputs" });
       const nameInput = this._el("input", {
@@ -1641,6 +1697,7 @@ export class FullSettingsModal {
         value: s.name,
         placeholder: "Name",
         maxlength: "35",
+        "aria-label": `${s.name} shortcut name`,
       });
       const urlInput = this._el("input", {
         type: "text",
@@ -1648,6 +1705,7 @@ export class FullSettingsModal {
         value: s.url,
         placeholder: "URL",
         maxlength: "2048",
+        "aria-label": `${s.name} shortcut URL`,
       });
       inputsDiv.append(nameInput, urlInput);
 
@@ -1672,6 +1730,7 @@ export class FullSettingsModal {
         innerHTML:
           '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
       });
+      resetIconBtn.setAttribute("aria-label", `Reset ${s.name} custom icon`);
       resetIconBtn.hidden = !s.customIcon;
       resetIconBtn.addEventListener("click", () => {
         const sm = this._sm();
@@ -1682,6 +1741,7 @@ export class FullSettingsModal {
       const delBtn = this._el("button", {
         className: "action-btn delete",
         title: "Delete",
+        "aria-label": `Delete ${s.name} shortcut`,
       });
       delBtn.innerHTML =
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -2081,4 +2141,4 @@ export class FullSettingsModal {
     });
   }
 }
-// [src/modules/settingsModal.js] YourDynamicDashboard V2.3 (Ditom Baroi Antu - 2025-26)
+// [src/modules/settingsModal.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

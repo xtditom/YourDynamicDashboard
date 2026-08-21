@@ -68,9 +68,31 @@
   display: none !important;
 }
 .visually-hidden {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: opacity 0.2s ease !important;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+:where(button, input, select, textarea, a, [role="button"], [tabindex]):focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 .fade-up {
   animation: fade-up 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
@@ -107,4 +129,4 @@
   background: var(--bg-interactive);
 }
 
-/* [css/animations.css] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) */
+/* [css/animations.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

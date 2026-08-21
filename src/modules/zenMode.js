@@ -52,6 +52,7 @@ export class ZenModeController {
     const notice = document.createElement("aside");
     notice.className = "zen-mode-notice";
     notice.setAttribute("role", "dialog");
+    notice.setAttribute("aria-modal", "false");
     notice.setAttribute("aria-live", "polite");
     notice.setAttribute("aria-labelledby", "zen-mode-notice-title");
 
@@ -130,4 +131,4 @@ export class ZenModeController {
   }
 }
 
-// [src/modules/zenMode.js] YourDynamicDashboard V2.2
+// [src/modules/zenMode.js] YourDynamicDashboard V3.0.0

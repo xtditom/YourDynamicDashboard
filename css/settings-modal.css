@@ -16,8 +16,10 @@
   transition: opacity 0.3s ease;
 }
 #full-settings-overlay.hidden {
+  display: flex !important;
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
 }
 
 /* --- Modal Window --- */
@@ -349,4 +351,4 @@
   }
 }
 
-/* [css/settings-modal.css] YourDynamicDashboard V2.3 (Ditom Baroi Antu - 2025-26) */
+/* [css/settings-modal.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

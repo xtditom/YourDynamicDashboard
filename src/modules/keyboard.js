@@ -131,13 +131,20 @@ export class KeyboardManager {
     if (state.get("zenMode")) return;
     const shortcuts = state.get("userShortcuts");
     if (shortcuts && shortcuts[index]) {
-      window.location.href = shortcuts[index].url;
+      const targets = state.get("linkTargets") || {};
+      window.open(shortcuts[index].url, targets.shortcuts || "_blank");
     }
   }
 
   closeAllPopups() {
     const popups = document.querySelectorAll(".popup-container.visible");
-    popups.forEach((p) => p.classList.remove("visible"));
+    popups.forEach((p) => {
+      p.classList.remove("visible");
+      p.setAttribute("aria-hidden", "true");
+      document
+        .querySelector(`[aria-controls="${p.id}"]`)
+        ?.setAttribute("aria-expanded", "false");
+    });
 
     const openBtns = document.querySelectorAll(".corner-button.is-open");
     openBtns.forEach((b) => b.classList.remove("is-open"));
@@ -145,7 +152,9 @@ export class KeyboardManager {
     const searchDrop = document.getElementById("search-dropdown");
     if (searchDrop) searchDrop.classList.add("hidden");
 
+    window.__settingsManagerInstance?.closeInfoModal?.();
+
     if (document.activeElement) document.activeElement.blur();
   }
 }
-// [src/modules/keyboard.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/keyboard.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

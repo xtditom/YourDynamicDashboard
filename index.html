@@ -19,18 +19,19 @@
       href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
+
   </head>
   <body>
     <div id="bg-blur-overlay"></div>
-    <div id="welcome-modal-overlay" class="hidden">
+    <div id="welcome-modal-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title" aria-hidden="true">
       <div id="welcome-modal" class="v2-1-modal">
-        <button id="welcome-modal-close">&times;</button>
+        <button id="welcome-modal-close" aria-label="Close welcome dialog">&times;</button>
 
         <div class="modal-header">
           <div class="badge-container">
-            <span class="version-badge">YourDynamicDashboard v2.2</span>
+            <span class="version-badge">YourDynamicDashboard v3.0.0</span>
           </div>
-          <h1>The Performance & Scaling Update</h1>
+          <h1 id="welcome-modal-title">The Performance & Scaling Update</h1>
           <p>
             Rebuilt mobile engine, smart storage, and a powerful local search
             history.
@@ -146,7 +147,7 @@
       </div>
     </div>
 
-    <button id="todo-toggle-button" class="corner-button top-left">
+    <button id="todo-toggle-button" class="corner-button top-left" aria-label="Open To-Do list" aria-controls="todo-popup" aria-expanded="false">
       <span class="icon-list">
         <svg
           fill="currentColor"
@@ -178,7 +179,7 @@
       </span>
     </button>
 
-    <button id="ai-tools-toggle-button" class="corner-button bottom-left">
+    <button id="ai-tools-toggle-button" class="corner-button bottom-left" aria-label="Open AI tools and social links" aria-controls="ai-tools-popup" aria-expanded="false">
       <svg
         class="tool-icon ai-icon"
         width="24"
@@ -214,7 +215,7 @@
       </svg>
     </button>
 
-    <button id="apps-toggle-button" class="corner-button top-right">
+    <button id="apps-toggle-button" class="corner-button top-right" aria-label="Open Google Apps" aria-controls="apps-popup" aria-expanded="false">
       <span class="icon-grid">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -247,7 +248,7 @@
       </span>
     </button>
 
-    <button id="settings-toggle-button" class="corner-button bottom-right">
+    <button id="settings-toggle-button" class="corner-button bottom-right" aria-label="Open settings" aria-controls="settings-popup" aria-expanded="false">
       <svg
         stroke="currentColor"
         width="24"
@@ -276,30 +277,31 @@
       </svg>
     </button>
 
-    <div id="todo-popup" class="popup-container">
-      <h2>To-Do List</h2>
+    <div id="todo-popup" class="popup-container" role="dialog" aria-labelledby="todo-popup-title" aria-hidden="true">
+      <h2 id="todo-popup-title">To-Do List</h2>
       <div id="todo-list"></div>
       <form id="todo-add-form">
         <input
           type="text"
           id="todo-input"
+          aria-label="New task"
           placeholder="Add a new task..."
           autocomplete="off"
           maxlength="50"
-        /><button type="submit" id="todo-add-btn">+</button>
+        /><button type="submit" id="todo-add-btn" aria-label="Add task">+</button>
       </form>
     </div>
 
-    <div id="ai-tools-popup" class="popup-container">
+    <div id="ai-tools-popup" class="popup-container" role="dialog" aria-labelledby="ai-tools-popup-title" aria-hidden="true">
       <div class="tools-header">
         <div class="tool-tabs-container">
-          <button class="tool-tab-button active" data-tab="ai">AI Tools</button>
+          <button class="tool-tab-button active" data-tab="ai" role="tab" aria-selected="true" aria-controls="ai-tools-list">AI Tools</button>
           <div class="tab-divider"></div>
-          <button class="tool-tab-button" data-tab="social">
+          <button class="tool-tab-button" data-tab="social" role="tab" aria-selected="false" aria-controls="social-tools-list">
             Social Media
           </button>
         </div>
-        <button id="tool-edit-button" class="tool-edit-button">
+        <button id="tool-edit-button" class="tool-edit-button" aria-label="Edit AI and social tools" aria-pressed="false">
           <svg
             class="icon-pencil"
             width="16"
@@ -337,19 +339,22 @@
           </svg>
         </button>
       </div>
-      <div id="ai-tools-list" class="tool-list active"></div>
-      <div id="social-tools-list" class="tool-list"></div>
+      <h2 id="ai-tools-popup-title" class="visually-hidden">AI Tools and Social Links</h2>
+      <div id="ai-tools-list" class="tool-list active" role="tabpanel" aria-label="AI tools"></div>
+      <div id="social-tools-list" class="tool-list" role="tabpanel" aria-label="Social links"></div>
     </div>
 
-    <div id="apps-popup" class="popup-container">
+    <div id="apps-popup" class="popup-container" role="dialog" aria-labelledby="apps-popup-title" aria-hidden="true">
+      <h2 id="apps-popup-title" class="visually-hidden">Google Apps</h2>
       <div id="apps-grid"></div>
       <div class="apps-footer">Drag and drop to rearrange apps</div>
     </div>
 
-    <div id="settings-popup" class="popup-container">
+    <div id="settings-popup" class="popup-container" role="dialog" aria-labelledby="settings-popup-title" aria-hidden="true">
       <div style="position: relative; text-align: center; margin-bottom: 1rem">
         <button
           id="info-btn"
+          aria-label="Open tips and tricks"
           title="Tips &amp; Tricks"
           style="position: absolute; left: 0; top: 0"
         >
@@ -365,9 +370,10 @@
             />
           </svg>
         </button>
-        <h2 style="margin: 0; display: inline-block">Mini Settings</h2>
+        <h2 id="settings-popup-title" style="margin: 0; display: inline-block">Mini Settings</h2>
         <button
           id="open-full-settings-btn"
+          aria-label="Open full settings"
           title="Open Full Settings"
           style="position: absolute; right: 0; top: 0"
         >
@@ -391,8 +397,8 @@
       </div>
 
       <div class="settings-tabs">
-        <button id="quick-tab" class="settings-tab-button active">Quick</button>
-        <button id="look-tab" class="settings-tab-button">Look</button>
+        <button id="quick-tab" class="settings-tab-button active" role="tab" aria-selected="true" aria-controls="quick-content">Quick</button>
+        <button id="look-tab" class="settings-tab-button" role="tab" aria-selected="false" aria-controls="look-content">Look</button>
       </div>
 
       <div class="settings-content">
@@ -403,7 +409,7 @@
               <span>Analog Clock</span><small>Use the analog clock.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="clock-type-toggle" />
+              <input type="checkbox" id="clock-type-toggle" aria-label="Use analog clock" />
               <span class="slider"></span>
             </label>
           </div>
@@ -412,7 +418,7 @@
               <span>Clock Format</span><small>Toggle for 24-hour format.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="clock-format-toggle" />
+              <input type="checkbox" id="clock-format-toggle" aria-label="Use 24-hour clock format" />
               <span class="slider"></span>
             </label>
           </div>
@@ -421,7 +427,7 @@
               <span>Temperature Display</span><small>Switch between Min-Max and Feels like.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="temp-display-toggle" />
+              <input type="checkbox" id="temp-display-toggle" aria-label="Show daily minimum and maximum temperatures" />
               <span class="slider"></span>
             </label>
           </div>
@@ -433,14 +439,16 @@
               <input
                 type="text"
                 id="custom-location-input"
+                aria-label="Weather location"
                 placeholder="Enter city name..."
                 style="flex: 1"
               />
-              <button id="save-location-btn" class="settings-button">
+              <button id="save-location-btn" class="settings-button" aria-label="Save weather location">
                 Save
               </button>
               <button
                 id="settings-gps-btn"
+                aria-label="Detect my location"
                 class="settings-button"
                 title="Detect My Location"
                 style="
@@ -469,6 +477,7 @@
             </div>
             <select
               id="widget-control-select"
+              aria-label="Widget visibility"
               class="settings-dropdown"
               style="
                 padding: 5px;
@@ -495,6 +504,7 @@
             </div>
             <select
               id="shortcuts-position-select"
+              aria-label="Shortcuts bar position"
               class="settings-dropdown"
               style="
                 padding: 5px;
@@ -545,7 +555,7 @@
               <span>Dark / Light</span><small>Enable dark theme.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="dark-mode-toggle" />
+              <input type="checkbox" id="dark-mode-toggle" aria-label="Enable dark theme" />
               <span class="slider"></span>
             </label>
           </div>
@@ -554,18 +564,18 @@
               <span>Custom Background</span><small>Upload your custom wallpaper.</small>
             </div>
             <div style="display: flex; gap: 8px">
-              <button id="upload-bg-button" class="settings-button">Upload</button>
-              <input type="file" id="bg-file-input" accept="image/*" class="hidden" />
-              <button id="remove-bg-button" class="settings-button hidden">Remove</button>
+              <button id="upload-bg-button" class="settings-button" aria-label="Upload custom background">Upload</button>
+              <input type="file" id="bg-file-input" accept="image/*" class="hidden" aria-label="Choose background image" />
+              <button id="remove-bg-button" class="settings-button hidden" aria-label="Remove custom background">Remove</button>
             </div>
           </div>
           <div class="setting-row">
             <div class="label">
-              <span>Random Background</span><small>Unsplash wallpaper features.</small>
+              <span>Random Background</span><small>Picsum wallpaper features.</small>
             </div>
             <div style="display: flex; gap: 8px">
-              <button id="random-bg-rnd-btn" class="settings-button" title="Get new random wallpaper">New BG</button>
-              <button id="random-bg-freeze-btn" class="settings-button" title="Freeze current wallpaper">Freeze</button>
+              <button id="random-bg-rnd-btn" class="settings-button" title="Get new random wallpaper" aria-label="Get a new random background">New BG</button>
+              <button id="random-bg-freeze-btn" class="settings-button" title="Freeze current wallpaper" aria-label="Freeze current background">Freeze</button>
             </div>
           </div>
           <div class="setting-row">
@@ -573,7 +583,7 @@
               <span>Glow Effect</span><small>Toggle clock glow &amp; pulsing.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="glow-effect-toggle" />
+              <input type="checkbox" id="glow-effect-toggle" aria-label="Enable glow effect" />
               <span class="slider"></span>
             </label>
           </div>
@@ -655,6 +665,7 @@
               <input
                 type="text"
                 id="widget-location-input"
+                aria-label="Weather location"
                 placeholder="Enter city name..."
                 style="flex: 3"
               />
@@ -667,6 +678,7 @@
               </button>
               <button
                 id="widget-gps-btn"
+                aria-label="Detect my location"
                 class="settings-button"
                 title="Detect Location"
                 style="
@@ -722,6 +734,9 @@
           <button
             type="button"
             id="search-provider-button"
+            aria-label="Choose search provider"
+            aria-controls="search-dropdown"
+            aria-expanded="false"
             title="Change Search Engine"
           >
             <img
@@ -735,6 +750,7 @@
           <input
             type="text"
             id="search-input"
+            aria-label="Search the web"
             name="q"
             required
             autocomplete="off"
@@ -747,7 +763,7 @@
             >Ctrl+K</span
           >
 
-          <button type="button" id="voice-search-btn" title="Voice Search">
+          <button type="button" id="voice-search-btn" title="Voice Search" aria-label="Start voice search">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -765,11 +781,11 @@
           <button type="submit" id="search-button" class="search-btn">
             Search
           </button>
-          <button type="button" id="open-site-button" class="search-btn hidden">
+          <button type="button" id="open-site-button" class="search-btn hidden" aria-label="Open search provider">
             Open
           </button>
 
-          <div id="search-dropdown" class="hidden">
+          <div id="search-dropdown" class="hidden" role="listbox" aria-label="Search providers" aria-hidden="true">
             <div class="dropdown-section">
               <h4>Search Engines</h4>
               <div id="dropdown-engines" class="dropdown-grid"></div>
@@ -791,10 +807,10 @@
       </div>
     </div>
 
-    <div id="info-modal-overlay" class="hidden">
+    <div id="info-modal-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
       <div class="modal-box">
-        <button class="modal-close" id="info-modal-close">&times;</button>
-        <h2>Did You Know? (Read this)</h2>
+        <button class="modal-close" id="info-modal-close" aria-label="Close information dialog">&times;</button>
+        <h2 id="info-modal-title">Did You Know? (Read this)</h2>
         <div class="info-content">
           <div class="info-item">
             <strong>👋 Personalized Greeting</strong>
@@ -845,4 +861,4 @@
     <script type="module" src="src/main.js"></script>
   </body>
 </html>
-<!-- [index.html] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) -->
+<!-- [index.html] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) -->

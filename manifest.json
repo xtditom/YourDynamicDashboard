@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YourDynamicDashboard",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "A dynamic and personalized new tab dashboard.",
   "author": "Ditom Baroi Antu",
   "homepage_url": "https://github.com/xtditom/YourDynamicDashboard",
@@ -14,17 +14,5 @@
     "16": "assets/icons/icon16.png",
     "48": "assets/icons/icon48.png",
     "128": "assets/icons/icon128.png"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "assets/icons/*.png",
-        "assets/search-tools/*.png",
-        "assets/ai-tools/*.png",
-        "assets/google-apps/*.png",
-        "assets/socials/*.png"
-      ],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  }
 }

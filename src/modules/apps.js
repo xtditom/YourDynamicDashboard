@@ -1,5 +1,6 @@
 import { CONFIG, GOOGLE_APPS } from "../config.js";
 import { state } from "../state.js";
+import { makeKeyboardInteractive } from "../utils.js";
 
 export class AppGrid {
   constructor() {
@@ -36,6 +37,7 @@ export class AppGrid {
     state.subscribe((key) => {
       if (key === "showApps") this.updateVisibility();
       if (key === "linkTargets") this.render();
+      if (key === "googleAppsOrder") this.render();
     });
     this.updateVisibility();
   }
@@ -58,11 +60,15 @@ export class AppGrid {
   toggle() {
     this.els.popup.classList.toggle("visible");
     this.els.btn.classList.toggle("is-open");
+    this.els.btn.setAttribute("aria-expanded", String(this.els.popup.classList.contains("visible")));
+    this.els.popup.setAttribute("aria-hidden", String(!this.els.popup.classList.contains("visible")));
   }
 
   close() {
     this.els.popup.classList.remove("visible");
     this.els.btn.classList.remove("is-open");
+    this.els.btn.setAttribute("aria-expanded", "false");
+    this.els.popup.setAttribute("aria-hidden", "true");
   }
 
   render() {
@@ -92,10 +98,17 @@ export class AppGrid {
       const a = document.createElement("div");
       a.className = "app-item";
       a.dataset.name = app.name;
-      a.onclick = (e) => {
+      const openApp = () => {
         const targets = state.get("linkTargets") || CONFIG.defaults.linkTargets;
         window.open(app.url, targets.apps || "_blank");
       };
+      a.onclick = openApp;
+      makeKeyboardInteractive(a, openApp, `Open ${app.name}`);
+      a.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+        event.preventDefault();
+        this.moveItem(app.name, event.key === "ArrowUp" ? -1 : 1);
+      });
       a.style.cursor = "pointer";
 
       const img = document.createElement("img");
@@ -180,8 +193,17 @@ export class AppGrid {
       ];
 
       state.set("googleAppsOrder", currentOrder);
-      this.render();
     }
+  }
+
+  moveItem(name, delta) {
+    const order = [...(state.get("googleAppsOrder") || [])];
+    const index = order.indexOf(name);
+    const target = index + delta;
+    if (index < 0 || target < 0 || target >= order.length) return;
+    [order[index], order[target]] = [order[target], order[index]];
+    state.set("googleAppsOrder", order);
+    this.els.grid.querySelector(`[data-name="${CSS.escape(name)}"]`)?.focus();
   }
 
   updateVisibility() {
@@ -189,4 +211,4 @@ export class AppGrid {
     this.els.btn.classList.toggle("hidden", !show);
   }
 }
-// [src/modules/apps.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/apps.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

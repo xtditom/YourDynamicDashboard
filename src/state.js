@@ -1,10 +1,85 @@
 import { CONFIG, DEFAULT_KEY_MAP, SEARCH_PROVIDERS } from "./config.js";
 import { sanitizeShortcuts } from "./validators.js";
 
+const STATE_SCHEMA_VERSION = 1;
+const VERSION_PREFIX = "ydd_state_version:";
+
 class StateManager {
   constructor() {
     this.cache = {};
     this.listeners = [];
+    this.storageWarningPending = false;
+  }
+
+  versionKey(key) {
+    return `${VERSION_PREFIX}${key}`;
+  }
+
+  areEqual(left, right) {
+    if (Object.is(left, right)) return true;
+    if (
+      left === null ||
+      right === null ||
+      typeof left !== "object" ||
+      typeof right !== "object"
+    ) return false;
+    if (Array.isArray(left) !== Array.isArray(right)) return false;
+    const leftKeys = Object.keys(left);
+    const rightKeys = Object.keys(right);
+    if (leftKeys.length !== rightKeys.length) return false;
+    return leftKeys.every(
+      (key) => Object.prototype.hasOwnProperty.call(right, key) && this.areEqual(left[key], right[key]),
+    );
+  }
+
+  normalizeValue(key, value) {
+    if (key === "userShortcuts") return sanitizeShortcuts(value);
+    if (key === "searchHistory") {
+      if (!Array.isArray(value)) throw new TypeError("Invalid search history");
+      return value.filter(
+        (item) =>
+          item &&
+          typeof item.query === "string" &&
+          typeof item.engineId === "string" &&
+          Number.isFinite(item.timestamp),
+      );
+    }
+    if (key === "searchProvider") {
+      const providers = SEARCH_PROVIDERS[value?.type];
+      if (
+        !value ||
+        !Array.isArray(providers) ||
+        !providers.some((provider) => provider.id === value.id)
+      ) throw new TypeError("Invalid search provider");
+    }
+    if (key === "keyMap") {
+      if (!value || typeof value !== "object" || Array.isArray(value)) {
+        throw new TypeError("Invalid key map");
+      }
+      const migrated = { ...DEFAULT_KEY_MAP };
+      Object.keys(value).forEach((action) => {
+        const saved = value[action];
+        if (typeof saved === "string") migrated[action] = { key: saved, enabled: true };
+        else if (saved && typeof saved === "object") {
+          migrated[action] = { ...migrated[action], ...saved };
+        }
+      });
+      return migrated;
+    }
+    const fallback = CONFIG.defaults[key];
+    if (fallback !== undefined && !this.isCompatible(fallback, value)) {
+      throw new TypeError(`Invalid value for ${key}`);
+    }
+    return value;
+  }
+
+  writeValue(key, value) {
+    const serialized = JSON.stringify(value);
+    if (serialized === undefined) {
+      throw new TypeError(`The value for ${key} is not serializable.`);
+    }
+    localStorage.setItem(key, serialized);
+    localStorage.setItem(this.versionKey(key), String(STATE_SCHEMA_VERSION));
   }
 
   get(key) {
@@ -26,69 +101,26 @@ class StateManager {
       try {
         const parsed = JSON.parse(fromDisk);
 
-        if (key === "keyMap") {
-          if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-            throw new TypeError("Invalid key map");
+        const storedVersion = Number(localStorage.getItem(this.versionKey(key)) || 0);
+        if (!Number.isFinite(storedVersion) || storedVersion > STATE_SCHEMA_VERSION) {
+          throw new TypeError(`Unsupported state version for ${key}`);
+        }
+        const normalized = this.normalizeValue(key, parsed);
+        this.cache[key] = normalized;
+        if (storedVersion !== STATE_SCHEMA_VERSION || !this.areEqual(normalized, parsed)) {
+          try {
+            this.writeValue(key, normalized);
+          } catch (writeError) {
+            console.warn(`Could not persist normalized state for ${key}.`, writeError);
+            this.showStorageWarning();
           }
-          const migrated = { ...DEFAULT_KEY_MAP };
-          Object.keys(parsed).forEach((action) => {
-            const savedVal = parsed[action];
-            if (typeof savedVal === "string") {
-              migrated[action] = { key: savedVal, enabled: true };
-            } else {
-              migrated[action] = { ...migrated[action], ...savedVal };
-            }
-          });
-          this.cache[key] = migrated;
-          return this.clone(migrated);
         }
-
-        if (key === "searchProvider") {
-          const providers = SEARCH_PROVIDERS[parsed?.type];
-          const isValid =
-            Array.isArray(providers) &&
-            providers.some((provider) => provider.id === parsed.id);
-          if (!isValid) throw new TypeError("Invalid search provider");
-        }
-
-        if (key === "searchHistory") {
-          if (!Array.isArray(parsed)) {
-            throw new TypeError("Invalid search history");
-          }
-          const sanitized = parsed.filter(
-            (item) =>
-              item &&
-              typeof item.query === "string" &&
-              typeof item.engineId === "string" &&
-              Number.isFinite(item.timestamp),
-          );
-          if (sanitized.length !== parsed.length) {
-            localStorage.setItem(key, JSON.stringify(sanitized));
-          }
-          this.cache[key] = sanitized;
-          return this.clone(sanitized);
-        }
-
-        if (key === "userShortcuts") {
-          const sanitized = sanitizeShortcuts(parsed);
-          if (JSON.stringify(sanitized) !== JSON.stringify(parsed)) {
-            localStorage.setItem(key, JSON.stringify(sanitized));
-          }
-          this.cache[key] = sanitized;
-          return this.clone(sanitized);
-        }
-
-        const fallback = CONFIG.defaults[key];
-        if (fallback !== undefined && !this.isCompatible(fallback, parsed)) {
-          throw new TypeError(`Invalid value for ${key}`);
-        }
-
-        this.cache[key] = parsed;
-        return this.clone(parsed);
+        return this.clone(normalized);
       } catch (e) {
         console.warn(`Corrupt state for ${key}, resetting to its default.`, e);
         try {
           localStorage.removeItem(key);
+          localStorage.removeItem(this.versionKey(key));
         } catch (removeError) {
           console.warn(`Could not remove corrupt state for ${key}.`, removeError);
         }
@@ -101,24 +133,23 @@ class StateManager {
   }
 
   set(key, value) {
-    if (key === "userShortcuts") value = sanitizeShortcuts(value);
+    if (value !== undefined) {
+      try {
+        value = this.normalizeValue(key, value);
+      } catch (error) {
+        console.warn(`Rejected invalid state for ${key}.`, error);
+        return false;
+      }
+    }
     const previous = this.get(key);
-    const isPrimitive =
-      value === null || (typeof value !== "object" && typeof value !== "function");
-
-    // Primitive no-op writes must not notify. Besides avoiding unnecessary work,
-    // this prevents subscribers from recursively re-setting the same flag.
-    if (isPrimitive && Object.is(previous, value)) return true;
+    if (this.areEqual(previous, value)) return true;
 
     try {
       if (value === undefined) {
         localStorage.removeItem(key);
+        localStorage.removeItem(this.versionKey(key));
       } else {
-        const serialized = JSON.stringify(value);
-        if (serialized === undefined) {
-          throw new TypeError(`The value for ${key} is not serializable.`);
-        }
-        localStorage.setItem(key, serialized);
+        this.writeValue(key, value);
       }
     } catch (err) {
       console.error(`Failed to save ${key} to localStorage:`, err);
@@ -149,6 +180,7 @@ class StateManager {
   }
 
   isCompatible(fallback, value) {
+    if (fallback === null) return value === null;
     if (Array.isArray(fallback)) return Array.isArray(value);
     if (fallback && typeof fallback === "object") {
       return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -181,4 +213,4 @@ class StateManager {
 }
 
 export const state = new StateManager();
-// [src/state.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/state.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

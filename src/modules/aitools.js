@@ -1,5 +1,6 @@
 import { CONFIG, AI_TOOLS, SOCIAL_LINKS } from "../config.js";
 import { state } from "../state.js";
+import { makeKeyboardInteractive } from "../utils.js";
 
 export class AiTools {
   constructor() {
@@ -59,9 +60,11 @@ export class AiTools {
     state.subscribe((key) => {
       if (key === "showAiTools") this.updateVisibility();
       if (key === "linkTargets") this.renderAll();
+      if (key === "aiToolsOrder" || key === "socialToolsOrder") this.renderAll();
     });
 
     this.initializeOrderState();
+    this.switchTab(this.activeTab === "social" ? "social" : "ai");
 
     this.updateVisibility();
   }
@@ -99,16 +102,22 @@ export class AiTools {
 
   toggle() {
     this.els.popup.classList.toggle("visible");
+    const visible = this.els.popup.classList.contains("visible");
+    this.els.btn.setAttribute("aria-expanded", String(visible));
+    this.els.popup.setAttribute("aria-hidden", String(!visible));
   }
 
   close() {
     this.els.popup.classList.remove("visible");
+    this.els.btn.setAttribute("aria-expanded", "false");
+    this.els.popup.setAttribute("aria-hidden", "true");
     if (this.isEditMode) this.toggleEditMode();
   }
 
   toggleEditMode() {
     this.isEditMode = !this.isEditMode;
     this.els.popup.classList.toggle("edit-mode", this.isEditMode);
+    this.els.editBtn.setAttribute("aria-pressed", String(this.isEditMode));
 
     const pencil = this.els.editBtn.querySelector(".icon-pencil");
     const check = this.els.editBtn.querySelector(".icon-check");
@@ -141,17 +150,25 @@ export class AiTools {
     localStorage.setItem("activeToolTab", tabName);
 
     this.els.tabs.forEach((t) =>
-      t.classList.toggle("active", t.dataset.tab === tabName),
+      {
+        const selected = t.dataset.tab === tabName;
+        t.classList.toggle("active", selected);
+        t.setAttribute("aria-selected", String(selected));
+      },
     );
 
     if (tabName === "ai") {
       this.els.aiList.classList.add("active");
+      this.els.aiList.setAttribute("aria-hidden", "false");
       this.els.socialList.classList.remove("active");
+      this.els.socialList.setAttribute("aria-hidden", "true");
       this.els.btn.querySelector(".ai-icon").classList.remove("hidden");
       this.els.btn.querySelector(".social-icon").classList.add("hidden");
     } else {
       this.els.aiList.classList.remove("active");
+      this.els.aiList.setAttribute("aria-hidden", "true");
       this.els.socialList.classList.add("active");
+      this.els.socialList.setAttribute("aria-hidden", "false");
       this.els.btn.querySelector(".ai-icon").classList.add("hidden");
       this.els.btn.querySelector(".social-icon").classList.remove("hidden");
     }
@@ -196,27 +213,43 @@ export class AiTools {
       a.className = "ai-tool-item";
       a.dataset.id = tool.id;
       if (!this.isEditMode) {
-        a.onclick = (e) => {
+        const openTool = () => {
           const targets =
             state.get("linkTargets") || CONFIG.defaults.linkTargets;
           window.open(tool.url, targets.ai || "_blank");
         };
+        a.onclick = openTool;
+        makeKeyboardInteractive(a, openTool, `Open ${tool.name}`);
         a.style.cursor = "pointer";
       }
 
       if (this.isEditMode) {
         a.classList.add("edit-mode-item");
         if (isHidden) a.classList.add("is-hidden");
+        a.setAttribute("role", "button");
+        a.tabIndex = 0;
+        a.setAttribute("aria-label", `Reorder ${tool.name}`);
+        a.addEventListener("keydown", (event) => {
+          if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+          event.preventDefault();
+          this.moveItem(tool.id, event.key === "ArrowUp" ? -1 : 1);
+        });
       }
 
       const iconDiv = document.createElement("div");
       iconDiv.className = "ai-tool-icon";
       const img = document.createElement("img");
       img.src = pathPrefix + tool.icon;
+      img.alt = tool.name;
 
       if (this.isEditMode) {
         const overlay = document.createElement("div");
         overlay.className = "edit-overlay";
+        makeKeyboardInteractive(
+          overlay,
+          () => this.toggleToolVisibility(tool.id),
+          `${isHidden ? "Show" : "Hide"} ${tool.name}`,
+        );
 
         const span = document.createElement("span");
         span.className = isHidden ? "icon-add" : "icon-remove";
@@ -315,8 +348,18 @@ export class AiTools {
       const [item] = currentOrder.splice(removeIndex, 1);
       currentOrder.splice(insertIndex, 0, item);
       state.set(orderKey, currentOrder);
-      this.renderAll();
     }
   }
+
+  moveItem(id, delta) {
+    const orderKey = this.activeTab === "ai" ? "aiToolsOrder" : "socialToolsOrder";
+    const order = [...(state.get(orderKey) || [])];
+    const index = order.indexOf(id);
+    const target = index + delta;
+    if (index < 0 || target < 0 || target >= order.length) return;
+    [order[index], order[target]] = [order[target], order[index]];
+    state.set(orderKey, order);
+    this.els.popup.querySelector(`[data-id="${CSS.escape(id)}"]`)?.focus();
+  }
 }
-// [src/modules/aitools.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/aitools.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

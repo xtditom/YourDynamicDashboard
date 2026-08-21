@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.0.0] - 2026-08-21 (PRIVACY & RELEASE CONSISTENCY UPDATE)
+
+### 🔒 Privacy and platform contracts
+
+* Documented the dashboard's Google Fonts dependency for interface typography.
+* Documented that Web Speech API processing location is controlled by the browser and may use its speech service; YDD does not record or store voice data.
+* Documented Google favicon usage for built-in and custom shortcuts.
+* Removed broad `<all_urls>` web-accessible resource exposure from the Chrome and Firefox manifests.
+
+### 📦 Release metadata
+
+* Synchronized the extension manifests, development documentation, release links, and in-app version labels to `3.0.0`.
+
 ## [2.2.0] - 2026-03-08 (PERFORMANCE & SCALING UPDATE)
 
 The **Performance & Scaling Update** is here. We rebuilt the mobile-responsive engine, integrated a proper database for heavy storage, and introduced a highly requested, privacy-focused Search History system.
@@ -22,12 +35,6 @@ The **Performance & Scaling Update** is here. We rebuilt the mobile-responsive e
 * **Layout Flexibility:** Added a new setting to dock the Shortcuts bar to either the Top or Bottom of the screen.
 * **Widget Control Expansion:** Expanded the widget visibility settings with more granular combinations (e.g., Search Only, Search & Quote, Weather & Quote, etc).
 * **Gradient UI Refinement:** Recalculated transparency and blur logic to provide more visual clarity and text contrast when using gradient themes.
-
-### 🔧 Fixes
-
-* **FOUC Eradicated:** Solved the "Flash Of Unstyled Content" (FOUC) bug. The dashboard now pre-loads styling correctly, eliminating the jarring visual jump on startup (Still may show for 0.01s in some cases).
-* **Advanced Colors Logic:** Fixed the UI state logic that was allowing the Advanced Colors editor to improperly conflict with Gradient and BG active modes.
-* **Animation & Stability Polish:** Cleaned up overlapping transition delays, removed conflicting CSS constraints, and squashed minor layout bugs across various popups and modals.
 
 ### 🔧 Fixes
 

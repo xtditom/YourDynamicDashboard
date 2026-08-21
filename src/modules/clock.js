@@ -23,12 +23,18 @@ export class Clock {
     };
 
     this.currentGreeting = "";
+    this._secondTimer = null;
+    this._animationFrame = null;
+    this._greetingDelayTimer = null;
+    this._greetingTypingTimer = null;
+    this._visibilityHandler = () => this.handleVisibilityChange();
     this.init();
   }
 
   init() {
     this.update();
-    setInterval(() => this.update(), 1000);
+    document.addEventListener("visibilitychange", this._visibilityHandler);
+    this.startSecondTimer();
     this.updateGreeting();
 
     this.toggleDateRow(state.get("showDate") === true);
@@ -44,6 +50,7 @@ export class Clock {
     state.subscribe((key, value) => {
       if (key === "clockType" || key === "clockFormat") {
         this.update();
+        this.syncAnalogLoop();
         if (key === "clockType" && this.els.master) {
           this.els.master.classList.remove("clock-switched");
           void this.els.master.offsetWidth;
@@ -58,18 +65,51 @@ export class Clock {
       }
     });
 
+    this.syncAnalogLoop();
+  }
+
+  startSecondTimer() {
+    clearInterval(this._secondTimer);
+    this._secondTimer = null;
+    if (document.hidden) return;
+    this._secondTimer = window.setInterval(() => this.update(), 1000);
+  }
+
+  syncAnalogLoop() {
+    const shouldAnimate = !document.hidden && state.get("clockType") === "analog";
+    if (!shouldAnimate) {
+      if (this._animationFrame !== null) {
+        cancelAnimationFrame(this._animationFrame);
+        this._animationFrame = null;
+      }
+      return;
+    }
+    if (this._animationFrame !== null) return;
     const animate = () => {
-      if (state.get("clockType") === "analog") this.updateAnalog();
-      requestAnimationFrame(animate);
+      if (document.hidden || state.get("clockType") !== "analog") {
+        this._animationFrame = null;
+        return;
+      }
+      this.updateAnalog();
+      this._animationFrame = requestAnimationFrame(animate);
     };
-    requestAnimationFrame(animate);
+    this._animationFrame = requestAnimationFrame(animate);
+  }
+
+  handleVisibilityChange() {
+    if (document.hidden) {
+      this.startSecondTimer();
+      this.syncAnalogLoop();
+      this.cancelGreetingAnimation();
+      return;
+    }
+    this.startSecondTimer();
+    this.update();
+    this.syncAnalogLoop();
+    this.updateGreeting();
   }
 
   async setUserName() {
-    import("../utils.js").then((utils) => {
-      utils.completeDefaultTask("dt-3");
-    });
-
     const currentName = state.get("userName") || "";
     const newName = await showCustomPrompt(
       "What should I call you?",
@@ -77,6 +117,9 @@ export class Clock {
     );
     if (newName !== null) {
       state.set("userName", newName.trim().substring(0, 35));
+      import("../utils.js").then((utils) => {
+        utils.completeDefaultTask("dt-3");
+      });
     }
   }
 
@@ -89,6 +132,8 @@ export class Clock {
   toggleGreetings(hide) {
     if (this.els.greeting) {
       this.els.greeting.style.display = hide ? "none" : "";
+      if (hide) this.cancelGreetingAnimation();
+      else this.updateGreeting();
     }
   }
 
@@ -177,6 +222,24 @@ export class Clock {
   updateGreeting() {
     if (!this.els.greeting) return;
 
+    const greeting = this.getGreetingText();
+    const displayedGreeting = this.els.greeting.textContent.trim();
+    if (this.currentGreeting === greeting && displayedGreeting === greeting) {
+      return;
+    }
+
+    this.cancelGreetingAnimation();
+    this.currentGreeting = greeting;
+    if (document.hidden || state.get("hideGreetings") === true) return;
+    this._greetingDelayTimer = window.setTimeout(() => {
+      this._greetingDelayTimer = null;
+      if (this.els.greeting.textContent.trim() !== greeting) {
+        this.typewriter(this.els.greeting, greeting, 45);
+      }
+    }, 400);
+  }
+
+  getGreetingText() {
     const hour = new Date().getHours();
     let greeting;
 
@@ -195,29 +258,33 @@ export class Clock {
         greeting = `${greeting}, ${cleanName}`;
       }
     }
+    return greeting;
+  }
 
-    if (this.currentGreeting !== greeting) {
-      this.currentGreeting = greeting;
-      setTimeout(() => {
-        this.typewriter(this.els.greeting, greeting, 45);
-      }, 400);
-    }
+  cancelGreetingAnimation() {
+    clearTimeout(this._greetingDelayTimer);
+    clearInterval(this._greetingTypingTimer);
+    this._greetingDelayTimer = null;
+    this._greetingTypingTimer = null;
+    this.els.greeting?.classList.remove("typing-effect");
   }
 
   typewriter(element, text, speed = 75) {
+    this.cancelGreetingAnimation();
     element.classList.add("typing-effect");
     let i = 0;
     element.textContent = "";
 
-    const typing = setInterval(() => {
+    this._greetingTypingTimer = window.setInterval(() => {
       if (i < text.length) {
         element.textContent += text.charAt(i);
         i++;
       } else {
-        clearInterval(typing);
+        clearInterval(this._greetingTypingTimer);
+        this._greetingTypingTimer = null;
         element.classList.remove("typing-effect");
       }
     }, speed);
   }
 }
-// [src/modules/clock.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/clock.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

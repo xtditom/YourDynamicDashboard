@@ -11,6 +11,72 @@ export function getIconUrl(url) {
   }
 }
 
+export function makeKeyboardInteractive(element, handler, label) {
+  if (!element) return element;
+  element.setAttribute("role", "button");
+  element.tabIndex = 0;
+  if (label) element.setAttribute("aria-label", label);
+  element.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    handler(event);
+  });
+  return element;
+}
+
+export function isValidCoordinate(value, min, max) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === "" ||
+    (typeof value === "string" && !value.trim()) ||
+    typeof value === "boolean"
+  ) {
+    return false;
+  }
+  const number = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(number) && number >= min && number <= max;
+}
+
+export function getGeocodingResults(payload) {
+  if (!payload || !Array.isArray(payload.results)) return [];
+  return payload.results.filter(
+    (result) =>
+      result &&
+      typeof result.name === "string" &&
+      isValidCoordinate(result.latitude, -90, 90) &&
+      isValidCoordinate(result.longitude, -180, 180),
+  );
+}
+
+export function formatLocationResult(result) {
+  return [result.name, result.admin1, result.country]
+    .filter((part, index, parts) => part && parts.indexOf(part) === index)
+    .join(", ");
+}
+
+export async function chooseGeocodingResult(results, query) {
+  if (results.length === 1) return results[0];
+  const buttons = results.slice(0, 5).map((result, index) => ({
+    text: `${index + 1}. ${formatLocationResult(result)}`,
+    value: index,
+    width: "auto",
+  }));
+  buttons.push({
+    text: "Cancel",
+    value: null,
+    width: "100px",
+    style: "background: var(--bg-interactive); color: var(--text-primary);",
+  });
+  const choice = await showCustomModal(
+    `Several places match "${query}". Choose the location to use:`,
+    false,
+    false,
+    buttons,
+  );
+  return Number.isInteger(choice) ? results[choice] || null : null;
+}
+
 export function createEl(tag, className, text = "") {
   const el = document.createElement(tag);
   if (className) el.className = className;
@@ -28,6 +94,7 @@ export function showCustomModal(
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
     overlay.className = "hidden ydd-custom-modal-overlay";
+    overlay.setAttribute("role", "presentation");
     overlay.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.7); display: flex; justify-content: center;
@@ -36,12 +103,16 @@ export function showCustomModal(
 
     const box = document.createElement("div");
     box.className = "modal-box";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
     box.style.cssText = `
       max-width: 400px; text-align: center;
       transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     `;
 
     const title = document.createElement("h2");
+    title.id = `ydd-modal-title-${Date.now()}`;
+    box.setAttribute("aria-labelledby", title.id);
     title.style.cssText = "color: var(--accent-color); margin-bottom: 1rem;";
     if (isCelebration) {
       title.textContent = "🎉 Congratulations 🎊";
@@ -68,6 +139,7 @@ export function showCustomModal(
       "display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;";
 
     const cleanup = (result) => {
+      document.removeEventListener("keydown", dialogKeyHandler);
       overlay.style.opacity = "0";
       box.style.transform = "scale(0.9)";
       setTimeout(() => {
@@ -119,6 +191,28 @@ export function showCustomModal(
     overlay.style.display = "flex";
     overlay.style.opacity = "1";
     box.style.transform = "scale(1)";
+    const dialogKeyHandler = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cleanup(isConfirm ? false : null);
+        return;
+      }
+      if (event.key === "Tab") {
+        const focusable = box.querySelectorAll("button, input, select, textarea, a[href]");
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", dialogKeyHandler);
+    window.setTimeout(() => box.querySelector("button, input")?.focus(), 0);
   });
 }
 
@@ -126,6 +220,7 @@ export function showCustomPrompt(message, defaultValue = "") {
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
     overlay.className = "hidden ydd-custom-modal-overlay";
+    overlay.setAttribute("role", "presentation");
     overlay.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.7); display: flex; justify-content: center;
@@ -134,12 +229,16 @@ export function showCustomPrompt(message, defaultValue = "") {
 
     const box = document.createElement("div");
     box.className = "modal-box";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
     box.style.cssText = `
       width: 400px; max-width: 90%; text-align: left;
       transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     `;
 
     const title = document.createElement("p");
+    title.id = `ydd-prompt-title-${Date.now()}`;
+    box.setAttribute("aria-labelledby", title.id);
     title.style.cssText =
       "color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.8rem; font-weight: 500;";
     title.textContent = "Hello there, I'm YourDynamicDashboard";
@@ -152,6 +251,7 @@ export function showCustomPrompt(message, defaultValue = "") {
     const input = document.createElement("input");
     input.type = "text";
     input.value = defaultValue;
+    input.setAttribute("aria-label", "Your answer");
     input.style.cssText =
       "width: 100%; box-sizing: border-box; margin-bottom: 1.5rem; padding: 10px; border-radius: 8px; border: 1px solid var(--bg-interactive); background: var(--bg-secondary); color: var(--text-primary); outline: none; transition: border-color 0.3s;";
     input.onfocus = () =>
@@ -196,6 +296,7 @@ export function showCustomPrompt(message, defaultValue = "") {
     }, 100);
 
     const cleanup = (result) => {
+      document.removeEventListener("keydown", promptKeyHandler);
       overlay.style.opacity = "0";
       box.style.transform = "scale(0.9)";
       setTimeout(() => {
@@ -212,6 +313,26 @@ export function showCustomPrompt(message, defaultValue = "") {
       if (e.key === "Enter") cleanup(input.value);
       if (e.key === "Escape") cleanup(null);
     });
+    const promptKeyHandler = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cleanup(null);
+        return;
+      }
+      if (event.key === "Tab") {
+        const focusable = box.querySelectorAll("input, button, a[href], select, textarea");
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", promptKeyHandler);
   });
 }
 
@@ -225,12 +346,13 @@ export function completeDefaultTask(taskIdOrText) {
     (t) => t.id === taskIdOrText || t.text === taskIdOrText,
   );
   if (index !== -1) {
-    const taskToComplete = todos[index];
-    todos.splice(index, 1);
-    state.set("todos", todos);
+    if (!todos[index].completed) {
+      todos[index].completed = true;
+      state.set("todos", todos);
+    }
 
     const completedIds = state.get("completedDefaultTaskIds") || [];
-    const idStr = String(taskToComplete.id);
+    const idStr = String(todos[index].id);
     if (!completedIds.includes(idStr)) {
       completedIds.push(idStr);
       state.set("completedDefaultTaskIds", completedIds);
@@ -238,6 +360,50 @@ export function completeDefaultTask(taskIdOrText) {
 
     progressDefaultTasks();
   }
+}
+
+/**
+ * Completes a welcome task without removing it from the user's To-Do list.
+ * The list keeps the completed item for strikethrough/history, while
+ * progressDefaultTasks advances the next onboarding item.
+ */
+export function markDefaultTaskComplete(taskIdOrText) {
+  completeDefaultTask(taskIdOrText);
+}
+
+export function markDefaultTaskIncomplete(taskIdOrText) {
+  if (!state.get("defaultTasksPinned")) return;
+  const idStr = String(taskIdOrText);
+  const completedIds = state.get("completedDefaultTaskIds") || [];
+  const nextIds = completedIds.filter((id) => String(id) !== idStr);
+  if (nextIds.length !== completedIds.length) {
+    state.set("completedDefaultTaskIds", nextIds);
+  }
+  progressDefaultTasks();
+}
+
+/**
+ * Makes the first two welcome tasks available as soon as the dashboard is
+ * initialized. Weather is optional, so onboarding must not depend on a
+ * successful network request.
+ */
+export function initializeDefaultTasks() {
+  if (state.get("defaultTasksPinned")) return;
+  const todos = state.get("todos") || [];
+  let slots = 2;
+  todos.forEach((task) => {
+    if (
+      slots > 0 &&
+      ["dt-1", "dt-2"].includes(String(task.id)) &&
+      !task.completed
+    ) {
+      task.pinned = true;
+      slots -= 1;
+    }
+  });
+  state.set("todos", todos);
+  state.set("defaultTasksPinned", true);
+  progressDefaultTasks();
 }
 
 export function progressDefaultTasks() {
@@ -304,4 +470,4 @@ export function progressDefaultTasks() {
     }
   }
 }
-// [src/utils.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/utils.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

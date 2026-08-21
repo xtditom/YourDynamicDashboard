@@ -40,6 +40,7 @@ export class CommandPalette {
     this.activeIndex = 0;
     this.currentMenu = "main"; // "main", "apps", "ai", "socials"
     this._helpModalClose = null;
+    this._previousFocus = null;
 
     // 1. Core main commands
     this.mainCommands = [
@@ -134,8 +135,9 @@ export class CommandPalette {
         icon: "ℹ️",
         shortcut: "",
         action: () => {
-          const infoOverlay = document.getElementById("info-modal-overlay");
-          if (infoOverlay) infoOverlay.classList.remove("hidden");
+          const settings = window.__settingsManagerInstance;
+          if (settings?.openInfoModal) settings.openInfoModal();
+          else document.getElementById("info-btn")?.click();
         }
       },
       {
@@ -317,13 +319,16 @@ export class CommandPalette {
     const overlay = document.createElement("div");
     overlay.id = "cp-modal-overlay";
     overlay.className = "hidden";
+    overlay.inert = true;
+    overlay.setAttribute("aria-hidden", "true");
 
     overlay.innerHTML = `
-      <div class="cp-modal">
+      <div class="cp-modal" role="dialog" aria-modal="true" aria-labelledby="cp-modal-title">
         <div class="cp-header">
           <div class="cp-search-wrapper">
             <span class="cp-search-icon">🔍</span>
-            <input type="text" id="cp-search-input" placeholder="Type a command or search... (Esc to close)" autocomplete="off" />
+            <label id="cp-modal-title" class="visually-hidden">Command Palette</label>
+            <input type="text" id="cp-search-input" aria-label="Search commands" placeholder="Type a command or search... (Esc to close)" autocomplete="off" />
           </div>
           <button type="button" class="cp-esc-badge" aria-label="Close command palette" title="Close command palette">Esc</button>
         </div>
@@ -344,9 +349,18 @@ export class CommandPalette {
   registerEvents() {
     const badge = document.getElementById("search-cp-badge");
     if (badge) {
+      badge.setAttribute("role", "button");
+      badge.tabIndex = 0;
+      badge.setAttribute("aria-label", "Open command palette");
       badge.addEventListener("click", (e) => {
         e.stopPropagation();
         this.open();
+      });
+      badge.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          this.open();
+        }
       });
     }
 
@@ -358,10 +372,25 @@ export class CommandPalette {
 
     this.els.escapeBtn.addEventListener("click", () => this.close());
     this.els.overlay.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-      e.preventDefault();
-      e.stopPropagation();
-      this.close();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        this.close();
+        return;
+      }
+      if (e.key === "Tab") {
+        const focusable = this.els.overlay.querySelectorAll("button, input, [tabindex]:not([tabindex='-1'])");
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     });
 
     this.els.input.addEventListener("input", (e) => {
@@ -395,8 +424,11 @@ export class CommandPalette {
   }
 
   open() {
+    if (!this.isOpen) this._previousFocus = document.activeElement;
     this.isOpen = true;
     this.els.overlay.classList.remove("hidden");
+    this.els.overlay.inert = false;
+    this.els.overlay.setAttribute("aria-hidden", "false");
     this.els.input.value = "";
     this.currentMenu = "main";
     this.activeIndex = 0;
@@ -410,7 +442,13 @@ export class CommandPalette {
   close() {
     this.isOpen = false;
     this.els.overlay.classList.add("hidden");
+    this.els.overlay.inert = true;
+    this.els.overlay.setAttribute("aria-hidden", "true");
     this.els.input.blur();
+    if (this._previousFocus?.focus) {
+      window.setTimeout(() => this._previousFocus.focus(), 0);
+    }
+    this._previousFocus = null;
   }
 
   switchMenu(menuName) {
@@ -540,6 +578,11 @@ export class CommandPalette {
     this.filteredCommands.forEach((c, idx) => {
       const item = document.createElement("div");
       item.className = `cp-item ${idx === this.activeIndex ? "active" : ""}`;
+      item.id = `cp-command-${idx}`;
+      item.setAttribute("role", "button");
+      item.tabIndex = 0;
+      item.setAttribute("aria-label", c.name);
+      item.setAttribute("aria-selected", String(idx === this.activeIndex));
       
       const left = document.createElement("div");
       left.className = "cp-item-left";
@@ -576,6 +619,13 @@ export class CommandPalette {
       item.addEventListener("click", () => {
         this.activeIndex = idx;
         this.execute();
+      });
+      item.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          this.activeIndex = idx;
+          this.execute();
+        }
       });
 
       this.els.list.appendChild(item);
@@ -672,6 +722,9 @@ export class CommandPalette {
 
     const modal = document.createElement("div");
     modal.className = "modal-box";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "cp-help-modal-title");
     modal.style.maxWidth = "525px";
     modal.style.width = "90%";
     modal.style.boxShadow = "0 10px 40px rgba(0,0,0,0.6)";
@@ -683,8 +736,8 @@ export class CommandPalette {
     modal.addEventListener("click", (e) => e.stopPropagation());
 
     modal.innerHTML = `
-      <button class="modal-close" id="cp-help-modal-close" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.6rem; color: var(--text-secondary); cursor: pointer;">&times;</button>
-      <h2 style="color: var(--accent-color); margin-bottom: 0.5rem; text-align: center; font-size: 1.45rem; font-weight: 700;">🎹 Command Palette Guide</h2>
+      <button class="modal-close" id="cp-help-modal-close" aria-label="Close command palette help" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.6rem; color: var(--text-secondary); cursor: pointer;">&times;</button>
+      <h2 id="cp-help-modal-title" style="color: var(--accent-color); margin-bottom: 0.5rem; text-align: center; font-size: 1.45rem; font-weight: 700;">🎹 Command Palette Guide</h2>
       <p class="modal-subtitle" style="text-align: center; color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.5rem;">Productivity Engine & Bang Shortcuts Guide</p>
       
       <div class="info-content" style="display: flex; flex-direction: column; gap: 1rem; max-height: 480px; overflow-y: auto;">
@@ -726,22 +779,42 @@ export class CommandPalette {
     const escHandler = (e) => {
       if (e.key === "Escape") {
         closeHandler();
+        return;
+      }
+      if (e.key === "Tab") {
+        const focusable = overlay.querySelectorAll("button, a[href], input, select, textarea");
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
     const closeHandler = () => {
       document.removeEventListener("keydown", escHandler);
       overlay.remove();
+      if (this._previousFocus?.focus) {
+        window.setTimeout(() => this._previousFocus.focus(), 0);
+      }
+      this._previousFocus = null;
       if (this._helpModalClose === closeHandler) {
         this._helpModalClose = null;
       }
     };
 
     this._helpModalClose = closeHandler;
+    this._previousFocus = document.activeElement;
     overlay
       .querySelector("#cp-help-modal-close")
       .addEventListener("click", closeHandler);
     overlay.addEventListener("click", closeHandler);
     document.addEventListener("keydown", escHandler);
+    window.setTimeout(() => overlay.querySelector("#cp-help-modal-close")?.focus(), 0);
   }
 
   getShortcutLabel(action) {

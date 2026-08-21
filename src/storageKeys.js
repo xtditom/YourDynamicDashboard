@@ -107,4 +107,4 @@ export function validateYddStorageEntries(entries) {
   return filtered;
 }
 
-// [src/storageKeys.js] YourDynamicDashboard V2.2
+// [src/storageKeys.js] YourDynamicDashboard V3.0.0

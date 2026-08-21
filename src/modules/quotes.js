@@ -10,19 +10,42 @@ export class QuoteWidget {
       weather: document.getElementById("weather-widget"),
       search: document.getElementById("search-form"),
     };
+    this._quoteTimer = null;
+    this._quoteFadeTimer = null;
+    this._visibilityHandler = () => this.handleVisibilityChange();
     this.init();
   }
 
   init() {
     this.updateText();
 
-    // --- ANIMATED CYCLE: 12.5 Seconds ---
-    setInterval(() => this.cycleQuote(), 12500);
+    // --- ANIMATED CYCLE: 12.5 Seconds (visible tabs only) ---
+    document.addEventListener("visibilitychange", this._visibilityHandler);
 
     state.subscribe((key) => {
       if (key === "widgetControl") this.applyWidgetVisibility();
     });
     this.applyWidgetVisibility();
+  }
+
+  startQuoteTimer() {
+    this.stopQuoteTimer();
+    if (document.hidden || this.els.widget?.classList.contains("hidden")) return;
+    this._quoteTimer = window.setInterval(() => this.cycleQuote(), 12500);
+  }
+
+  stopQuoteTimer() {
+    clearInterval(this._quoteTimer);
+    clearTimeout(this._quoteFadeTimer);
+    this._quoteTimer = null;
+    this._quoteFadeTimer = null;
+    this.els.text?.classList.remove("quote-fading");
+    this.els.author?.classList.remove("quote-fading");
+  }
+
+  handleVisibilityChange() {
+    if (document.hidden) this.stopQuoteTimer();
+    else this.startQuoteTimer();
   }
 
   updateText() {
@@ -32,13 +55,16 @@ export class QuoteWidget {
   }
 
   cycleQuote() {
+    if (document.hidden || this.els.widget?.classList.contains("hidden")) return;
     this.els.text.classList.add("quote-fading");
     this.els.author.classList.add("quote-fading");
 
-    setTimeout(() => {
+    clearTimeout(this._quoteFadeTimer);
+    this._quoteFadeTimer = window.setTimeout(() => {
       this.updateText();
       this.els.text.classList.remove("quote-fading");
       this.els.author.classList.remove("quote-fading");
+      this._quoteFadeTimer = null;
     }, 500);
   }
 
@@ -123,6 +149,7 @@ export class QuoteWidget {
     }
 
     document.body.classList.toggle("widgets-hidden", control === "nothing");
+    this.startQuoteTimer();
   }
 }
-// [src/modules/quotes.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/quotes.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

@@ -1,5 +1,12 @@
 import { state } from "../state.js";
-import { getIconUrl, showCustomModal, completeDefaultTask } from "../utils.js";
+import {
+  chooseGeocodingResult,
+  completeDefaultTask,
+  getGeocodingResults,
+  getIconUrl,
+  makeKeyboardInteractive,
+  showCustomModal,
+} from "../utils.js";
 import { secondStorage } from "../secondStorage.js";
 import {
   clearYddLocalStorage,
@@ -291,6 +298,11 @@ export class SettingsManager {
     SettingsManager.THEMES = THEMES;
     this._backgroundOperationId = 0;
     this._activeBackgroundObjectUrl = null;
+    this._locationRequestId = 0;
+    this._locationController = null;
+    this._gpsRequestId = 0;
+    this._infoPreviousFocus = null;
+    this._infoKeyHandler = null;
     window.addEventListener(
       "pagehide",
       () => this._releaseActiveBackgroundObjectUrl(),
@@ -350,6 +362,7 @@ export class SettingsManager {
       bgBlurSelect: document.getElementById("bg-blur-select"),
       blurRow: document.getElementById("blur-intensity-row"),
     };
+    if (this.els.infoOverlay) this.els.infoOverlay.inert = true;
 
     if (!this.els.btn) return;
     this.init();
@@ -689,6 +702,8 @@ export class SettingsManager {
         state.set("lastSettingsView", "full");
       } else if (isMiniOpen) {
         this.els.popup.classList.remove("visible");
+        this.els.btn.setAttribute("aria-expanded", "false");
+        this.els.popup.setAttribute("aria-hidden", "true");
         state.set("lastSettingsView", "mini");
       } else {
         const lastView = state.get("lastSettingsView") || "mini";
@@ -696,6 +711,8 @@ export class SettingsManager {
           fullModal.open();
         } else {
           this.els.popup.classList.add("visible");
+          this.els.btn.setAttribute("aria-expanded", "true");
+          this.els.popup.setAttribute("aria-hidden", "false");
           state.set("lastSettingsView", "mini");
         }
       }
@@ -749,6 +766,8 @@ export class SettingsManager {
         !this.els.btn.contains(e.target)
       ) {
         this.els.popup.classList.remove("visible");
+        this.els.btn.setAttribute("aria-expanded", "false");
+        this.els.popup.setAttribute("aria-hidden", "true");
         state.set("lastSettingsView", "mini");
       }
     });
@@ -768,8 +787,10 @@ export class SettingsManager {
     this.els.tabs.forEach((tab, index) => {
       tab.addEventListener("click", () => {
         this.els.tabs.forEach((t) => t.classList.remove("active"));
+        this.els.tabs.forEach((t) => t.setAttribute("aria-selected", "false"));
         this.els.panes.forEach((p) => p.classList.remove("active"));
         tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
         if (this.els.panes[index])
           this.els.panes[index].classList.add("active");
       });
@@ -898,7 +919,7 @@ export class SettingsManager {
 
     if (this.els.infoBtn) {
       this.els.infoBtn.addEventListener("click", () => {
-        this.els.infoOverlay.classList.remove("hidden");
+        this.openInfoModal();
 
         // --- DYNAMIC VIBE: DELETE SECOND DEFAULT TASK ---
         if (state.get("defaultTasksPinned")) {
@@ -909,11 +930,13 @@ export class SettingsManager {
       });
     }
     if (this.els.infoClose) {
-      this.els.infoClose.addEventListener("click", () =>
-        this.els.infoOverlay.classList.add("hidden"),
-      );
+      this.els.infoClose.addEventListener("click", () => this.closeInfoModal());
     }
-
+    if (this.els.infoOverlay) {
+      this.els.infoOverlay.addEventListener("click", (event) => {
+        if (event.target === this.els.infoOverlay) this.closeInfoModal();
+      });
+    }
     this.setupMiscListeners();
 
     if (this.els.randomBgFreeze) {
@@ -926,6 +949,50 @@ export class SettingsManager {
         this.fetchRandomBackground();
       });
     }
+  }
+
+  openInfoModal() {
+    if (!this.els.infoOverlay) return;
+    if (!this.els.infoOverlay.classList.contains("hidden")) return;
+    this._infoPreviousFocus = document.activeElement;
+    this.els.infoOverlay.classList.remove("hidden");
+    this.els.infoOverlay.inert = false;
+    this.els.infoOverlay.setAttribute("aria-hidden", "false");
+    this._infoKeyHandler = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        this.closeInfoModal();
+      } else if (event.key === "Tab") {
+        const focusable = this.els.infoOverlay.querySelectorAll("button, a[href], input, select, textarea");
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", this._infoKeyHandler);
+    window.setTimeout(() => this.els.infoClose?.focus(), 0);
+  }
+
+  closeInfoModal() {
+    if (!this.els.infoOverlay) return;
+    this.els.infoOverlay.classList.add("hidden");
+    this.els.infoOverlay.inert = true;
+    this.els.infoOverlay.setAttribute("aria-hidden", "true");
+    if (this._infoKeyHandler) {
+      document.removeEventListener("keydown", this._infoKeyHandler);
+      this._infoKeyHandler = null;
+    }
+    if (this._infoPreviousFocus?.focus) {
+      window.setTimeout(() => this._infoPreviousFocus.focus(), 0);
+    }
+    this._infoPreviousFocus = null;
   }
 
   saveCurrentTheme() {
@@ -1005,13 +1072,16 @@ export class SettingsManager {
           btn.style.textShadow =
             "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
 
-          btn.addEventListener("click", async () => {
+          const applySavedTheme = async () => {
             await this.applySelectedTheme(theme);
-          });
+          };
+          btn.addEventListener("click", applySavedTheme);
+          makeKeyboardInteractive(btn, applySavedTheme, `Apply ${theme.name}`);
 
-          const del = document.createElement("div");
+          const del = document.createElement("button");
           del.className = "delete-preset";
           del.textContent = "×";
+          del.setAttribute("aria-label", `Delete ${theme.name}`);
           del.addEventListener("click", (e) => {
             e.stopPropagation();
             const newSaved = savedThemes.filter((_, idx) => idx !== i);
@@ -1151,6 +1221,7 @@ export class SettingsManager {
     state.set("darkMode", isDarkType);
     if (this.els.dark) this.els.dark.checked = isDarkType;
     document.body.setAttribute("data-theme", isDarkType ? "dark" : "light");
+    this.syncThemeIdentity(theme.id || "custom");
     if (theme.colors["--bg-tertiary"]) {
       this.updateIconInversion(theme.colors["--bg-tertiary"]);
     }
@@ -1209,6 +1280,7 @@ export class SettingsManager {
     Object.entries(theme.ui).forEach(([key, val]) => {
       document.body.style.setProperty(key, val);
     });
+    this.syncThemeIdentity(`gradient-${theme.id || "gradient"}`);
 
     this.updateWarningText();
     this.updateAutoThemeGlowState();
@@ -1245,43 +1317,74 @@ export class SettingsManager {
     this.syncColorPickers(colors);
     document.body.style.setProperty("--icon-filter", "grayscale(0%)");
     document.body.style.setProperty("--icon-opacity", "1");
+    this.syncThemeIdentity("custom");
+  }
+
+  syncThemeIdentity(themeId) {
+    const id = themeId || "custom";
+    document.body.setAttribute("data-theme-id", id);
+    document.documentElement.setAttribute("data-theme-id", id);
+    const isDefaultDark = id === "default-dark" && !state.get("gradientModeActive");
+    document.body.style.setProperty(
+      "--icon-filter",
+      isDefaultDark ? "grayscale(100%) brightness(1)" : "grayscale(0%)",
+    );
+    document.body.style.setProperty("--icon-opacity", isDefaultDark ? "0.8" : "1");
   }
 
   async searchLocation() {
     const city = this.els.locInput.value.trim();
     if (!city) return;
 
+    const requestId = ++this._locationRequestId;
+    this._locationController?.abort();
+    const controller = new AbortController();
+    this._locationController = controller;
     this.els.locInput.disabled = true;
     if (this.els.locSave) this.els.locSave.textContent = "...";
     try {
       const res = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`,
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=5&language=en&format=json`,
+        { signal: controller.signal },
       );
-      const data = await res.json();
-      if (data.results && data.results.length > 0) {
-        const loc = data.results[0];
+      if (!res.ok) throw new Error(`Geocoding request failed (${res.status})`);
+      const results = getGeocodingResults(await res.json());
+      if (requestId !== this._locationRequestId) return;
+      if (results.length === 0) {
+        showCustomModal(
+          `Could not find any city with name "${city}". Try another name.`,
+        );
+        return;
+      }
+      const loc = await chooseGeocodingResult(results, city);
+      if (requestId !== this._locationRequestId || !loc) return;
+      {
         state.set("yd_city", loc.name);
-        state.set("yd_lat", loc.latitude);
-        state.set("yd_lon", loc.longitude);
+        state.set("yd_lat", Number(loc.latitude));
+        state.set("yd_lon", Number(loc.longitude));
         state.set("locationUpdate", Date.now());
         this.els.locInput.value = loc.name;
         if (this.els.locSave) {
           this.els.locSave.textContent = "Saved";
           setTimeout(() => {
-            this.els.locSave.textContent = "Save";
+            if (requestId === this._locationRequestId) {
+              this.els.locSave.textContent = "Save";
+            }
           }, 2000);
         }
-      } else {
-        showCustomModal(
-          `Could not find any city with name "${city}". Try another name.`,
-        );
-        if (this.els.locSave) this.els.locSave.textContent = "Save";
       }
     } catch (e) {
-      showCustomModal("Connection error. Check your internet.");
-      if (this.els.locSave) this.els.locSave.textContent = "Save";
+      if (e?.name !== "AbortError" && requestId === this._locationRequestId) {
+        console.error("Geocoding Error:", e);
+        showCustomModal("Could not look up that location. Check your connection and try again.");
+      }
     } finally {
-      this.els.locInput.disabled = false;
+      if (requestId === this._locationRequestId) {
+        this.els.locInput.disabled = false;
+        if (this.els.locSave && this.els.locSave.textContent === "...") {
+          this.els.locSave.textContent = "Save";
+        }
+      }
     }
   }
 
@@ -1290,8 +1393,11 @@ export class SettingsManager {
       const res = await fetch(
         `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`,
       );
+      if (!res.ok) throw new Error(`Reverse geocoding failed (${res.status})`);
       const data = await res.json();
-      return data.city || data.locality || "Unknown Location";
+      if (!data || typeof data !== "object") throw new TypeError("Invalid reverse geocoding response");
+      return [data.city, data.locality, data.principalSubdivision]
+        .find((value) => typeof value === "string" && value.trim()) || "Unknown Location";
     } catch (e) {
       return `${parseFloat(lat).toFixed(1)}, ${parseFloat(lon).toFixed(1)}`;
     }
@@ -1365,12 +1471,13 @@ export class SettingsManager {
         "When you proceed, your browser will securely ping Open-Meteo " +
         "(for weather) and BigDataCloud (for the city name).\n\n" +
         "This data is saved locally on your device. We do not track you " +
-        "in the background, and we have no server to store your location data.",
+        "in the background, and we have no server to store your location data.\n\n" +
+        "Remember Choice only hides this explanation next time; your browser still controls location permission.",
       false,
       false,
       [
         { text: "I Agree", value: "agree", width: "130px" },
-        { text: "Always Allow", value: "always", width: "130px" },
+        { text: "Remember Choice", value: "always", width: "145px" },
         {
           text: "Cancel",
           value: "cancel",
@@ -1393,11 +1500,22 @@ export class SettingsManager {
 
   /** Calls the standard Web Geolocation API — the browser handles the permission prompt. */
   _requestBrowserLocation() {
+    const requestId = ++this._gpsRequestId;
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const gpsLat = pos.coords.latitude;
         const gpsLon = pos.coords.longitude;
+        if (
+          requestId !== this._gpsRequestId ||
+          !Number.isFinite(gpsLat) ||
+          !Number.isFinite(gpsLon) ||
+          gpsLat < -90 ||
+          gpsLat > 90 ||
+          gpsLon < -180 ||
+          gpsLon > 180
+        ) return;
         const gpsCity = await this.reverseGeocode(gpsLat, gpsLon);
+        if (requestId !== this._gpsRequestId) return;
         state.set("yd_city", gpsCity);
         state.set("yd_lat", gpsLat);
         state.set("yd_lon", gpsLon);
@@ -1752,16 +1870,20 @@ export class SettingsManager {
       const img = document.createElement("img");
       img.src = s.customIcon || s.icon || getIconUrl(s.url);
       img.className = "icon";
+      img.alt = `${s.name} icon`;
 
       const fileInput = document.createElement("input");
       fileInput.type = "file";
       fileInput.accept = "image/*";
       fileInput.style.display = "none";
+      fileInput.setAttribute("aria-label", `Choose custom icon for ${s.name}`);
 
       iconContainer.appendChild(img);
       iconContainer.appendChild(fileInput);
 
-      iconContainer.addEventListener("click", () => fileInput.click());
+      const chooseIcon = () => fileInput.click();
+      iconContainer.addEventListener("click", chooseIcon);
+      makeKeyboardInteractive(iconContainer, chooseIcon, `Change ${s.name} icon`);
 
       const inputsDiv = document.createElement("div");
       inputsDiv.className = "inputs";
@@ -1771,6 +1893,7 @@ export class SettingsManager {
       nameInput.className = "name-input";
       nameInput.value = s.name;
       nameInput.placeholder = "Name";
+      nameInput.setAttribute("aria-label", `${s.name} shortcut name`);
       nameInput.maxLength = 35;
 
       const urlInput = document.createElement("input");
@@ -1778,6 +1901,7 @@ export class SettingsManager {
       urlInput.className = "url-input";
       urlInput.value = s.url;
       urlInput.placeholder = "URL";
+      urlInput.setAttribute("aria-label", `${s.name} shortcut URL`);
       urlInput.maxLength = 2048;
 
       const triggerSave = () => {
@@ -2369,4 +2493,4 @@ export class SettingsManager {
     }
   }
 }
-// [src/modules/settings.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/settings.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

@@ -20,9 +20,9 @@ export class Shortcuts {
     const current = state.get("userShortcuts");
 
     if (!current || !Array.isArray(current)) {
-      const withIcons = this.defaults.map((s) => ({
-        ...s,
-        icon: getIconUrl(s.url),
+      const withIcons = this.defaults.map((shortcut) => ({
+        ...shortcut,
+        icon: getIconUrl(shortcut.url),
       }));
       state.set("userShortcuts", withIcons);
     }
@@ -111,4 +111,4 @@ export class Shortcuts {
     }
   }
 }
-// [src/modules/shortcuts.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/shortcuts.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

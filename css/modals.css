@@ -19,6 +19,10 @@
   opacity: 0;
   pointer-events: none;
 }
+#info-modal-overlay.hidden {
+  display: flex !important;
+  visibility: hidden;
+}
 .modal-box {
   background-color: var(--bg-secondary);
   padding: 2rem;
@@ -202,7 +206,7 @@ body.transparency-active .ydd-custom-modal-overlay {
   transform: translateX(16px);
 }
 
-/* --- 12. WELCOME MODAL V2.2.0 --- */
+/* --- 12. WELCOME MODAL V3.0.0 --- */
 #welcome-modal-overlay {
   position: fixed;
   top: 0;
@@ -221,7 +225,8 @@ body.transparency-active .ydd-custom-modal-overlay {
 #welcome-modal-overlay.hidden {
   opacity: 0;
   pointer-events: none;
-  display: none !important;
+  display: flex !important;
+  visibility: hidden;
 }
 #welcome-modal {
   background: linear-gradient(145deg, #121212, #0a0a0a);
@@ -833,4 +838,4 @@ html.high-bg-blur body.has-custom-bg .dropdown-item {
   -webkit-backdrop-filter: blur(3px) !important;
 }
 
-/* [css/modals.css] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26) */
+/* [css/modals.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

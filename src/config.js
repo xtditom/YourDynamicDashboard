@@ -592,4 +592,4 @@ export const DEFAULT_KEY_MAP = {
   zen: { key: "z", enabled: true, fixed: true },
   voice: { key: "v", enabled: true, fixed: true },
 };
-// [src/config.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/config.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

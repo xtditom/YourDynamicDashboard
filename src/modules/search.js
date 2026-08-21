@@ -1,6 +1,6 @@
 import { state } from "../state.js";
 import { CONFIG, SEARCH_PROVIDERS, SEARCH_SUGGESTIONS } from "../config.js";
-import { showCustomModal } from "../utils.js";
+import { makeKeyboardInteractive, showCustomModal } from "../utils.js";
 import { BANG_MAP } from "./palette.js";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -29,11 +29,16 @@ export class Search {
     this._dropdownCloseTimer = null;
     this._historyExpiryTimer = null;
     this._historyModalClose = null;
+    this._historyPreviousFocus = null;
     this.recognition = null;
     this.isListening = false;
     this._voiceStartPending = false;
     this._voiceStartId = 0;
     this._voicePlaceholderBeforeStart = null;
+    this._typewriterTimer = null;
+    this._typewriterInterval = null;
+    this._typewriterRunId = 0;
+    this._visibilityHandler = () => this.handleVisibilityChange();
     this.currentFilteredHistory = [];
     this.init();
     window.YD_Search = this;
@@ -58,10 +63,12 @@ export class Search {
     this.updateUI();
     this.updateButtons();
     this.startTypewriterEffect();
+    document.addEventListener("visibilitychange", this._visibilityHandler);
 
     state.subscribe((key) => {
       if (key === "linkTargets") this.updateButtons();
       if (key === "hideVoiceSearch") this.updateVoiceButton();
+      if (key === "widgetControl") this.syncTypewriterVisibility();
       if (key === "searchHistory" || key === "searchAutoDeleteDays") {
         this.pruneExpiredHistory();
       }
@@ -172,6 +179,23 @@ export class Search {
         ? configuredDays
         : CONFIG.defaults.searchAutoDeleteDays;
     return days * DAY_IN_MS;
+  }
+
+  isSearchVisible() {
+    const control = state.get("widgetControl") || "all";
+    return ["all", "search-only", "search-weather", "search-quote"].includes(control);
+  }
+
+  handleVisibilityChange() {
+    this.syncTypewriterVisibility();
+  }
+
+  syncTypewriterVisibility() {
+    if (document.hidden || !this.isSearchVisible()) {
+      this.stopTypewriterEffect();
+    } else if (!this._typewriterTimer && !this._typewriterInterval) {
+      this.startTypewriterEffect();
+    }
   }
 
   scheduleHistoryExpiry(history) {
@@ -297,6 +321,9 @@ export class Search {
 
     top5.forEach((item) => {
       const li = document.createElement("li");
+      li.setAttribute("role", "option");
+      li.tabIndex = 0;
+      li.setAttribute("aria-label", `Search again for ${item.query}`);
 
       const icon = document.createElement("img");
       const engineIcon = this._resolveEngineIcon(item.engineId);
@@ -324,12 +351,22 @@ export class Search {
         this._removeHistoryDropdown();
         this._executeViaEngine(item.query, this.current.id);
       });
+      li.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          this._removeHistoryDropdown();
+          this._executeViaEngine(item.query, this.current.id);
+        }
+      });
 
       ul.appendChild(li);
     });
 
     const footerLi = document.createElement("li");
     footerLi.className = "sh-full-history-btn";
+    footerLi.setAttribute("role", "button");
+    footerLi.tabIndex = 0;
+    footerLi.setAttribute("aria-label", "Open full search history");
     footerLi.textContent = "Full Search History";
     footerLi.addEventListener("mousedown", (e) => {
       e.preventDefault();
@@ -382,6 +419,9 @@ export class Search {
 
     const overlay = document.createElement("div");
     overlay.id = "sh-modal-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-labelledby", "sh-modal-title");
     overlay.style.zIndex = "9900";
 
     const modal = document.createElement("div");
@@ -404,6 +444,7 @@ export class Search {
 
     const infoBtn = document.createElement("button");
     infoBtn.className = "sh-info-btn";
+    infoBtn.setAttribute("aria-label", "About search history");
     infoBtn.title = "About Search History";
     infoBtn.style.background = "transparent";
     infoBtn.style.border = "none";
@@ -427,6 +468,7 @@ export class Search {
     });
 
     const title = document.createElement("h3");
+    title.id = "sh-modal-title";
     title.textContent = "Search History";
 
     titleWrap.appendChild(infoBtn);
@@ -439,6 +481,7 @@ export class Search {
     ghostLabel.className = "sh-ghost-toggle";
     const ghostCheck = document.createElement("input");
     ghostCheck.type = "checkbox";
+    ghostCheck.setAttribute("aria-label", "Pause saving search history");
     ghostCheck.checked = state.get("searchHistoryPaused") || false;
     const ghostSpan = document.createElement("span");
     ghostSpan.textContent = "Don't save searches";
@@ -511,6 +554,7 @@ export class Search {
     const filterInput = document.createElement("input");
     filterInput.type = "text";
     filterInput.id = "sh-filter-input";
+    filterInput.setAttribute("aria-label", "Filter search history");
     filterInput.placeholder = "Filter history…";
     filterRow.appendChild(filterInput);
 
@@ -537,6 +581,10 @@ export class Search {
       clearTimeout(filterTimer);
       document.removeEventListener("keydown", escHandler);
       overlay.remove();
+      if (this._historyPreviousFocus?.focus) {
+        window.setTimeout(() => this._historyPreviousFocus.focus(), 0);
+      }
+      this._historyPreviousFocus = null;
       if (this._historyModalClose === closeOverlay) {
         this._historyModalClose = null;
       }
@@ -544,13 +592,29 @@ export class Search {
     const escHandler = (e) => {
       if (e.key === "Escape") {
         closeOverlay();
+        return;
+      }
+      if (e.key === "Tab") {
+        const focusable = overlay.querySelectorAll("button, input, select, [tabindex]:not([tabindex='-1'])");
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
 
     this._historyModalClose = closeOverlay;
+    this._historyPreviousFocus = document.activeElement;
     closeBtn.addEventListener("click", closeOverlay);
     overlay.addEventListener("click", closeOverlay);
     document.addEventListener("keydown", escHandler);
+    window.setTimeout(() => filterInput.focus(), 0);
   }
 
   closeHistoryModal() {
@@ -611,10 +675,12 @@ export class Search {
         queryEl.className = "sh-row-query";
         queryEl.textContent = item.query;
         queryEl.title = "Search for this again";
-        queryEl.addEventListener("click", () => {
+        const repeatSearch = () => {
           this.closeHistoryModal();
           this._executeViaEngine(item.query, item.engineId);
-        });
+        };
+        makeKeyboardInteractive(queryEl, repeatSearch, `Search again for ${item.query}`);
+        queryEl.addEventListener("click", repeatSearch);
 
         const timeEl = document.createElement("span");
         timeEl.className = "sh-row-time";
@@ -624,6 +690,7 @@ export class Search {
         delBtn.className = "sh-delete-btn";
         delBtn.textContent = "×";
         delBtn.title = "Remove this entry";
+        delBtn.setAttribute("aria-label", `Remove search ${item.query}`);
         delBtn.addEventListener("click", () => {
           const h = (state.get("searchHistory") || []).filter(
             (x) => x.timestamp !== item.timestamp,
@@ -770,6 +837,13 @@ export class Search {
       },
       video: false,
     });
+    footerLi.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        this._removeHistoryDropdown();
+        this.buildHistoryModal();
+      }
+    });
     stream.getTracks().forEach((track) => track.stop());
   }
 
@@ -899,6 +973,7 @@ export class Search {
       this.els.input.placeholder = this._voicePlaceholderBeforeStart || "";
     }
     this._voicePlaceholderBeforeStart = null;
+    this.syncTypewriterVisibility();
   }
 
   async showVoiceError(error) {
@@ -955,64 +1030,105 @@ export class Search {
 
   // --- SECTION: UI & ANIMATION ---
   startTypewriterEffect() {
+    this.stopTypewriterEffect();
+    if (document.hidden || !this.isSearchVisible()) return;
+
     const typeSpeed = 50;
     const deleteSpeed = 25;
     const readDelay = 9500;
+    const runId = ++this._typewriterRunId;
 
-    const loop = () => {
-      if (this.isListening || this._voiceStartPending) {
-        setTimeout(loop, 1000);
-        return;
-      }
-
-      const text =
-        SEARCH_SUGGESTIONS[
-          Math.floor(Math.random() * SEARCH_SUGGESTIONS.length)
-        ];
-      let i = 0;
-      const typing = setInterval(() => {
+    const loop = (delay = 0) => {
+      this._typewriterTimer = window.setTimeout(() => {
+        this._typewriterTimer = null;
+        if (
+          runId !== this._typewriterRunId ||
+          document.hidden ||
+          !this.isSearchVisible()
+        ) return;
         if (this.isListening || this._voiceStartPending) {
-          clearInterval(typing);
-          loop();
+          loop(1000);
           return;
         }
 
-        this.els.input.placeholder = text.substring(0, i) + "|";
-        i++;
+        const text =
+          SEARCH_SUGGESTIONS[
+            Math.floor(Math.random() * SEARCH_SUGGESTIONS.length)
+          ];
+        let i = 0;
+        this._typewriterInterval = window.setInterval(() => {
+          if (
+            runId !== this._typewriterRunId ||
+            document.hidden ||
+            !this.isSearchVisible() ||
+            this.isListening ||
+            this._voiceStartPending
+          ) {
+            this.stopTypewriterEffect();
+            return;
+          }
 
-        if (i > text.length) {
-          clearInterval(typing);
-          this.els.input.placeholder = text;
+          this.els.input.placeholder = text.substring(0, i) + "|";
+          i++;
 
-          setTimeout(() => {
-            let j = text.length;
-            const deleting = setInterval(() => {
-              if (this.isListening || this._voiceStartPending) {
-                clearInterval(deleting);
-                loop();
-                return;
-              }
+          if (i > text.length) {
+            clearInterval(this._typewriterInterval);
+            this._typewriterInterval = null;
+            this.els.input.placeholder = text;
+            this._typewriterTimer = window.setTimeout(() => {
+              this._typewriterTimer = null;
+              let j = text.length;
+              this._typewriterInterval = window.setInterval(() => {
+                if (
+                  runId !== this._typewriterRunId ||
+                  document.hidden ||
+                  !this.isSearchVisible() ||
+                  this.isListening ||
+                  this._voiceStartPending
+                ) {
+                  this.stopTypewriterEffect();
+                  return;
+                }
 
-              this.els.input.placeholder = text.substring(0, j) + "|";
-              j--;
-
-              if (j < 0) {
-                clearInterval(deleting);
-                this.els.input.placeholder = "";
-                setTimeout(loop, 200);
-              }
-            }, deleteSpeed);
-          }, readDelay);
-        }
-      }, typeSpeed);
+                this.els.input.placeholder = text.substring(0, j) + "|";
+                j--;
+                if (j < 0) {
+                  clearInterval(this._typewriterInterval);
+                  this._typewriterInterval = null;
+                  this.els.input.placeholder = "";
+                  loop(200);
+                }
+              }, deleteSpeed);
+            }, readDelay);
+          }
+        }, typeSpeed);
+      }, delay);
     };
+
     loop();
+  }
+
+  stopTypewriterEffect() {
+    this._typewriterRunId++;
+    clearTimeout(this._typewriterTimer);
+    clearInterval(this._typewriterInterval);
+    this._typewriterTimer = null;
+    this._typewriterInterval = null;
+    if (this.els.input && !this.els.input.value) {
+      this.els.input.placeholder = "";
+    }
   }
 
   renderProviderDropdown() {
     const createItem = (p, type) => {
       const div = document.createElement("div");
       div.className = `dropdown-item ${p.id === this.current.id ? "active" : ""}`;
+      makeKeyboardInteractive(div, () => {
+        this.setProvider(p.id, type);
+        this.closeDropdown();
+      }, `Use ${p.name}`);
+      div.setAttribute("role", "option");
+      div.setAttribute("aria-selected", String(p.id === this.current.id));
 
       const img = document.createElement("img");
       img.src = CONFIG.paths.search + p.icon;
@@ -1102,7 +1218,9 @@ export class Search {
     this._dropdownCloseTimer = null;
     this.els.dropdown.classList.remove("closing");
     this.els.dropdown.classList.remove("hidden");
+    this.els.dropdown.setAttribute("aria-hidden", "false");
     this.els.providerBtn.classList.add("is-open");
+    this.els.providerBtn.setAttribute("aria-expanded", "true");
 
     const body = document.body;
     if (body.classList.contains("has-custom-bg") || body.classList.contains("gradient-mode-active")) {
@@ -1148,7 +1266,9 @@ export class Search {
     this._dropdownCloseTimer = window.setTimeout(() => {
       this._dropdownCloseTimer = null;
       this.els.dropdown.classList.add("hidden");
+      this.els.dropdown.setAttribute("aria-hidden", "true");
       this.els.dropdown.classList.remove("closing");
+      this.els.providerBtn.setAttribute("aria-expanded", "false");
 
       this.els.dropdown.style.removeProperty("backdrop-filter");
       this.els.dropdown.style.removeProperty("-webkit-backdrop-filter");
@@ -1181,4 +1301,4 @@ export class Search {
     window.location.href = url;
   }
 }
-// [src/modules/search.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/search.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)
