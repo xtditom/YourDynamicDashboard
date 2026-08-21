@@ -1,4 +1,19 @@
 try {
+  var preloadObjectUrl = null;
+  var preloadBackgroundEnabled = true;
+  var releasePreloadObjectUrl = function() {
+    if (preloadObjectUrl) {
+      URL.revokeObjectURL(preloadObjectUrl);
+      preloadObjectUrl = null;
+      window.__yddPreloadBackgroundUrl = null;
+    }
+  };
+  var cancelPreloadBackground = function() {
+    preloadBackgroundEnabled = false;
+    releasePreloadObjectUrl();
+  };
+  window.addEventListener("pagehide", cancelPreloadBackground, { once: true });
+  window.__releaseYddPreloadBackground = cancelPreloadBackground;
   if (localStorage.getItem("zenMode") === "true") {
     document.documentElement.classList.add("zen-mode-preload");
   }
@@ -67,12 +82,15 @@ try {
     if (bgTime === "null" || bgTime === '"-1"' || Date.now() - parseInt(bgTime) <= 259200000) {
       imgUrl = (savedBg && savedBg !== '"null"') ? savedBg : ((bg && bg !== '"null"') ? bg : null);
     }
+  } else if (bgMode === '"random"' && savedBg && savedBg !== '"null"') {
+    imgUrl = savedBg;
   } else if (bg && bg !== '"null"' && bgMode !== '"random"') {
     imgUrl = bg;
   }
 
   if (imgUrl && imgUrl !== "null" && imgUrl !== '"null"') {
     var style = document.createElement("style");
+    style.id = "ydd-remote-background";
     style.textContent = "body { background-image: url(" + imgUrl.replace(/^"|"$/g, "") + ") !important; background-size: cover !important; background-position: center !important; }";
     document.head.appendChild(style);
   }
@@ -100,11 +118,18 @@ try {
       var transaction = db.transaction("images", "readonly");
       var store = transaction.objectStore("images");
       var getRequest = store.get("current_bg");
+      transaction.oncomplete = function() { db.close(); };
+      transaction.onerror = function() { db.close(); };
+      transaction.onabort = function() { db.close(); };
       
       getRequest.onsuccess = function(e) {
-        if (e.target.result) {
+        if (e.target.result && preloadBackgroundEnabled) {
+          releasePreloadObjectUrl();
           var objectUrl = URL.createObjectURL(e.target.result);
+          preloadObjectUrl = objectUrl;
+          window.__yddPreloadBackgroundUrl = objectUrl;
           var style = document.createElement("style");
+          style.id = "ydd-idb-background";
           style.textContent = "body { background-image: url(" + objectUrl + ") !important; background-size: cover !important; background-position: center !important; }";
           document.head.appendChild(style);
           if (document.body) {
@@ -123,6 +148,7 @@ try {
         if (p) p.remove();
       };
     } else {
+      db.close();
       var p = document.getElementById("idb-preloader");
       if (p) p.remove();
     }

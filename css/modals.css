@@ -1,7 +1,5 @@
 /* --- 11. MODALS & KEYS --- */
 #info-modal-overlay,
-#key-modal-overlay,
-#link-direction-modal-overlay,
 #night-mode-modal-overlay {
   position: fixed;
   top: 0;
@@ -17,8 +15,6 @@
   transition: opacity 0.3s;
 }
 #info-modal-overlay.hidden,
-#key-modal-overlay.hidden,
-#link-direction-modal-overlay.hidden,
 #night-mode-modal-overlay.hidden {
   opacity: 0;
   pointer-events: none;
@@ -32,6 +28,49 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   position: relative;
   border: 1px solid var(--border-color);
+}
+
+/* Keep the glass surface readable while leaving the surrounding dashboard visible. */
+body.transparency-active .modal-box,
+body.transparency-active .sh-modal,
+body.transparency-active #full-settings-modal,
+body.transparency-active #welcome-modal {
+  -webkit-backdrop-filter: blur(5px) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+body.transparency-active .modal-box,
+body.transparency-active .sh-modal,
+body.transparency-active #full-settings-modal {
+  background-color: rgba(248, 248, 248, 0.50) !important;
+}
+
+body[data-theme="dark"].transparency-active .modal-box,
+body[data-theme="dark"].transparency-active .sh-modal,
+body[data-theme="dark"].transparency-active #full-settings-modal,
+body.has-custom-bg.transparency-active .modal-box,
+body.has-custom-bg.transparency-active .sh-modal,
+body.has-custom-bg.transparency-active #full-settings-modal,
+body.gradient-dark.transparency-active .modal-box,
+body.gradient-dark.transparency-active .sh-modal,
+body.gradient-dark.transparency-active #full-settings-modal {
+  background-color: rgba(16, 16, 16, 0.60) !important;
+}
+
+body.transparency-active #info-modal-overlay,
+body.transparency-active #night-mode-modal-overlay,
+body.transparency-active #full-settings-overlay,
+body.transparency-active #sh-modal-overlay,
+body.transparency-active #welcome-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.032) !important;
+  -webkit-backdrop-filter: blur(1px) !important;
+  backdrop-filter: blur(1px) !important;
+}
+
+body.transparency-active .ydd-custom-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.32) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  backdrop-filter: blur(3px) !important;
 }
 .modal-close {
   position: absolute;
@@ -82,29 +121,6 @@
   color: var(--accent-color);
 }
 
-.key-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-height: 350px;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-
-.key-grid::-webkit-scrollbar {
-  width: 6px;
-}
-.key-grid::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-}
-.key-grid::-webkit-scrollbar-thumb {
-  background: var(--bg-interactive);
-  border-radius: 4px;
-}
-.key-grid::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-color);
-}
 .key-row {
   display: flex;
   justify-content: space-between;
@@ -202,14 +218,10 @@
   opacity: 1;
   transition: opacity 0.3s ease;
 }
-#welcome-modal-overlay.hidden,
-#gps-consent-modal-overlay.hidden {
+#welcome-modal-overlay.hidden {
   opacity: 0;
   pointer-events: none;
   display: none !important;
-}
-#gps-consent-modal-overlay {
-  z-index: 12000 !important;
 }
 #welcome-modal {
   background: linear-gradient(145deg, #121212, #0a0a0a);
@@ -807,41 +819,6 @@ body.force-white-text:not(.has-custom-bg) .key-row span {
 
 body.force-white-text:not(.has-custom-bg) .settings-note {
   background-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* --- CUSTOM ROUNDED CHECKBOX --- */
-.custom-rounded-checkbox {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--accent-color);
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.custom-rounded-checkbox:checked {
-  background: var(--accent-color);
-}
-
-.custom-rounded-checkbox:checked::after {
-  content: "";
-  position: absolute;
-  left: 5.5px;
-  top: 1.5px;
-  width: 4px;
-  height: 9px;
-  border: solid var(--bg-secondary);
-  border-width: 0 2.5px 2.5px 0;
-  transform: rotate(45deg);
-}
-
-.custom-rounded-checkbox:hover {
-  box-shadow: 0 0 8px var(--accent-color);
 }
 
 /* --- HIGH BLUR UI OVERRIDES (MAX SPECIFICITY) --- */

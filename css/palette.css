@@ -13,6 +13,25 @@
   animation: cpOverlayIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+body.transparency-active #cp-modal-overlay,
+body.transparency-active #cp-help-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.32) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  backdrop-filter: blur(3px) !important;
+}
+
+body.transparency-active .cp-modal {
+  background-color: rgba(248, 248, 248, 0.78) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+body[data-theme="dark"].transparency-active .cp-modal,
+body.has-custom-bg.transparency-active .cp-modal,
+body.gradient-dark.transparency-active .cp-modal {
+  background-color: rgba(16, 16, 16, 0.76) !important;
+}
+
 #cp-modal-overlay.hidden {
   opacity: 0;
   pointer-events: none;

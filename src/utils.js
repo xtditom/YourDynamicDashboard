@@ -7,7 +7,7 @@ export function getIconUrl(url) {
     const urlObject = new URL(url);
     return `https://www.google.com/s2/favicons?sz=64&domain=${urlObject.hostname}`;
   } catch (e) {
-    return "assets/icons/default.png";
+    return "assets/icons/icon32.png";
   }
 }
 
@@ -27,7 +27,7 @@ export function showCustomModal(
 ) {
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
-    overlay.className = "hidden";
+    overlay.className = "hidden ydd-custom-modal-overlay";
     overlay.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.7); display: flex; justify-content: center;
@@ -125,7 +125,7 @@ export function showCustomModal(
 export function showCustomPrompt(message, defaultValue = "") {
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
-    overlay.className = "hidden";
+    overlay.className = "hidden ydd-custom-modal-overlay";
     overlay.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.7); display: flex; justify-content: center;

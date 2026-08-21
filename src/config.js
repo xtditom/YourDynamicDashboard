@@ -8,6 +8,7 @@ export const CONFIG = {
     showApps: true,
     shortcutsPosition: "bottom",
     showAiTools: true,
+    showEditableText: true,
     todos: [
       {
         id: "dt-1",

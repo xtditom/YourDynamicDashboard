@@ -358,7 +358,7 @@
             width="24"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 256 256"
-            fill="#ffffff"
+            fill="currentColor"
           >
             <path
               d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
@@ -588,7 +588,7 @@
 
       <div class="settings-footer">
         <p>&copy; Ditom Baroi Antu <span id="copyright-year">2025</span></p>
-        <p><strong>YourDynamicDashboard</strong> V2.2.0</p>
+        <p><strong>YourDynamicDashboard</strong> V3.0.0</p>
         <p>
           Weather data provided by
           <a
@@ -840,173 +840,7 @@
       </div>
     </div>
 
-    <div id="key-modal-overlay" class="hidden">
-      <div class="modal-box">
-        <button class="modal-close" id="key-modal-close">&times;</button>
-        <h2>Keyboard Shortcuts</h2>
-        <p class="modal-subtitle">
-          Click a button, then press a key to rebind.
-        </p>
-        <div id="key-list" class="key-grid"></div>
-        <div id="key-note-container"></div>
-        <div class="modal-footer">
-          <button id="reset-keys-btn" class="settings-button danger">
-            Reset to Defaults
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="link-direction-modal-overlay" class="hidden">
-      <div class="modal-box">
-        <button class="modal-close" id="link-direction-modal-close">
-          &times;
-        </button>
-        <h2>Link Direction</h2>
-        <p class="modal-subtitle">Choose where your links open.</p>
-        <div id="link-direction-list" class="key-grid"></div>
-        <div class="modal-footer">
-          <button id="reset-link-direction-btn" class="settings-button danger">
-            Reset to Defaults
-          </button>
-        </div>
-      </div>
-    </div>
-
     <div id="shortcuts-container"></div>
-
-    <div
-      id="gps-consent-modal-overlay"
-      class="hidden"
-      style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.75);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 12000;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      "
-    >
-      <div
-        class="modal-box"
-        style="
-          max-width: 440px;
-          width: 90%;
-          text-align: center;
-          background: #1e1e1e;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 16px;
-          padding: 2rem;
-          box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
-        "
-      >
-        <h2
-          style="
-            color: #ffffff;
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin-bottom: 1.25rem;
-            text-align: center;
-          "
-        >
-          Location Access
-        </h2>
-        <p
-          style="
-            color: var(--text-secondary, #a0a0a0);
-            font-size: 0.92rem;
-            line-height: 1.55;
-            margin-bottom: 1rem;
-            text-align: left;
-          "
-        >
-          Your coordinates are used strictly to fetch local weather data. When
-          you proceed, your browser will securely ping Open-Meteo (for weather)
-          and BigDataCloud (for the city name).
-        </p>
-        <p
-          style="
-            color: var(--text-secondary, #a0a0a0);
-            font-size: 0.92rem;
-            line-height: 1.55;
-            margin-bottom: 1.5rem;
-            text-align: left;
-          "
-        >
-          This data is saved locally on your device. We do not track you in the
-          background, and we have no server to store your location data.
-        </p>
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-          "
-        >
-          <input
-            type="checkbox"
-            id="gps-consent-checkbox"
-            class="custom-rounded-checkbox"
-          />
-          <label
-            for="gps-consent-checkbox"
-            style="
-              color: var(--accent-color, #006eff);
-              font-size: 0.92rem;
-              font-weight: 500;
-              cursor: pointer;
-            "
-            >Don’t show this warning again</label
-          >
-        </div>
-        <div style="display: flex; gap: 12px; justify-content: center; width: 100%;">
-          <button
-            id="gps-consent-agree"
-            class="settings-button"
-            style="
-              flex: 1;
-              max-width: 150px;
-              padding: 0.75rem 1rem;
-              border-radius: 8px;
-              background-color: #555555;
-              color: #ffffff;
-              font-weight: 600;
-              font-size: 0.92rem;
-              border: none;
-              cursor: pointer;
-            "
-          >
-            I Agree
-          </button>
-          <button
-            id="gps-consent-cancel"
-            class="settings-button"
-            style="
-              flex: 1;
-              max-width: 150px;
-              padding: 0.75rem 1rem;
-              border-radius: 8px;
-              background-color: var(--bg-interactive, rgba(255, 255, 255, 0.08));
-              color: var(--accent-color, #006eff);
-              font-weight: 600;
-              font-size: 0.92rem;
-              border: none;
-              cursor: pointer;
-            "
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
 
     <script type="module" src="src/main.js"></script>
   </body>

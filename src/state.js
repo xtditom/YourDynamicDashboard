@@ -1,4 +1,5 @@
 import { CONFIG, DEFAULT_KEY_MAP, SEARCH_PROVIDERS } from "./config.js";
+import { sanitizeShortcuts } from "./validators.js";
 
 class StateManager {
   constructor() {
@@ -68,6 +69,15 @@ class StateManager {
           return this.clone(sanitized);
         }
 
+        if (key === "userShortcuts") {
+          const sanitized = sanitizeShortcuts(parsed);
+          if (JSON.stringify(sanitized) !== JSON.stringify(parsed)) {
+            localStorage.setItem(key, JSON.stringify(sanitized));
+          }
+          this.cache[key] = sanitized;
+          return this.clone(sanitized);
+        }
+
         const fallback = CONFIG.defaults[key];
         if (fallback !== undefined && !this.isCompatible(fallback, parsed)) {
           throw new TypeError(`Invalid value for ${key}`);
@@ -91,6 +101,7 @@ class StateManager {
   }
 
   set(key, value) {
+    if (key === "userShortcuts") value = sanitizeShortcuts(value);
     const previous = this.get(key);
     const isPrimitive =
       value === null || (typeof value !== "object" && typeof value !== "function");

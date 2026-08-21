@@ -1,6 +1,50 @@
 import { state } from "../state.js";
 import { showCustomModal, getIconUrl } from "../utils.js";
 import { CONFIG, DEFAULT_KEY_MAP } from "../config.js";
+import { getBindableKey, validateImageBlob } from "../validators.js";
+
+const KEY_LABELS = Object.freeze({
+  todo: "Toggle To-Do",
+  ai: "Toggle AI Tools",
+  apps: "Toggle Google Apps",
+  settings: "Toggle Settings",
+  search: "Focus On Search",
+  clock: "Toggle Clock Mode",
+  date: "Toggle Date",
+  autoTheme: "Toggle Auto Theme",
+  tempDisplay: "Toggle Temp Display",
+  hideGreetings: "Toggle Greetings",
+  showEditableText: "Toggle Editable Text",
+  numKeys: "Keys for Shortcuts",
+  zen: "Key for Zen Mode",
+  voice: "Key for Voice Search",
+});
+
+const FULL_NORMAL_THEME_ORDER = Object.freeze([
+  "default-light",
+  "theme-3",
+  "theme-5",
+  "theme-4",
+  "theme-8",
+  "default-dark",
+  "theme-1",
+  "theme-2",
+  "theme-6",
+  "theme-7",
+]);
+
+const FULL_GRADIENT_THEME_ORDER = Object.freeze([
+  "electric-sky",
+  "cotton-candy",
+  "glacier",
+  "bio-lime",
+  "dawn-bloom",
+  "grey",
+  "royal",
+  "deep-space",
+  "ember",
+  "forest",
+]);
 
 /**
  * FullSettingsModal — A comprehensive, draggable settings window.
@@ -24,12 +68,15 @@ export class FullSettingsModal {
 
     // Element cache
     this.els = {};
+    this._activeKeyCleanup = null;
+    this._previousFocus = null;
 
     window.__fullSettingsModalInstance = this;
 
     // Bound handlers for cleanup
     this._onMouseMove = this._handleDragMove.bind(this);
     this._onMouseUp = this._handleDragEnd.bind(this);
+    this._onDialogKeyDown = this._handleDialogKeyDown.bind(this);
 
     this.build();
     this.bindCoreEvents();
@@ -119,7 +166,13 @@ export class FullSettingsModal {
     });
 
     // Modal
-    this.modal = this._el("div", { id: "full-settings-modal" });
+    this.modal = this._el("div", {
+      id: "full-settings-modal",
+      role: "dialog",
+      "aria-modal": "true",
+      "aria-labelledby": "full-settings-title",
+      tabindex: "-1",
+    });
 
     // Titlebar
     const titlebar = this._el("div", { className: "fs-titlebar" });
@@ -127,11 +180,11 @@ export class FullSettingsModal {
       id: "open-mini-settings-btn",
       className: "fs-nav-btn",
       title: "Switch to Mini Settings",
-      innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
+      innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
     });
     this.els.miniBtn = miniBtn;
 
-    const titleH2 = this._el("h2", {}, [
+    const titleH2 = this._el("h2", { id: "full-settings-title" }, [
       this._el("span", { className: "fs-title-icon", textContent: "⚙" }),
       document.createTextNode("Full Settings"),
     ]);
@@ -184,7 +237,7 @@ export class FullSettingsModal {
     // Footer
     const footer = this._el("div", { className: "fs-footer" });
     footer.innerHTML = `<p>&copy; Ditom Baroi Antu <span class="fs-copyright-year">2025</span></p>
-<p><strong>YourDynamicDashboard</strong> V2.2.0</p>
+<p><strong>YourDynamicDashboard</strong> V3.0.0</p>
 <p>Weather data provided by <a href="https://open-meteo.com/" target="_blank">Open-Meteo.com</a></p>`;
     const yearSpan = footer.querySelector(".fs-copyright-year");
     const year = new Date().getFullYear();
@@ -280,19 +333,24 @@ export class FullSettingsModal {
     this.els.fsTempUnit = tempToggle.input;
     this.els.fsTempDisplay = tempDisplay.input;
 
+    const tempUnitRow = this._row(
+      "Temperature Unit",
+      "Toggle for Fahrenheit.",
+      tempToggle.wrapper,
+    );
+    const tempDisplayRow = this._row(
+      "Temperature Display",
+      "Switch between Min-Max and Feels like.",
+      tempDisplay.wrapper,
+    );
+    this.els.fsTempUnitRow = tempUnitRow;
+    this.els.fsTempDisplayRow = tempDisplayRow;
+
     pane.appendChild(
       this._section("Weather", [
         locRow,
-        this._row(
-          "Temperature Unit",
-          "Toggle for Fahrenheit.",
-          tempToggle.wrapper,
-        ),
-        this._row(
-          "Temperature Display",
-          "Switch between Min-Max and Feels like.",
-          tempDisplay.wrapper,
-        ),
+        tempUnitRow,
+        tempDisplayRow,
       ]),
     );
 
@@ -329,16 +387,36 @@ export class FullSettingsModal {
 
     // Link Direction (inline)
     const linkDirContainer = this._el("div", { className: "fs-key-grid" });
+    const resetLinkDirections = this._el("button", {
+      type: "button",
+      className: "settings-button danger",
+      textContent: "Reset Link Directions",
+    });
+    resetLinkDirections.hidden = true;
     this.els.fsLinkDirList = linkDirContainer;
-    pane.appendChild(this._section("Link Direction", [linkDirContainer]));
+    this.els.fsResetLinkDirections = resetLinkDirections;
+    pane.appendChild(
+      this._section("Link Direction", [linkDirContainer, resetLinkDirections]),
+    );
 
     // Shortcut Keys (inline)
     const keyContainer = this._el("div", { className: "fs-key-grid" });
     const keyNoteContainer = this._el("div");
+    const resetKeys = this._el("button", {
+      type: "button",
+      className: "settings-button danger",
+      textContent: "Reset Keyboard Shortcuts",
+    });
+    resetKeys.hidden = true;
     this.els.fsKeyList = keyContainer;
     this.els.fsKeyNoteContainer = keyNoteContainer;
+    this.els.fsResetKeys = resetKeys;
     pane.appendChild(
-      this._section("Keyboard Shortcuts", [keyContainer, keyNoteContainer]),
+      this._section("Keyboard Shortcuts", [
+        keyContainer,
+        keyNoteContainer,
+        resetKeys,
+      ]),
     );
 
     return pane;
@@ -357,19 +435,24 @@ export class FullSettingsModal {
     this.els.fsAutoTheme = autoToggle.input;
     this.els.fsGlow = glowToggle.input;
 
+    const autoThemeRow = this._row(
+      "Auto Theme",
+      "Randomize theme on every new tab.",
+      autoToggle.wrapper,
+    );
+    const glowRow = this._row(
+      "Glow Effect",
+      "Toggle clock glow & pulsing.",
+      glowToggle.wrapper,
+    );
+    this.els.fsAutoThemeRow = autoThemeRow;
+    this.els.fsGlowRow = glowRow;
+
     pane.appendChild(
       this._section("Theme", [
         this._row("Dark Mode", "Enable the dark theme.", darkToggle.wrapper),
-        this._row(
-          "Auto Theme",
-          "Randomize theme on every new tab.",
-          autoToggle.wrapper,
-        ),
-        this._row(
-          "Glow Effect",
-          "Toggle clock glow & pulsing.",
-          glowToggle.wrapper,
-        ),
+        autoThemeRow,
+        glowRow,
       ]),
     );
 
@@ -558,6 +641,7 @@ export class FullSettingsModal {
     const urlInput = this._el("input", {
       type: "text",
       placeholder: "URL (e.g., https://google.com)",
+      maxlength: "2048",
       required: "",
     });
     inputsDiv.append(nameInput, urlInput);
@@ -697,6 +781,7 @@ export class FullSettingsModal {
   bindCoreEvents() {
     // Close
     this.els.closeBtn.addEventListener("click", () => this.close());
+    this.overlay.addEventListener("keydown", this._onDialogKeyDown, true);
     this.overlay.addEventListener("click", (e) => {
       if (e.target === this.overlay) this.close();
     });
@@ -749,6 +834,18 @@ export class FullSettingsModal {
     this.els.fsShortcutsPosition.addEventListener("change", (e) =>
       state.set("shortcutsPosition", e.target.value),
     );
+    this.els.fsResetKeys.addEventListener("click", async () => {
+      if (await showCustomModal("Reset keyboard shortcuts to default?", true)) {
+        state.set("keyMap", structuredClone(DEFAULT_KEY_MAP));
+        this._renderKeyEditor();
+      }
+    });
+    this.els.fsResetLinkDirections.addEventListener("click", async () => {
+      if (await showCustomModal("Reset link directions to default?", true)) {
+        state.set("linkTargets", { ...CONFIG.defaults.linkTargets });
+        this._renderLinkDirectionEditor();
+      }
+    });
 
     // Location search
     this.els.fsLocSave.addEventListener("click", () => this._searchLocation());
@@ -810,10 +907,10 @@ export class FullSettingsModal {
       this._updateBgState();
       this.els.fsBgInput.value = "";
     });
-    this.els.fsRemoveBg.addEventListener("click", () => {
+    this.els.fsRemoveBg.addEventListener("click", async () => {
       const sm = this._sm();
       if (sm && typeof sm.removeCustomBg === "function") {
-        sm.removeCustomBg();
+        await sm.removeCustomBg();
       }
       this._updateBgState();
     });
@@ -822,7 +919,6 @@ export class FullSettingsModal {
     this.els.fsRndBtn.addEventListener("click", async () => {
       const sm = this._sm();
       if (sm) {
-        state.set("randomBgMode", "random");
         await sm.fetchRandomBackground();
         this._updateBgState();
       }
@@ -878,6 +974,9 @@ export class FullSettingsModal {
         if (cssVar) {
           document.body.style.setProperty(cssVar, e.target.value);
           state.set(`custom-${cssVar}`, e.target.value);
+          if (cssVar === "--bg-tertiary") {
+            sm?.updateIconInversion(e.target.value);
+          }
         }
         state.set("normalThemeId", "custom");
         this._updateColorControlsState();
@@ -898,17 +997,18 @@ export class FullSettingsModal {
       state.set("shortcutsPosition", e.target.value),
     );
 
-    this.els.fsShortcutForm.addEventListener("submit", (e) => {
+    this.els.fsShortcutForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = this.els.fsScNameInput.value;
       const url = this.els.fsScUrlInput.value;
       if (!name.trim() || !url.trim()) return;
       const sm = this._sm();
       if (sm) {
-        sm.addShortcut(name, url);
-        this.els.fsScNameInput.value = "";
-        this.els.fsScUrlInput.value = "";
-        this._renderShortcutEditor();
+        if (await sm.addShortcut(name, url)) {
+          this.els.fsScNameInput.value = "";
+          this.els.fsScUrlInput.value = "";
+          this._renderShortcutEditor();
+        }
       }
     });
 
@@ -989,7 +1089,12 @@ export class FullSettingsModal {
         key === "normalThemeId" ||
         key === "gradientThemeId" ||
         key === "autoTheme" ||
-        key === "darkMode"
+        key === "darkMode" ||
+        key === "widgetControl" ||
+        key === "yd_city" ||
+        key === "yd_lat" ||
+        key === "yd_lon" ||
+        key === "glowEffect"
       ) {
         this._syncColorPickers();
         this._updateColorControlsState();
@@ -1082,30 +1187,77 @@ export class FullSettingsModal {
     this._renderLinkDirectionEditor();
     this._updateBgState();
     this._updateColorControlsState();
+    this._updateControlAvailability();
   }
 
   // ─── Open / Close ──────────────────────────────────────────
 
   open() {
+    if (this.isOpen) return;
     // Close the mini popup if open
     const miniPopup = document.getElementById("settings-popup");
     if (miniPopup) miniPopup.classList.remove("visible");
 
+    this._previousFocus = document.activeElement;
     this.populateAll();
     this.overlay.classList.remove("hidden");
     this.isOpen = true;
+    window.addEventListener("keydown", this._onDialogKeyDown, true);
+    document.addEventListener("keydown", this._onDialogKeyDown, true);
     state.set("lastSettingsView", "full");
 
     // Reset position to center
     this.modal.style.transform = "";
     this.offsetX = 0;
     this.offsetY = 0;
+    window.setTimeout(() => this.els.closeBtn.focus(), 0);
   }
 
   close() {
+    if (!this.isOpen) return;
+    if (this._activeKeyCleanup) this._activeKeyCleanup();
+    this._handleDragEnd();
+    window.removeEventListener("keydown", this._onDialogKeyDown, true);
+    document.removeEventListener("keydown", this._onDialogKeyDown, true);
     this.overlay.classList.add("hidden");
     this.isOpen = false;
     state.set("lastSettingsView", "full");
+    const previousFocus = this._previousFocus;
+    this._previousFocus = null;
+    if (previousFocus && typeof previousFocus.focus === "function") {
+      window.setTimeout(() => previousFocus.focus(), 0);
+    }
+  }
+
+  _handleDialogKeyDown(event) {
+    if (!this.isOpen) return;
+    if (event.key === "Escape" || event.key === "Esc") {
+      if (event.target?.closest?.(".ydd-custom-modal-overlay")) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this.close();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const focusable = Array.from(
+      this.modal.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => element.offsetParent !== null);
+    if (focusable.length === 0) {
+      event.preventDefault();
+      this.modal.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   // ─── Drag ──────────────────────────────────────────────────
@@ -1187,6 +1339,13 @@ export class FullSettingsModal {
     const sm = this._sm();
     if (!sm) return;
 
+    const orderThemes = (themes, order) => {
+      const byId = new Map(themes.map((theme) => [theme.id, theme]));
+      const ordered = order.map((id) => byId.get(id)).filter(Boolean);
+      const listed = new Set(order);
+      return [...ordered, ...themes.filter((theme) => !listed.has(theme.id))];
+    };
+
     const renderGrid = (container, themes, isGradient) => {
       container.innerHTML = "";
       themes.forEach((theme) => {
@@ -1212,15 +1371,16 @@ export class FullSettingsModal {
             "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
           btn.style.borderColor = "var(--border-color)";
         }
-        btn.addEventListener("click", () => {
-          sm.disableAutoTheme();
-          if (isGradient) sm.applyGradientTheme(theme);
-          else sm.applyNormalTheme(theme);
-          // Re-sync pickers and disabled states
-          setTimeout(() => {
-            this._syncColorPickers();
-            this._updateColorControlsState();
-          }, 50);
+        btn.addEventListener("click", async () => {
+          if (
+            await sm.applySelectedTheme(theme, isGradient)
+          ) {
+            // Re-sync pickers and disabled states
+            setTimeout(() => {
+              this._syncColorPickers();
+              this._updateColorControlsState();
+            }, 50);
+          }
         });
         container.appendChild(btn);
       });
@@ -1228,8 +1388,16 @@ export class FullSettingsModal {
 
     // Access THEMES through the exported reference
     if (window.__YDD_THEMES) {
-      renderGrid(this.els.fsNormalThemes, window.__YDD_THEMES.normal, false);
-      renderGrid(this.els.fsGradientThemes, window.__YDD_THEMES.gradient, true);
+      renderGrid(
+        this.els.fsNormalThemes,
+        orderThemes(window.__YDD_THEMES.normal, FULL_NORMAL_THEME_ORDER),
+        false,
+      );
+      renderGrid(
+        this.els.fsGradientThemes,
+        orderThemes(window.__YDD_THEMES.gradient, FULL_GRADIENT_THEME_ORDER),
+        true,
+      );
     }
   }
 
@@ -1255,14 +1423,14 @@ export class FullSettingsModal {
         btn.style.textShadow =
           "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
         btn.style.borderColor = "var(--border-color)";
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
           if (sm) {
-            sm.disableAutoTheme();
-            sm.applyNormalTheme(theme);
-            setTimeout(() => {
-              this._syncColorPickers();
-              this._updateColorControlsState();
-            }, 50);
+            if (await sm.applySelectedTheme(theme)) {
+              setTimeout(() => {
+                this._syncColorPickers();
+                this._updateColorControlsState();
+              }, 50);
+            }
           }
         });
         const del = document.createElement("div");
@@ -1328,6 +1496,64 @@ export class FullSettingsModal {
     if (this.els.fsColorWarning) {
       this.els.fsColorWarning.classList.toggle("hidden", !disabled);
     }
+    this._updateControlAvailability();
+  }
+
+  _updateControlAvailability() {
+    const hasBg =
+      document.body.classList.contains("has-custom-bg") ||
+      !!state.get("backgroundImage") ||
+      !!state.get("randomBgMode");
+    const isGradient =
+      document.body.classList.contains("gradient-mode-active") ||
+      state.get("gradientModeActive") === true;
+    const autoThemeDisabled = hasBg;
+    const glowDisabled = hasBg || isGradient;
+
+    const setDisabled = (input, row, disabled) => {
+      if (input) input.disabled = disabled;
+      if (row) row.classList.toggle("disabled", disabled);
+    };
+    setDisabled(
+      this.els.fsAutoTheme,
+      this.els.fsAutoThemeRow,
+      autoThemeDisabled,
+    );
+    setDisabled(this.els.fsGlow, this.els.fsGlowRow, glowDisabled);
+
+    const widgetControl = state.get("widgetControl") || "all";
+    const weatherVisible = [
+      "all",
+      "weather-only",
+      "search-weather",
+      "weather-quote",
+    ].includes(widgetControl);
+    const latitude = state.get("yd_lat");
+    const longitude = state.get("yd_lon");
+    const hasLocation =
+      latitude !== null &&
+      latitude !== undefined &&
+      latitude !== "" &&
+      longitude !== null &&
+      longitude !== undefined &&
+      longitude !== "" &&
+      Number.isFinite(Number(latitude)) &&
+      Number.isFinite(Number(longitude)) &&
+      Number(latitude) >= -90 &&
+      Number(latitude) <= 90 &&
+      Number(longitude) >= -180 &&
+      Number(longitude) <= 180;
+    const temperatureDisabled = !weatherVisible || !hasLocation;
+    setDisabled(
+      this.els.fsTempUnit,
+      this.els.fsTempUnitRow,
+      temperatureDisabled,
+    );
+    setDisabled(
+      this.els.fsTempDisplay,
+      this.els.fsTempDisplayRow,
+      temperatureDisabled,
+    );
   }
 
   // ─── Background State ─────────────────────────────────────
@@ -1415,17 +1641,38 @@ export class FullSettingsModal {
         className: "url-input",
         value: s.url,
         placeholder: "URL",
+        maxlength: "2048",
       });
       inputsDiv.append(nameInput, urlInput);
 
       const triggerSave = () => {
         const sm = this._sm();
-        if (sm) sm.updateShortcut(index, nameInput.value, urlInput.value);
+        if (sm && !sm.updateShortcut(index, nameInput.value, urlInput.value)) {
+          const saved = (state.get("userShortcuts") || [])[index];
+          if (saved) {
+            nameInput.value = saved.name;
+            urlInput.value = saved.url;
+          }
+        }
       };
       nameInput.addEventListener("blur", triggerSave);
       urlInput.addEventListener("blur", triggerSave);
 
       const actionsDiv = this._el("div", { className: "actions" });
+      const resetIconBtn = this._el("button", {
+        type: "button",
+        className: "action-btn reset",
+        title: "Reset Custom Icon",
+        innerHTML:
+          '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+      });
+      resetIconBtn.hidden = !s.customIcon;
+      resetIconBtn.addEventListener("click", () => {
+        const sm = this._sm();
+        if (!sm) return;
+        sm.updateShortcut(index, nameInput.value, urlInput.value, null, true);
+        this._renderShortcutEditor();
+      });
       const delBtn = this._el("button", {
         className: "action-btn delete",
         title: "Delete",
@@ -1440,9 +1687,21 @@ export class FullSettingsModal {
         }
       });
 
-      fileInput.addEventListener("change", (e) => {
+      fileInput.addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        try {
+          await validateImageBlob(file, {
+            maxBytes: 2 * 1024 * 1024,
+            maxWidth: 4096,
+            maxHeight: 4096,
+            maxPixels: 16_000_000,
+          });
+        } catch (error) {
+          await showCustomModal(error.message);
+          fileInput.value = "";
+          return;
+        }
         const reader = new FileReader();
         reader.onload = (ev) => {
           const tempImg = new Image();
@@ -1452,22 +1711,27 @@ export class FullSettingsModal {
             canvas.height = 256;
             canvas.getContext("2d").drawImage(tempImg, 0, 0, 256, 256);
             const dataUrl = canvas.toDataURL("image/png");
-            img.src = dataUrl;
             const sm = this._sm();
-            if (sm)
-              sm.updateShortcut(
+            if (
+              sm?.updateShortcut(
                 index,
                 nameInput.value,
                 urlInput.value,
                 dataUrl,
-              );
+              )
+            ) {
+              img.src = dataUrl;
+              resetIconBtn.hidden = false;
+            }
           };
+          tempImg.onerror = () => showCustomModal("The icon could not be decoded.");
           tempImg.src = ev.target.result;
         };
         reader.readAsDataURL(file);
+        fileInput.value = "";
       });
 
-      actionsDiv.append(delBtn);
+      actionsDiv.append(resetIconBtn, delBtn);
       div.append(handle, iconContainer, inputsDiv, actionsDiv);
 
       // Drag & drop
@@ -1493,6 +1757,81 @@ export class FullSettingsModal {
 
   // ─── Key Editor ────────────────────────────────────────────
 
+  _createResetIconButton(title, onClick) {
+    const button = this._el("button", {
+      type: "button",
+      className: "action-btn reset",
+      title,
+      innerHTML:
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+    });
+    button.addEventListener("click", onClick);
+    return button;
+  }
+
+  async _resetKeyBinding(action) {
+    const defaults = DEFAULT_KEY_MAP[action];
+    if (!defaults) return;
+
+    const currentMap = state.get("keyMap") || {};
+    const defaultKey = defaults.key;
+    const getEntry = (entry) =>
+      typeof entry === "string" ? { key: entry, enabled: true } : entry || {};
+    const conflictAction = Object.keys(currentMap).find((key) => {
+      if (key === action) return false;
+      const entry = getEntry(currentMap[key]);
+      return entry.enabled !== false && entry.key === defaultKey;
+    });
+
+    if (conflictAction) {
+      const conflictLabel = KEY_LABELS[conflictAction] || conflictAction;
+      const decision = await showCustomModal(
+        `The default key “${defaultKey.toUpperCase()}” is already assigned to ${conflictLabel}. Swap the two keys so both shortcuts remain available?`,
+        true,
+        false,
+        [
+          { text: "Swap keys", value: "swap", width: "120px" },
+          {
+            text: "Cancel",
+            value: "cancel",
+            width: "120px",
+            style:
+              "background: var(--bg-interactive); color: var(--text-primary);",
+          },
+        ],
+      );
+      if (decision !== "swap") return;
+
+      const displaced = getEntry(currentMap[action]);
+      const displacedKey = displaced.key;
+      const displacedOwner = Object.keys(currentMap).find((key) => {
+        if (key === action || key === conflictAction) return false;
+        const entry = getEntry(currentMap[key]);
+        return entry.enabled !== false && entry.key === displacedKey;
+      });
+      if (!displacedKey || displacedKey === defaultKey || displacedOwner) {
+        await showCustomModal(
+          "These shortcuts already contain another key conflict. Change the conflicting shortcut first, then try resetting this one again.",
+        );
+        return;
+      }
+
+      const nextMap = { ...currentMap };
+      nextMap[action] = structuredClone(defaults);
+      nextMap[conflictAction] = {
+        ...getEntry(currentMap[conflictAction]),
+        key: displaced.key || defaults.key,
+      };
+      state.set("keyMap", nextMap);
+      this._renderKeyEditor();
+      return;
+    }
+
+    const nextMap = { ...currentMap, [action]: structuredClone(defaults) };
+    state.set("keyMap", nextMap);
+    this._renderKeyEditor();
+  }
+
   _renderKeyEditor() {
     const container = this.els.fsKeyList;
     if (!container) return;
@@ -1504,22 +1843,18 @@ export class FullSettingsModal {
     }
 
     const map = state.get("keyMap");
-    const labels = {
-      todo: "Toggle To-Do",
-      ai: "Toggle AI Tools",
-      apps: "Toggle Google Apps",
-      settings: "Toggle Settings",
-      search: "Focus On Search",
-      clock: "Toggle Clock Mode",
-      date: "Toggle Date",
-      autoTheme: "Toggle Auto Theme",
-      tempDisplay: "Toggle Temp Display",
-      hideGreetings: "Toggle Greetings",
-      showEditableText: "Toggle Editable Text",
-      numKeys: "Keys for Shortcuts",
-      zen: "Key for Zen Mode",
-      voice: "Key for Voice Search",
-    };
+    const labels = KEY_LABELS;
+
+    const hasChanges = Object.keys(labels).some((action) => {
+      const current = map[action] || DEFAULT_KEY_MAP[action];
+      const baseline = DEFAULT_KEY_MAP[action];
+      return (
+        !baseline ||
+        current.key !== baseline.key ||
+        current.enabled !== baseline.enabled
+      );
+    });
+    if (this.els.fsResetKeys) this.els.fsResetKeys.hidden = !hasChanges;
 
     Object.entries(labels).forEach(([action, labelText]) => {
       let data = map[action];
@@ -1530,6 +1865,16 @@ export class FullSettingsModal {
       row.appendChild(this._el("span", { textContent: labelText }));
 
       const controls = this._el("div", { className: "key-controls" });
+      const baseline = DEFAULT_KEY_MAP[action];
+      const changed =
+        !baseline ||
+        data.key !== baseline.key ||
+        data.enabled !== baseline.enabled;
+      const resetButton = this._createResetIconButton(
+        `Reset ${labelText}`,
+        () => this._resetKeyBinding(action),
+      );
+      resetButton.hidden = !changed;
 
       if (data.fixed) {
         const status = this._el("span", {
@@ -1571,9 +1916,14 @@ export class FullSettingsModal {
             btn.classList.remove("listening");
             btn.style.borderColor = "";
 
-            const pressedKey = event.key.toLowerCase();
-            if (event.key === "Escape") {
-              btn.textContent = originalText;
+            const pressedKey = getBindableKey(event);
+            if (!pressedKey) {
+              btn.textContent = "Invalid!";
+              btn.style.borderColor = "#e53e3e";
+              setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.borderColor = "";
+              }, 1000);
               return;
             }
             if (
@@ -1638,6 +1988,7 @@ export class FullSettingsModal {
         this._renderKeyEditor();
       });
       controls.appendChild(toggleLabel);
+      controls.appendChild(resetButton);
 
       row.appendChild(controls);
       container.appendChild(row);
@@ -1674,9 +2025,26 @@ export class FullSettingsModal {
       shortcuts: "Shortcuts",
       searchOpen: "Search Open Button",
     };
+    const defaults = CONFIG.defaults.linkTargets;
+    const hasChanges = Object.keys(labels).some(
+      (key) => targets[key] !== defaults[key],
+    );
+    if (this.els.fsResetLinkDirections) {
+      this.els.fsResetLinkDirections.hidden = !hasChanges;
+    }
 
     Object.entries(labels).forEach(([key, labelText]) => {
       const isNewTab = (targets[key] || "_blank") === "_blank";
+      const resetButton = this._createResetIconButton(
+        `Reset ${labelText}`,
+        () => {
+          const currentTargets = { ...state.get("linkTargets") };
+          currentTargets[key] = defaults[key];
+          state.set("linkTargets", currentTargets);
+          this._renderLinkDirectionEditor();
+        },
+      );
+      resetButton.hidden = targets[key] === defaults[key];
       const row = this._el("div", { className: "key-row" });
       row.appendChild(this._el("span", { textContent: labelText }));
 
@@ -1701,6 +2069,7 @@ export class FullSettingsModal {
         this._renderLinkDirectionEditor();
       });
       controls.appendChild(toggleLabel);
+      controls.appendChild(resetButton);
       row.appendChild(controls);
       container.appendChild(row);
     });

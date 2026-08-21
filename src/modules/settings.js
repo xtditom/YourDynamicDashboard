@@ -1,12 +1,17 @@
 import { state } from "../state.js";
-import { getIconUrl, showCustomModal } from "../utils.js";
-import { DEFAULT_KEY_MAP, CONFIG } from "../config.js";
+import { getIconUrl, showCustomModal, completeDefaultTask } from "../utils.js";
 import { secondStorage } from "../secondStorage.js";
 import {
   clearYddLocalStorage,
   getYddStorageEntries,
   validateYddStorageEntries,
 } from "../storageKeys.js";
+import {
+  MAX_SHORTCUTS,
+  MAX_SHORTCUT_NAME_LENGTH,
+  normalizeHttpUrl,
+  validateImageBlob,
+} from "../validators.js";
 
 // --- ALIEN DNA (Glass Palettes) ---
 const ALIEN_LIGHT = {
@@ -184,6 +189,21 @@ export const THEMES = {
         "--glow-color": "#828282",
       },
     },
+    {
+      id: "theme-8",
+      type: "light",
+      name: "Lavender Mist",
+      colors: {
+        "--bg-primary": "#ded6ff",
+        "--bg-secondary": "#ffffff",
+        "--bg-tertiary": "#cdc1fb",
+        "--accent-color": "#6953b8",
+        "--text-primary": "#33265f",
+        "--text-secondary": "#5a4b7a",
+        "--text-placeholder": "#887aa8",
+        "--glow-color": "#9b87d3",
+      },
+    },
   ],
   gradient: [
     {
@@ -211,6 +231,13 @@ export const THEMES = {
       id: "bio-lime",
       name: "Bio Lime",
       colors: ["#42bd00ff", "#087416ff"],
+      ui: ALIEN_LIGHT,
+      type: "light",
+    },
+    {
+      id: "dawn-bloom",
+      name: "Dawn Bloom",
+      colors: ["#ffd6a5", "#ffafcc"],
       ui: ALIEN_LIGHT,
       type: "light",
     },
@@ -262,6 +289,13 @@ export class SettingsManager {
     }
     SettingsManager.instance = this;
     SettingsManager.THEMES = THEMES;
+    this._backgroundOperationId = 0;
+    this._activeBackgroundObjectUrl = null;
+    window.addEventListener(
+      "pagehide",
+      () => this._releaseActiveBackgroundObjectUrl(),
+      { once: true },
+    );
 
     // Expose for full settings modal module
     window.__settingsManagerInstance = this;
@@ -313,17 +347,6 @@ export class SettingsManager {
       infoBtn: document.getElementById("info-btn"),
       infoOverlay: document.getElementById("info-modal-overlay"),
       infoClose: document.getElementById("info-modal-close"),
-      editKeysBtn: document.getElementById("edit-keys-btn"),
-      keyOverlay: document.getElementById("key-modal-overlay"),
-      keyClose: document.getElementById("key-modal-close"),
-      keyList: document.getElementById("key-list"),
-      keyNoteContainer: document.getElementById("key-note-container"),
-      keyReset: document.getElementById("reset-keys-btn"),
-      editLinkDirBtn: document.getElementById("edit-link-direction-btn"),
-      linkDirOverlay: document.getElementById("link-direction-modal-overlay"),
-      linkDirClose: document.getElementById("link-direction-modal-close"),
-      linkDirList: document.getElementById("link-direction-list"),
-      linkDirReset: document.getElementById("reset-link-direction-btn"),
       bgBlurSelect: document.getElementById("bg-blur-select"),
       blurRow: document.getElementById("blur-intensity-row"),
     };
@@ -348,8 +371,13 @@ export class SettingsManager {
       if (
         key === "widgetControl" ||
         key === "yd_city" ||
+        key === "yd_lat" ||
+        key === "yd_lon" ||
         key === "locationUpdate"
       ) {
+        if (key === "widgetControl" && this.els.widgetControl) {
+          this.els.widgetControl.value = value || "all";
+        }
         this.updateTempTogglesState();
       }
       if (key === "autoTheme") {
@@ -382,9 +410,6 @@ export class SettingsManager {
       if (key === "userSavedThemes") {
         this.renderSavedThemes();
         this.renderMiniThemes();
-      }
-      if (key === "keyMap") {
-        this.renderKeyEditor();
       }
       if (
         key === "gradientModeActive" ||
@@ -488,7 +513,7 @@ export class SettingsManager {
 
     if (randomBgMode === "random") {
       document.body.classList.add("has-custom-bg");
-      this.fetchRandomBackground("random");
+      this.fetchRandomBackground("startup");
     } else if (randomBgMode === "freeze") {
       document.body.classList.add("has-custom-bg");
       if (randomBgTime === -1) {
@@ -499,8 +524,7 @@ export class SettingsManager {
         }
         if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
       } else if (randomBgTime && Date.now() - randomBgTime > 259200000) {
-        state.set("randomBgMode", "random");
-        this.fetchRandomBackground("random");
+        this.fetchRandomBackground("startup");
       } else if (state.get("savedBgUrl")) {
         document.body.style.backgroundImage = `url(${state.get("savedBgUrl")})`;
         if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
@@ -536,14 +560,18 @@ export class SettingsManager {
     if (this.els.glowToggle) this.els.glowToggle.checked = isGlowOn;
 
     if (state.get("autoTheme")) {
-      this.applyRandomTheme(true);
+      if (document.body.classList.contains("has-custom-bg")) {
+        this.disableAutoTheme();
+      } else {
+        this.applyRandomTheme();
+      }
     } else {
       const isGradient = state.get("gradientModeActive");
       if (isGradient) {
         const themeId = state.get("gradientThemeId");
         const theme =
           THEMES.gradient.find((t) => t.id === themeId) || THEMES.gradient[0];
-        this.applyGradientTheme(theme, false, true);
+        this.applyGradientTheme(theme, false);
       } else {
         const savedId = state.get("normalThemeId");
 
@@ -555,7 +583,7 @@ export class SettingsManager {
         }
 
         if (theme) {
-          this.applyNormalTheme(theme, true);
+          this.applyNormalTheme(theme);
         } else {
           this.applyCustomColors();
         }
@@ -582,11 +610,22 @@ export class SettingsManager {
 
   updateTempTogglesState() {
     const widgetControl = state.get("widgetControl") || "all";
-    const city = state.get("yd_city");
     const lat = state.get("yd_lat");
     const lon = state.get("yd_lon");
 
-    const hasLocation = city && lat && lon && lat !== "0" && lon !== "0";
+    const hasLocation =
+      lat !== null &&
+      lat !== undefined &&
+      lat !== "" &&
+      lon !== null &&
+      lon !== undefined &&
+      lon !== "" &&
+      Number.isFinite(Number(lat)) &&
+      Number.isFinite(Number(lon)) &&
+      Number(lat) >= -90 &&
+      Number(lat) <= 90 &&
+      Number(lon) >= -180 &&
+      Number(lon) <= 180;
 
     const weatherHidden = [
       "search-only",
@@ -611,7 +650,7 @@ export class SettingsManager {
     });
   }
 
-  applyRandomTheme(skipBgWipe = false) {
+  applyRandomTheme() {
     const pool = [
       ...THEMES.normal.map((t) => ({ ...t, mode: "normal" })),
       ...THEMES.gradient.map((t) => ({ ...t, mode: "gradient" })),
@@ -620,9 +659,9 @@ export class SettingsManager {
     const random = pool[Math.floor(Math.random() * pool.length)];
 
     if (random.mode === "gradient") {
-      this.applyGradientTheme(random, true, skipBgWipe);
+      this.applyGradientTheme(random);
     } else {
-      this.applyNormalTheme(random, skipBgWipe);
+      this.applyNormalTheme(random);
     }
   }
 
@@ -875,48 +914,6 @@ export class SettingsManager {
       );
     }
 
-    if (this.els.editKeysBtn) {
-      this.els.editKeysBtn.addEventListener("click", () => {
-        this.renderKeyEditor();
-        this.els.keyOverlay.classList.remove("hidden");
-      });
-    }
-    if (this.els.keyClose) {
-      this.els.keyClose.addEventListener("click", () =>
-        this.els.keyOverlay.classList.add("hidden"),
-      );
-    }
-    if (this.els.keyReset) {
-      this.els.keyReset.addEventListener("click", async () => {
-        if (
-          await showCustomModal("Reset keyboard shortcuts to default?", true)
-        ) {
-          state.set("keyMap", null);
-          this.renderKeyEditor();
-        }
-      });
-    }
-
-    if (this.els.editLinkDirBtn) {
-      this.els.editLinkDirBtn.addEventListener("click", () => {
-        this.renderLinkDirectionEditor();
-        this.els.linkDirOverlay.classList.remove("hidden");
-      });
-    }
-    if (this.els.linkDirClose) {
-      this.els.linkDirClose.addEventListener("click", () =>
-        this.els.linkDirOverlay.classList.add("hidden"),
-      );
-    }
-    if (this.els.linkDirReset) {
-      this.els.linkDirReset.addEventListener("click", async () => {
-        if (await showCustomModal("Reset link directions to default?", true)) {
-          state.set("linkTargets", null);
-          this.renderLinkDirectionEditor();
-        }
-      });
-    }
-
     this.setupMiscListeners();
 
     if (this.els.randomBgFreeze) {
@@ -926,282 +923,9 @@ export class SettingsManager {
     }
     if (this.els.randomBgRnd) {
       this.els.randomBgRnd.addEventListener("click", () => {
-        state.set("randomBgMode", "random");
         this.fetchRandomBackground();
       });
     }
-  }
-
-  renderKeyEditor() {
-    if (!this.els.keyList) return;
-    this.els.keyList.innerHTML = "";
-    if (this.els.keyNoteContainer) this.els.keyNoteContainer.innerHTML = "";
-
-    if (this.activeKeyCleanup) {
-      this.activeKeyCleanup();
-    }
-
-    const map = state.get("keyMap");
-    const labels = {
-      todo: "Toggle To-Do",
-      ai: "Toggle AI Tools",
-      apps: "Toggle Google Apps",
-      settings: "Toggle Settings",
-      search: "Focus On Search",
-      clock: "Toggle Clock Mode",
-      date: "Toggle Date",
-      autoTheme: "Toggle Auto Theme",
-      tempDisplay: "Toggle Temp Display",
-      hideGreetings: "Toggle Greetings",
-      showEditableText: "Toggle Editable Text",
-      numKeys: "Keys for Shortcuts",
-      zen: "Key for Zen Mode",
-      voice: "Key for Voice Search",
-    };
-
-    Object.entries(labels).forEach(([action, labelText]) => {
-      let data = map[action];
-      if (!data || typeof data !== "object") {
-        data = DEFAULT_KEY_MAP[action] || { key: "?", enabled: false };
-      }
-
-      const currentKey = data.key;
-      const isEnabled = data.enabled;
-      const isFixed = data.fixed;
-
-      const row = document.createElement("div");
-      row.className = "key-row";
-
-      const label = document.createElement("span");
-      label.textContent = labelText;
-
-      const controls = document.createElement("div");
-      controls.className = "key-controls";
-
-      let statusSpan = null;
-      const btn = document.createElement("button");
-      btn.className = `key-btn ${!isEnabled ? "disabled" : ""}`;
-      btn.textContent = currentKey.toUpperCase();
-      btn.disabled = !isEnabled;
-
-      if (isFixed) {
-        statusSpan = document.createElement("span");
-        statusSpan.className = `key-fixed-status ${isEnabled ? "active" : "inactive"}`;
-        statusSpan.textContent = isEnabled ? "ACTIVE" : "INACTIVE";
-        statusSpan.style.fontWeight = "bold";
-        statusSpan.style.padding = "0.4rem 1rem";
-        statusSpan.style.minWidth = "60px";
-        statusSpan.style.textAlign = "center";
-        statusSpan.style.fontSize = "0.85rem";
-        statusSpan.style.color = isEnabled
-          ? "var(--accent-color)"
-          : "var(--text-secondary)";
-      }
-
-      const toggleLabel = document.createElement("label");
-      toggleLabel.className = "toggle-switch mini";
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = isEnabled;
-      const slider = document.createElement("span");
-      slider.className = "slider";
-
-      toggleLabel.appendChild(checkbox);
-      toggleLabel.appendChild(slider);
-
-      checkbox.addEventListener("change", (e) => {
-        e.stopPropagation();
-        const newMap = { ...state.get("keyMap") };
-
-        const currentData = newMap[action] || DEFAULT_KEY_MAP[action];
-        newMap[action] = {
-          ...currentData,
-          key: currentKey,
-          enabled: checkbox.checked,
-        };
-        state.set("keyMap", newMap);
-        this.renderKeyEditor();
-      });
-
-      if (!isFixed)
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          if (this.activeKeyCleanup) this.activeKeyCleanup();
-
-          const originalText = btn.textContent;
-          btn.textContent = "...";
-          btn.classList.add("listening");
-          btn.style.borderColor = "var(--accent-color)";
-
-          const handler = (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            document.removeEventListener("keydown", handler, true);
-            this.activeKeyCleanup = null;
-            btn.classList.remove("listening");
-            btn.style.borderColor = "";
-
-            const pressedKey = event.key.toLowerCase();
-            if (event.key === "Escape") {
-              btn.textContent = originalText;
-              return;
-            }
-            if (
-              (pressedKey >= "1" && pressedKey <= "9") ||
-              pressedKey === "z" ||
-              pressedKey === "v"
-            ) {
-              btn.textContent = "Reserved!";
-              btn.style.borderColor = "#e53e3e";
-              setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.borderColor = "";
-              }, 1000);
-              return;
-            }
-            const currentMap = state.get("keyMap");
-            const existingAction = Object.keys(currentMap).find((k) => {
-              const item = currentMap[k];
-              const itemKey = typeof item === "object" ? item.key : item;
-              return itemKey === pressedKey && k !== action && item.enabled;
-            });
-
-            if (existingAction) {
-              btn.textContent = "Taken!";
-              btn.style.borderColor = "#e53e3e";
-              setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.borderColor = "";
-              }, 1000);
-              return;
-            }
-            const newMap = { ...currentMap };
-            newMap[action] = { key: pressedKey, enabled: true };
-            state.set("keyMap", newMap);
-            this.renderKeyEditor();
-          };
-
-          this.activeKeyCleanup = () => {
-            document.removeEventListener("keydown", handler, true);
-            btn.textContent = originalText;
-            btn.classList.remove("listening");
-            btn.style.borderColor = "";
-            this.activeKeyCleanup = null;
-          };
-          document.addEventListener("keydown", handler, { capture: true });
-        });
-
-      if (isFixed) {
-        controls.appendChild(statusSpan);
-      } else {
-        controls.appendChild(btn);
-      }
-      controls.appendChild(toggleLabel);
-      row.appendChild(label);
-      row.appendChild(controls);
-      this.els.keyList.appendChild(row);
-    });
-
-    const note = document.createElement("div");
-    note.className = "settings-note";
-    note.style.marginTop = "1rem";
-
-    const p = document.createElement("p");
-    p.appendChild(document.createTextNode("Keys "));
-    const strong1 = document.createElement("strong");
-    strong1.textContent = "1-9";
-    p.appendChild(strong1);
-    p.appendChild(document.createTextNode(" are reserved for "));
-    const strong2 = document.createElement("strong");
-    strong2.textContent = "Shortcuts";
-    p.appendChild(strong2);
-    p.appendChild(document.createElement("br"));
-    p.appendChild(document.createTextNode("Press "));
-    const strong3 = document.createElement("strong");
-    strong3.textContent = "Z";
-    p.appendChild(strong3);
-    p.appendChild(document.createTextNode(" for "));
-    const strong4 = document.createElement("strong");
-    strong4.textContent = "Zen Mode";
-    p.appendChild(strong4);
-    p.appendChild(document.createTextNode(", "));
-    const strong5 = document.createElement("strong");
-    strong5.textContent = "V";
-    p.appendChild(strong5);
-    p.appendChild(document.createTextNode(" for "));
-    const strong6 = document.createElement("strong");
-    strong6.textContent = "Voice Search";
-    p.appendChild(strong6);
-
-    note.appendChild(p);
-    if (this.els.keyNoteContainer) {
-      this.els.keyNoteContainer.appendChild(note);
-    } else {
-      this.els.keyList.appendChild(note);
-    }
-  }
-
-  renderLinkDirectionEditor() {
-    if (!this.els.linkDirList) return;
-    this.els.linkDirList.innerHTML = "";
-
-    let targets = state.get("linkTargets");
-    if (!targets) {
-      targets = { ...CONFIG.defaults.linkTargets };
-      state.set("linkTargets", targets);
-    }
-
-    const labels = {
-      ai: "AI Tools & Socials",
-      apps: "Google Apps",
-      shortcuts: "Shortcuts",
-      searchOpen: "Search Open Button",
-    };
-
-    Object.entries(labels).forEach(([key, labelText]) => {
-      const currentTarget = targets[key] || "_blank";
-      const isNewTab = currentTarget === "_blank";
-
-      const row = document.createElement("div");
-      row.className = "key-row";
-
-      const label = document.createElement("span");
-      label.textContent = labelText;
-
-      const controls = document.createElement("div");
-      controls.className = "key-controls";
-
-      const statusText = document.createElement("span");
-      statusText.textContent = isNewTab ? "New Tab" : "Same Tab";
-      statusText.style.marginRight = "10px";
-      statusText.style.fontSize = "0.9em";
-      statusText.style.opacity = "0.8";
-
-      const toggleLabel = document.createElement("label");
-      toggleLabel.className = "toggle-switch mini";
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = isNewTab;
-      const slider = document.createElement("span");
-      slider.className = "slider";
-
-      toggleLabel.appendChild(checkbox);
-      toggleLabel.appendChild(slider);
-
-      checkbox.addEventListener("change", (e) => {
-        e.stopPropagation();
-        const newTargets = { ...state.get("linkTargets") };
-        newTargets[key] = checkbox.checked ? "_blank" : "_self";
-        state.set("linkTargets", newTargets);
-        this.renderLinkDirectionEditor();
-      });
-
-      controls.appendChild(statusText);
-      controls.appendChild(toggleLabel);
-      row.appendChild(label);
-      row.appendChild(controls);
-      this.els.linkDirList.appendChild(row);
-    });
   }
 
   saveCurrentTheme() {
@@ -1237,18 +961,22 @@ export class SettingsManager {
     }
 
     let savedThemes = state.get("userSavedThemes") || [];
+    const type =
+      document.body.getAttribute("data-theme") === "dark" ? "dark" : "light";
 
     if (savedThemes.length >= 5) {
       savedThemes[4] = {
         id: `preset-${Date.now()}`,
         name: `Preset 5`,
         colors: currentColors,
+        type,
       };
     } else {
       savedThemes.push({
         id: `preset-${Date.now()}`,
         name: `Preset ${savedThemes.length + 1}`,
         colors: currentColors,
+        type,
       });
     }
 
@@ -1277,12 +1005,8 @@ export class SettingsManager {
           btn.style.textShadow =
             "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
 
-          btn.addEventListener("click", () => {
-            this.disableAutoTheme();
-            this.applyNormalTheme(theme);
-            import("../utils.js").then((utils) => {
-              utils.completeDefaultTask("dt-5");
-            });
+          btn.addEventListener("click", async () => {
+            await this.applySelectedTheme(theme);
           });
 
           const del = document.createElement("div");
@@ -1323,9 +1047,8 @@ export class SettingsManager {
       const isPhosphor = theme.name === "Phosphor" || theme.id === "theme-7";
       const rightColor = isAzureSky ? "#006EFF" : (isPhosphor ? "#91AA5B" : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]));
       btn.style.background = `linear-gradient(to top right, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
-      btn.addEventListener("click", () => {
-        this.disableAutoTheme();
-        this.applyNormalTheme(theme);
+      btn.addEventListener("click", async () => {
+        await this.applySelectedTheme(theme);
       });
       container.appendChild(btn);
     });
@@ -1337,9 +1060,8 @@ export class SettingsManager {
       btn.className = "mini-theme-swatch";
       btn.title = theme.name;
       btn.style.background = `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]})`;
-      btn.addEventListener("click", () => {
-        this.disableAutoTheme();
-        this.applyGradientTheme(theme);
+      btn.addEventListener("click", async () => {
+        await this.applySelectedTheme(theme, true);
       });
       container.appendChild(btn);
     });
@@ -1355,9 +1077,8 @@ export class SettingsManager {
           ? window.__getThemeRightColor(theme)
           : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]);
         btn.style.background = `linear-gradient(to top right, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
-        btn.addEventListener("click", () => {
-          this.disableAutoTheme();
-          this.applyNormalTheme(theme);
+        btn.addEventListener("click", async () => {
+          await this.applySelectedTheme(theme);
         });
       } else {
         btn.classList.add("empty");
@@ -1367,32 +1088,44 @@ export class SettingsManager {
     }
   }
 
-  applyNormalTheme(theme, skipBgWipe = false) {
-    if (!skipBgWipe) {
-      secondStorage.deleteImage().catch((err) => console.error(err));
-      localStorage.removeItem("has_idb_bg");
+  hasCustomBackground() {
+    return (
+      document.body.classList.contains("has-custom-bg") ||
+      !!state.get("backgroundImage") ||
+      !!state.get("randomBgMode") ||
+      localStorage.getItem("has_idb_bg") === "true"
+    );
+  }
 
-      state.set("backgroundImage", null);
-      state.set("randomBgMode", null);
-      state.set("savedBgUrl", null);
-      state.set("bgSavedDate", null);
-
-      document.body.style.removeProperty("background-image");
-      document.body.style.removeProperty("background-size");
-      document.body.style.removeProperty("background-position");
-
-      document.querySelectorAll("style").forEach((styleEl) => {
-        if (styleEl.textContent.includes("background-image: url")) {
-          styleEl.remove();
-        }
-      });
-
-      document.body.classList.remove("has-custom-bg");
-      if (this.els.removeBg) this.els.removeBg.classList.add("hidden");
-      this.updateRandomBgButtons();
-      this.updateAutoThemeGlowState();
+  async applySelectedTheme(theme, isGradient = false) {
+    if (this.hasCustomBackground()) {
+      const decision = await showCustomModal(
+        "Applying this theme will permanently delete your custom background. Continue?",
+        true,
+        true,
+        [
+          { text: "OK", value: "ok", width: "110px" },
+          {
+            text: "No",
+            value: "no",
+            width: "110px",
+            style:
+              "background: var(--bg-interactive); color: var(--text-primary);",
+          },
+        ],
+      );
+      if (decision !== "ok") return false;
+      if (!(await this.removeCustomBg())) return false;
     }
 
+    this.disableAutoTheme();
+    if (isGradient) this.applyGradientTheme(theme);
+    else this.applyNormalTheme(theme);
+    completeDefaultTask("dt-5");
+    return true;
+  }
+
+  applyNormalTheme(theme) {
     state.set("gradientModeActive", false);
     state.set("transparencyActive", false);
     document.body.classList.remove("gradient-mode-active");
@@ -1412,64 +1145,31 @@ export class SettingsManager {
       if (key === "--bg-tertiary") this.updateIconInversion(val);
     });
 
-    if (theme.id === "default-dark") {
-      document.body.style.setProperty("--icon-filter", "grayscale(100%)");
-      document.body.style.setProperty("--icon-opacity", "0.99");
-
-      state.set("darkMode", true);
-      if (this.els.dark) this.els.dark.checked = true;
-    } else {
-      document.body.style.setProperty("--icon-filter", "grayscale(0%)");
-      document.body.style.setProperty("--icon-opacity", "1");
-
-      state.set("darkMode", false);
-      if (this.els.dark) this.els.dark.checked = false;
-    }
-
     this.syncColorPickers(theme.colors);
 
-    const isDarkType = theme.type === "dark" || theme.type === "default-dark";
+    const isDarkType = this.getThemeType(theme) === "dark";
+    state.set("darkMode", isDarkType);
+    if (this.els.dark) this.els.dark.checked = isDarkType;
     document.body.setAttribute("data-theme", isDarkType ? "dark" : "light");
+    if (theme.colors["--bg-tertiary"]) {
+      this.updateIconInversion(theme.colors["--bg-tertiary"]);
+    }
 
     this.updateWarningText();
     this.updateAutoThemeGlowState();
     document.body.classList.remove("force-white-text");
   }
 
-  applyGradientTheme(theme, save = true, skipBgWipe = false) {
-    if (!skipBgWipe) {
-      secondStorage.deleteImage().catch((err) => console.error(err));
-      localStorage.removeItem("has_idb_bg");
-
-      state.set("backgroundImage", null);
-      state.set("randomBgMode", null);
-      state.set("savedBgUrl", null);
-      state.set("bgSavedDate", null);
-
-      document.body.style.removeProperty("background-image");
-      document.body.style.removeProperty("background-size");
-      document.body.style.removeProperty("background-position");
-
-      document.querySelectorAll("style").forEach((styleEl) => {
-        if (styleEl.textContent.includes("background-image: url")) {
-          styleEl.remove();
-        }
-      });
-
-      document.body.classList.remove("has-custom-bg");
-      if (this.els.removeBg) this.els.removeBg.classList.add("hidden");
-      this.updateRandomBgButtons();
-      this.updateAutoThemeGlowState();
-    }
-
+  applyGradientTheme(theme, save = true) {
     if (save) {
       state.set("gradientModeActive", true);
       state.set("gradientThemeId", theme.id);
       state.set("transparencyActive", true);
     }
 
-    state.set("darkMode", false);
-    if (this.els.dark) this.els.dark.checked = false;
+    const isDarkType = theme.type === "dark";
+    state.set("darkMode", isDarkType);
+    if (this.els.dark) this.els.dark.checked = isDarkType;
 
     document.body.style.setProperty("--gradient-color-1", theme.colors[0]);
     document.body.style.setProperty("--gradient-color-2", theme.colors[1]);
@@ -1600,9 +1300,9 @@ export class SettingsManager {
   async freezeRandomBackground() {
     const currentMode = state.get("randomBgMode");
     if (currentMode === "freeze") {
-      state.set("randomBgMode", "random");
-      state.set("randomBgTime", null);
-      await this.fetchRandomBackground();
+      if (await this.fetchRandomBackground()) {
+        state.set("randomBgTime", null);
+      }
     } else {
       const result = await showCustomModal(
         "Freeze current background? You can save it for 72 hours or forever.",
@@ -1623,21 +1323,16 @@ export class SettingsManager {
 
       if (result === "cancel" || !result) return;
 
-      state.set("randomBgMode", "freeze");
-      if (result === "forever") {
-        state.set("randomBgTime", -1);
-      } else {
-        state.set("randomBgTime", Date.now());
-      }
-
       if (
         !state.get("savedBgUrl") ||
         !document.body.classList.contains("has-custom-bg")
       ) {
-        await this.fetchRandomBackground();
-      } else {
-        this.updateRandomBgButtons();
+        if (!(await this.fetchRandomBackground())) return;
       }
+
+      state.set("randomBgMode", "freeze");
+      state.set("randomBgTime", result === "forever" ? -1 : Date.now());
+      this.updateRandomBgButtons();
 
       const message =
         result === "forever"
@@ -1805,14 +1500,8 @@ export class SettingsManager {
           btn.style.textShadow =
             "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
         }
-        btn.addEventListener("click", () => {
-          this.disableAutoTheme();
-          if (isGradient) this.applyGradientTheme(theme);
-          else this.applyNormalTheme(theme);
-
-          import("../utils.js").then((utils) => {
-            utils.completeDefaultTask("dt-5");
-          });
+        btn.addEventListener("click", async () => {
+          await this.applySelectedTheme(theme, isGradient);
         });
         container.appendChild(btn);
       });
@@ -1887,17 +1576,18 @@ export class SettingsManager {
       });
     }
     if (this.els.removeBg) {
-      this.els.removeBg.addEventListener("click", () => {
-        this.removeCustomBg();
+      this.els.removeBg.addEventListener("click", async () => {
+        await this.removeCustomBg();
       });
     }
     if (this.els.shortcutForm) {
-      this.els.shortcutForm.addEventListener("submit", (e) => {
+      this.els.shortcutForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const inputs = this.els.shortcutForm.querySelectorAll("input");
-        this.addShortcut(inputs[0].value, inputs[1].value);
-        inputs[0].value = "";
-        inputs[1].value = "";
+        if (await this.addShortcut(inputs[0].value, inputs[1].value)) {
+          inputs[0].value = "";
+          inputs[1].value = "";
+        }
       });
     }
     if (this.els.backup) {
@@ -1914,64 +1604,109 @@ export class SettingsManager {
     }
   }
 
-  async handleBgUpload(file) {
-    if (!file) return;
-    const objectUrl = URL.createObjectURL(file);
+  _releaseActiveBackgroundObjectUrl() {
+    if (this._activeBackgroundObjectUrl) {
+      URL.revokeObjectURL(this._activeBackgroundObjectUrl);
+      this._activeBackgroundObjectUrl = null;
+    }
+    window.__releaseYddPreloadBackground?.();
+  }
 
+  _removePreloadedBackgroundStyles() {
+    document.getElementById("ydd-remote-background")?.remove();
+    document.getElementById("ydd-idb-background")?.remove();
+    document.getElementById("idb-preloader")?.remove();
+  }
+
+  _applyBackgroundUrl(url) {
     document.body.classList.add("has-custom-bg");
     document.body.style.setProperty(
       "background-image",
-      `url("${objectUrl}")`,
+      `url("${String(url).replaceAll('"', "%22")}")`,
       "important",
     );
-    document.body.style.setProperty(
-      "background-size",
-      "cover",
-      "important",
-    );
+    document.body.style.setProperty("background-size", "cover", "important");
     document.body.style.setProperty(
       "background-position",
       "center",
       "important",
     );
-    if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
-    state.set("randomBgMode", null);
-    state.set("backgroundImage", null);
-    localStorage.removeItem("lowResBg");
+  }
+
+  _syncBackgroundControls() {
+    const hasBackground = document.body.classList.contains("has-custom-bg");
+    if (this.els.removeBg) {
+      this.els.removeBg.classList.toggle("hidden", !hasBackground);
+    }
     this.updateRandomBgButtons();
     this.updateAutoThemeGlowState();
+    window.__fullSettingsModalInstance?._updateBgState();
+  }
 
+  async handleBgUpload(file) {
+    if (!file) return false;
+    const operationId = ++this._backgroundOperationId;
     try {
+      await validateImageBlob(file);
+      if (operationId !== this._backgroundOperationId) return false;
       await secondStorage.saveImage(file);
+      if (operationId !== this._backgroundOperationId) return false;
+
+      const objectUrl = URL.createObjectURL(file);
+      this._releaseActiveBackgroundObjectUrl();
+      this._activeBackgroundObjectUrl = objectUrl;
+      this._removePreloadedBackgroundStyles();
+      this._applyBackgroundUrl(objectUrl);
+
       localStorage.setItem("has_idb_bg", "true");
-    } catch (idbErr) {
-      console.warn("IndexedDB blocked by browser shields.", idbErr);
-    }
-    if (window.__fullSettingsModalInstance) {
-      window.__fullSettingsModalInstance._updateBgState();
+      localStorage.removeItem("lowResBg");
+      state.set("randomBgMode", null);
+      state.set("randomBgTime", null);
+      state.set("savedBgUrl", null);
+      state.set("backgroundImage", null);
+      this.disableAutoTheme();
+      this._syncBackgroundControls();
+      return true;
+    } catch (error) {
+      if (operationId === this._backgroundOperationId) {
+        console.error("Background upload failed:", error);
+        await showCustomModal(
+          error instanceof TypeError
+            ? error.message
+            : "The background could not be saved. Your current background was kept.",
+        );
+      }
+      return false;
     }
   }
 
-  removeCustomBg() {
-    secondStorage.deleteImage().catch((err) => console.error(err));
-    state.set("backgroundImage", null);
-    state.set("randomBgMode", null);
-    localStorage.removeItem("has_idb_bg");
-    document.body.classList.remove("has-custom-bg");
-    document.body.style.removeProperty("background-image");
-    document.body.style.removeProperty("background-size");
-    document.body.style.removeProperty("background-position");
-
-    document.querySelectorAll("style").forEach((styleEl) => {
-      if (styleEl.textContent.includes("background-image: url")) {
-        styleEl.remove();
+  async removeCustomBg() {
+    const operationId = ++this._backgroundOperationId;
+    try {
+      await secondStorage.deleteImage();
+      if (operationId !== this._backgroundOperationId) return false;
+      this._releaseActiveBackgroundObjectUrl();
+      this._removePreloadedBackgroundStyles();
+      state.set("backgroundImage", null);
+      state.set("savedBgUrl", null);
+      state.set("randomBgMode", null);
+      state.set("randomBgTime", null);
+      localStorage.removeItem("has_idb_bg");
+      localStorage.removeItem("lowResBg");
+      document.body.classList.remove("has-custom-bg");
+      document.body.style.removeProperty("background-image");
+      document.body.style.removeProperty("background-size");
+      document.body.style.removeProperty("background-position");
+      this._syncBackgroundControls();
+      return true;
+    } catch (error) {
+      if (operationId === this._backgroundOperationId) {
+        console.error("Background removal failed:", error);
+        await showCustomModal(
+          "The saved background could not be removed. Nothing was changed.",
+        );
       }
-    });
-    if (this.els.removeBg) this.els.removeBg.classList.add("hidden");
-    this.updateRandomBgButtons();
-    this.updateAutoThemeGlowState();
-    if (window.__fullSettingsModalInstance) {
-      window.__fullSettingsModalInstance._updateBgState();
+      return false;
     }
   }
 
@@ -2043,6 +1778,7 @@ export class SettingsManager {
       urlInput.className = "url-input";
       urlInput.value = s.url;
       urlInput.placeholder = "URL";
+      urlInput.maxLength = 2048;
 
       const triggerSave = () => {
         this.updateShortcut(index, nameInput.value, urlInput.value);
@@ -2081,9 +1817,21 @@ export class SettingsManager {
         resetBtn.style.display = "none";
       });
 
-      fileInput.addEventListener("change", (e) => {
+      fileInput.addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        try {
+          await validateImageBlob(file, {
+            maxBytes: 2 * 1024 * 1024,
+            maxWidth: 4096,
+            maxHeight: 4096,
+            maxPixels: 16_000_000,
+          });
+        } catch (error) {
+          await showCustomModal(error.message);
+          fileInput.value = "";
+          return;
+        }
         const reader = new FileReader();
         reader.onload = (ev) => {
           const tempImg = new window.Image();
@@ -2104,6 +1852,7 @@ export class SettingsManager {
             );
             resetBtn.style.display = "";
           };
+          tempImg.onerror = () => showCustomModal("The icon could not be decoded.");
           tempImg.src = ev.target.result;
         };
         reader.readAsDataURL(file);
@@ -2150,14 +1899,27 @@ export class SettingsManager {
     });
   }
 
-  addShortcut(name, url) {
-    url = url.trim();
-    if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+  async addShortcut(name, url) {
     const current = [...(state.get("userShortcuts") || [])];
-    const cleanName = name.substring(0, 35);
+    if (current.length >= MAX_SHORTCUTS) {
+      await showCustomModal(`You can add up to ${MAX_SHORTCUTS} shortcuts.`);
+      return false;
+    }
+    const cleanName = String(name || "").trim().slice(0, MAX_SHORTCUT_NAME_LENGTH);
+    if (!cleanName) {
+      await showCustomModal("Enter a shortcut name.");
+      return false;
+    }
+    try {
+      url = normalizeHttpUrl(url);
+    } catch (error) {
+      await showCustomModal(error.message);
+      return false;
+    }
     current.push({ name: cleanName, url, icon: getIconUrl(url) });
-    state.set("userShortcuts", current);
+    if (!state.set("userShortcuts", current)) return false;
     this.renderShortcutEditor();
+    return true;
   }
 
   updateShortcut(
@@ -2167,11 +1929,23 @@ export class SettingsManager {
     customIconData = undefined,
     removeCustomIcon = false,
   ) {
-    url = url.trim();
-    if (!/^https?:\/\//i.test(url)) url = "https://" + url;
     const current = [...(state.get("userShortcuts") || [])];
+    if (!Number.isInteger(index) || index < 0 || index >= current.length) {
+      return false;
+    }
+    const cleanName = String(name || "").trim().slice(0, MAX_SHORTCUT_NAME_LENGTH);
+    if (!cleanName) {
+      void showCustomModal("Enter a shortcut name.");
+      return false;
+    }
+    try {
+      url = normalizeHttpUrl(url);
+    } catch (error) {
+      void showCustomModal(error.message);
+      return false;
+    }
     if (current[index]) {
-      current[index].name = name.substring(0, 35);
+      current[index].name = cleanName;
       const oldUrl = current[index].url;
       current[index].url = url;
 
@@ -2182,30 +1956,54 @@ export class SettingsManager {
       }
 
       if (customIconData !== undefined && customIconData !== null) {
+        if (
+          typeof customIconData !== "string" ||
+          !customIconData.startsWith("data:image/") ||
+          customIconData.length > 3_000_000
+        ) {
+          void showCustomModal("The processed shortcut icon is too large.");
+          return false;
+        }
         current[index].customIcon = customIconData;
       }
       if (removeCustomIcon) {
         delete current[index].customIcon;
         current[index].icon = getIconUrl(url);
       }
-      state.set("userShortcuts", current);
+      return state.set("userShortcuts", current);
     }
+    return false;
   }
 
   deleteShortcut(index) {
     const current = [...(state.get("userShortcuts") || [])];
+    if (!Number.isInteger(index) || index < 0 || index >= current.length) {
+      return false;
+    }
     current.splice(index, 1);
-    state.set("userShortcuts", current);
+    if (!state.set("userShortcuts", current)) return false;
     this.renderShortcutEditor();
+    return true;
   }
 
   reorderShortcuts(fromIndex, toIndex) {
-    if (fromIndex === toIndex) return;
     const current = [...(state.get("userShortcuts") || [])];
+    if (
+      !Number.isInteger(fromIndex) ||
+      !Number.isInteger(toIndex) ||
+      fromIndex < 0 ||
+      toIndex < 0 ||
+      fromIndex >= current.length ||
+      toIndex >= current.length
+    ) {
+      return false;
+    }
+    if (fromIndex === toIndex) return true;
     const item = current.splice(fromIndex, 1)[0];
     current.splice(toIndex, 0, item);
-    state.set("userShortcuts", current);
+    if (!state.set("userShortcuts", current)) return false;
     this.renderShortcutEditor();
+    return true;
   }
 
   async backup() {
@@ -2241,6 +2039,35 @@ export class SettingsManager {
         "The backup could not be created. Your data was not changed.",
       );
     }
+  }
+
+  getThemeType(theme) {
+    if (theme?.type === "dark" || theme?.type === "default-dark") return "dark";
+    if (theme?.type === "light") return "light";
+
+    const color = String(theme?.colors?.["--bg-primary"] || "").trim();
+    let channels = null;
+    if (/^#[\da-f]{3}$/i.test(color)) {
+      channels = [color[1], color[2], color[3]].map((value) =>
+        parseInt(value + value, 16),
+      );
+    } else if (/^#[\da-f]{6}/i.test(color)) {
+      channels = [
+        parseInt(color.slice(1, 3), 16),
+        parseInt(color.slice(3, 5), 16),
+        parseInt(color.slice(5, 7), 16),
+      ];
+    } else if (/^rgba?\(/i.test(color)) {
+      const values = color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+      if (values?.length === 3 && values.every(Number.isFinite)) channels = values;
+    }
+    if (channels) {
+      const [r, g, b] = channels;
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128
+        ? "dark"
+        : "light";
+    }
+    return document.body.getAttribute("data-theme") === "dark" ? "dark" : "light";
   }
 
   async restore(e) {
@@ -2279,6 +2106,7 @@ export class SettingsManager {
           throw new TypeError("Invalid background image in backup.");
         }
         restoredBackground = await this.dataUrlToBlob(data.backgroundImage);
+        await validateImageBlob(restoredBackground);
       }
 
       mutationStarted = true;
@@ -2345,8 +2173,9 @@ export class SettingsManager {
     return response.blob();
   }
 
-  async fetchRandomBackground() {
-    const targetBtn = this.els.randomBgRnd;
+  async fetchRandomBackground(origin = "user") {
+    const targetBtn = origin === "startup" ? null : this.els.randomBgRnd;
+    const operationId = ++this._backgroundOperationId;
     let originalNodes = [];
     if (targetBtn) {
       originalNodes = Array.from(targetBtn.childNodes);
@@ -2354,55 +2183,52 @@ export class SettingsManager {
       targetBtn.disabled = true;
     }
 
-    const applyBg = (url) => {
-      secondStorage.deleteImage().catch((err) => console.error(err));
-      localStorage.removeItem("has_idb_bg");
-      localStorage.removeItem("lowResBg");
-
-      document.querySelectorAll("style").forEach((styleEl) => {
-        if (styleEl.textContent.includes("background-image: url")) {
-          styleEl.remove();
-        }
-      });
-
-      document.body.classList.add("has-custom-bg");
-      document.body.style.setProperty(
-        "background-image",
-        `url("${url}")`,
-        "important",
-      );
-      document.body.style.setProperty("background-size", "cover", "important");
-      document.body.style.setProperty(
-        "background-position",
-        "center",
-        "important",
-      );
-
-      state.set("backgroundImage", url);
-      if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
-
-      this.disableAutoTheme();
-      this.updateRandomBgButtons();
-      this.updateAutoThemeGlowState();
-
-      if (targetBtn) {
-        targetBtn.textContent = "";
-        originalNodes.forEach((node) => targetBtn.appendChild(node));
-        targetBtn.disabled = false;
-      }
-    };
-
-    const width = Math.round(window.screen.width * window.devicePixelRatio);
-    const height = Math.round(window.screen.height * window.devicePixelRatio);
+    const width = Math.max(800, Math.min(1920, Math.round(window.innerWidth)));
+    const height = Math.max(600, Math.min(1080, Math.round(window.innerHeight)));
 
     try {
+      const cacheKey = `${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0]}`;
       const response = await fetch(
-        `https://picsum.photos/${width}/${height}?random=1`,
+        `https://picsum.photos/${width}/${height}?random=${cacheKey}`,
       );
+      if (!response.ok) {
+        throw new Error(`Wallpaper service returned ${response.status}.`);
+      }
+      if (operationId !== this._backgroundOperationId) return false;
+
       const finalUrl = response.url;
+      if (!finalUrl) throw new Error("Wallpaper service returned no image URL.");
+      const wallpaperBlob = await response.blob();
+      await validateImageBlob(wallpaperBlob, {
+        maxBytes: 20 * 1024 * 1024,
+        maxWidth: 4096,
+        maxHeight: 4096,
+        maxPixels: 20_000_000,
+      });
+      if (operationId !== this._backgroundOperationId) return false;
+      await secondStorage.deleteImage();
+      if (operationId !== this._backgroundOperationId) return false;
+
+      this._releaseActiveBackgroundObjectUrl();
+      this._removePreloadedBackgroundStyles();
+      this._applyBackgroundUrl(finalUrl);
+      localStorage.removeItem("has_idb_bg");
+      localStorage.removeItem("lowResBg");
       state.set("savedBgUrl", finalUrl);
-      applyBg(finalUrl);
+      state.set("backgroundImage", finalUrl);
+      state.set("randomBgMode", "random");
+      this.disableAutoTheme();
+      this._syncBackgroundControls();
+      return true;
     } catch (err) {
+      if (operationId === this._backgroundOperationId) {
+        console.error("Random background failed:", err);
+        await showCustomModal(
+          "A new background could not be loaded. Your current background was kept.",
+        );
+      }
+      return false;
+    } finally {
       if (targetBtn) {
         targetBtn.textContent = "";
         originalNodes.forEach((node) => targetBtn.appendChild(node));
@@ -2444,6 +2270,8 @@ export class SettingsManager {
   updateAutoThemeGlowState() {
     const hasBg = document.body.classList.contains("has-custom-bg");
     const isGradient = document.body.classList.contains("gradient-mode-active");
+    const autoThemeDisabled = hasBg;
+    const disabledControls = hasBg || isGradient;
 
     if (this.els.blurRow) {
       if (hasBg) {
@@ -2454,12 +2282,11 @@ export class SettingsManager {
     }
 
     if (this.els.autoThemeToggle) {
-      this.els.autoThemeToggle.disabled = hasBg;
+      this.els.autoThemeToggle.disabled = autoThemeDisabled;
       const parentRow = this.els.autoThemeToggle.closest(".setting-row");
-      if (parentRow) parentRow.style.opacity = hasBg ? "0.5" : "1";
+      if (parentRow) parentRow.style.opacity = autoThemeDisabled ? "0.5" : "1";
     }
 
-    const disabledControls = hasBg || isGradient;
     if (this.els.glowToggle) {
       this.els.glowToggle.disabled = disabledControls;
       const parentRow = this.els.glowToggle.closest(".setting-row");

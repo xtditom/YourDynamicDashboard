@@ -59,6 +59,23 @@ body.gradient-mode-active.transparency-active #search-dropdown {
   border: 1px solid var(--widget-border);
 }
 
+/* Light gradient glass needs a darker track so an off switch remains obvious. */
+body.gradient-mode-active.gradient-light .toggle-switch .slider {
+  background-color: rgba(48, 38, 78, 0.32) !important;
+  border: 1px solid rgba(48, 38, 78, 0.42);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+
+body.gradient-mode-active.gradient-light .toggle-switch .slider:before {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(48, 38, 78, 0.35);
+}
+
+body.gradient-mode-active.gradient-light
+  .toggle-switch input:checked + .slider {
+  background-color: var(--accent-color) !important;
+}
+
 body.gradient-mode-active .widget-container {
   background-color: var(--widget-bg);
   border: 1px solid var(--widget-border);
