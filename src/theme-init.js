@@ -27,7 +27,22 @@ try {
     "theme-4": "#90c69e",
     "theme-5": "#ffa9d2",
     "theme-6": "#0A043C",
-    "theme-7": "#0f0f15"
+    "theme-7": "#0f0f15",
+    "theme-8": "#ded6ff"
+  };
+
+  var THEME_DARK_COLORS = {
+    "theme-3": "#1c2635",
+    "theme-4": "#14291d",
+    "theme-5": "#321727",
+    "theme-8": "#211d3b"
+  };
+
+  var THEME_LIGHT_COLORS = {
+    "theme-1": "#f4f4f4",
+    "theme-2": "#e7f3d0",
+    "theme-6": "#d8f7f7",
+    "theme-7": "#d9e2c5"
   };
 
   var dm = localStorage.getItem("darkMode");
@@ -37,8 +52,11 @@ try {
   if (gm !== "true" && (dm === null || dm === "true")) {
     document.documentElement.setAttribute("data-theme", "dark");
     document.documentElement.setAttribute("data-theme-id", thId);
-    document.documentElement.style.setProperty("--bg-primary", THEME_COLORS[thId] || "#030303");
-    document.documentElement.style.backgroundColor = THEME_COLORS[thId] || "#030303";
+    var preloadColor = (dm === null || dm === "true")
+      ? (THEME_DARK_COLORS[thId] || THEME_COLORS[thId] || "#030303")
+      : (THEME_LIGHT_COLORS[thId] || THEME_COLORS[thId] || "#c3c3c3");
+    document.documentElement.style.setProperty("--bg-primary", preloadColor);
+    document.documentElement.style.backgroundColor = preloadColor;
   } 
   else if (gm === "true") {
     document.documentElement.classList.add("gradient-mode-active");
@@ -56,7 +74,7 @@ try {
         document.documentElement.style.backgroundColor = rawBgp.replace(/^"|"$/g, "");
       }
     } else {
-      var color = THEME_COLORS[thId] || "#c3c3c3";
+      var color = THEME_LIGHT_COLORS[thId] || THEME_COLORS[thId] || "#c3c3c3";
       document.documentElement.style.setProperty("--bg-primary", color);
       document.documentElement.style.backgroundColor = color;
     }

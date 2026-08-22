@@ -283,6 +283,24 @@
   flex: 1 1 0;
 }
 
+.background-loading-spinner {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: background-loading-spin 0.75s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes background-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* --- Backup controls in full modal --- */
 .fs-backup-controls {
   display: flex;

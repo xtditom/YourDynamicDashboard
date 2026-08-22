@@ -45,6 +45,12 @@ export class Search {
   }
 
   getValidProvider(value) {
+    if (value?.id === "brave") {
+      const replacement = { id: "perplexity", type: "engines" };
+      state.set("searchProvider", replacement);
+      return replacement;
+    }
+
     const providers = SEARCH_PROVIDERS[value?.type];
     if (
       Array.isArray(providers) &&
@@ -259,6 +265,8 @@ export class Search {
   saveSearch(query, engineId) {
     if (state.get("searchHistoryPaused")) return;
 
+    if (engineId === "brave") engineId = "perplexity";
+
     const now = Date.now();
     let history = this.pruneExpiredHistory();
 
@@ -327,7 +335,7 @@ export class Search {
 
       const icon = document.createElement("img");
       const engineIcon = this._resolveEngineIcon(item.engineId);
-      icon.src = CONFIG.paths.search + engineIcon;
+      icon.src = this._getProviderIconUrl(engineIcon);
       icon.alt = item.engineId || "";
       icon.width = 16;
       icon.height = 16;
@@ -664,7 +672,9 @@ export class Search {
         row.className = "sh-row";
 
         const icon = document.createElement("img");
-        icon.src = CONFIG.paths.search + this._resolveEngineIcon(item.engineId);
+        icon.src = this._getProviderIconUrl(
+          this._resolveEngineIcon(item.engineId),
+        );
         icon.alt = item.engineId || "";
         icon.width = 22;
         icon.height = 22;
@@ -709,6 +719,7 @@ export class Search {
   }
 
   _executeViaEngine(query, engineId) {
+    if (engineId === "brave") engineId = "perplexity";
     let provider = null;
     for (const type of ["engines", "platforms"]) {
       provider = SEARCH_PROVIDERS[type].find((p) => p.id === engineId);
@@ -768,11 +779,17 @@ export class Search {
 
   _resolveEngineIcon(engineId) {
     if (!engineId) return "google.png";
+    if (engineId === "brave") engineId = "perplexity";
     for (const type of ["engines", "platforms"]) {
       const found = SEARCH_PROVIDERS[type].find((p) => p.id === engineId);
       if (found) return found.icon;
     }
     return "google.png";
+  }
+
+  _getProviderIconUrl(icon) {
+    if (!icon) return `${CONFIG.paths.search}google.png`;
+    return icon.includes("/") ? icon : `${CONFIG.paths.search}${icon}`;
   }
 
   // --- SECTION: VOICE SEARCH ---
@@ -1131,7 +1148,7 @@ export class Search {
       div.setAttribute("aria-selected", String(p.id === this.current.id));
 
       const img = document.createElement("img");
-      img.src = CONFIG.paths.search + p.icon;
+      img.src = this._getProviderIconUrl(p.icon);
       img.alt = p.name;
 
       const span = document.createElement("span");
@@ -1171,7 +1188,7 @@ export class Search {
       (p) => p.id === this.current.id,
     );
     if (provider) {
-      this.els.providerIcon.src = CONFIG.paths.search + provider.icon;
+      this.els.providerIcon.src = this._getProviderIconUrl(provider.icon);
       this.els.providerIcon.alt = provider.name;
     }
   }

@@ -1,5 +1,10 @@
 import { state } from "../state.js";
-import { GOOGLE_APPS, AI_TOOLS, SOCIAL_LINKS } from "../config.js";
+import {
+  GOOGLE_APPS,
+  AI_TOOLS,
+  SOCIAL_LINKS,
+  SEARCH_PROVIDERS,
+} from "../config.js";
 
 // Complete Bang Mapping for Search Engines & Platforms
 export const BANG_MAP = {
@@ -10,8 +15,8 @@ export const BANG_MAP = {
   "bing": { id: "bing", type: "engines" },
   "y": { id: "yahoo", type: "engines" },
   "yahoo": { id: "yahoo", type: "engines" },
-  "br": { id: "brave", type: "engines" },
-  "brave": { id: "brave", type: "engines" },
+  "ppx": { id: "perplexity", type: "engines" },
+  "perplexity": { id: "perplexity", type: "engines" },
   "ddg": { id: "duckduckgo", type: "engines" },
   "duckduckgo": { id: "duckduckgo", type: "engines" },
   "yd": { id: "yandex", type: "engines" },
@@ -42,7 +47,7 @@ export class CommandPalette {
   constructor() {
     this.isOpen = false;
     this.activeIndex = 0;
-    this.currentMenu = "main"; // "main", "apps", "ai", "socials"
+    this.currentMenu = "main"; // "main", "search", "apps", "ai", "socials"
     this._helpModalClose = null;
     this._previousFocus = null;
 
@@ -253,8 +258,33 @@ export class CommandPalette {
         icon: "📱",
         shortcut: "Folder",
         action: () => this.switchMenu("socials")
+      },
+      {
+        id: "submenu-search",
+        name: "Do Search...",
+        icon: "🔎",
+        shortcut: "Folder",
+        action: () => this.switchMenu("search")
       }
     ];
+
+    this.searchCommands = [
+      ...(SEARCH_PROVIDERS.engines || []).map((provider) => ({
+        ...provider,
+        providerType: "engines",
+      })),
+      ...(SEARCH_PROVIDERS.platforms || []).map((provider) => ({
+        ...provider,
+        providerType: "platforms",
+      })),
+    ].map((provider) => ({
+        id: `search-${provider.providerType}-${provider.id}`,
+        name: provider.name,
+        icon: "🔎",
+        shortcut: "",
+        action: () =>
+          window.YD_Search?.setProvider(provider.id, provider.providerType),
+      }));
 
     // 2. Google Apps commands
     this.appCommands = [];
@@ -491,7 +521,7 @@ export class CommandPalette {
   }
 
   switchMenu(menuName) {
-    const validMenus = ["main", "apps", "ai", "socials"];
+    const validMenus = ["main", "search", "apps", "ai", "socials"];
     const targetMenu = validMenus.includes(menuName) ? menuName : "main";
     this.currentMenu = targetMenu;
     this.els.input.value = "";
@@ -499,6 +529,7 @@ export class CommandPalette {
     
     const placeholders = {
       main: "Type a command or search... (Esc to close)",
+      search: "Choose a search engine or platform... (Backspace to go back)",
       apps: "Search Google Apps... (Backspace to go back)",
       ai: "Search AI Tools... (Backspace to go back)",
       socials: "Search Social Links... (Backspace to go back)"
@@ -558,10 +589,11 @@ export class CommandPalette {
     if (this.currentMenu === "main" && query !== "") {
       // Unified search crawls all commands across all categories
       const allSearchable = this.orderCommands(this.getVisibleCommands([
-        ...this.mainCommands.filter(c => c.id !== "submenu-apps" && c.id !== "submenu-ai" && c.id !== "submenu-socials"),
+        ...this.mainCommands.filter(c => c.id !== "submenu-apps" && c.id !== "submenu-ai" && c.id !== "submenu-socials" && c.id !== "submenu-search"),
         ...this.appCommands,
         ...this.aiCommands,
-        ...this.socialCommands
+        ...this.socialCommands,
+        ...this.searchCommands,
       ]));
       this.filteredCommands = allSearchable.filter(c => 
         c.name.toLowerCase().includes(query) || 
@@ -577,6 +609,8 @@ export class CommandPalette {
         baseList = this.orderCommands(this.aiCommands);
       } else if (this.currentMenu === "socials") {
         baseList = this.orderCommands(this.socialCommands);
+      } else if (this.currentMenu === "search") {
+        baseList = this.orderCommands(this.searchCommands);
       }
 
       if (!query) {
@@ -683,7 +717,7 @@ export class CommandPalette {
   executeCommand(command) {
     if (!command?.action) return false;
     if (
-      !["submenu-apps", "submenu-ai", "submenu-socials", "cp-back-button"].includes(
+      !["submenu-apps", "submenu-ai", "submenu-socials", "submenu-search", "cp-back-button"].includes(
         command.id,
       )
     ) {

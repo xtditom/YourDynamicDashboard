@@ -425,11 +425,11 @@ export const SEARCH_PROVIDERS = {
       icon: "yahoo.png",
     },
     {
-      id: "brave",
-      name: "Brave",
-      url: "https://search.brave.com/search",
+      id: "perplexity",
+      name: "Perplexity",
+      url: "https://www.perplexity.ai/search",
       queryParam: "q",
-      icon: "brave.png",
+      icon: "assets/ai-tools/perplexity.png",
     },
     {
       id: "duckduckgo",

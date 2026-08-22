@@ -217,7 +217,8 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
   width: 100%;
   box-sizing: border-box;
   background-color: var(--bg-interactive, rgba(255, 255, 255, 0.08));
-  color: var(--text-primary);
+  color: var(--text-primary, #f9fafb) !important;
+  caret-color: var(--accent-color, #ffffff);
   padding: 0.75rem 1rem;
   border-radius: 8px;
   border: 1px solid transparent;
@@ -232,7 +233,8 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
 }
 #add-shortcut-form input::placeholder,
 #fs-add-shortcut-form input::placeholder {
-  color: var(--text-placeholder, #888888);
+  color: var(--text-secondary, var(--text-placeholder, #b8c0cc)) !important;
+  opacity: 1;
   font-size: 0.88rem;
 }
 #add-shortcut-form button,

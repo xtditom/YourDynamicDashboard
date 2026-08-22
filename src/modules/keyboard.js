@@ -142,7 +142,12 @@ export class KeyboardManager {
 
   openFullSettings() {
     if (state.get("zenMode")) return;
-    window.__fullSettingsModalInstance?.open();
+    const fullModal = window.__fullSettingsModalInstance;
+    if (fullModal?.isOpen) {
+      fullModal.close();
+      return;
+    }
+    fullModal?.open();
   }
 
   openMiniSettings() {
@@ -150,6 +155,13 @@ export class KeyboardManager {
     const fullModal = window.__fullSettingsModalInstance;
     const miniPopup = document.getElementById("settings-popup");
     const miniButton = document.getElementById("settings-toggle-button");
+    if (miniPopup?.classList.contains("visible")) {
+      miniPopup.classList.remove("visible");
+      miniPopup.setAttribute("aria-hidden", "true");
+      miniButton?.setAttribute("aria-expanded", "false");
+      state.set("lastSettingsView", "mini");
+      return;
+    }
     if (fullModal?.isOpen) fullModal.close();
     if (!miniPopup) return;
     miniPopup.classList.add("visible");

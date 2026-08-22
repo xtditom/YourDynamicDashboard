@@ -94,16 +94,16 @@ export const THEMES = {
     {
       id: "theme-1",
       type: "dark",
-      name: "YDD Standard",
+      name: "Crimson Red",
       colors: {
         "--bg-primary": "#000000",
-        "--bg-secondary": "#141414",
-        "--bg-tertiary": "#2d2d2d",
-        "--accent-color": "#ff7300",
-        "--text-primary": "#ff7300",
-        "--text-secondary": "#ff7300",
-        "--text-placeholder": "#ff7300",
-        "--glow-color": "#ff7300",
+        "--bg-secondary": "#000000",
+        "--bg-tertiary": "#000000",
+        "--accent-color": "#ff1010",
+        "--text-primary": "#ff1010",
+        "--text-secondary": "#ff1010",
+        "--text-placeholder": "#ff1010",
+        "--glow-color": "#ff1010",
       },
     },
     {
@@ -286,6 +286,105 @@ export const THEMES = {
   ],
 };
 
+const DARK_MODE_THEME_IDS = new Set([
+  "default-light",
+  "default-dark",
+  "theme-1",
+  "theme-2",
+  "theme-3",
+  "theme-4",
+  "theme-5",
+  "theme-6",
+  "theme-7",
+  "theme-8",
+]);
+
+const LIGHT_THEME_DARK_VARIANTS = {
+  "theme-3": {
+    "--bg-primary": "#1c2635",
+    "--bg-secondary": "#12345e",
+    "--bg-tertiary": "#1d4f88",
+    "--accent-color": "#d9f0ff",
+    "--text-primary": "#eff9ff",
+    "--text-secondary": "#c0def2",
+    "--text-placeholder": "#9fc6e2",
+    "--glow-color": "#55b7ff",
+  },
+  "theme-4": {
+    "--bg-primary": "#14291d",
+    "--bg-secondary": "#1c3e29",
+    "--bg-tertiary": "#2b583b",
+    "--accent-color": "#b9ffd1",
+    "--text-primary": "#e6ffed",
+    "--text-secondary": "#bde4c8",
+    "--text-placeholder": "#9bcaab",
+    "--glow-color": "#58cf83",
+  },
+  "theme-5": {
+    "--bg-primary": "#321727",
+    "--bg-secondary": "#4a1f3b",
+    "--bg-tertiary": "#672850",
+    "--accent-color": "#ffd1e8",
+    "--text-primary": "#ffeaf4",
+    "--text-secondary": "#f1b9d2",
+    "--text-placeholder": "#df91b5",
+    "--glow-color": "#ff6db2",
+  },
+  "theme-8": {
+    "--bg-primary": "#211d3b",
+    "--bg-secondary": "#322b56",
+    "--bg-tertiary": "#483d70",
+    "--accent-color": "#e4dcff",
+    "--text-primary": "#f2efff",
+    "--text-secondary": "#d1c8f2",
+    "--text-placeholder": "#aca0dc",
+    "--glow-color": "#9a84f0",
+  },
+};
+
+const DARK_THEME_LIGHT_VARIANTS = {
+  "theme-1": {
+    "--bg-primary": "#f4f4f4",
+    "--bg-secondary": "#ffffff",
+    "--bg-tertiary": "#ffe5e5",
+    "--accent-color": "#d40000",
+    "--text-primary": "#b00000",
+    "--text-secondary": "#7a1f1f",
+    "--text-placeholder": "#d21f1f",
+    "--glow-color": "#ff4545",
+  },
+  "theme-2": {
+    "--bg-primary": "#e7f3d0",
+    "--bg-secondary": "#ffffff",
+    "--bg-tertiary": "#d7ef9a",
+    "--accent-color": "#496900",
+    "--text-primary": "#315000",
+    "--text-secondary": "#46621c",
+    "--text-placeholder": "#5e8500",
+    "--glow-color": "#78a900",
+  },
+  "theme-6": {
+    "--bg-primary": "#d8f7f7",
+    "--bg-secondary": "#fff4fb",
+    "--bg-tertiary": "#b8eeee",
+    "--accent-color": "#007b8a",
+    "--text-primary": "#004b63",
+    "--text-secondary": "#a00068",
+    "--text-placeholder": "#7030a0",
+    "--glow-color": "#00aabd",
+  },
+  "theme-7": {
+    "--bg-primary": "#d9e2c5",
+    "--bg-secondary": "#f4f7e9",
+    "--bg-tertiary": "#c2d39e",
+    "--accent-color": "#294b27",
+    "--text-primary": "#396b2f",
+    "--text-secondary": "#2f7d3a",
+    "--text-placeholder": "#5b7448",
+    "--glow-color": "#648f3e",
+  },
+};
+
 export class SettingsManager {
   static instance = null;
   static THEMES = null;
@@ -432,6 +531,7 @@ export class SettingsManager {
         key === "gradientThemeId"
       ) {
         this.updateAutoThemeGlowState();
+        this.updateDarkModeControlState();
       }
       if (key === "glowEffect") {
         const isGlowOn = value !== false;
@@ -596,7 +696,10 @@ export class SettingsManager {
         }
 
         if (theme) {
-          this.applyNormalTheme(theme);
+          const themeToApply = this.isDarkModeAvailableForTheme(theme)
+            ? this.getDarkModeTheme(theme, state.get("darkMode") === true)
+            : theme;
+          this.applyNormalTheme(themeToApply);
         } else {
           this.applyCustomColors();
         }
@@ -606,6 +709,7 @@ export class SettingsManager {
     this.updateClockFormatState();
     this.updateTempTogglesState();
     this.updateWarningText();
+    this.updateDarkModeControlState();
   }
 
   updateClockFormatState() {
@@ -809,14 +913,12 @@ export class SettingsManager {
 
     if (this.els.dark) {
       this.els.dark.addEventListener("change", () => {
+        if (!this.isDarkModeAvailable()) {
+          this.updateDarkModeControlState();
+          return;
+        }
         this.disableAutoTheme();
-        const isChecked = this.els.dark.checked;
-        state.set("darkMode", isChecked);
-
-        const targetTheme = isChecked
-          ? THEMES.normal.find((t) => t.id === "default-dark")
-          : THEMES.normal.find((t) => t.id === "default-light");
-        this.applyNormalTheme(targetTheme);
+        this.applyDarkModePreference(this.els.dark.checked);
 
         import("../utils.js").then((utils) => {
           utils.completeDefaultTask("dt-5");
@@ -1104,7 +1206,7 @@ export class SettingsManager {
     if (!container) return;
     container.innerHTML = "";
 
-    const targetNormalIds = ["theme-1", "theme-7", "theme-5"]; // YDD Standard, Phosphor, Sakura
+    const targetNormalIds = ["theme-1", "theme-7", "theme-5"]; // Crimson Red, Phosphor, Sakura
     const targetGradientIds = ["glacier", "bio-lime", "deep-space"]; // Glacier, Bio Lime, Deep Space
 
     targetNormalIds.forEach((id) => {
@@ -1228,7 +1330,54 @@ export class SettingsManager {
 
     this.updateWarningText();
     this.updateAutoThemeGlowState();
+    this.updateDarkModeControlState();
     document.body.classList.remove("force-white-text");
+  }
+
+  isDarkModeAvailableForTheme(theme) {
+    return (
+      state.get("gradientModeActive") !== true &&
+      !!theme?.id &&
+      DARK_MODE_THEME_IDS.has(theme.id)
+    );
+  }
+
+  getDarkModeTheme(theme, enabled) {
+    if (!theme?.id) return theme;
+
+    const baseTheme =
+      THEMES.normal.find((item) => item.id === theme.id) || theme;
+
+    if (theme.id === "default-light" || theme.id === "default-dark") {
+      return THEMES.normal.find((item) =>
+        enabled ? item.id === "default-dark" : item.id === "default-light",
+      );
+    }
+
+    const variantColors = enabled
+      ? LIGHT_THEME_DARK_VARIANTS[theme.id]
+      : DARK_THEME_LIGHT_VARIANTS[theme.id];
+    if (!variantColors) return baseTheme;
+
+    return {
+      ...baseTheme,
+      type: enabled ? "dark" : "light",
+      darkVariant: true,
+      colors: { ...baseTheme.colors, ...variantColors },
+    };
+  }
+
+  applyDarkModePreference(enabled) {
+    if (!this.isDarkModeAvailable()) {
+      this.updateDarkModeControlState();
+      return;
+    }
+
+    const themeId = state.get("normalThemeId");
+    const baseTheme = THEMES.normal.find((theme) => theme.id === themeId);
+    if (!baseTheme) return;
+
+    this.applyNormalTheme(this.getDarkModeTheme(baseTheme, enabled));
   }
 
   applyGradientTheme(theme, save = true) {
@@ -1284,6 +1433,31 @@ export class SettingsManager {
 
     this.updateWarningText();
     this.updateAutoThemeGlowState();
+    this.updateDarkModeControlState();
+  }
+
+  isDarkModeAvailable() {
+    return (
+      state.get("gradientModeActive") !== true &&
+      DARK_MODE_THEME_IDS.has(state.get("normalThemeId"))
+    );
+  }
+
+  isDefaultThemeModeAvailable() {
+    return this.isDarkModeAvailable();
+  }
+
+  updateDarkModeControlState() {
+    const available = this.isDarkModeAvailable();
+    const input = this.els.dark;
+    const row = input?.closest(".setting-row");
+    if (input) {
+      input.disabled = !available;
+      input.checked = available && state.get("darkMode") === true;
+    }
+    row?.classList.toggle("disabled", !available);
+
+    window.__fullSettingsModalInstance?._updateControlAvailability?.();
   }
 
   applyCustomColors() {
@@ -2297,15 +2471,30 @@ export class SettingsManager {
     return response.blob();
   }
 
-  async fetchRandomBackground(origin = "user") {
-    const targetBtn = origin === "startup" ? null : this.els.randomBgRnd;
+  async fetchRandomBackground(origin = "user", triggerButton = null) {
     const operationId = ++this._backgroundOperationId;
-    let originalNodes = [];
-    if (targetBtn) {
-      originalNodes = Array.from(targetBtn.childNodes);
-      targetBtn.textContent = "⏳";
-      targetBtn.disabled = true;
-    }
+    const fullSettingsButton =
+      triggerButton || window.__fullSettingsModalInstance?.els?.fsRndBtn;
+    const loadingButtons =
+      origin === "startup"
+        ? []
+        : [this.els.randomBgRnd, fullSettingsButton].filter(Boolean);
+    const originalButtonContents = new Map();
+    loadingButtons.forEach((button) => {
+      originalButtonContents.set(button, {
+        nodes: Array.from(button.childNodes),
+        title: button.getAttribute("title"),
+      });
+      button.replaceChildren();
+      const spinner = document.createElement("span");
+      spinner.className = "background-loading-spinner";
+      spinner.setAttribute("aria-hidden", "true");
+      button.appendChild(spinner);
+      button.disabled = true;
+      button.classList.add("is-loading");
+      button.setAttribute("aria-busy", "true");
+      button.setAttribute("title", "Fetching a wallpaper...");
+    });
 
     const width = Math.max(800, Math.min(1920, Math.round(window.innerWidth)));
     const height = Math.max(600, Math.min(1080, Math.round(window.innerHeight)));
@@ -2353,11 +2542,15 @@ export class SettingsManager {
       }
       return false;
     } finally {
-      if (targetBtn) {
-        targetBtn.textContent = "";
-        originalNodes.forEach((node) => targetBtn.appendChild(node));
-        targetBtn.disabled = false;
-      }
+      loadingButtons.forEach((button) => {
+        const original = originalButtonContents.get(button);
+        button.replaceChildren(...original.nodes);
+        button.disabled = false;
+        button.classList.remove("is-loading");
+        button.removeAttribute("aria-busy");
+        if (original.title === null) button.removeAttribute("title");
+        else button.setAttribute("title", original.title);
+      });
     }
   }
 

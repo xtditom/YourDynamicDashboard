@@ -284,11 +284,13 @@ export class FullSettingsModal {
     const formatToggle = this._toggle("fs-clock-format-toggle");
     const dateToggle = this._toggle("fs-date-toggle");
     const greetToggle = this._toggle("fs-hide-greetings-toggle");
+    const editableToggle = this._toggle("fs-editable-text-toggle");
 
     this.els.fsClockType = clockToggle.input;
     this.els.fsClockFormat = formatToggle.input;
     this.els.fsDateToggle = dateToggle.input;
     this.els.fsHideGreetings = greetToggle.input;
+    this.els.fsEditableText = editableToggle.input;
 
     const formatRow = this._row(
       "Clock Format",
@@ -310,6 +312,11 @@ export class FullSettingsModal {
           "Hide Greetings",
           "Hide the greeting message.",
           greetToggle.wrapper,
+        ),
+        this._row(
+          "Show Editable Text",
+          "Display custom text under greeting.",
+          editableToggle.wrapper,
         ),
       ]),
     );
@@ -461,6 +468,13 @@ export class FullSettingsModal {
     this.els.fsAutoTheme = autoToggle.input;
     this.els.fsGlow = glowToggle.input;
 
+    const darkRow = this._row(
+      "Dark Mode",
+      "Toggle this theme's dark or light appearance.",
+      darkToggle.wrapper,
+    );
+    this.els.fsDarkRow = darkRow;
+
     const autoThemeRow = this._row(
       "Auto Theme",
       "Randomize theme on every new tab.",
@@ -476,7 +490,7 @@ export class FullSettingsModal {
 
     pane.appendChild(
       this._section("Theme", [
-        this._row("Dark Mode", "Enable the dark theme.", darkToggle.wrapper),
+        darkRow,
         autoThemeRow,
         glowRow,
       ]),
@@ -699,52 +713,33 @@ export class FullSettingsModal {
     const todoToggle = this._toggle("fs-todo-toggle");
     const appsToggle = this._toggle("fs-apps-toggle");
     const aiToggle = this._toggle("fs-ai-toggle");
+    const voiceToggle = this._toggle("fs-hide-voice-toggle");
     this.els.fsTodoToggle = todoToggle.input;
     this.els.fsAppsToggle = appsToggle.input;
     this.els.fsAiToggle = aiToggle.input;
+    this.els.fsHideVoice = voiceToggle.input;
 
     pane.appendChild(
       this._section("Visibility", [
         this._row(
-          "Show To-Do List",
-          "Display the To-Do List button.",
+          "Hide To-Do List",
+          "Hide the To-Do List button.",
           todoToggle.wrapper,
         ),
         this._row(
-          "Show Google Apps",
-          "Display the Google Apps button.",
+          "Hide Google Apps",
+          "Hide the Google Apps button.",
           appsToggle.wrapper,
         ),
         this._row(
-          "Show AI Tools & Socials",
-          "Display the AI Tools & Socials button.",
+          "Hide AI Tools & Socials",
+          "Hide the AI Tools & Socials button.",
           aiToggle.wrapper,
         ),
-      ]),
-    );
-
-    // Voice Search toggle
-    const voiceToggle = this._toggle("fs-hide-voice-toggle");
-    this.els.fsHideVoice = voiceToggle.input;
-    pane.appendChild(
-      this._section("Search", [
         this._row(
           "Hide Voice Search",
           "Hide the microphone button.",
           voiceToggle.wrapper,
-        ),
-      ]),
-    );
-
-    // Display & Content
-    const editableToggle = this._toggle("fs-editable-text-toggle");
-    this.els.fsEditableText = editableToggle.input;
-    pane.appendChild(
-      this._section("Display & Content", [
-        this._row(
-          "Show Editable Text",
-          "Display custom text under greeting.",
-          editableToggle.wrapper,
         ),
       ]),
     );
@@ -891,23 +886,11 @@ export class FullSettingsModal {
 
     // ─── Appearance tab events ───
     this.els.fsDark.addEventListener("change", () => {
+      if (this.els.fsDark.disabled) return;
       const sm = this._sm();
       if (sm) sm.disableAutoTheme();
-      state.set("darkMode", this.els.fsDark.checked);
       if (sm) {
-        const target = this.els.fsDark.checked
-          ? sm.constructor.THEMES?.normal?.find((t) => t.id === "default-dark")
-          : sm.constructor.THEMES?.normal?.find(
-              (t) => t.id === "default-light",
-            );
-        // Fallback: use direct theme application
-        sm.applyNormalTheme?.(
-          target || {
-            id: this.els.fsDark.checked ? "default-dark" : "default-light",
-            colors: {},
-            type: this.els.fsDark.checked ? "default-dark" : "light",
-          },
-        );
+        sm.applyDarkModePreference?.(this.els.fsDark.checked);
       }
     });
 
@@ -951,7 +934,7 @@ export class FullSettingsModal {
     this.els.fsRndBtn.addEventListener("click", async () => {
       const sm = this._sm();
       if (sm) {
-        await sm.fetchRandomBackground();
+        await sm.fetchRandomBackground("user", this.els.fsRndBtn);
         this._updateBgState();
       }
     });
@@ -1045,9 +1028,9 @@ export class FullSettingsModal {
     });
 
     // ─── Data tab events ───
-    this._bindToggle(this.els.fsTodoToggle, "showTodo", true);
-    this._bindToggle(this.els.fsAppsToggle, "showApps", true);
-    this._bindToggle(this.els.fsAiToggle, "showAiTools", true);
+    this._bindHideToggle(this.els.fsTodoToggle, "showTodo");
+    this._bindHideToggle(this.els.fsAppsToggle, "showApps");
+    this._bindHideToggle(this.els.fsAiToggle, "showAiTools");
     this.els.fsHideVoice.addEventListener("change", () => {
       state.set("hideVoiceSearch", this.els.fsHideVoice.checked);
     });
@@ -1102,6 +1085,13 @@ export class FullSettingsModal {
     });
   }
 
+  _bindHideToggle(input, key) {
+    input.checked = state.get(key) === false;
+    input.addEventListener("change", () => {
+      state.set(key, !input.checked);
+    });
+  }
+
   // ─── State Subscription ────────────────────────────────────
 
   subscribeState() {
@@ -1144,12 +1134,15 @@ export class FullSettingsModal {
       showEditableText: { el: this.els.fsEditableText, check: value === true },
       tempUnit: { el: this.els.fsTempUnit, check: value === "imperial" },
       tempDisplayMode: { el: this.els.fsTempDisplay, check: value === true },
-      darkMode: { el: this.els.fsDark, check: value === true },
+      darkMode: {
+        el: this.els.fsDark,
+        check: this.isDefaultThemeModeAvailable() && value === true,
+      },
       autoTheme: { el: this.els.fsAutoTheme, check: value === true },
       glowEffect: { el: this.els.fsGlow, check: value !== false },
-      showTodo: { el: this.els.fsTodoToggle, check: value === true },
-      showApps: { el: this.els.fsAppsToggle, check: value === true },
-      showAiTools: { el: this.els.fsAiToggle, check: value === true },
+      showTodo: { el: this.els.fsTodoToggle, check: value === false },
+      showApps: { el: this.els.fsAppsToggle, check: value === false },
+      showAiTools: { el: this.els.fsAiToggle, check: value === false },
       hideVoiceSearch: { el: this.els.fsHideVoice, check: value === true },
     };
 
@@ -1190,9 +1183,9 @@ export class FullSettingsModal {
     this.els.fsDark.checked = state.get("darkMode") === true;
     this.els.fsAutoTheme.checked = state.get("autoTheme") === true;
     this.els.fsGlow.checked = state.get("glowEffect") !== false;
-    this.els.fsTodoToggle.checked = state.get("showTodo") !== false;
-    this.els.fsAppsToggle.checked = state.get("showApps") !== false;
-    this.els.fsAiToggle.checked = state.get("showAiTools") !== false;
+    this.els.fsTodoToggle.checked = state.get("showTodo") === false;
+    this.els.fsAppsToggle.checked = state.get("showApps") === false;
+    this.els.fsAiToggle.checked = state.get("showAiTools") === false;
     this.els.fsHideVoice.checked = state.get("hideVoiceSearch") === true;
 
     // Dropdowns
@@ -1582,6 +1575,13 @@ export class FullSettingsModal {
     );
     setDisabled(this.els.fsGlow, this.els.fsGlowRow, glowDisabled);
 
+    const darkModeAvailable = this.isDefaultThemeModeAvailable();
+    setDisabled(this.els.fsDark, this.els.fsDarkRow, !darkModeAvailable);
+    if (this.els.fsDark) {
+      this.els.fsDark.checked =
+        darkModeAvailable && state.get("darkMode") === true;
+    }
+
     const widgetControl = state.get("widgetControl") || "all";
     const weatherVisible = [
       "all",
@@ -1615,6 +1615,15 @@ export class FullSettingsModal {
       this.els.fsTempDisplayRow,
       temperatureDisabled,
     );
+  }
+
+  isDarkModeAvailable() {
+    const sm = this._sm();
+    return sm?.isDarkModeAvailable?.() === true;
+  }
+
+  isDefaultThemeModeAvailable() {
+    return this.isDarkModeAvailable();
   }
 
   // ─── Background State ─────────────────────────────────────
