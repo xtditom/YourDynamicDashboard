@@ -1219,6 +1219,7 @@ export class FullSettingsModal {
 
   open() {
     if (this.isOpen) return;
+    state.set("fullSettingsEverOpened", true);
     // Close the mini popup if open
     const miniPopup = document.getElementById("settings-popup");
     if (miniPopup) {
@@ -1250,6 +1251,7 @@ export class FullSettingsModal {
     this._handleDragEnd();
     window.removeEventListener("keydown", this._onDialogKeyDown, true);
     document.removeEventListener("keydown", this._onDialogKeyDown, true);
+    this.modal.style.transform = "";
     this.overlay.classList.add("hidden");
     this.overlay.inert = true;
     this.overlay.setAttribute("aria-hidden", "true");
@@ -1815,8 +1817,12 @@ export class FullSettingsModal {
       div.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", index);
         div.classList.add("dragging");
+        list.classList.add("is-reordering");
       });
-      div.addEventListener("dragend", () => div.classList.remove("dragging"));
+      div.addEventListener("dragend", () => {
+        div.classList.remove("dragging");
+        list.classList.remove("is-reordering");
+      });
       div.addEventListener("dragover", (e) => e.preventDefault());
       div.addEventListener("drop", (e) => {
         e.preventDefault();

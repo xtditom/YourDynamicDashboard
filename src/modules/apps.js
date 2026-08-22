@@ -144,11 +144,13 @@ export class AppGrid {
         e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData("text/plain", item.dataset.name);
         item.classList.add("dragging");
+        this.els.grid.classList.add("is-reordering");
         this.dragSrcEl = item;
       });
 
       item.addEventListener("dragend", () => {
         item.classList.remove("dragging");
+        this.els.grid.classList.remove("is-reordering");
         slots.forEach((s) => s.classList.remove("drag-over"));
       });
     });

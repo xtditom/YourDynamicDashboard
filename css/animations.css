@@ -94,6 +94,22 @@
     scroll-behavior: auto !important;
   }
 }
+
+@keyframes ydd-tremble {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-0.5px, 0.25px) rotate(-0.7deg);
+  }
+  50% {
+    transform: translate(0.5px, -0.25px) rotate(1.1deg);
+  }
+  75% {
+    transform: translate(-0.25px, 0.25px) rotate(-0.7deg);
+  }
+}
 .fade-up {
   animation: fade-up 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
 }
@@ -102,6 +118,16 @@
 }
 .popup-scale-entry {
   animation: popup-scale 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+/* Reordering feedback for draggable dashboard items. */
+#apps-grid.is-reordering .app-icon,
+#ai-tools-popup.edit-mode .ai-tool-item .ai-tool-icon img,
+#shortcuts-editor-list.is-reordering .icon,
+.fs-shortcuts-list.is-reordering .icon {
+  animation: ydd-tremble 0.40s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
 }
 @keyframes popup-scale {
   0% {

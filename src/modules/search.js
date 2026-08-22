@@ -423,7 +423,7 @@ export class Search {
 
   // --- SECTION: LAYER 2 — FULL HISTORY MODAL ---
   buildHistoryModal() {
-    this.closeHistoryModal();
+    this.closeHistoryModal(true);
 
     const overlay = document.createElement("div");
     overlay.id = "sh-modal-overlay";
@@ -584,17 +584,32 @@ export class Search {
     modal.appendChild(listContainer);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
+    window.requestAnimationFrame(() => overlay.classList.add("is-open"));
 
-    const closeOverlay = () => {
+    let isClosing = false;
+    let closeTimer = null;
+    const closeOverlay = (immediate = false) => {
+      if (isClosing && !immediate) return;
+      isClosing = true;
       clearTimeout(filterTimer);
       document.removeEventListener("keydown", escHandler);
-      overlay.remove();
-      if (this._historyPreviousFocus?.focus) {
-        window.setTimeout(() => this._historyPreviousFocus.focus(), 0);
-      }
-      this._historyPreviousFocus = null;
-      if (this._historyModalClose === closeOverlay) {
-        this._historyModalClose = null;
+      overlay.classList.add("closing");
+      const finishClose = () => {
+        closeTimer = null;
+        overlay.remove();
+        if (this._historyPreviousFocus?.focus) {
+          window.setTimeout(() => this._historyPreviousFocus.focus(), 0);
+        }
+        this._historyPreviousFocus = null;
+        if (this._historyModalClose === closeOverlay) {
+          this._historyModalClose = null;
+        }
+      };
+      if (immediate) {
+        if (closeTimer !== null) window.clearTimeout(closeTimer);
+        finishClose();
+      } else {
+        closeTimer = window.setTimeout(finishClose, 250);
       }
     };
     const escHandler = (e) => {
@@ -625,9 +640,9 @@ export class Search {
     window.setTimeout(() => filterInput.focus(), 0);
   }
 
-  closeHistoryModal() {
+  closeHistoryModal(immediate = false) {
     if (this._historyModalClose) {
-      this._historyModalClose();
+      this._historyModalClose(immediate);
       return;
     }
     document.getElementById("sh-modal-overlay")?.remove();

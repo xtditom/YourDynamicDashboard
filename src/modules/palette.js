@@ -780,7 +780,7 @@ export class CommandPalette {
   }
 
   openHelpModal() {
-    this.closeHelpModal();
+    this.closeHelpModal(true);
 
     const overlay = document.createElement("div");
     overlay.id = "cp-help-modal-overlay";
@@ -794,7 +794,7 @@ export class CommandPalette {
     overlay.style.alignItems = "center";
 
     const modal = document.createElement("div");
-    modal.className = "modal-box";
+    modal.className = "modal-box cp-help-modal";
     modal.setAttribute("role", "dialog");
     modal.setAttribute("aria-modal", "true");
     modal.setAttribute("aria-labelledby", "cp-help-modal-title");
@@ -848,6 +848,10 @@ export class CommandPalette {
 
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
+    window.requestAnimationFrame(() => {
+      overlay.classList.add("is-open");
+      modal.classList.add("is-open");
+    });
 
     const escHandler = (e) => {
       if (e.key === "Escape") {
@@ -868,15 +872,30 @@ export class CommandPalette {
         }
       }
     };
-    const closeHandler = () => {
+    let isClosing = false;
+    let closeTimer = null;
+    const closeHandler = (immediate = false) => {
+      if (isClosing && !immediate) return;
+      isClosing = true;
       document.removeEventListener("keydown", escHandler);
-      overlay.remove();
-      if (this._previousFocus?.focus) {
-        window.setTimeout(() => this._previousFocus.focus(), 0);
-      }
-      this._previousFocus = null;
-      if (this._helpModalClose === closeHandler) {
-        this._helpModalClose = null;
+      overlay.classList.remove("is-open");
+      overlay.classList.add("closing");
+      const finishClose = () => {
+        closeTimer = null;
+        overlay.remove();
+        if (this._previousFocus?.focus) {
+          window.setTimeout(() => this._previousFocus.focus(), 0);
+        }
+        this._previousFocus = null;
+        if (this._helpModalClose === closeHandler) {
+          this._helpModalClose = null;
+        }
+      };
+      if (immediate) {
+        if (closeTimer !== null) window.clearTimeout(closeTimer);
+        finishClose();
+      } else {
+        closeTimer = window.setTimeout(finishClose, 250);
       }
     };
 
@@ -916,9 +935,9 @@ export class CommandPalette {
     state.set(key, !(typeof current === "boolean" ? current : defaultValue));
   }
 
-  closeHelpModal() {
+  closeHelpModal(immediate = false) {
     if (this._helpModalClose) {
-      this._helpModalClose();
+      this._helpModalClose(immediate);
       return;
     }
     document.getElementById("cp-help-modal-overlay")?.remove();

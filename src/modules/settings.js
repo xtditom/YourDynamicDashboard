@@ -818,6 +818,7 @@ export class SettingsManager {
           this.els.btn.setAttribute("aria-expanded", "true");
           this.els.popup.setAttribute("aria-hidden", "false");
           state.set("lastSettingsView", "mini");
+          this.handleMiniSettingsOpened();
         }
       }
 
@@ -1051,6 +1052,44 @@ export class SettingsManager {
         this.fetchRandomBackground();
       });
     }
+  }
+
+  handleMiniSettingsOpened() {
+    if (state.get("fullSettingsEverOpened") === true) return;
+
+    const previousCount = Number(state.get("miniSettingsOpenCount")) || 0;
+    const openCount = previousCount + 1;
+    if (!state.set("miniSettingsOpenCount", openCount)) return;
+
+    const shouldShowFirstHint =
+      openCount === 1 && state.get("miniSettingsHintShown") !== true;
+    const shouldShowRepeatHint = openCount % 8 === 0;
+    if (shouldShowFirstHint || shouldShowRepeatHint) {
+      this.showMiniSettingsHint();
+    }
+  }
+
+  showMiniSettingsHint() {
+    if (state.get("fullSettingsEverOpened") === true) return;
+    state.set("miniSettingsHintShown", true);
+
+    const hint = document.createElement("div");
+    hint.className = "mini-settings-hint";
+    hint.setAttribute("role", "status");
+    hint.setAttribute("aria-live", "polite");
+    hint.textContent = "Need more control? Click the top-right button to open Full Settings.";
+    const timer = document.createElement("div");
+    timer.className = "zen-notice-timer";
+    timer.setAttribute("aria-hidden", "true");
+    hint.style.setProperty("--zen-notice-duration", "7000ms");
+    hint.appendChild(timer);
+    document.body.appendChild(hint);
+
+    window.requestAnimationFrame(() => hint.classList.add("visible"));
+    window.setTimeout(() => {
+      hint.classList.remove("visible");
+      window.setTimeout(() => hint.remove(), 300);
+    }, 7000);
   }
 
   openInfoModal() {
@@ -1646,25 +1685,39 @@ export class SettingsManager {
         "(for weather) and BigDataCloud (for the city name).\n\n" +
         "This data is saved locally on your device. We do not track you " +
         "in the background, and we have no server to store your location data.\n\n" +
-        "Remember Choice only hides this explanation next time; your browser still controls location permission.",
+        "Select Remember choice to skip this explanation next time. Your browser still controls location permission.",
       false,
       false,
       [
-        { text: "I Agree", value: "agree", width: "130px" },
-        { text: "Remember Choice", value: "always", width: "145px" },
+        {
+          text: "I Agree",
+          value: ({ checkboxChecked }) => ({
+            action: "agree",
+            remember: checkboxChecked,
+          }),
+          width: "130px",
+        },
         {
           text: "Cancel",
           value: "cancel",
-          width: "100px",
+          width: "130px",
           style:
             "background: var(--bg-interactive); color: var(--text-primary);",
         },
       ],
+      false,
+      {
+        checkbox: {
+          label: "Remember choice",
+        },
+        italicText:
+          "Select Remember choice to skip this explanation next time. Your browser still controls location permission.",
+      },
     );
 
-    if (result === "cancel" || !result) return;
+    if (!result || result === "cancel" || result.action !== "agree") return;
 
-    if (result === "always") {
+    if (result.remember) {
       localStorage.setItem("hideGpsConsent", "true");
     }
 
@@ -2180,9 +2233,11 @@ export class SettingsManager {
       div.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", index);
         div.classList.add("dragging");
+        this.els.shortcutList.classList.add("is-reordering");
       });
       div.addEventListener("dragend", () => {
         div.classList.remove("dragging");
+        this.els.shortcutList.classList.remove("is-reordering");
       });
       div.addEventListener("dragover", (e) => {
         e.preventDefault();

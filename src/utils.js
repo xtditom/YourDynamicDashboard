@@ -90,6 +90,7 @@ export function showCustomModal(
   isDanger = false,
   customButtons = null,
   isCelebration = false,
+  modalOptions = null,
 ) {
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
@@ -107,7 +108,7 @@ export function showCustomModal(
     box.setAttribute("aria-modal", "true");
     box.style.cssText = `
       max-width: 400px; text-align: center;
-      transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0; transform: scale(0.9); transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     `;
 
     const title = document.createElement("h2");
@@ -132,7 +133,34 @@ export function showCustomModal(
       box.style.padding = "2.5rem 2rem";
     }
 
-    text.textContent = message;
+    if (modalOptions?.italicText && message.includes(modalOptions.italicText)) {
+      const [before, after] = message.split(modalOptions.italicText);
+      text.append(
+        document.createTextNode(before),
+        Object.assign(document.createElement("em"), {
+          textContent: modalOptions.italicText,
+        }),
+        document.createTextNode(after),
+      );
+    } else {
+      text.textContent = message;
+    }
+
+    let checkboxInput = null;
+    let checkboxRow = null;
+    if (modalOptions?.checkbox) {
+      checkboxRow = document.createElement("label");
+      checkboxRow.className = "ydd-modal-checkbox";
+      checkboxInput = document.createElement("input");
+      checkboxInput.type = "checkbox";
+      checkboxInput.setAttribute(
+        "aria-label",
+        modalOptions.checkbox.label || "Remember choice",
+      );
+      const checkboxLabel = document.createElement("span");
+      checkboxLabel.textContent = modalOptions.checkbox.label || "Remember choice";
+      checkboxRow.append(checkboxInput, checkboxLabel);
+    }
 
     const btnContainer = document.createElement("div");
     btnContainer.style.cssText =
@@ -141,6 +169,7 @@ export function showCustomModal(
     const cleanup = (result) => {
       document.removeEventListener("keydown", dialogKeyHandler);
       overlay.style.opacity = "0";
+      box.style.opacity = "0";
       box.style.transform = "scale(0.9)";
       setTimeout(() => {
         if (document.body.contains(overlay)) {
@@ -157,7 +186,18 @@ export function showCustomModal(
         btn.style.width = btnData.width || "auto";
         if (btnData.style) btn.style.cssText += btnData.style;
         btn.textContent = btnData.text;
-        btn.onclick = () => cleanup(btnData.value);
+        if (btnData.value === "cancel" && checkboxInput) {
+          btn.disabled = checkboxInput.checked;
+          checkboxInput.addEventListener("change", () => {
+            btn.disabled = checkboxInput.checked;
+          });
+        }
+        btn.onclick = () =>
+          cleanup(
+            typeof btnData.value === "function"
+              ? btnData.value({ checkboxChecked: checkboxInput?.checked === true })
+              : btnData.value,
+          );
         btnContainer.appendChild(btn);
       });
     } else {
@@ -182,14 +222,17 @@ export function showCustomModal(
 
     box.appendChild(title);
     box.appendChild(text);
+    if (checkboxRow) box.appendChild(checkboxRow);
     box.appendChild(btnContainer);
     overlay.appendChild(box);
     document.body.appendChild(overlay);
 
-    overlay.offsetHeight;
     overlay.classList.remove("hidden");
     overlay.style.display = "flex";
+    void overlay.offsetWidth;
     overlay.style.opacity = "1";
+    void box.offsetWidth;
+    box.style.opacity = "1";
     box.style.transform = "scale(1)";
     const dialogKeyHandler = (event) => {
       if (event.key === "Escape") {
@@ -233,7 +276,7 @@ export function showCustomPrompt(message, defaultValue = "") {
     box.setAttribute("aria-modal", "true");
     box.style.cssText = `
       width: 400px; max-width: 90%; text-align: left;
-      transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0; transform: scale(0.9); transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     `;
 
     const title = document.createElement("p");
@@ -284,10 +327,12 @@ export function showCustomPrompt(message, defaultValue = "") {
     overlay.appendChild(box);
     document.body.appendChild(overlay);
 
-    overlay.offsetHeight;
     overlay.classList.remove("hidden");
     overlay.style.display = "flex";
+    void overlay.offsetWidth;
     overlay.style.opacity = "1";
+    void box.offsetWidth;
+    box.style.opacity = "1";
     box.style.transform = "scale(1)";
 
     setTimeout(() => {
@@ -298,6 +343,7 @@ export function showCustomPrompt(message, defaultValue = "") {
     const cleanup = (result) => {
       document.removeEventListener("keydown", promptKeyHandler);
       overlay.style.opacity = "0";
+      box.style.opacity = "0";
       box.style.transform = "scale(0.9)";
       setTimeout(() => {
         if (document.body.contains(overlay)) {

@@ -297,11 +297,11 @@ body.loaded .corner-button {
   top: auto;
   bottom: 80px;
   left: 4.5rem;
-  transform: scale(1.1);
+  transform: scale(0.85);
   transform-origin: bottom left;
 }
 #ai-tools-popup.visible {
-  transform: scale(0.97);
+  transform: scale(1);
 }
 .tools-header {
   display: flex;
@@ -449,6 +449,14 @@ body.has-custom-bg .tool-edit-button {
   border-top: 2px solid var(--accent-color);
 }
 
+.ai-tools-footer {
+  width: 100%;
+  text-align: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
 #apps-popup {
   top: 80px;
   right: 4.5rem;
@@ -536,13 +544,41 @@ body.has-custom-bg .tool-edit-button {
   right: 4.5rem;
   width: 380px;
   max-height: 615px;
-  transform: scale(1.1);
+  transform: scale(0.85);
   transform-origin: bottom right;
   display: flex;
   flex-direction: column;
 }
 #settings-popup.visible {
-  transform: scale(0.97);
+  transform: scale(1);
+}
+
+/* First-use guidance for the mini settings button. */
+.mini-settings-hint {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 4000;
+  width: min(320px, calc(100vw - 2rem));
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.96);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+.mini-settings-hint.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
 }
 #settings-popup h2 {
   text-align: center;

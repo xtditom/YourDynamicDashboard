@@ -168,6 +168,7 @@ export class KeyboardManager {
     miniPopup.setAttribute("aria-hidden", "false");
     miniButton?.setAttribute("aria-expanded", "true");
     state.set("lastSettingsView", "mini");
+    window.__settingsManagerInstance?.handleMiniSettingsOpened?.();
   }
 
   closeAllPopups() {

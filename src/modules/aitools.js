@@ -17,7 +17,11 @@ export class AiTools {
 
     this.activeTab = localStorage.getItem("activeToolTab") || "ai";
     this.isEditMode = false;
-    this.hiddenTools = state.get("hiddenTools") || {};
+    this.hiddenTools = {
+      ...(CONFIG.defaults.hiddenTools || {}),
+      ...(state.get("hiddenTools") || {}),
+    };
+    state.set("hiddenTools", this.hiddenTools);
 
     this.init();
   }
@@ -60,6 +64,10 @@ export class AiTools {
     state.subscribe((key) => {
       if (key === "showAiTools") this.updateVisibility();
       if (key === "linkTargets") this.renderAll();
+      if (key === "hiddenTools") {
+        this.hiddenTools = { ...(state.get("hiddenTools") || {}) };
+        this.renderAll();
+      }
       if (key === "aiToolsOrder" || key === "socialToolsOrder") this.renderAll();
     });
 
@@ -273,12 +281,15 @@ export class AiTools {
   }
 
   toggleToolVisibility(id) {
-    if (this.hiddenTools[id]) {
-      delete this.hiddenTools[id];
+    const nextHiddenTools = { ...this.hiddenTools };
+    if (nextHiddenTools[id]) {
+      nextHiddenTools[id] = false;
     } else {
-      this.hiddenTools[id] = true;
+      nextHiddenTools[id] = true;
     }
-    state.set("hiddenTools", this.hiddenTools);
+
+    if (!state.set("hiddenTools", nextHiddenTools)) return;
+    this.hiddenTools = { ...(state.get("hiddenTools") || {}) };
     this.renderAll();
   }
 

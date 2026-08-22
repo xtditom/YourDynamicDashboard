@@ -46,12 +46,17 @@ export const CONFIG = {
     hiddenTools: {
       "ai-deepseek": true,
       "ai-qwen": true,
+      "ai-mistral": true,
       "social-snapchat": true,
       "social-linkedin": true,
+      "social-tiktok": true,
     },
     autoTheme: false,
     zenMode: false,
     zenNoticeAcknowledged: false,
+    miniSettingsHintShown: false,
+    miniSettingsOpenCount: 0,
+    fullSettingsEverOpened: false,
     darkMode: true,
     normalThemeId: "default-dark",
     linkTargets: {
@@ -342,6 +347,12 @@ export const AI_TOOLS = [
     icon: "perplexity.png",
     id: "ai-perplexity",
   },
+  {
+    name: "Mistral",
+    url: "https://chat.mistral.ai/",
+    icon: "mistral.png",
+    id: "ai-mistral",
+  },
 ];
 
 export const SOCIAL_LINKS = [
@@ -398,6 +409,12 @@ export const SOCIAL_LINKS = [
     url: "https://web.snapchat.com/",
     icon: "sc.png",
     id: "social-snapchat",
+  },
+  {
+    name: "TikTok",
+    url: "https://www.tiktok.com/",
+    icon: "tiktok.png",
+    id: "social-tiktok",
   },
 ];
 

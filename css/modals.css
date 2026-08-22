@@ -12,16 +12,18 @@
   align-items: center;
   z-index: 2000;
   opacity: 1;
-  transition: opacity 0.3s;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 #info-modal-overlay.hidden,
 #night-mode-modal-overlay.hidden {
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
 }
 #info-modal-overlay.hidden {
   display: flex !important;
-  visibility: hidden;
 }
 .modal-box {
   background-color: var(--bg-secondary);
@@ -32,6 +34,39 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   position: relative;
   border: 1px solid var(--border-color);
+}
+.ydd-modal-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: -0.25rem 0 1rem;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  cursor: pointer;
+  user-select: none;
+}
+.ydd-modal-checkbox input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+.ydd-custom-modal-overlay .settings-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+#info-modal-overlay .modal-box,
+#night-mode-modal-overlay .modal-box {
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#info-modal-overlay:not(.hidden) .modal-box,
+#night-mode-modal-overlay:not(.hidden) .modal-box {
+  opacity: 1;
+  transform: scale(1);
 }
 
 /* Keep the glass surface readable while leaving the surrounding dashboard visible. */
@@ -220,13 +255,15 @@ body.transparency-active .ydd-custom-modal-overlay {
   justify-content: center;
   align-items: center;
   opacity: 1;
-  transition: opacity 0.3s ease;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 #welcome-modal-overlay.hidden {
   opacity: 0;
   pointer-events: none;
   display: flex !important;
   visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
 }
 #welcome-modal {
   background: linear-gradient(145deg, #121212, #0a0a0a);
@@ -241,6 +278,13 @@ body.transparency-active .ydd-custom-modal-overlay {
   position: relative;
   color: #f0f0f0;
   font-family: "Inter", system-ui, sans-serif;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#welcome-modal-overlay:not(.hidden) #welcome-modal {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .modal-header {
@@ -477,7 +521,20 @@ body.zen-mode .text-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: shOverlayIn 0.2s ease;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+}
+#sh-modal-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s ease, visibility 0s linear 0s;
+}
+#sh-modal-overlay.closing {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
 }
 @keyframes shOverlayIn {
   from {
@@ -497,7 +554,17 @@ body.zen-mode .text-container {
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: shModalIn 0.22s ease;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#sh-modal-overlay.is-open .sh-modal {
+  opacity: 1;
+  transform: scale(1);
+}
+#sh-modal-overlay.closing .sh-modal {
+  opacity: 0;
+  transform: scale(0.94);
 }
 @keyframes shModalIn {
   from {

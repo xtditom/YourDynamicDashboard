@@ -10,7 +10,9 @@
   align-items: flex-start;
   justify-content: center;
   padding-top: 10vh;
-  animation: cpOverlayIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s ease, visibility 0s linear 0s;
 }
 
 body.transparency-active #cp-modal-overlay,
@@ -32,12 +34,38 @@ body.gradient-dark.transparency-active .cp-modal {
   background-color: rgba(16, 16, 16, 0.76) !important;
 }
 
+#cp-help-modal-overlay {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+}
+#cp-help-modal-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s ease, visibility 0s linear 0s;
+}
+#cp-help-modal-overlay .cp-help-modal {
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#cp-help-modal-overlay .cp-help-modal.is-open {
+  opacity: 1;
+  transform: scale(1);
+}
+#cp-help-modal-overlay.closing {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+}
+
 #cp-modal-overlay.hidden {
   display: flex !important;
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
 }
 
 @keyframes cpOverlayIn {
@@ -55,7 +83,14 @@ body.gradient-dark.transparency-active .cp-modal {
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
-  animation: cpModalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#cp-modal-overlay:not(.hidden) .cp-modal {
+  opacity: 1;
+  transform: scale(1);
 }
 
 @keyframes cpModalIn {

@@ -266,15 +266,12 @@ body.has-custom-bg #analog-clock-svg {
 body.dark-popups:not(.gradient-mode-active) img[src$="/x.png"],
 body.dark-popups:not(.gradient-mode-active) img[src*="chatgpt.png"],
 body.dark-popups:not(.gradient-mode-active) img[src*="grok.png"],
-body.dark-popups:not(.gradient-mode-active) img[src*="notebooklm.png"],
 body.has-custom-bg img[src$="/x.png"],
 body.has-custom-bg img[src*="chatgpt.png"],
 body.has-custom-bg img[src*="grok.png"],
-body.has-custom-bg img[src*="notebooklm.png"],
 body.gradient-dark img[src$="/x.png"],
 body.gradient-dark img[src*="chatgpt.png"],
-body.gradient-dark img[src*="grok.png"],
-body.gradient-dark img[src*="notebooklm.png"] {
+body.gradient-dark img[src*="grok.png"] {
   filter: brightness(0) invert(1) !important;
 }
 
@@ -291,18 +288,41 @@ body.dark-popups:not(.gradient-mode-active)
   .ai-tool-item:hover
   .ai-tool-icon
   img[src*="grok.png"],
-body.dark-popups:not(.gradient-mode-active)
-  .app-item:hover
-  .app-icon[src*="notebooklm.png"],
 body.has-custom-bg .ai-tool-item:hover .ai-tool-icon img[src$="/x.png"],
 body.has-custom-bg .ai-tool-item:hover .ai-tool-icon img[src*="chatgpt.png"],
 body.has-custom-bg .ai-tool-item:hover .ai-tool-icon img[src*="grok.png"],
-body.has-custom-bg .app-item:hover .app-icon[src*="notebooklm.png"],
 body.gradient-dark .ai-tool-item:hover .ai-tool-icon img[src$="/x.png"],
 body.gradient-dark .ai-tool-item:hover .ai-tool-icon img[src*="chatgpt.png"],
-body.gradient-dark .ai-tool-item:hover .ai-tool-icon img[src*="grok.png"],
-body.gradient-dark .app-item:hover .app-icon[src*="notebooklm.png"] {
+body.gradient-dark .ai-tool-item:hover .ai-tool-icon img[src*="grok.png"] {
   filter: brightness(0) invert(1) !important;
+}
+
+/* NotebookLM keeps its original artwork in every theme and background mode. */
+.app-icon[src*="notebooklm.png"],
+.app-icon[src*="notebooklm.png"]:hover {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* The built-in Dark theme is the only theme that keeps monochrome icons. */
+body[data-theme="dark"][data-theme-id="default-dark"]
+  .app-icon[src*="notebooklm.png"],
+body[data-theme="dark"][data-theme-id="default-dark"]
+  .app-icon[src*="notebooklm.png"]:hover,
+html[data-theme="dark"][data-theme-id="default-dark"] body
+  .app-icon[src*="notebooklm.png"],
+html[data-theme="dark"][data-theme-id="default-dark"] body
+  .app-icon[src*="notebooklm.png"]:hover {
+  filter: grayscale(100%) brightness(1) !important;
+  opacity: 0.8 !important;
+}
+
+body[data-theme="dark"][data-theme-id="default-dark"]
+  .app-icon[src*="notebooklm.png"]:hover,
+html[data-theme="dark"][data-theme-id="default-dark"] body
+  .app-icon[src*="notebooklm.png"]:hover {
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 /* [css/themes.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */
