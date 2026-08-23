@@ -116,6 +116,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (key === "disableAnimations") {
       document.documentElement.classList.toggle("disable-animations", value === true);
     }
+    if (key === "normalThemeId" || key === "gradientThemeId") {
+      const themeId = state.get("gradientModeActive")
+        ? `gradient-${state.get("gradientThemeId") || "gradient"}`
+        : state.get("normalThemeId") || "default-dark";
+      document.body.setAttribute("data-theme-id", themeId);
+      document.documentElement.setAttribute("data-theme-id", themeId);
+    }
   });
 
   // --- WELCOME TEXT ---
@@ -188,13 +195,6 @@ function manageWelcomePopup() {
         event.preventDefault();
         first.focus();
       }
-    }
-    if (key === "normalThemeId" || key === "gradientThemeId") {
-      const themeId = state.get("gradientModeActive")
-        ? `gradient-${state.get("gradientThemeId") || "gradient"}`
-        : state.get("normalThemeId") || "default-dark";
-      document.body.setAttribute("data-theme-id", themeId);
-      document.documentElement.setAttribute("data-theme-id", themeId);
     }
   };
 

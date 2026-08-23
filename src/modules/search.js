@@ -40,6 +40,7 @@ export class Search {
     this._typewriterRunId = 0;
     this._visibilityHandler = () => this.handleVisibilityChange();
     this.currentFilteredHistory = [];
+    this._quoteHiddenBySearch = false;
     this.init();
     window.YD_Search = this;
   }
@@ -71,10 +72,13 @@ export class Search {
     this.startTypewriterEffect();
     document.addEventListener("visibilitychange", this._visibilityHandler);
 
-    state.subscribe((key) => {
+    state.subscribe((key, value) => {
       if (key === "linkTargets") this.updateButtons();
       if (key === "hideVoiceSearch") this.updateVoiceButton();
       if (key === "widgetControl") this.syncTypewriterVisibility();
+      if (key === "disableAnimations" && value === true) {
+        this._restoreQuotesImmediately();
+      }
       if (key === "searchHistory" || key === "searchAutoDeleteDays") {
         this.pruneExpiredHistory();
       }
@@ -311,13 +315,7 @@ export class Search {
       ul.style.setProperty("background-color", "var(--widget-bg)", "important");
       ul.style.setProperty("color", isDark ? "#ffffff" : "#000000", "important");
 
-      if (isNew) {
-        const quoteWidget = document.getElementById("quote-widget");
-        if (quoteWidget) {
-          quoteWidget.style.setProperty("visibility", "hidden", "important");
-          quoteWidget.style.opacity = "0";
-        }
-      }
+      if (isNew) this._hideQuoteForOverlay();
     } else {
       ul.style.removeProperty("backdrop-filter");
       ul.style.removeProperty("-webkit-backdrop-filter");
@@ -382,6 +380,13 @@ export class Search {
       this._removeHistoryDropdown();
       this.buildHistoryModal();
     });
+    footerLi.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        this._removeHistoryDropdown();
+        this.buildHistoryModal();
+      }
+    });
     ul.appendChild(footerLi);
 
     const inputRect = this.els.input.getBoundingClientRect();
@@ -409,10 +414,13 @@ export class Search {
   }
 
   _restoreQuotes() {
+    if (!this._quoteHiddenBySearch) return;
+
     const mainHidden = this.els.dropdown.classList.contains("hidden") || this.els.dropdown.classList.contains("closing");
     const historyHidden = !this._historyDropdownEl || this._historyDropdownEl.classList.contains("closing");
 
     if (mainHidden && historyHidden) {
+      this._quoteHiddenBySearch = false;
       const quoteWidget = document.getElementById("quote-widget");
       if (quoteWidget) {
         quoteWidget.style.removeProperty("visibility");
@@ -430,6 +438,29 @@ export class Search {
         }
       }
     }
+  }
+
+  _hideQuoteForOverlay() {
+    if (state.get("disableAnimations") === true) return;
+
+    const quoteWidget = document.getElementById("quote-widget");
+    if (!quoteWidget) return;
+
+    this._quoteHiddenBySearch = true;
+    quoteWidget.style.setProperty("visibility", "hidden", "important");
+    quoteWidget.style.opacity = "0";
+  }
+
+  _restoreQuotesImmediately() {
+    if (!this._quoteHiddenBySearch) return;
+
+    this._quoteHiddenBySearch = false;
+    const quoteWidget = document.getElementById("quote-widget");
+    if (!quoteWidget) return;
+
+    quoteWidget.style.removeProperty("visibility");
+    quoteWidget.style.opacity = "1";
+    quoteWidget.classList.remove("quote-dropdown-restore");
   }
 
   // --- SECTION: LAYER 2 — FULL HISTORY MODAL ---
@@ -880,13 +911,6 @@ export class Search {
       },
       video: false,
     });
-    footerLi.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        this._removeHistoryDropdown();
-        this.buildHistoryModal();
-      }
-    });
     stream.getTracks().forEach((track) => track.stop());
   }
 
@@ -1294,11 +1318,7 @@ export class Search {
       this.els.dropdown.style.setProperty("background-color", "var(--widget-bg)", "important");
       this.els.dropdown.style.setProperty("color", isDark ? "#ffffff" : "#000000", "important");
       
-      const quoteWidget = document.getElementById("quote-widget");
-      if (quoteWidget) {
-        quoteWidget.style.setProperty("visibility", "hidden", "important");
-        quoteWidget.style.opacity = "0";
-      }
+      this._hideQuoteForOverlay();
     } else {
       this.els.dropdown.style.removeProperty("backdrop-filter");
       this.els.dropdown.style.removeProperty("-webkit-backdrop-filter");

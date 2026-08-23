@@ -282,9 +282,7 @@ export class AiTools {
           ? "mistralToolUseCount"
           : tool.id === "social-tiktok"
             ? "tiktokToolUseCount"
-            : tool.id === "ai-perplexity"
-              ? "perplexityUseCount"
-              : null;
+            : null;
       if (featureKey && (Number(state.get(featureKey)) || 0) < 1) {
         const badge = document.createElement("span");
         badge.className = "tool-new-badge";
@@ -385,9 +383,7 @@ export class AiTools {
         ? "mistralToolUseCount"
         : toolId === "social-tiktok"
           ? "tiktokToolUseCount"
-          : toolId === "ai-perplexity"
-            ? "perplexityUseCount"
-            : null;
+          : null;
     if (!key || (Number(state.get(key)) || 0) >= 1) return;
     if (!state.set(key, 1)) return;
     this.renderAll();
