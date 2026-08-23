@@ -605,10 +605,22 @@ export class FullSettingsModal {
       id: "fs-rnd-btn",
       textContent: "Random",
     });
+    const scheduleSelect = this._dropdown("fs-random-bg-schedule-select", [
+      ["refresh", "Every refresh"],
+      ["30s", "Every 30 seconds"],
+      ["1m", "Every minute"],
+      ["1h", "Every hour"],
+      ["6h", "Every 6 hours"],
+      ["day", "Every day"],
+    ]);
+    scheduleSelect.classList.add("hidden");
+    scheduleSelect.setAttribute("aria-label", "Random background schedule");
+    scheduleSelect.title = "Choose when the background changes";
     this.els.fsFreezeBtn = freezeBtn;
     this.els.fsRndBtn = rndBtn;
+    this.els.fsRandomBgSchedule = scheduleSelect;
     const rndControls = this._el("div", { className: "background-controls" });
-    rndControls.append(freezeBtn, rndBtn);
+    rndControls.append(freezeBtn, rndBtn, scheduleSelect);
 
     const blurSelect = this._dropdown("fs-blur-select", [
       ["0", "Off"],
@@ -1042,6 +1054,15 @@ export class FullSettingsModal {
         this._updateBgState();
       }
     });
+    this.els.fsRandomBgSchedule.addEventListener("change", async (event) => {
+      const sm = this._sm();
+      if (!sm || typeof sm.setRandomBackgroundSchedule !== "function") return;
+
+      const previous = sm.getRandomBackgroundSchedule?.() || "1m";
+      const accepted = await sm.setRandomBackgroundSchedule(event.target.value);
+      if (!accepted) event.target.value = previous;
+      this._updateBgState();
+    });
     this.els.fsFreezeBtn.addEventListener("click", async () => {
       const sm = this._sm();
       if (sm && typeof sm.freezeRandomBackground === "function") {
@@ -1294,6 +1315,7 @@ export class FullSettingsModal {
         key === "gradientModeActive" ||
         key === "backgroundImage" ||
         key === "randomBgMode" ||
+        key === "randomBgSchedule" ||
         key === "normalThemeId" ||
         key === "gradientThemeId" ||
         key === "autoTheme" ||
@@ -1383,6 +1405,8 @@ export class FullSettingsModal {
     this.els.fsScPosition.value = state.get("shortcutsPosition") || "bottom";
     this.els.fsLocInput.value = state.get("yd_city") || "";
     this.els.fsBlurSelect.value = state.get("bgBlurIntensity") || "0";
+    this.els.fsRandomBgSchedule.value =
+      state.get("randomBgSchedule") || "1m";
 
     // Clock format row state
     const isAnalog = state.get("clockType") === "analog";
@@ -1847,6 +1871,15 @@ export class FullSettingsModal {
       !!state.get("backgroundImage") ||
       !!state.get("randomBgMode");
     const mode = state.get("randomBgMode");
+    const schedule = state.get("randomBgSchedule") || "1m";
+
+    if (this.els.fsRandomBgSchedule) {
+      this.els.fsRandomBgSchedule.value = schedule;
+      this.els.fsRandomBgSchedule.classList.toggle("hidden", mode !== "random");
+    }
+    if (this.els.fsRndBtn) {
+      this.els.fsRndBtn.classList.toggle("hidden", mode === "random");
+    }
 
     if (this.els.fsRemoveBg) {
       this.els.fsRemoveBg.classList.toggle("hidden", !hasBg);

@@ -83,8 +83,101 @@ try {
   var bgMode = localStorage.getItem("randomBgMode");
   var bg = localStorage.getItem("backgroundImage");
   var savedBg = localStorage.getItem("savedBgUrl");
+  var randomBgSchedule = localStorage.getItem("randomBgSchedule");
+  var randomBgCurrentPreview = localStorage.getItem("randomBgCurrentPreview");
+  var randomBgNextPreview = localStorage.getItem("randomBgNextPreview");
+  var randomBgNext = localStorage.getItem("randomBgNextUrl");
   var bgTime = localStorage.getItem("randomBgTime");
   var imgUrl = null;
+
+  var readStoredUrl = function(value) {
+    if (!value || value === "null" || value === '"null"') return null;
+    var parsed = value;
+    try {
+      parsed = JSON.parse(value);
+    } catch (error) {
+      // Support older or manually-entered unquoted URL values.
+    }
+    if (typeof parsed !== "string" || !parsed) return null;
+    try {
+      var url = new URL(parsed, document.baseURI);
+      if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+      return url.href;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  var randomBgNextUrl = readStoredUrl(randomBgNext);
+  var readStoredString = function(value, fallback) {
+    if (!value || value === "null" || value === '"null"') return fallback;
+    var parsed = value;
+    try {
+      parsed = JSON.parse(value);
+    } catch (error) {
+      // Support older or manually-entered values.
+    }
+    return typeof parsed === "string" && parsed ? parsed : fallback;
+  };
+
+  var parsedRandomBgSchedule = readStoredString(randomBgSchedule, "1m");
+  var randomBgCurrentPreviewUrl = (function(value) {
+    var parsed = readStoredString(value, null);
+    return typeof parsed === "string" && parsed.startsWith("data:image/")
+      ? parsed
+      : null;
+  })(randomBgCurrentPreview);
+  var randomBgNextPreviewUrl = (function(value) {
+    if (!value || value === "null" || value === '"null"') return null;
+    var parsed = value;
+    try {
+      parsed = JSON.parse(value);
+    } catch (error) {
+      // Support older or manually-entered preview values.
+    }
+    return typeof parsed === "string" && parsed.startsWith("data:image/")
+      ? parsed
+      : null;
+  })(randomBgNextPreview);
+
+  if (!["refresh", "30s", "1m", "1h", "6h", "day"].includes(parsedRandomBgSchedule)) {
+    parsedRandomBgSchedule = "refresh";
+  }
+  var readStoredNumber = function(value, fallback) {
+    var parsed = value;
+    try {
+      parsed = JSON.parse(value);
+    } catch (error) {
+      parsed = Number(value);
+    }
+    return Number.isFinite(Number(parsed)) ? Number(parsed) : fallback;
+  };
+  var localDateKey = function(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  };
+  var randomBgLastChangedAt = readStoredNumber(
+    localStorage.getItem("randomBgLastChangedAt"),
+    0,
+  );
+  var randomBgLastChangedDate = readStoredString(
+    localStorage.getItem("randomBgLastChangedDate"),
+    "",
+  );
+  var randomBgTimedChangeDue = false;
+  if (parsedRandomBgSchedule === "day") {
+    randomBgTimedChangeDue = randomBgLastChangedDate !== localDateKey(new Date());
+  } else if (parsedRandomBgSchedule !== "refresh") {
+    var randomBgIntervals = {
+      "30s": 30000,
+      "1m": 60000,
+      "1h": 3600000,
+      "6h": 21600000,
+    };
+    randomBgTimedChangeDue =
+      !randomBgLastChangedAt ||
+      Date.now() - randomBgLastChangedAt >=
+        randomBgIntervals[parsedRandomBgSchedule];
+  }
 
   var bgBlur = localStorage.getItem("bgBlurIntensity");
   if (bgBlur) {
@@ -104,8 +197,25 @@ try {
     if (bgTime === "null" || bgTime === '"-1"' || Date.now() - parseInt(bgTime) <= 259200000) {
       imgUrl = (savedBg && savedBg !== '"null"') ? savedBg : ((bg && bg !== '"null"') ? bg : null);
     }
-  } else if (bgMode === '"random"' && savedBg && savedBg !== '"null"') {
-    imgUrl = savedBg;
+  } else if (bgMode === '"random"') {
+    if (parsedRandomBgSchedule === "refresh") {
+      imgUrl =
+        randomBgNextPreviewUrl ||
+        randomBgNextUrl ||
+        readStoredUrl(savedBg) ||
+        readStoredUrl(bg);
+    } else {
+      var queuedTimedPreview = randomBgTimedChangeDue
+        ? randomBgNextPreviewUrl || randomBgNextUrl
+        : null;
+      imgUrl =
+        queuedTimedPreview ||
+        randomBgCurrentPreviewUrl ||
+        readStoredUrl(savedBg) ||
+        readStoredUrl(bg) ||
+        randomBgNextPreviewUrl ||
+        randomBgNextUrl;
+    }
   } else if (bg && bg !== '"null"' && bgMode !== '"random"') {
     imgUrl = bg;
   }
@@ -113,13 +223,18 @@ try {
   if (imgUrl && imgUrl !== "null" && imgUrl !== '"null"') {
     var style = document.createElement("style");
     style.id = "ydd-remote-background";
-    style.textContent = "body { background-image: url(" + imgUrl.replace(/^"|"$/g, "") + ") !important; background-size: cover !important; background-position: center !important; }";
+    var cssUrl = String(imgUrl)
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\)/g, "\\)");
+    style.textContent = "body { background-image: url(\"" + cssUrl.replace(/^"|"$/g, "") + "\") !important; background-size: cover !important; background-position: center !important; }";
     document.head.appendChild(style);
   }
 
   var hasIdbBg = localStorage.getItem("has_idb_bg") === "true";
   var fallback = THEME_COLORS[thId] || "#0a0a0a";
-  if (hasIdbBg || (bgMode === '"random"' || bgMode === '"freeze"')) {
+  var randomModeWithoutImage = bgMode === '"random"' && !imgUrl;
+  if ((hasIdbBg && bgMode !== '"random"') || bgMode === '"freeze"' || randomModeWithoutImage) {
     var preloader = document.createElement("style");
     preloader.id = "idb-preloader";
     var pColor = fallback || "#0a0a0a";
@@ -139,15 +254,27 @@ try {
     if (db.objectStoreNames.contains("images")) {
       var transaction = db.transaction("images", "readonly");
       var store = transaction.objectStore("images");
-      var getRequest = store.get("current_bg");
+      var randomUsesCurrentRecord =
+        bgMode === '"random"' &&
+        parsedRandomBgSchedule !== "refresh" &&
+        !(randomBgTimedChangeDue && (randomBgNextPreviewUrl || randomBgNextUrl));
+      var getRequest = store.get(
+        randomUsesCurrentRecord ? "random_bg_current" : "current_bg",
+      );
       transaction.oncomplete = function() { db.close(); };
       transaction.onerror = function() { db.close(); };
       transaction.onabort = function() { db.close(); };
       
       getRequest.onsuccess = function(e) {
-        if (e.target.result && preloadBackgroundEnabled) {
+        var storedBackground = e.target.result;
+        var storedRandomBlob =
+          randomUsesCurrentRecord && storedBackground?.blob instanceof Blob
+            ? storedBackground.blob
+            : null;
+        var usableBackground = storedRandomBlob || storedBackground;
+        if (usableBackground && preloadBackgroundEnabled && (bgMode !== '"random"' || randomUsesCurrentRecord)) {
           releasePreloadObjectUrl();
-          var objectUrl = URL.createObjectURL(e.target.result);
+          var objectUrl = URL.createObjectURL(usableBackground);
           preloadObjectUrl = objectUrl;
           window.__yddPreloadBackgroundUrl = objectUrl;
           var style = document.createElement("style");

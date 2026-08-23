@@ -749,6 +749,12 @@ body.has-custom-bg .tool-edit-button {
   align-items: center;
   box-sizing: border-box;
 }
+#random-bg-schedule-select {
+  width: 125px !important;
+  flex: 0 0 125px !important;
+  padding: 0.5rem 0.25rem !important;
+  box-sizing: border-box;
+}
 
 .api-key-section {
   background-color: rgba(0, 0, 0, 0.05);

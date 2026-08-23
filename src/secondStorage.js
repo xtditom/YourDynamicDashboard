@@ -1,6 +1,8 @@
 const DB_NAME = "YDD_Storage";
 const STORE_NAME = "images";
 const DB_VERSION = 2;
+const RANDOM_BACKGROUND_QUEUE_KEY = "random_bg_queue";
+const RANDOM_BACKGROUND_CURRENT_KEY = "random_bg_current";
 
 let databasePromise = null;
 let mutationQueue = Promise.resolve();
@@ -79,6 +81,53 @@ export const secondStorage = {
   deleteImage() {
     return enqueueMutation(() =>
       runTransaction("readwrite", (store) => store.delete("current_bg")),
+    );
+  },
+
+  saveRandomBackgroundQueue(queue) {
+    return enqueueMutation(() =>
+      runTransaction("readwrite", (store) =>
+        store.put(queue, RANDOM_BACKGROUND_QUEUE_KEY),
+      ),
+    );
+  },
+
+  async getRandomBackgroundQueue() {
+    await mutationQueue;
+    const queue = await runTransaction("readonly", (store) =>
+      store.get(RANDOM_BACKGROUND_QUEUE_KEY),
+    );
+    return Array.isArray(queue) ? queue : [];
+  },
+
+  deleteRandomBackgroundQueue() {
+    return enqueueMutation(() =>
+      runTransaction("readwrite", (store) =>
+        store.delete(RANDOM_BACKGROUND_QUEUE_KEY),
+      ),
+    );
+  },
+
+  saveRandomBackgroundCurrent(entry) {
+    return enqueueMutation(() =>
+      runTransaction("readwrite", (store) =>
+        store.put(entry, RANDOM_BACKGROUND_CURRENT_KEY),
+      ),
+    );
+  },
+
+  async getRandomBackgroundCurrent() {
+    await mutationQueue;
+    return runTransaction("readonly", (store) =>
+      store.get(RANDOM_BACKGROUND_CURRENT_KEY),
+    );
+  },
+
+  deleteRandomBackgroundCurrent() {
+    return enqueueMutation(() =>
+      runTransaction("readwrite", (store) =>
+        store.delete(RANDOM_BACKGROUND_CURRENT_KEY),
+      ),
     );
   },
 

@@ -20,6 +20,22 @@ import {
   validateImageBlob,
 } from "../validators.js";
 
+const RANDOM_BG_QUEUE_TARGET = 2;
+const RANDOM_BG_PREVIEW_WIDTH = 480;
+const RANDOM_BG_SCHEDULES = Object.freeze({
+  refresh: { label: "Every refresh", interval: null },
+  "30s": { label: "Every 30 seconds", interval: 30_000 },
+  "1m": { label: "Every minute", interval: 60_000 },
+  "1h": { label: "Every hour", interval: 3_600_000 },
+  "6h": { label: "Every 6 hours", interval: 21_600_000 },
+  day: { label: "Every day", interval: null },
+});
+const RANDOM_BG_REFRESH_WARNING =
+  "Every refresh background mode is enabled.\n\n" +
+  "You need more than 20 Mbps to experience a new background on every refresh. " +
+  "On slower connections, background fetching may struggle or take longer.\n\n" +
+  "We recommend choosing a timed option if your connection is not fast or stable.";
+
 // --- ALIEN DNA (Glass Palettes) ---
 const ALIEN_LIGHT = {
   "--bg-secondary": "rgba(255, 255, 255, 0.25)",
@@ -817,6 +833,7 @@ export class SettingsManager {
     SettingsManager.instance = this;
     SettingsManager.THEMES = THEMES;
     this._backgroundOperationId = 0;
+    this._randomBgScheduleTimer = null;
     this._activeBackgroundObjectUrl = null;
     this._locationRequestId = 0;
     this._locationController = null;
@@ -825,7 +842,13 @@ export class SettingsManager {
     this._infoKeyHandler = null;
     window.addEventListener(
       "pagehide",
-      () => this._releaseActiveBackgroundObjectUrl(),
+      () => {
+        this._releaseActiveBackgroundObjectUrl();
+        if (this._randomBgScheduleTimer) {
+          window.clearTimeout(this._randomBgScheduleTimer);
+          this._randomBgScheduleTimer = null;
+        }
+      },
       { once: true },
     );
 
@@ -870,6 +893,7 @@ export class SettingsManager {
       removeBg: document.getElementById("remove-bg-button"),
       randomBgFreeze: document.getElementById("random-bg-freeze-btn"),
       randomBgRnd: document.getElementById("random-bg-rnd-btn"),
+      randomBgSchedule: document.getElementById("random-bg-schedule-select"),
       backup: document.getElementById("backup-button"),
       restore: document.getElementById("restore-button"),
       restoreInput: document.getElementById("restore-file-input"),
@@ -1048,7 +1072,7 @@ export class SettingsManager {
 
     if (randomBgMode === "random") {
       document.body.classList.add("has-custom-bg");
-      this.fetchRandomBackground("startup");
+      this.initializeRandomBackground();
     } else if (randomBgMode === "freeze") {
       document.body.classList.add("has-custom-bg");
       if (randomBgTime === -1) {
@@ -1566,6 +1590,15 @@ export class SettingsManager {
     if (this.els.randomBgRnd) {
       this.els.randomBgRnd.addEventListener("click", () => {
         this.fetchRandomBackground();
+      });
+    }
+    if (this.els.randomBgSchedule) {
+      this.els.randomBgSchedule.addEventListener("change", async (event) => {
+        const previous = this.getRandomBackgroundSchedule();
+        const accepted = await this.setRandomBackgroundSchedule(
+          event.target.value,
+        );
+        if (!accepted) event.target.value = previous;
       });
     }
   }
@@ -2269,7 +2302,7 @@ export class SettingsManager {
   async freezeRandomBackground() {
     const currentMode = state.get("randomBgMode");
     if (currentMode === "freeze") {
-      if (await this.fetchRandomBackground()) {
+      if (await this.fetchRandomBackground("user", null, { preserveSchedule: true })) {
         state.set("randomBgTime", null);
       }
     } else {
@@ -2300,6 +2333,7 @@ export class SettingsManager {
       }
 
       state.set("randomBgMode", "freeze");
+      await this._clearRandomBackgroundQueue();
       state.set("randomBgTime", result === "forever" ? -1 : Date.now());
       this.updateRandomBgButtons();
 
@@ -2649,6 +2683,535 @@ export class SettingsManager {
     window.__fullSettingsModalInstance?._updateBgState();
   }
 
+  getRandomBackgroundSchedule() {
+    const schedule = state.get("randomBgSchedule");
+    return Object.prototype.hasOwnProperty.call(RANDOM_BG_SCHEDULES, schedule)
+      ? schedule
+      : "refresh";
+  }
+
+  _getRandomBackgroundDateKey(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  _isRandomBackgroundDue(schedule = this.getRandomBackgroundSchedule()) {
+    if (schedule === "refresh") return false;
+    if (schedule === "day") {
+      return state.get("randomBgLastChangedDate") !== this._getRandomBackgroundDateKey();
+    }
+
+    const interval = RANDOM_BG_SCHEDULES[schedule]?.interval;
+    const lastChangedAt = Number(state.get("randomBgLastChangedAt")) || 0;
+    return !lastChangedAt || Date.now() - lastChangedAt >= interval;
+  }
+
+  _getRandomBackgroundCurrentPreview() {
+    const value = state.get("randomBgCurrentPreview");
+    return typeof value === "string" && value.startsWith("data:image/")
+      ? value
+      : null;
+  }
+
+  _getRandomBackgroundFallbackCurrent() {
+    const url = state.get("savedBgUrl") || state.get("backgroundImage");
+    if (typeof url !== "string" || !url.trim()) return null;
+
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        return null;
+      }
+      return {
+        url: parsed.href,
+        blob: null,
+        preview: this._getRandomBackgroundCurrentPreview(),
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async _getStoredRandomBackgroundCurrent() {
+    try {
+      const current = await secondStorage.getRandomBackgroundCurrent();
+      return this._normalizeRandomBackgroundEntry(current);
+    } catch (error) {
+      console.warn("Current random background could not be read:", error);
+      return null;
+    }
+  }
+
+  async _persistRandomBackgroundCurrent(entry) {
+    const normalized = this._normalizeRandomBackgroundEntry(entry);
+    if (!normalized) return false;
+
+    state.set("randomBgCurrentPreview", normalized.preview || "");
+    try {
+      await secondStorage.saveRandomBackgroundCurrent(normalized);
+      return true;
+    } catch (error) {
+      console.warn("Current random background could not be saved:", error);
+      return false;
+    }
+  }
+
+  async _clearRandomBackgroundCurrent() {
+    state.set("randomBgCurrentPreview", "");
+    try {
+      await secondStorage.deleteRandomBackgroundCurrent();
+    } catch (error) {
+      console.warn("Current random background could not be cleared:", error);
+    }
+  }
+
+  _markRandomBackgroundChanged() {
+    state.set("randomBgLastChangedAt", Date.now());
+    state.set("randomBgLastChangedDate", this._getRandomBackgroundDateKey());
+  }
+
+  async setRandomBackgroundSchedule(schedule) {
+    if (!Object.prototype.hasOwnProperty.call(RANDOM_BG_SCHEDULES, schedule)) {
+      return false;
+    }
+    if (state.get("randomBgMode") !== "random") return false;
+
+    if (schedule === "refresh") {
+      const result = await showCustomModal(
+        RANDOM_BG_REFRESH_WARNING,
+        false,
+        false,
+        [
+          { text: "OK", value: "ok", width: "120px" },
+          {
+            text: "Cancel",
+            value: "cancel",
+            width: "120px",
+            style:
+              "background: var(--bg-interactive); color: var(--text-primary);",
+          },
+        ],
+      );
+      if (result !== "ok") return false;
+    }
+
+    state.set("randomBgSchedule", schedule);
+    if (schedule !== "refresh") this._markRandomBackgroundChanged();
+    this.updateRandomBgButtons();
+    this._scheduleRandomBackgroundRefresh();
+    return true;
+  }
+
+  _scheduleRandomBackgroundRefresh() {
+    if (this._randomBgScheduleTimer) {
+      window.clearTimeout(this._randomBgScheduleTimer);
+      this._randomBgScheduleTimer = null;
+    }
+    if (state.get("randomBgMode") !== "random") return;
+
+    const schedule = this.getRandomBackgroundSchedule();
+    if (schedule === "refresh") return;
+
+    let delay;
+    if (schedule === "day") {
+      const now = new Date();
+      const nextDay = new Date(now);
+      nextDay.setHours(24, 0, 0, 0);
+      delay = Math.max(1000, nextDay.getTime() - now.getTime() + 100);
+    } else {
+      const interval = RANDOM_BG_SCHEDULES[schedule].interval;
+      const lastChangedAt = Number(state.get("randomBgLastChangedAt")) || 0;
+      delay = lastChangedAt
+        ? Math.max(1000, interval - (Date.now() - lastChangedAt))
+        : 1000;
+    }
+
+    this._randomBgScheduleTimer = window.setTimeout(async () => {
+      this._randomBgScheduleTimer = null;
+      if (
+        state.get("randomBgMode") === "random" &&
+        this._isRandomBackgroundDue()
+      ) {
+        await this._advanceRandomBackground("schedule");
+      }
+      this._scheduleRandomBackgroundRefresh();
+    }, delay);
+  }
+
+  _getRandomBackgroundNextUrl() {
+    const value = state.get("randomBgNextUrl");
+    if (typeof value !== "string" || !value.trim()) return null;
+
+    try {
+      const url = new URL(value);
+      if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+      return url.href;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  _getRandomBackgroundNextPreview() {
+    const value = state.get("randomBgNextPreview");
+    return typeof value === "string" && value.startsWith("data:image/")
+      ? value
+      : null;
+  }
+
+  _setRandomBackgroundNextUrl(url) {
+    return state.set("randomBgNextUrl", url || null);
+  }
+
+  _setRandomBackgroundNextMetadata(entry) {
+    this._setRandomBackgroundNextUrl(entry?.url || null);
+    state.set("randomBgNextPreview", entry?.preview || null);
+  }
+
+  _normalizeRandomBackgroundEntry(entry) {
+    if (!entry || typeof entry.url !== "string" || !entry.url.trim()) return null;
+
+    let url;
+    try {
+      url = new URL(entry.url);
+      if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    } catch (error) {
+      return null;
+    }
+
+    return {
+      url: url.href,
+      blob: entry.blob instanceof Blob ? entry.blob : null,
+      preview:
+        typeof entry.preview === "string" && entry.preview.startsWith("data:image/")
+          ? entry.preview
+          : null,
+    };
+  }
+
+  async _persistRandomBackgroundQueue(queue, fallbackEntry = null) {
+    const limitedQueue = queue.slice(0, RANDOM_BG_QUEUE_TARGET);
+    this._setRandomBackgroundNextMetadata(limitedQueue[0] || fallbackEntry);
+
+    try {
+      await secondStorage.saveRandomBackgroundQueue(limitedQueue);
+      return true;
+    } catch (error) {
+      console.warn("Random background queue could not be saved:", error);
+      return false;
+    }
+  }
+
+  async _clearRandomBackgroundQueue() {
+    this._setRandomBackgroundNextMetadata(null);
+    try {
+      await secondStorage.deleteRandomBackgroundQueue();
+    } catch (error) {
+      console.warn("Random background queue could not be cleared:", error);
+    }
+  }
+
+  _applyRandomBackgroundAsCurrent(url, displayUrl = url) {
+    this._releaseActiveBackgroundObjectUrl();
+    this._removePreloadedBackgroundStyles();
+    this._applyBackgroundUrl(displayUrl);
+    state.set("savedBgUrl", url);
+    state.set("backgroundImage", url);
+    state.set("randomBgMode", "random");
+    state.set("randomBgTime", null);
+  }
+
+  async _waitForImageDecode(url) {
+    const image = new Image();
+    image.decoding = "async";
+    const loaded = new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () => reject(new Error("Background image could not be decoded."));
+    });
+    image.src = url;
+
+    if (typeof image.decode === "function") {
+      try {
+        await image.decode();
+        return true;
+      } catch (error) {
+        // Fall back to the load event for browsers with incomplete decode support.
+      }
+    }
+    await loaded;
+    return true;
+  }
+
+  async _createRandomBackgroundPreview(blob) {
+    let source = null;
+    let objectUrl = null;
+    try {
+      if (typeof createImageBitmap === "function") {
+        source = await createImageBitmap(blob);
+      } else {
+        objectUrl = URL.createObjectURL(blob);
+        const image = new Image();
+        image.src = objectUrl;
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = () => reject(new Error("Preview image could not be decoded."));
+        });
+        source = image;
+      }
+
+      const sourceWidth = source.width || source.naturalWidth;
+      const sourceHeight = source.height || source.naturalHeight;
+      if (!sourceWidth || !sourceHeight) return null;
+
+      const scale = Math.min(1, RANDOM_BG_PREVIEW_WIDTH / sourceWidth);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+      canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+      const context = canvas.getContext("2d");
+      if (!context) return null;
+      context.drawImage(source, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL("image/jpeg", 0.58);
+    } catch (error) {
+      return null;
+    } finally {
+      source?.close?.();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    }
+  }
+
+  async _useRandomBackgroundEntry(
+    entry,
+    operationId,
+    { markChanged = true, persistCurrent = true } = {},
+  ) {
+    let displayUrl = entry.url;
+    let objectUrl = null;
+
+    if (entry.blob) {
+      try {
+        objectUrl = URL.createObjectURL(entry.blob);
+        await this._waitForImageDecode(objectUrl);
+        displayUrl = objectUrl;
+      } catch (error) {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+      }
+    }
+
+    if (operationId !== this._backgroundOperationId) {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      return false;
+    }
+
+    this._applyRandomBackgroundAsCurrent(entry.url, displayUrl);
+    this._activeBackgroundObjectUrl = objectUrl;
+    if (persistCurrent) await this._persistRandomBackgroundCurrent(entry);
+    if (markChanged) this._markRandomBackgroundChanged();
+    return true;
+  }
+
+  async _getStoredRandomBackgroundQueue() {
+    try {
+      const storedQueue = await secondStorage.getRandomBackgroundQueue();
+      return storedQueue.map((entry) => this._normalizeRandomBackgroundEntry(entry)).filter(Boolean);
+    } catch (error) {
+      console.warn("Random background queue could not be read:", error);
+      return [];
+    }
+  }
+
+  async _fetchRandomWallpaper() {
+    const width = Math.max(800, Math.min(1920, Math.round(window.innerWidth)));
+    const height = Math.max(600, Math.min(1080, Math.round(window.innerHeight)));
+    const cacheKey = `${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0]}`;
+    const response = await fetch(
+      `https://picsum.photos/${width}/${height}?random=${cacheKey}`,
+    );
+    if (!response.ok) {
+      throw new Error(`Wallpaper service returned ${response.status}.`);
+    }
+
+    const finalUrl = response.url;
+    if (!finalUrl) throw new Error("Wallpaper service returned no image URL.");
+
+    const wallpaperBlob = await response.blob();
+    await validateImageBlob(wallpaperBlob, {
+      maxBytes: 20 * 1024 * 1024,
+      maxWidth: 4096,
+      maxHeight: 4096,
+      maxPixels: 20_000_000,
+    });
+    return {
+      url: finalUrl,
+      blob: wallpaperBlob,
+      preview: await this._createRandomBackgroundPreview(wallpaperBlob),
+    };
+  }
+
+  async _advanceRandomBackground(origin = "schedule", operationId = null) {
+    const activeOperationId = operationId || ++this._backgroundOperationId;
+    try {
+      const storedQueue = await this._getStoredRandomBackgroundQueue();
+      if (activeOperationId !== this._backgroundOperationId) return false;
+
+      if (storedQueue.length > 0) {
+        const [entry, ...remainingQueue] = storedQueue;
+        const fallbackEntry = {
+          url: entry.url,
+          preview: entry.preview || this._getRandomBackgroundNextPreview(),
+        };
+        if (!(await this._useRandomBackgroundEntry(entry, activeOperationId))) {
+          return false;
+        }
+        await this._persistRandomBackgroundQueue(remainingQueue, fallbackEntry);
+        this._syncBackgroundControls();
+        void this._fillRandomBackgroundQueue(
+          activeOperationId,
+          remainingQueue,
+          fallbackEntry,
+        );
+        return true;
+      }
+
+      const entry = await this._fetchRandomWallpaper();
+      if (activeOperationId !== this._backgroundOperationId) return false;
+      if (!(await this._useRandomBackgroundEntry(entry, activeOperationId))) {
+        return false;
+      }
+      await this._persistRandomBackgroundQueue([], entry);
+      this._syncBackgroundControls();
+      void this._fillRandomBackgroundQueue(activeOperationId, [], entry);
+      return true;
+    } catch (error) {
+      if (activeOperationId === this._backgroundOperationId) {
+        console.warn(`Random background ${origin} update failed:`, error);
+      }
+      return false;
+    }
+  }
+
+  async initializeRandomBackground() {
+    const operationId = ++this._backgroundOperationId;
+    const schedule = this.getRandomBackgroundSchedule();
+
+    if (schedule !== "refresh") {
+      const currentEntry =
+        (await this._getStoredRandomBackgroundCurrent()) ||
+        this._getRandomBackgroundFallbackCurrent();
+      if (operationId !== this._backgroundOperationId) return;
+
+      if (currentEntry && !this._isRandomBackgroundDue(schedule)) {
+        if (
+          !(await this._useRandomBackgroundEntry(currentEntry, operationId, {
+            markChanged: false,
+          }))
+        ) {
+          return;
+        }
+        const queue = await this._getStoredRandomBackgroundQueue();
+        if (operationId !== this._backgroundOperationId) return;
+        this._syncBackgroundControls();
+        void this._fillRandomBackgroundQueue(
+          operationId,
+          queue,
+          currentEntry,
+        );
+        this._scheduleRandomBackgroundRefresh();
+        return;
+      }
+
+      await this._advanceRandomBackground("schedule", operationId);
+      this._scheduleRandomBackgroundRefresh();
+      return;
+    }
+
+    const storedQueue = await this._getStoredRandomBackgroundQueue();
+    if (operationId !== this._backgroundOperationId) return;
+
+    if (storedQueue.length > 0) {
+      const [entry, ...remainingQueue] = storedQueue;
+      const fallbackEntry = {
+        url: entry.url,
+        preview: entry.preview || this._getRandomBackgroundNextPreview(),
+      };
+      if (!(await this._useRandomBackgroundEntry(entry, operationId))) return;
+
+      await this._persistRandomBackgroundQueue(remainingQueue, fallbackEntry);
+      this._syncBackgroundControls();
+      void this._fillRandomBackgroundQueue(operationId, remainingQueue, fallbackEntry);
+      return;
+    }
+
+    const queuedUrl = this._getRandomBackgroundNextUrl();
+    if (queuedUrl) {
+      const legacyEntry = {
+        url: queuedUrl,
+        preview: this._getRandomBackgroundNextPreview(),
+      };
+      if (!(await this._useRandomBackgroundEntry(legacyEntry, operationId))) return;
+      await this._persistRandomBackgroundQueue([], legacyEntry);
+      this._syncBackgroundControls();
+      void this._fillRandomBackgroundQueue(operationId, [], legacyEntry);
+      return;
+    }
+
+    try {
+      const results = await Promise.allSettled([
+        this._fetchRandomWallpaper(),
+        this._fetchRandomWallpaper(),
+      ]);
+      if (operationId !== this._backgroundOperationId) return;
+
+      const entries = results
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value);
+      if (entries.length === 0) {
+        throw new Error("No valid random wallpaper was returned.");
+      }
+
+      const [currentEntry, ...nextEntries] = entries;
+      if (!(await this._useRandomBackgroundEntry(currentEntry, operationId))) return;
+      await this._persistRandomBackgroundQueue(nextEntries, currentEntry);
+      this._syncBackgroundControls();
+      void this._fillRandomBackgroundQueue(operationId, nextEntries, currentEntry);
+    } catch (error) {
+      if (operationId === this._backgroundOperationId) {
+        console.error("Initial random background failed:", error);
+      }
+    }
+  }
+
+  async _fillRandomBackgroundQueue(operationId, queue, fallbackEntry) {
+    const currentQueue = queue.slice(0, RANDOM_BG_QUEUE_TARGET);
+    const missingCount = RANDOM_BG_QUEUE_TARGET - currentQueue.length;
+    if (missingCount <= 0) return true;
+
+    const fillOne = async () => {
+      try {
+        const entry = await this._fetchRandomWallpaper();
+        if (
+          operationId !== this._backgroundOperationId ||
+          state.get("randomBgMode") !== "random"
+        ) return false;
+
+        currentQueue.push(entry);
+        await this._persistRandomBackgroundQueue(currentQueue, fallbackEntry);
+        return true;
+      } catch (error) {
+        if (operationId === this._backgroundOperationId) {
+          console.warn("Random background prefetch failed:", error);
+        }
+        return false;
+      }
+    };
+
+    await Promise.all(
+      Array.from({ length: missingCount }, () => fillOne()),
+    );
+    return currentQueue.length > 0;
+  }
+
   async handleBgUpload(file) {
     if (!file) return false;
     const operationId = ++this._backgroundOperationId;
@@ -2657,6 +3220,8 @@ export class SettingsManager {
       if (operationId !== this._backgroundOperationId) return false;
       await secondStorage.saveImage(file);
       if (operationId !== this._backgroundOperationId) return false;
+      await this._clearRandomBackgroundQueue();
+      await this._clearRandomBackgroundCurrent();
 
       const objectUrl = URL.createObjectURL(file);
       this._releaseActiveBackgroundObjectUrl();
@@ -2691,6 +3256,8 @@ export class SettingsManager {
     try {
       await secondStorage.deleteImage();
       if (operationId !== this._backgroundOperationId) return false;
+      await this._clearRandomBackgroundQueue();
+      await this._clearRandomBackgroundCurrent();
       this._releaseActiveBackgroundObjectUrl();
       this._removePreloadedBackgroundStyles();
       state.set("backgroundImage", null);
@@ -2726,6 +3293,8 @@ export class SettingsManager {
     ) {
       try {
         await secondStorage.deleteImage();
+        await secondStorage.deleteRandomBackgroundQueue();
+        await secondStorage.deleteRandomBackgroundCurrent();
       } catch (e) {
         console.error("Failed to wipe IndexedDB:", e);
       }
@@ -3141,6 +3710,9 @@ export class SettingsManager {
         localStorage.removeItem("has_idb_bg");
       }
 
+      await secondStorage.deleteRandomBackgroundQueue();
+      await secondStorage.deleteRandomBackgroundCurrent();
+
       location.reload();
     } catch (error) {
       console.error("Restore failed:", error);
@@ -3187,7 +3759,7 @@ export class SettingsManager {
     return response.blob();
   }
 
-  async fetchRandomBackground(origin = "user", triggerButton = null) {
+  async fetchRandomBackground(origin = "user", triggerButton = null, options = {}) {
     const operationId = ++this._backgroundOperationId;
     const fullSettingsButton =
       triggerButton || window.__fullSettingsModalInstance?.els?.fsRndBtn;
@@ -3218,42 +3790,21 @@ export class SettingsManager {
       button.setAttribute("title", "Fetching a wallpaper...");
     });
 
-    const width = Math.max(800, Math.min(1920, Math.round(window.innerWidth)));
-    const height = Math.max(600, Math.min(1080, Math.round(window.innerHeight)));
-
     try {
-      const cacheKey = `${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0]}`;
-      const response = await fetch(
-        `https://picsum.photos/${width}/${height}?random=${cacheKey}`,
-      );
-      if (!response.ok) {
-        throw new Error(`Wallpaper service returned ${response.status}.`);
-      }
+      const entry = await this._fetchRandomWallpaper();
       if (operationId !== this._backgroundOperationId) return false;
 
-      const finalUrl = response.url;
-      if (!finalUrl) throw new Error("Wallpaper service returned no image URL.");
-      const wallpaperBlob = await response.blob();
-      await validateImageBlob(wallpaperBlob, {
-        maxBytes: 20 * 1024 * 1024,
-        maxWidth: 4096,
-        maxHeight: 4096,
-        maxPixels: 20_000_000,
-      });
-      if (operationId !== this._backgroundOperationId) return false;
       await secondStorage.deleteImage();
       if (operationId !== this._backgroundOperationId) return false;
 
-      this._releaseActiveBackgroundObjectUrl();
-      this._removePreloadedBackgroundStyles();
-      this._applyBackgroundUrl(finalUrl);
+      if (!(await this._useRandomBackgroundEntry(entry, operationId))) return false;
+      await this._persistRandomBackgroundQueue([], entry);
       localStorage.removeItem("has_idb_bg");
       localStorage.removeItem("lowResBg");
-      state.set("savedBgUrl", finalUrl);
-      state.set("backgroundImage", finalUrl);
-      state.set("randomBgMode", "random");
       this.disableAutoTheme();
       this._syncBackgroundControls();
+      void this._fillRandomBackgroundQueue(operationId, [], entry);
+      this._scheduleRandomBackgroundRefresh();
       return true;
     } catch (err) {
       if (operationId === this._backgroundOperationId) {
@@ -3278,6 +3829,7 @@ export class SettingsManager {
 
   updateRandomBgButtons() {
     const mode = state.get("randomBgMode");
+    const schedule = this.getRandomBackgroundSchedule();
 
     if (this.els.randomBgFreeze) {
       if (mode === "freeze") {
@@ -3299,10 +3851,15 @@ export class SettingsManager {
     }
 
     if (this.els.randomBgRnd) {
+      this.els.randomBgRnd.classList.toggle("hidden", mode === "random");
       this.els.randomBgRnd.style.color =
         mode === "random" ? "var(--accent-color)" : "";
       this.els.randomBgRnd.style.borderColor =
         mode === "random" ? "var(--accent-color)" : "";
+    }
+    if (this.els.randomBgSchedule) {
+      this.els.randomBgSchedule.value = schedule;
+      this.els.randomBgSchedule.classList.toggle("hidden", mode !== "random");
     }
   }
 
