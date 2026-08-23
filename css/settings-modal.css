@@ -49,6 +49,9 @@
 #full-settings-modal.is-dragging {
   user-select: none;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  /* Keep a small, deliberate impact without bringing back the long sticky
+     easing used by the modal open/close animation. */
+  transition: transform 0.12s ease-out, box-shadow 0.2s ease;
 }
 
 /* --- Titlebar (drag handle) --- */
@@ -226,6 +229,11 @@
   gap: 0.75rem;
 }
 
+.fs-generate-theme-btn {
+  width: 100%;
+  font-weight: 700;
+}
+
 /* --- Color picker grid --- */
 .fs-color-grid {
   display: grid;
@@ -275,16 +283,16 @@
 
 .fs-location-input {
   min-width: 0;
-  border: none;
+  border: 1px solid var(--form-control-border);
   border-radius: 8px;
   outline: none;
-  background-color: var(--bg-interactive);
-  color: var(--text-primary);
+  background-color: var(--form-control-bg);
+  color: var(--form-control-text);
   padding: 0.5rem;
   font: inherit;
 }
 .fs-location-input::placeholder {
-  color: var(--text-secondary);
+  color: var(--form-control-placeholder);
 }
 .fs-location-action {
   min-width: 0;
@@ -309,6 +317,72 @@
   }
 }
 
+.background-loading-indicator {
+  display: inline-block;
+  flex: 0 0 auto;
+  font-size: 1rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* High-contrast update marker for the recently changed Dark Mode control. */
+.setting-row .label .fs-dark-mode-label,
+.setting-row .label .fs-disable-animations-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.fs-updated-sticker,
+.fs-new-sticker {
+  width: 4.8rem;
+  height: 1.6rem;
+  flex: 0 0 auto;
+  line-height: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.38));
+}
+
+.fs-updated-sticker svg,
+.fs-new-sticker svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.fs-weather-location-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.fs-generate-theme-btn {
+  position: relative;
+}
+
+.fs-generate-new-sticker {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  width: 3.8rem;
+  height: 1.35rem;
+  transform: translateY(-50%);
+}
+
+.theme-preset-button {
+  position: relative;
+}
+
+.fs-theme-new-sticker {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  width: 2.9rem;
+  height: 1.25rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+}
+
 /* --- Backup controls in full modal --- */
 .fs-backup-controls {
   display: flex;
@@ -330,6 +404,10 @@
   font-size: 0.75rem;
   padding: 0.75rem 1.25rem;
   flex-shrink: 0;
+  cursor: grab;
+}
+.fs-footer a {
+  cursor: pointer;
 }
 .fs-footer p {
   margin: 0;

@@ -222,6 +222,7 @@ export class AiTools {
       a.dataset.id = tool.id;
       if (!this.isEditMode) {
         const openTool = () => {
+          this.recordFeatureUse(tool.id);
           const targets =
             state.get("linkTargets") || CONFIG.defaults.linkTargets;
           window.open(tool.url, targets.ai || "_blank");
@@ -275,6 +276,22 @@ export class AiTools {
       iconDiv.appendChild(img);
       a.appendChild(iconDiv);
       a.appendChild(document.createTextNode(tool.name));
+
+      const featureKey =
+        tool.id === "ai-mistral"
+          ? "mistralToolUseCount"
+          : tool.id === "social-tiktok"
+            ? "tiktokToolUseCount"
+            : tool.id === "ai-perplexity"
+              ? "perplexityUseCount"
+              : null;
+      if (featureKey && (Number(state.get(featureKey)) || 0) < 1) {
+        const badge = document.createElement("span");
+        badge.className = "tool-new-badge";
+        badge.textContent = "NEW";
+        badge.setAttribute("aria-label", "New");
+        a.appendChild(badge);
+      }
 
       container.appendChild(a);
     });
@@ -360,6 +377,20 @@ export class AiTools {
       currentOrder.splice(insertIndex, 0, item);
       state.set(orderKey, currentOrder);
     }
+  }
+
+  recordFeatureUse(toolId) {
+    const key =
+      toolId === "ai-mistral"
+        ? "mistralToolUseCount"
+        : toolId === "social-tiktok"
+          ? "tiktokToolUseCount"
+          : toolId === "ai-perplexity"
+            ? "perplexityUseCount"
+            : null;
+    if (!key || (Number(state.get(key)) || 0) >= 1) return;
+    if (!state.set(key, 1)) return;
+    this.renderAll();
   }
 
   moveItem(id, delta) {

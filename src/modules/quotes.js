@@ -24,6 +24,7 @@ export class QuoteWidget {
 
     state.subscribe((key) => {
       if (key === "widgetControl") this.applyWidgetVisibility();
+      if (key === "disableAnimations") this.applyWidgetVisibility();
     });
     this.applyWidgetVisibility();
   }
@@ -56,6 +57,10 @@ export class QuoteWidget {
 
   cycleQuote() {
     if (document.hidden || this.els.widget?.classList.contains("hidden")) return;
+    if (state.get("disableAnimations") === true) {
+      this.updateText();
+      return;
+    }
     this.els.text.classList.add("quote-fading");
     this.els.author.classList.add("quote-fading");
 
@@ -109,10 +114,23 @@ export class QuoteWidget {
         break;
     }
 
+    const motionDisabled = state.get("disableAnimations") === true;
     const animate = (el, animClass, inlineDelay = null) => {
       if (!el) return;
-      el.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+      el.classList.remove(
+        "fade-up",
+        "fade-down",
+        "popup-scale-entry",
+        "quote-dropdown-restore",
+      );
       el.style.animationDelay = inlineDelay || "";
+      if (motionDisabled) {
+        el.style.opacity = "1";
+        el.style.transform = "none";
+        return;
+      }
+      el.style.opacity = "";
+      el.style.transform = "";
       void el.offsetWidth;
       if (animClass) el.classList.add(animClass);
     };

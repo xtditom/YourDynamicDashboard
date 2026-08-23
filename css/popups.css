@@ -399,6 +399,19 @@ body.has-custom-bg .tool-edit-button {
 .ai-tool-item.is-hidden {
   opacity: 0.4;
 }
+.tool-new-badge {
+  margin-left: auto;
+  padding: 0.12rem 0.32rem;
+  border: 1px solid #141414;
+  border-radius: 4px;
+  background: #ffe05b;
+  color: #141414;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
 .edit-overlay {
   position: absolute;
   top: 50%;
@@ -616,6 +629,12 @@ body.has-custom-bg .tool-edit-button {
   font-weight: 500;
   font-size: 1rem;
 }
+.setting-row .label .mini-dark-mode-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
 .setting-row .label small {
   font-size: 0.75rem;
   color: var(--text-secondary);
@@ -686,7 +705,7 @@ body.has-custom-bg .tool-edit-button {
 .settings-button {
   background-color: var(--bg-interactive);
   color: var(--accent-color);
-  border: none;
+  border: 1px solid var(--form-control-border);
   padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
@@ -745,15 +764,15 @@ body.has-custom-bg .tool-edit-button {
 }
 #custom-location-input {
   flex-grow: 1;
-  border: none;
-  background-color: var(--bg-interactive);
-  color: var(--text-primary);
+  border: 1px solid var(--form-control-border);
+  background-color: var(--form-control-bg);
+  color: var(--form-control-text);
   padding: 0.5rem;
   border-radius: 8px;
   outline: none;
 }
 #custom-location-input::placeholder {
-  color: var(--text-secondary);
+  color: var(--form-control-placeholder);
 }
 
 #save-location-btn,
@@ -833,6 +852,7 @@ body.has-custom-bg .tool-edit-button {
   right: 0;
   bottom: 0;
   background-color: var(--switch-bg);
+  border: 1px solid var(--switch-border);
   transition: 0.4s;
   border-radius: 28px;
 }
@@ -843,36 +863,46 @@ body.has-custom-bg .tool-edit-button {
   width: 20px;
   left: 4px;
   bottom: 4px;
-  background-color: var(--bg-primary);
+  background-color: var(--switch-thumb);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
   transition: 0.4s;
   border-radius: 50%;
 }
 input:checked + .slider {
-  background-color: var(--accent-color);
+  background-color: var(--switch-active-bg);
 }
 
-body.force-white-text .toggle-switch input:checked + .slider {
-  background-color: #ffffff !important;
-}
 input:checked + .slider:before {
   transform: translateX(22px);
 }
 
 body.gradient-dark .toggle-switch .slider:before {
-  background-color: #000000 !important;
-}
-
-body.force-white-text .toggle-switch .slider:before,
-body.force-white-text .toggle-switch input:checked + .slider:before {
-  background-color: #000000 !important;
-}
-
-body.force-white-text .toggle-switch .slider:before {
-  background-color: #000000 !important;
+  background-color: var(--switch-thumb) !important;
 }
 
 body.has-custom-bg .toggle-switch .slider:before {
+  background-color: var(--switch-thumb) !important;
+}
+
+body.has-custom-bg .toggle-switch input:checked + .slider {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+/* Keep light-gradient and wallpaper toggles readable without changing the theme palette. */
+body.force-white-text .toggle-switch .slider:before,
+body.force-white-text .toggle-switch input:checked + .slider:before {
+  background-color: var(--switch-thumb) !important;
+}
+
+body.has-custom-bg .toggle-switch input:checked + .slider:before {
   background-color: #000000 !important;
+}
+
+.settings-dropdown {
+  background-color: var(--form-control-bg) !important;
+  color: var(--form-control-text) !important;
+  border: 1px solid var(--form-control-border) !important;
 }
 
 .settings-dropdown option {
@@ -893,6 +923,13 @@ body.gradient-mode-active .settings-dropdown option {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--bg-tertiary);
+}
+
+.mini-weather-location-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
 }
 
 .ai-tool-item:hover .ai-tool-icon img {

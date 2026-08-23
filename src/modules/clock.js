@@ -57,6 +57,7 @@ export class Clock {
           this.els.master.classList.add("clock-switched");
         }
       }
+      if (key === "disableAnimations") this.syncAnalogLoop();
       if (key === "showDate") this.toggleDateRow(value);
       if (key === "hideGreetings") this.toggleGreetings(value);
       if (key === "userName") {
@@ -76,7 +77,9 @@ export class Clock {
   }
 
   syncAnalogLoop() {
-    const shouldAnimate = !document.hidden && state.get("clockType") === "analog";
+    const shouldAnimate =
+      !document.hidden &&
+      state.get("clockType") === "analog";
     if (!shouldAnimate) {
       if (this._animationFrame !== null) {
         cancelAnimationFrame(this._animationFrame);
@@ -203,11 +206,17 @@ export class Clock {
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const secondsWithMs = now.getSeconds() + now.getMilliseconds() / 1000;
+    const motionDisabled = state.get("disableAnimations") === true;
 
-    const hourDegrees = ((hours % 12) + minutes / 60) * 30;
-    const minuteDegrees = (minutes + secondsWithMs / 60) * 6;
+    // Keep the clock live while making motion-disabled updates discrete:
+    // hands jump only when their displayed hour/minute changes, and the
+    // second marker jumps once per second instead of sweeping.
+    const hourDegrees =
+      ((hours % 12) + (motionDisabled ? 0 : minutes / 60)) * 30;
+    const minuteDegrees =
+      (minutes + (motionDisabled ? 0 : secondsWithMs / 60)) * 6;
 
-    const secondAngle = secondsWithMs * 6 - 90;
+    const secondAngle = (motionDisabled ? now.getSeconds() : secondsWithMs) * 6 - 90;
     const radius = 85;
     const radian = secondAngle * (Math.PI / 180);
     const cx = 100 + radius * Math.cos(radian);
@@ -231,6 +240,10 @@ export class Clock {
     this.cancelGreetingAnimation();
     this.currentGreeting = greeting;
     if (document.hidden || state.get("hideGreetings") === true) return;
+    if (state.get("disableAnimations") === true) {
+      this.els.greeting.textContent = greeting;
+      return;
+    }
     this._greetingDelayTimer = window.setTimeout(() => {
       this._greetingDelayTimer = null;
       if (this.els.greeting.textContent.trim() !== greeting) {

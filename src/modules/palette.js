@@ -282,8 +282,12 @@ export class CommandPalette {
         name: provider.name,
         icon: "🔎",
         shortcut: "",
-        action: () =>
-          window.YD_Search?.setProvider(provider.id, provider.providerType),
+        action: () => {
+          if (provider.id === "perplexity") {
+            window.YD_Search?.recordPerplexityUse?.();
+          }
+          window.YD_Search?.setProvider(provider.id, provider.providerType);
+        },
       }));
 
     // 2. Google Apps commands
@@ -687,6 +691,17 @@ export class CommandPalette {
           badge.title = `Shortcut ${shortcut} is disabled in Settings`;
         }
         item.appendChild(badge);
+      }
+
+      if (
+        c.id === "search-engines-perplexity" &&
+        (Number(state.get("perplexityUseCount")) || 0) < 1
+      ) {
+        const newBadge = document.createElement("span");
+        newBadge.className = "cp-new-badge";
+        newBadge.textContent = "NEW";
+        newBadge.setAttribute("aria-label", "New");
+        item.appendChild(newBadge);
       }
 
       item.addEventListener("click", () => {

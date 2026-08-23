@@ -62,8 +62,11 @@ export class KeyboardManager {
     } else if (isEnabled("todo")) this.clickButton("todo-toggle-button");
     else if (isEnabled("ai")) this.clickButton("ai-tools-toggle-button");
     else if (isEnabled("apps")) this.clickButton("apps-toggle-button");
-    else if (isEnabled("settings")) this.openFullSettings();
-    else if (isEnabled("miniSettings")) this.openMiniSettings();
+    else if (isEnabled("settings")) {
+      if (this.openFullSettings()) this.recordSettingsShortcutUse("settings");
+    } else if (isEnabled("miniSettings")) {
+      if (this.openMiniSettings()) this.recordSettingsShortcutUse("miniSettings");
+    }
     else if (isEnabled("clock")) {
       const current = state.get("clockType");
       state.set("clockType", current === "analog" ? "digital" : "analog");
@@ -131,6 +134,15 @@ export class KeyboardManager {
     }
   }
 
+  recordSettingsShortcutUse(action) {
+    const key =
+      action === "miniSettings"
+        ? "miniSettingsShortcutUseCount"
+        : "settingsShortcutUseCount";
+    const currentCount = Math.max(0, Number(state.get(key)) || 0);
+    state.set(key, Math.min(8, currentCount + 1));
+  }
+
   launchShortcut(index) {
     if (state.get("zenMode")) return;
     const shortcuts = state.get("userShortcuts");
@@ -141,17 +153,18 @@ export class KeyboardManager {
   }
 
   openFullSettings() {
-    if (state.get("zenMode")) return;
     const fullModal = window.__fullSettingsModalInstance;
     if (fullModal?.isOpen) {
       fullModal.close();
-      return;
+      return true;
     }
-    fullModal?.open();
+    if (!fullModal) return false;
+    fullModal.open();
+    return true;
   }
 
   openMiniSettings() {
-    if (state.get("zenMode")) return;
+    if (state.get("zenMode")) return false;
     const fullModal = window.__fullSettingsModalInstance;
     const miniPopup = document.getElementById("settings-popup");
     const miniButton = document.getElementById("settings-toggle-button");
@@ -160,15 +173,16 @@ export class KeyboardManager {
       miniPopup.setAttribute("aria-hidden", "true");
       miniButton?.setAttribute("aria-expanded", "false");
       state.set("lastSettingsView", "mini");
-      return;
+      return true;
     }
     if (fullModal?.isOpen) fullModal.close();
-    if (!miniPopup) return;
+    if (!miniPopup) return false;
     miniPopup.classList.add("visible");
     miniPopup.setAttribute("aria-hidden", "false");
     miniButton?.setAttribute("aria-expanded", "true");
     state.set("lastSettingsView", "mini");
     window.__settingsManagerInstance?.handleMiniSettingsOpened?.();
+    return true;
   }
 
   closeAllPopups() {

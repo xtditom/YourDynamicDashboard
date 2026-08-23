@@ -395,7 +395,7 @@ export class Search {
       const el = this._historyDropdownEl;
       this._historyDropdownEl = null;
 
-      if (immediate) {
+      if (immediate || state.get("disableAnimations") === true) {
         el.remove();
         this._restoreQuotes();
       } else {
@@ -416,7 +416,18 @@ export class Search {
       const quoteWidget = document.getElementById("quote-widget");
       if (quoteWidget) {
         quoteWidget.style.removeProperty("visibility");
-        quoteWidget.style.opacity = "";
+        quoteWidget.classList.remove("quote-dropdown-restore");
+        if (state.get("disableAnimations") === true) {
+          quoteWidget.style.opacity = "1";
+        } else {
+          quoteWidget.style.opacity = "";
+          void quoteWidget.offsetWidth;
+          quoteWidget.classList.add("quote-dropdown-restore");
+          window.setTimeout(
+            () => quoteWidget.classList.remove("quote-dropdown-restore"),
+            400,
+          );
+        }
       }
     }
   }
@@ -439,9 +450,9 @@ export class Search {
     modal.addEventListener("click", (e) => e.stopPropagation());
 
     if (document.body.classList.contains("force-white-text") && !document.body.classList.contains("has-custom-bg")) {
-      modal.style.color = "#ffffff";
-      modal.style.setProperty("--text-primary", "#ffffff"); 
-      modal.style.setProperty("--text-secondary", "rgba(255,255,255,0.7)");
+      modal.style.color = "#000000";
+      modal.style.setProperty("--text-primary", "#000000");
+      modal.style.setProperty("--text-secondary", "rgba(0,0,0,0.7)");
     }
 
     const header = document.createElement("div");
@@ -1155,10 +1166,12 @@ export class Search {
     const createItem = (p, type) => {
       const div = document.createElement("div");
       div.className = `dropdown-item ${p.id === this.current.id ? "active" : ""}`;
-      makeKeyboardInteractive(div, () => {
+      const selectProvider = () => {
         this.setProvider(p.id, type);
+        if (p.id === "perplexity") this.recordPerplexityUse();
         this.closeDropdown();
-      }, `Use ${p.name}`);
+      };
+      makeKeyboardInteractive(div, selectProvider, `Use ${p.name}`);
       div.setAttribute("role", "option");
       div.setAttribute("aria-selected", String(p.id === this.current.id));
 
@@ -1172,10 +1185,18 @@ export class Search {
       div.appendChild(img);
       div.appendChild(span);
 
-      div.addEventListener("click", () => {
-        this.setProvider(p.id, type);
-        this.closeDropdown();
-      });
+      if (
+        p.id === "perplexity" &&
+        (Number(state.get("perplexityUseCount")) || 0) < 1
+      ) {
+        const badge = document.createElement("span");
+        badge.className = "search-new-badge";
+        badge.textContent = "NEW";
+        badge.setAttribute("aria-label", "New");
+        div.appendChild(badge);
+      }
+
+      div.addEventListener("click", selectProvider);
       return div;
     };
 
@@ -1188,6 +1209,12 @@ export class Search {
     SEARCH_PROVIDERS.platforms.forEach((p) =>
       this.els.platformList.appendChild(createItem(p, "platforms")),
     );
+  }
+
+  recordPerplexityUse() {
+    if ((Number(state.get("perplexityUseCount")) || 0) >= 1) return;
+    if (!state.set("perplexityUseCount", 1)) return;
+    this.renderProviderDropdown();
   }
 
   setProvider(id, type) {
@@ -1292,8 +1319,22 @@ export class Search {
       return;
     }
     
-    this.els.dropdown.classList.add("closing");
     this.els.providerBtn.classList.remove("is-open");
+
+    if (state.get("disableAnimations") === true) {
+      this.els.dropdown.classList.add("hidden");
+      this.els.dropdown.setAttribute("aria-hidden", "true");
+      this.els.providerBtn.setAttribute("aria-expanded", "false");
+      this.els.dropdown.classList.remove("closing");
+      this.els.dropdown.style.removeProperty("backdrop-filter");
+      this.els.dropdown.style.removeProperty("-webkit-backdrop-filter");
+      this.els.dropdown.style.removeProperty("background-color");
+      this.els.dropdown.style.removeProperty("color");
+      this._restoreQuotes();
+      return;
+    }
+
+    this.els.dropdown.classList.add("closing");
 
     this._dropdownCloseTimer = window.setTimeout(() => {
       this._dropdownCloseTimer = null;

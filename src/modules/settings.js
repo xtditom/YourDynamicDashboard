@@ -30,6 +30,15 @@ const ALIEN_LIGHT = {
   "--text-placeholder": "#555555",
   "--accent-color": "#1a1a1a",
   "--glow-color": "rgba(0,0,0,0.5)",
+  "--border-color": "rgba(28, 35, 54, 0.72)",
+  "--switch-bg": "rgba(38, 47, 74, 0.62)",
+  "--switch-border": "rgba(255, 255, 255, 0.82)",
+  "--switch-thumb": "#ffffff",
+  "--switch-active-bg": "#20263d",
+  "--form-control-bg": "rgba(255, 255, 255, 0.76)",
+  "--form-control-text": "#172033",
+  "--form-control-placeholder": "#37455f",
+  "--form-control-border": "rgba(28, 35, 54, 0.72)",
   "--icon-filter": "grayscale(0%)",
   "--icon-opacity": "1",
 };
@@ -43,9 +52,421 @@ const ALIEN_DARK = {
   "--text-placeholder": "#9ca3af",
   "--accent-color": "#f0f0f0",
   "--glow-color": "rgba(255,255,255,0.7)",
+  "--border-color": "rgba(255, 255, 255, 0.5)",
+  "--switch-bg": "rgba(255, 255, 255, 0.34)",
+  "--switch-border": "rgba(255, 255, 255, 0.76)",
+  "--switch-thumb": "#f8fafc",
+  "--switch-active-bg": "#84a8ff",
+  "--form-control-bg": "rgba(0, 0, 0, 0.36)",
+  "--form-control-text": "#ffffff",
+  "--form-control-placeholder": "rgba(255, 255, 255, 0.8)",
+  "--form-control-border": "rgba(255, 255, 255, 0.62)",
   "--icon-filter": "grayscale(0%) brightness(1.0)",
   "--icon-opacity": "0.9",
 };
+
+const makeDarkGradientUI = (switchActiveBg) => ({
+  ...ALIEN_DARK,
+  "--switch-active-bg": switchActiveBg,
+});
+
+const GENERATED_THEME_COLOR_KEYS = Object.freeze([
+  "--bg-primary",
+  "--bg-secondary",
+  "--bg-tertiary",
+  "--accent-color",
+  "--text-primary",
+  "--text-secondary",
+  "--text-placeholder",
+  "--glow-color",
+]);
+
+const GENERATED_THEME_RECIPES = Object.freeze([
+  { hue: 202, saturation: 68, accentOffset: 8, surfaceOffset: 24, lightPrimary: 76, lightSecondary: 89, lightTertiary: 68 },
+  { hue: 258, saturation: 64, accentOffset: -8, surfaceOffset: 18, lightPrimary: 80, lightSecondary: 91, lightTertiary: 73 },
+  { hue: 332, saturation: 70, accentOffset: 10, surfaceOffset: -18, lightPrimary: 78, lightSecondary: 88, lightTertiary: 67 },
+  { hue: 38, saturation: 78, accentOffset: -8, surfaceOffset: 18, lightPrimary: 80, lightSecondary: 91, lightTertiary: 71 },
+  { hue: 146, saturation: 58, accentOffset: 12, surfaceOffset: -16, lightPrimary: 73, lightSecondary: 87, lightTertiary: 65 },
+  { hue: 188, saturation: 72, accentOffset: -10, surfaceOffset: 22, lightPrimary: 77, lightSecondary: 89, lightTertiary: 69 },
+  { hue: 16, saturation: 74, accentOffset: 8, surfaceOffset: -20, lightPrimary: 75, lightSecondary: 87, lightTertiary: 64 },
+]);
+
+let generatedThemeIndex = 0;
+
+function clampColorChannel(value) {
+  return Math.max(0, Math.min(255, Math.round(value)));
+}
+
+function hslToHex(hue, saturation, lightness) {
+  const h = ((hue % 360) + 360) % 360 / 360;
+  const s = Math.max(0, Math.min(100, saturation)) / 100;
+  const l = Math.max(0, Math.min(100, lightness)) / 100;
+  const chroma = (1 - Math.abs(2 * l - 1)) * s;
+  const x = chroma * (1 - Math.abs(((h * 6) % 2) - 1));
+  const match = l - chroma / 2;
+  let red = 0;
+  let green = 0;
+  let blue = 0;
+
+  if (h < 1 / 6) [red, green, blue] = [chroma, x, 0];
+  else if (h < 2 / 6) [red, green, blue] = [x, chroma, 0];
+  else if (h < 3 / 6) [red, green, blue] = [0, chroma, x];
+  else if (h < 4 / 6) [red, green, blue] = [0, x, chroma];
+  else if (h < 5 / 6) [red, green, blue] = [x, 0, chroma];
+  else [red, green, blue] = [chroma, 0, x];
+
+  return `#${[red, green, blue]
+    .map((channel) => clampColorChannel((channel + match) * 255).toString(16).padStart(2, "0"))
+    .join("")}`;
+}
+
+function hexToHsl(color) {
+  const value = String(color || "").replace("#", "");
+  if (![3, 4, 6, 8].includes(value.length) || !/^[\da-f]+$/i.test(value)) return null;
+  const shortValue = value.length === 3 || value.length === 4;
+  const rgbValue = value.slice(0, shortValue ? 3 : 6);
+  const expanded = shortValue
+    ? rgbValue.split("").map((v) => v + v).join("")
+    : rgbValue;
+  const red = parseInt(expanded.slice(0, 2), 16) / 255;
+  const green = parseInt(expanded.slice(2, 4), 16) / 255;
+  const blue = parseInt(expanded.slice(4, 6), 16) / 255;
+  const max = Math.max(red, green, blue);
+  const min = Math.min(red, green, blue);
+  const delta = max - min;
+  let hue = 0;
+
+  if (delta !== 0) {
+    if (max === red) hue = 60 * (((green - blue) / delta) % 6);
+    else if (max === green) hue = 60 * ((blue - red) / delta + 2);
+    else hue = 60 * ((red - green) / delta + 4);
+  }
+  if (hue < 0) hue += 360;
+  const lightness = (max + min) / 2;
+  const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
+  return { hue, saturation: saturation * 100, lightness: lightness * 100 };
+}
+
+function relativeLuminance(color) {
+  const value = String(color || "").replace("#", "");
+  if (![3, 4, 6, 8].includes(value.length) || !/^[\da-f]+$/i.test(value)) return 0;
+  const shortValue = value.length === 3 || value.length === 4;
+  const rgbValue = value.slice(0, shortValue ? 3 : 6);
+  const expanded = shortValue
+    ? rgbValue.split("").map((v) => v + v).join("")
+    : rgbValue;
+  const channels = [0, 2, 4].map((index) => parseInt(expanded.slice(index, index + 2), 16) / 255);
+  const linear = channels.map((channel) =>
+    channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+  );
+  return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+}
+
+function contrastRatio(foreground, background) {
+  const foregroundLum = relativeLuminance(foreground);
+  const backgroundLum = relativeLuminance(background);
+  const lighter = Math.max(foregroundLum, backgroundLum);
+  const darker = Math.min(foregroundLum, backgroundLum);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function ensureContrast(foreground, background, minimum, preferLighter) {
+  if (contrastRatio(foreground, background) >= minimum) return foreground;
+  const hsl = hexToHsl(foreground);
+  if (!hsl) return foreground;
+
+  for (let step = 1; step <= 80; step += 1) {
+    const lightness = preferLighter
+      ? Math.min(98, hsl.lightness + step)
+      : Math.max(2, hsl.lightness - step);
+    const candidate = hslToHex(hsl.hue, hsl.saturation, lightness);
+    if (contrastRatio(candidate, background) >= minimum) return candidate;
+  }
+  return preferLighter ? "#ffffff" : "#111111";
+}
+
+function adjustHexColor(color, hueOffset = 0, saturationScale = 1, lightnessOffset = 0) {
+  const hsl = hexToHsl(color);
+  if (!hsl) return color;
+  return hslToHex(
+    hsl.hue + hueOffset,
+    hsl.saturation * saturationScale,
+    hsl.lightness + lightnessOffset,
+  );
+}
+
+function colorOrFallback(color, fallback) {
+  return hexToHsl(color) ? color : fallback;
+}
+
+function deriveCustomThemeUI(colors, isDark) {
+  const primary = colorOrFallback(colors["--bg-primary"], isDark ? "#101722" : "#f1f4f8");
+  const secondary = colorOrFallback(colors["--bg-secondary"], isDark ? "#1d2938" : "#ffffff");
+  const tertiary = colorOrFallback(colors["--bg-tertiary"], isDark ? "#2c3a4c" : "#e1e7ee");
+  const accent = colorOrFallback(colors["--accent-color"], isDark ? "#8fc7ff" : "#245d9c");
+  const primaryText = colorOrFallback(colors["--text-primary"], isDark ? "#f5f8fc" : "#17202a");
+  const secondaryText = colorOrFallback(colors["--text-secondary"], isDark ? "#d3deea" : "#344454");
+  const placeholder = colorOrFallback(colors["--text-placeholder"], isDark ? "#aebdce" : "#647384");
+
+  const interactive = adjustHexColor(tertiary, 0, 0.92, isDark ? 7 : -7);
+  const interactiveHover = adjustHexColor(tertiary, 0, 0.98, isDark ? 14 : -14);
+  const switchBg = adjustHexColor(tertiary, 0, 0.9, isDark ? 11 : -20);
+  const formBg = adjustHexColor(tertiary, 0, 0.92, isDark ? 3 : -3);
+  const border = ensureContrast(accent, secondary, 2, isDark);
+  const switchBorder = ensureContrast(primaryText, switchBg, 2, isDark);
+  const activeSwitch = ensureContrast(accent, primary, 3, isDark);
+  const formText = ensureContrast(primaryText, formBg, 4.5, isDark);
+  const formPlaceholder = ensureContrast(placeholder, formBg, 3, isDark);
+
+  return {
+    "--bg-interactive": interactive,
+    "--bg-interactive-hover": interactiveHover,
+    "--bg-hover-translucent": isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)",
+    "--border-color": border,
+    "--switch-bg": switchBg,
+    "--switch-border": switchBorder,
+    "--switch-thumb": isDark ? "#ffffff" : "#ffffff",
+    "--switch-active-bg": activeSwitch,
+    "--form-control-bg": formBg,
+    "--form-control-text": formText,
+    "--form-control-placeholder": formPlaceholder,
+    "--form-control-border": border,
+    "--widget-bg": secondary,
+    "--widget-border": border,
+    "--text-color": primaryText,
+    "--text-shadow": isDark ? "0 1px 2px rgba(0, 0, 0, 0.45)" : "none",
+  };
+}
+
+function createRecipeGeneratedTheme(mode, recipe) {
+  const isDark = mode === "dark";
+  const {
+    hue,
+    saturation,
+    accentOffset,
+    surfaceOffset,
+    lightPrimary = 76,
+    lightSecondary = 89,
+    lightTertiary = 68,
+  } = recipe;
+  const colors = isDark
+    ? {
+        "--bg-primary": hslToHex(hue, saturation * 0.7, 7),
+        "--bg-secondary": hslToHex(hue + surfaceOffset, saturation * 0.78, 19),
+        "--bg-tertiary": hslToHex(hue - 14, saturation * 0.86, 30),
+        "--accent-color": hslToHex(hue + accentOffset, saturation, 66),
+        "--text-primary": hslToHex(hue + 8, saturation * 0.35, 94),
+        "--text-secondary": hslToHex(hue + surfaceOffset, saturation * 0.3, 79),
+        "--text-placeholder": hslToHex(hue + surfaceOffset, saturation * 0.25, 68),
+        "--glow-color": hslToHex(hue + accentOffset, saturation, 72),
+      }
+    : {
+        "--bg-primary": hslToHex(hue, saturation * 0.82, lightPrimary),
+        "--bg-secondary": hslToHex(hue + surfaceOffset, saturation * 0.64, lightSecondary),
+        "--bg-tertiary": hslToHex(hue - 14, saturation * 0.9, lightTertiary),
+        "--accent-color": hslToHex(hue + accentOffset, saturation, 42),
+        "--text-primary": hslToHex(hue + 8, saturation * 0.58, 18),
+        "--text-secondary": hslToHex(hue + surfaceOffset, saturation * 0.45, 34),
+        "--text-placeholder": hslToHex(hue + surfaceOffset, saturation * 0.35, 45),
+        "--glow-color": hslToHex(hue + accentOffset, saturation, 54),
+      };
+
+  colors["--text-primary"] = ensureContrast(
+    colors["--text-primary"],
+    colors["--bg-primary"],
+    4.5,
+    isDark,
+  );
+  colors["--text-secondary"] = ensureContrast(
+    colors["--text-secondary"],
+    colors["--bg-secondary"],
+    4.5,
+    isDark,
+  );
+  colors["--text-placeholder"] = ensureContrast(
+    colors["--text-placeholder"],
+    colors["--bg-secondary"],
+    3,
+    isDark,
+  );
+  colors["--accent-color"] = ensureContrast(
+    colors["--accent-color"],
+    colors["--bg-primary"],
+    3,
+    isDark,
+  );
+
+  return colors;
+}
+
+function getGenerationSourceTheme(mode, sourceIndex) {
+  const sourceThemes = THEMES.normal.filter(
+    (theme) => !["default-light", "default-dark"].includes(theme.id),
+  );
+  const normalizedIndex = Math.floor(sourceIndex);
+  const source = sourceThemes[normalizedIndex % sourceThemes.length];
+  if (!source) return null;
+
+  if (source.id === "default-light" || source.id === "default-dark") {
+    const defaultId = mode === "dark" ? "default-dark" : "default-light";
+    return sourceThemes.find((theme) => theme.id === defaultId) || source;
+  }
+
+  const sourceIsDark = source.type === "dark";
+  if ((mode === "dark") === sourceIsDark) return source;
+
+  const variantColors = mode === "dark"
+    ? LIGHT_THEME_DARK_VARIANTS[source.id]
+    : DARK_THEME_LIGHT_VARIANTS[source.id];
+  return variantColors ? { ...source, type: mode, colors: { ...source.colors, ...variantColors } } : source;
+}
+
+function createSourceThemeVariation(mode, sourceTheme, variationIndex) {
+  const isDark = mode === "dark";
+  const sourceColors = sourceTheme?.colors || {};
+  const sourceHsl = Object.fromEntries(
+    GENERATED_THEME_COLOR_KEYS.map((role) => [role, hexToHsl(sourceColors[role])]),
+  );
+  const anchor = [
+    sourceHsl["--accent-color"],
+    sourceHsl["--glow-color"],
+    sourceHsl["--text-primary"],
+    sourceHsl["--text-secondary"],
+    sourceHsl["--bg-primary"],
+  ].find((hsl) => hsl && hsl.saturation >= 8) || {
+    hue: isDark ? 215 : 205,
+    saturation: 55,
+    lightness: isDark ? 55 : 42,
+  };
+  const normalizedVariationIndex = Math.floor(variationIndex);
+  const phase = normalizedVariationIndex % 4;
+  const mutationPlans = [
+    ["--accent-color"],
+    ["--accent-color", "--glow-color"],
+    ["--bg-tertiary", "--accent-color", "--text-placeholder"],
+    ["--bg-primary", "--bg-secondary", "--bg-tertiary", "--accent-color", "--glow-color"],
+  ];
+  const mutatedRoles = new Set(mutationPlans[phase]);
+  const hueJumps = [132, -112, 76, 178];
+  const hueJump = hueJumps[phase];
+  const colors = {};
+
+  GENERATED_THEME_COLOR_KEYS.forEach((role) => {
+    const source = sourceHsl[role];
+    const fallback = {
+      "--bg-primary": isDark ? 8 : 76,
+      "--bg-secondary": isDark ? 20 : 89,
+      "--bg-tertiary": isDark ? 33 : 68,
+      "--accent-color": isDark ? 64 : 44,
+      "--text-primary": isDark ? 94 : 18,
+      "--text-secondary": isDark ? 79 : 34,
+      "--text-placeholder": isDark ? 67 : 45,
+      "--glow-color": isDark ? 72 : 56,
+    }[role];
+    const base = source || {
+      hue: anchor.hue,
+      saturation: anchor.saturation,
+      lightness: fallback,
+    };
+
+    if (!mutatedRoles.has(role)) {
+      // Preserve the source theme's identity for untouched roles.
+      colors[role] = sourceColors[role] || hslToHex(base.hue, base.saturation, fallback);
+      return;
+    }
+
+    const isSurface = role.startsWith("--bg-");
+    const roleHueOffset = role === "--accent-color" ? 0 : role === "--glow-color" ? 24 : -18;
+    const targetLightness = isSurface
+      ? (role === "--bg-primary" ? (isDark ? 9 : 76) : role === "--bg-secondary" ? (isDark ? 21 : 88) : (isDark ? 34 : 68))
+      : role === "--accent-color"
+        ? (isDark ? 64 : 44)
+        : role === "--glow-color"
+          ? (isDark ? 72 : 56)
+          : fallback;
+    const targetSaturation = isSurface ? 62 : 88;
+    colors[role] = hslToHex(
+      base.hue + hueJump + roleHueOffset,
+      Math.min(96, Math.max(targetSaturation, base.saturation * 0.86)),
+      targetLightness,
+    );
+  });
+
+  colors["--text-primary"] = ensureContrast(colors["--text-primary"], colors["--bg-primary"], 4.5, isDark);
+  colors["--text-secondary"] = ensureContrast(colors["--text-secondary"], colors["--bg-secondary"], 4.5, isDark);
+  colors["--text-placeholder"] = ensureContrast(colors["--text-placeholder"], colors["--bg-secondary"], 3, isDark);
+  colors["--accent-color"] = ensureContrast(colors["--accent-color"], colors["--bg-primary"], 3, isDark);
+  return colors;
+}
+
+function createWildGeneratedTheme(mode, recipe, generationIndex) {
+  const isDark = mode === "dark";
+  let seed = (generationIndex + 1) * 97 + recipe.hue * 13;
+  const next = () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+  const baseHue = recipe.hue + (next() - 0.5) * 55;
+  const colors = {
+    "--bg-primary": hslToHex(baseHue + (next() - 0.5) * 42, 48 + next() * 28, isDark ? 6 + next() * 7 : 70 + next() * 14),
+    "--bg-secondary": hslToHex(baseHue + 60 + (next() - 0.5) * 70, 42 + next() * 30, isDark ? 17 + next() * 9 : 84 + next() * 10),
+    "--bg-tertiary": hslToHex(baseHue - 46 + (next() - 0.5) * 58, 48 + next() * 32, isDark ? 27 + next() * 10 : 62 + next() * 16),
+    "--accent-color": hslToHex(baseHue + 120 + (next() - 0.5) * 55, 62 + next() * 28, isDark ? 57 + next() * 17 : 35 + next() * 18),
+    "--text-primary": hslToHex(baseHue + 14, 20 + next() * 28, isDark ? 91 + next() * 6 : 12 + next() * 12),
+    "--text-secondary": hslToHex(baseHue - 22, 18 + next() * 28, isDark ? 73 + next() * 15 : 25 + next() * 18),
+    "--text-placeholder": hslToHex(baseHue + 80, 20 + next() * 28, isDark ? 62 + next() * 14 : 36 + next() * 16),
+    "--glow-color": hslToHex(baseHue + 180 + (next() - 0.5) * 65, 62 + next() * 28, isDark ? 65 + next() * 15 : 45 + next() * 18),
+  };
+  colors["--text-primary"] = ensureContrast(colors["--text-primary"], colors["--bg-primary"], 4.5, isDark);
+  colors["--text-secondary"] = ensureContrast(colors["--text-secondary"], colors["--bg-secondary"], 4.5, isDark);
+  colors["--text-placeholder"] = ensureContrast(colors["--text-placeholder"], colors["--bg-secondary"], 3, isDark);
+  colors["--accent-color"] = ensureContrast(colors["--accent-color"], colors["--bg-primary"], 3, isDark);
+  return colors;
+}
+
+function createGeneratedTheme(mode, recipe, generationIndex) {
+  // Deterministic 10-generation distribution:
+  // 4 source mutations, 3 curated recipes, and 3 bounded wild palettes.
+  const generationPattern = [
+    "source",
+    "recipe",
+    "wild",
+    "source",
+    "recipe",
+    "wild",
+    "source",
+    "recipe",
+    "source",
+    "wild",
+  ];
+  const cycleIndex = generationIndex % generationPattern.length;
+  const style = generationPattern[cycleIndex];
+
+  if (style === "wild") {
+    return createWildGeneratedTheme(mode, recipe, generationIndex);
+  }
+
+  if (style === "source") {
+    const sourcePositions = [0, 3, 6, 8];
+    const cycleNumber = Math.floor(generationIndex / generationPattern.length);
+    const sourceSlot =
+      cycleNumber * sourcePositions.length + sourcePositions.indexOf(cycleIndex);
+    const sourceTheme = getGenerationSourceTheme(mode, sourceSlot);
+    if (sourceTheme) return createSourceThemeVariation(mode, sourceTheme, generationIndex);
+  }
+
+  return createRecipeGeneratedTheme(mode, recipe);
+}
+
+function isUsableThemeColor(value) {
+  const color = String(value || "").trim();
+  return (
+    color === "transparent" ||
+    /^#[\da-f]{3,4}$/i.test(color) ||
+    /^#[\da-f]{6}(?:[\da-f]{2})?$/i.test(color) ||
+    /^(?:rgb|hsl)a?\([^)]*\)$/i.test(color)
+  );
+}
 
 export function getThemeRightColor(theme) {
   if (!theme || !theme.colors) return "#ffffff";
@@ -130,7 +551,7 @@ export const THEMES = {
         "--bg-secondary": "#006eff",
         "--bg-tertiary": "#287ff0",
         "--accent-color": "#ffffff",
-        "--text-primary": "#000000",
+        "--text-primary": "#f0f0f0",
         "--text-secondary": "#ffffff",
         "--text-placeholder": "#ffffff",
         "--glow-color": "#006eff",
@@ -252,35 +673,35 @@ export const THEMES = {
       id: "grey",
       name: "Passion",
       colors: ["#c9c9c9", "#4e4e4e"],
-      ui: ALIEN_DARK,
+      ui: makeDarkGradientUI("#050505"),
       type: "dark",
     },
     {
       id: "royal",
       name: "Royal",
       colors: ["#9500ebff", "#257bfcff"],
-      ui: ALIEN_DARK,
+      ui: makeDarkGradientUI("#6b16b8"),
       type: "dark",
     },
     {
       id: "deep-space",
       name: "Deep Space",
       colors: ["#302b63", "#1d0838ff"],
-      ui: ALIEN_DARK,
+      ui: makeDarkGradientUI("#30255f"),
       type: "dark",
     },
     {
       id: "ember",
       name: "Ember",
       colors: ["#480048", "#C04848"],
-      ui: ALIEN_DARK,
+      ui: makeDarkGradientUI("#8f3158"),
       type: "dark",
     },
     {
       id: "forest",
       name: "Forest",
       colors: ["#295038", "#10491eff"],
-      ui: ALIEN_DARK,
+      ui: makeDarkGradientUI("#1b6b3a"),
       type: "dark",
     },
   ],
@@ -354,19 +775,19 @@ const DARK_THEME_LIGHT_VARIANTS = {
     "--glow-color": "#ff4545",
   },
   "theme-2": {
-    "--bg-primary": "#e7f3d0",
-    "--bg-secondary": "#ffffff",
-    "--bg-tertiary": "#d7ef9a",
-    "--accent-color": "#496900",
-    "--text-primary": "#315000",
-    "--text-secondary": "#46621c",
-    "--text-placeholder": "#5e8500",
-    "--glow-color": "#78a900",
+    "--bg-primary": "#c9d378",
+    "--bg-secondary": "#fffaf0",
+    "--bg-tertiary": "#a2af41",
+    "--accent-color": "#627500",
+    "--text-primary": "#5a2d00",
+    "--text-secondary": "#7a4100",
+    "--text-placeholder": "#a15d00",
+    "--glow-color": "#ff8a00",
   },
   "theme-6": {
-    "--bg-primary": "#d8f7f7",
-    "--bg-secondary": "#fff4fb",
-    "--bg-tertiary": "#b8eeee",
+    "--bg-primary": "#b8eaea",
+    "--bg-secondary": "#89e4e6",
+    "--bg-tertiary": "#33d8db",
     "--accent-color": "#007b8a",
     "--text-primary": "#004b63",
     "--text-secondary": "#a00068",
@@ -375,8 +796,8 @@ const DARK_THEME_LIGHT_VARIANTS = {
   },
   "theme-7": {
     "--bg-primary": "#d9e2c5",
-    "--bg-secondary": "#f4f7e9",
-    "--bg-tertiary": "#c2d39e",
+    "--bg-secondary": "#dedede",
+    "--bg-tertiary": "#adc47e",
     "--accent-color": "#294b27",
     "--text-primary": "#396b2f",
     "--text-secondary": "#2f7d3a",
@@ -519,6 +940,9 @@ export class SettingsManager {
         }
         this.updateClockFormatState();
       }
+      if (key === "showEditableText" && this.els.editableTextToggle) {
+        this.els.editableTextToggle.checked = value === false;
+      }
       if (key === "userSavedThemes") {
         this.renderSavedThemes();
         this.renderMiniThemes();
@@ -564,11 +988,7 @@ export class SettingsManager {
     this.bindSimpleToggle(this.els.apps, "showApps", true);
     this.bindSimpleToggle(this.els.ai, "showAiTools", true);
     this.bindSimpleToggle(this.els.autoThemeToggle, "autoTheme", false);
-    this.bindSimpleToggle(
-      this.els.editableTextToggle,
-      "showEditableText",
-      true,
-    );
+    this.bindHideToggle(this.els.editableTextToggle, "showEditableText");
 
     if (this.els.shortcutsPosition) {
       this.els.shortcutsPosition.value =
@@ -587,6 +1007,8 @@ export class SettingsManager {
     if (this.els.dark) {
       this.els.dark.checked = state.get("darkMode") === true;
     }
+    this.updateDarkModeUpdatedBadge();
+    this.updateWeatherLocationBadge();
 
     if (this.els.widgetControl)
       this.els.widgetControl.value = state.get("widgetControl") || "all";
@@ -767,19 +1189,108 @@ export class SettingsManager {
     });
   }
 
-  applyRandomTheme() {
-    const pool = [
-      ...THEMES.normal.map((t) => ({ ...t, mode: "normal" })),
-      ...THEMES.gradient.map((t) => ({ ...t, mode: "gradient" })),
-    ];
+  generateCuratedTheme() {
+    const hasBackground =
+      document.body.classList.contains("has-custom-bg") ||
+      !!state.get("backgroundImage") ||
+      !!state.get("randomBgMode");
+    if (state.get("gradientModeActive") === true || hasBackground) return false;
 
-    const random = pool[Math.floor(Math.random() * pool.length)];
+    const mode = state.get("darkMode") === true ? "dark" : "light";
+    const generationIndex = generatedThemeIndex;
+    const recipe =
+      GENERATED_THEME_RECIPES[generationIndex % GENERATED_THEME_RECIPES.length];
+    generatedThemeIndex += 1;
 
-    if (random.mode === "gradient") {
-      this.applyGradientTheme(random);
-    } else {
-      this.applyNormalTheme(random);
+    this.disableAutoTheme();
+    this.applyNormalTheme({
+      name: "Generated Theme",
+      type: mode,
+      colors: createGeneratedTheme(mode, recipe, generationIndex),
+    });
+    return true;
+  }
+
+  isValidSavedTheme(theme) {
+    return Boolean(
+      theme &&
+        typeof theme.id === "string" &&
+        theme.id &&
+        theme.colors &&
+        typeof theme.colors === "object" &&
+        GENERATED_THEME_COLOR_KEYS.every(
+          (key) => isUsableThemeColor(theme.colors[key]),
+        ),
+    );
+  }
+
+  buildAutoThemePool() {
+    const pool = [];
+    const seen = new Set();
+    const add = (theme, mode, key) => {
+      if (!theme || seen.has(key)) return;
+      seen.add(key);
+      pool.push({ ...theme, mode, autoKey: key });
+    };
+
+    THEMES.normal.forEach((theme) => {
+      const baseMode = this.getThemeType(theme);
+      add(theme, "normal", `normal:${theme.id}:${baseMode}`);
+
+      const opposite = this.getDarkModeTheme(theme, baseMode !== "dark");
+      const hasDifferentColors =
+        opposite &&
+        JSON.stringify(opposite.colors) !== JSON.stringify(theme.colors);
+      if (hasDifferentColors) {
+        add(
+          opposite,
+          "normal",
+          `normal:${theme.id}:${this.getThemeType(opposite)}`,
+        );
+      }
+    });
+
+    THEMES.gradient.forEach((theme) =>
+      add(theme, "gradient", `gradient:${theme.id}`),
+    );
+
+    (state.get("userSavedThemes") || []).forEach((theme) => {
+      if (!this.isValidSavedTheme(theme)) return;
+      add(
+        theme,
+        "normal",
+        `saved:${theme.id}:${this.getThemeType(theme)}`,
+      );
+    });
+
+    return pool;
+  }
+
+  getCurrentAutoThemeKey() {
+    if (state.get("gradientModeActive") === true) {
+      return `gradient:${state.get("gradientThemeId") || ""}`;
     }
+    const normalThemeId = state.get("normalThemeId") || "custom";
+    const saved = (state.get("userSavedThemes") || []).some(
+      (theme) => theme?.id === normalThemeId && this.isValidSavedTheme(theme),
+    );
+    return `${saved ? "saved" : "normal"}:${normalThemeId}:${
+      state.get("darkMode") === true ? "dark" : "light"
+    }`;
+  }
+
+  applyRandomTheme() {
+    const pool = this.buildAutoThemePool();
+    if (pool.length === 0) return false;
+
+    const currentKey = this.getCurrentAutoThemeKey();
+    const candidates = pool.filter((theme) => theme.autoKey !== currentKey);
+    const available = candidates.length > 0 ? candidates : pool;
+    const random = available[Math.floor(Math.random() * available.length)];
+
+    if (random.mode === "gradient") this.applyGradientTheme(random);
+    else this.applyNormalTheme(random);
+    return true;
   }
 
   disableAutoTheme() {
@@ -865,6 +1376,9 @@ export class SettingsManager {
     }
 
     document.addEventListener("click", (e) => {
+      if (e.target.closest?.(".ydd-custom-modal-overlay, #custom-modal-overlay")) {
+        return;
+      }
       if (
         this.els.popup.classList.contains("visible") &&
         !this.els.popup.contains(e.target) &&
@@ -920,6 +1434,7 @@ export class SettingsManager {
         }
         this.disableAutoTheme();
         this.applyDarkModePreference(this.els.dark.checked);
+        this.recordDarkModeToggleUse();
 
         import("../utils.js").then((utils) => {
           utils.completeDefaultTask("dt-5");
@@ -992,6 +1507,7 @@ export class SettingsManager {
               this.updateIconInversion(e.target.value);
           }
           state.set("normalThemeId", "custom");
+          this.applyCustomThemeUI();
           this.updateWarningText();
         }
       });
@@ -1067,6 +1583,29 @@ export class SettingsManager {
     if (shouldShowFirstHint || shouldShowRepeatHint) {
       this.showMiniSettingsHint();
     }
+  }
+
+  showThemeGenerationHint() {
+    if (state.get("themeGenerationHintShown") === true) return;
+    if (!state.set("themeGenerationHintShown", true)) return;
+
+    const hint = document.createElement("div");
+    hint.className = "mini-settings-hint";
+    hint.setAttribute("role", "status");
+    hint.setAttribute("aria-live", "polite");
+    hint.textContent = "Use “Save Current Theme” to save this generated theme.";
+    const timer = document.createElement("div");
+    timer.className = "zen-notice-timer";
+    timer.setAttribute("aria-hidden", "true");
+    hint.style.setProperty("--zen-notice-duration", "7000ms");
+    hint.appendChild(timer);
+    document.body.appendChild(hint);
+
+    window.requestAnimationFrame(() => hint.classList.add("visible"));
+    window.setTimeout(() => {
+      hint.classList.remove("visible");
+      window.setTimeout(() => hint.remove(), 300);
+    }, 7000);
   }
 
   showMiniSettingsHint() {
@@ -1337,6 +1876,25 @@ export class SettingsManager {
   }
 
   applyNormalTheme(theme) {
+    [
+      "--bg-interactive",
+      "--bg-interactive-hover",
+      "--bg-hover-translucent",
+      "--border-color",
+      "--switch-bg",
+      "--switch-border",
+      "--switch-thumb",
+      "--switch-active-bg",
+      "--form-control-bg",
+      "--form-control-text",
+      "--form-control-placeholder",
+      "--form-control-border",
+      "--widget-bg",
+      "--widget-border",
+      "--text-color",
+      "--text-shadow",
+    ].forEach((property) => document.body.style.removeProperty(property));
+
     state.set("gradientModeActive", false);
     state.set("transparencyActive", false);
     document.body.classList.remove("gradient-mode-active");
@@ -1356,9 +1914,16 @@ export class SettingsManager {
       if (key === "--bg-tertiary") this.updateIconInversion(val);
     });
 
+    const isDarkType = this.getThemeType(theme) === "dark";
+    const isBuiltInTheme = THEMES.normal.some((builtIn) => builtIn.id === theme.id);
+    if (!isBuiltInTheme) {
+      Object.entries(deriveCustomThemeUI(theme.colors, isDarkType)).forEach(([key, val]) => {
+        document.body.style.setProperty(key, val);
+      });
+    }
+
     this.syncColorPickers(theme.colors);
 
-    const isDarkType = this.getThemeType(theme) === "dark";
     state.set("darkMode", isDarkType);
     if (this.els.dark) this.els.dark.checked = isDarkType;
     document.body.setAttribute("data-theme", isDarkType ? "dark" : "light");
@@ -1371,6 +1936,34 @@ export class SettingsManager {
     this.updateAutoThemeGlowState();
     this.updateDarkModeControlState();
     document.body.classList.remove("force-white-text");
+  }
+
+  applyCustomThemeUI(colors = {}) {
+    if (state.get("gradientModeActive") === true || this.hasCustomBackground()) return;
+
+    const colorKeys = [
+      "--bg-primary",
+      "--bg-secondary",
+      "--bg-tertiary",
+      "--accent-color",
+      "--text-primary",
+      "--text-secondary",
+      "--text-placeholder",
+    ];
+    const resolvedColors = { ...colors };
+    colorKeys.forEach((key) => {
+      if (!resolvedColors[key]) {
+        resolvedColors[key] =
+          document.body.style.getPropertyValue(key).trim() ||
+          getComputedStyle(document.body).getPropertyValue(key).trim();
+      }
+    });
+
+    Object.entries(
+      deriveCustomThemeUI(resolvedColors, state.get("darkMode") === true),
+    ).forEach(([key, val]) => {
+      document.body.style.setProperty(key, val);
+    });
   }
 
   isDarkModeAvailableForTheme(theme) {
@@ -1499,6 +2092,62 @@ export class SettingsManager {
     window.__fullSettingsModalInstance?._updateControlAvailability?.();
   }
 
+  updateDarkModeUpdatedBadge() {
+    const hidden =
+      (Number(state.get("darkModeToggleUseCount")) || 0) >= 20;
+    const miniSticker = document.getElementById("dark-mode-updated-sticker");
+    if (miniSticker) miniSticker.hidden = hidden;
+    window.__fullSettingsModalInstance?.updateDarkModeUpdatedBadge?.(hidden);
+  }
+
+  updateWeatherLocationBadge() {
+    const hidden =
+      (Number(state.get("weatherLocationSaveCount")) || 0) >= 2;
+    const miniSticker = document.getElementById(
+      "weather-location-updated-sticker",
+    );
+    if (miniSticker) miniSticker.hidden = hidden;
+    window.__fullSettingsModalInstance?.updateWeatherLocationBadge?.(hidden);
+  }
+
+  recordWeatherLocationSaveUse() {
+    const currentCount = Math.max(
+      0,
+      Number(state.get("weatherLocationSaveCount")) || 0,
+    );
+    const nextCount = Math.min(2, currentCount + 1);
+    if (!state.set("weatherLocationSaveCount", nextCount)) return;
+    this.updateWeatherLocationBadge();
+  }
+
+  recordThemePresetUse(themeId) {
+    const key =
+      themeId === "theme-8"
+        ? "lavenderMistThemeUseCount"
+        : themeId === "dawn-bloom"
+          ? "dawnBloomThemeUseCount"
+          : null;
+    if (!key || (Number(state.get(key)) || 0) >= 1) return;
+    if (!state.set(key, 1)) return;
+    window.__fullSettingsModalInstance?.updateThemeBadges?.();
+  }
+
+  recordThemeGeneratorUse() {
+    if ((Number(state.get("themeGeneratorUseCount")) || 0) >= 1) return;
+    if (!state.set("themeGeneratorUseCount", 1)) return;
+    window.__fullSettingsModalInstance?.updateThemeGeneratorBadge?.(true);
+  }
+
+  recordDarkModeToggleUse() {
+    const currentCount = Math.max(
+      0,
+      Number(state.get("darkModeToggleUseCount")) || 0,
+    );
+    const nextCount = Math.min(20, currentCount + 1);
+    if (!state.set("darkModeToggleUseCount", nextCount)) return;
+    this.updateDarkModeUpdatedBadge();
+  }
+
   applyCustomColors() {
     if (state.get("gradientModeActive")) return;
 
@@ -1527,6 +2176,7 @@ export class SettingsManager {
         if (v === "--bg-tertiary") this.updateIconInversion(saved);
       }
     });
+    this.applyCustomThemeUI(colors);
     this.syncColorPickers(colors);
     document.body.style.setProperty("--icon-filter", "grayscale(0%)");
     document.body.style.setProperty("--icon-opacity", "1");
@@ -1895,6 +2545,14 @@ export class SettingsManager {
     });
   }
 
+  bindHideToggle(el, key) {
+    if (!el) return;
+    el.checked = state.get(key) === false;
+    el.addEventListener("change", () => {
+      state.set(key, !el.checked);
+    });
+  }
+
   setupMiscListeners() {
     if (this.els.locInput) {
       this.els.locInput.addEventListener("keydown", (e) => {
@@ -1902,7 +2560,10 @@ export class SettingsManager {
       });
     }
     if (this.els.locSave) {
-      this.els.locSave.addEventListener("click", () => this.searchLocation());
+      this.els.locSave.addEventListener("click", () => {
+        this.recordWeatherLocationSaveUse();
+        this.searchLocation();
+      });
     }
     if (this.els.locDetect) {
       this.els.locDetect.addEventListener("click", () => this.detectLocation());
@@ -2541,10 +3202,16 @@ export class SettingsManager {
         title: button.getAttribute("title"),
       });
       button.replaceChildren();
-      const spinner = document.createElement("span");
-      spinner.className = "background-loading-spinner";
-      spinner.setAttribute("aria-hidden", "true");
-      button.appendChild(spinner);
+      const loadingIndicator = document.createElement("span");
+      const animationsDisabled =
+        state.get("disableAnimations") === true ||
+        document.documentElement.classList.contains("disable-animations");
+      loadingIndicator.className = animationsDisabled
+        ? "background-loading-indicator"
+        : "background-loading-spinner";
+      loadingIndicator.setAttribute("aria-hidden", "true");
+      if (animationsDisabled) loadingIndicator.textContent = "⌛";
+      button.appendChild(loadingIndicator);
       button.disabled = true;
       button.classList.add("is-loading");
       button.setAttribute("aria-busy", "true");

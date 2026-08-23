@@ -15,6 +15,11 @@ import { ZenModeController } from "./modules/zenMode.js";
 import { initializeDefaultTasks } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.documentElement.classList.toggle(
+    "disable-animations",
+    state.get("disableAnimations") === true,
+  );
+
   const initialize = (name, factory) => {
     try {
       return factory();
@@ -107,6 +112,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (key === "showEditableText") {
       const welcomeEl = document.getElementById("welcome-text");
       if (welcomeEl) welcomeEl.classList.toggle("hidden", value === false);
+    }
+    if (key === "disableAnimations") {
+      document.documentElement.classList.toggle("disable-animations", value === true);
     }
   });
 

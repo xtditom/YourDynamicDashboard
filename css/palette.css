@@ -245,6 +245,19 @@ body.gradient-dark.transparency-active .cp-modal {
   border-style: dashed;
 }
 
+.cp-new-badge {
+  margin-left: auto;
+  padding: 0.12rem 0.3rem;
+  border: 1px solid #141414;
+  border-radius: 4px;
+  background: #ffe05b;
+  color: #141414;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
 .cp-empty-msg {
   padding: 32px;
   text-align: center;

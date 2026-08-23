@@ -95,6 +95,17 @@
   }
 }
 
+/* User-controlled motion switch. Keep this broad so every component,
+   pseudo-element, keyframe, and transition follows the same preference. */
+html.disable-animations,
+html.disable-animations *,
+html.disable-animations *::before,
+html.disable-animations *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
 @keyframes ydd-tremble {
   0%,
   100% {

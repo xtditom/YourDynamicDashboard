@@ -144,9 +144,9 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
 }
 .shortcut-editor-item input {
   width: 100%;
-  background-color: var(--bg-interactive);
-  border: 1px solid transparent;
-  color: var(--text-primary);
+  background-color: var(--form-control-bg);
+  border: 1px solid var(--form-control-border);
+  color: var(--form-control-text);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -216,12 +216,12 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
 #fs-add-shortcut-form input {
   width: 100%;
   box-sizing: border-box;
-  background-color: var(--bg-interactive, rgba(255, 255, 255, 0.08));
-  color: var(--text-primary, #f9fafb) !important;
+  background-color: var(--form-control-bg, var(--bg-interactive));
+  color: var(--form-control-text, var(--text-primary)) !important;
   caret-color: var(--accent-color, #ffffff);
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid var(--form-control-border, var(--border-color));
   outline: none;
   font-size: 0.9rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
@@ -233,7 +233,7 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
 }
 #add-shortcut-form input::placeholder,
 #fs-add-shortcut-form input::placeholder {
-  color: var(--text-secondary, var(--text-placeholder, #b8c0cc)) !important;
+  color: var(--form-control-placeholder, var(--text-secondary, var(--text-placeholder, #b8c0cc))) !important;
   opacity: 1;
   font-size: 0.88rem;
 }
@@ -243,11 +243,11 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
   max-width: 480px;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  background-color: var(--bg-interactive, rgba(255, 255, 255, 0.08));
-  color: var(--accent-color);
+  background-color: var(--form-control-bg, var(--bg-interactive, rgba(255, 255, 255, 0.08)));
+  color: var(--form-control-text, var(--accent-color));
   font-weight: 600;
   font-size: 0.92rem;
-  border: 1px solid transparent;
+  border: 1px solid var(--form-control-border, transparent);
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.1s ease, color 0.2s ease;
   display: flex;
@@ -256,7 +256,7 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
 }
 #add-shortcut-form button:hover,
 #fs-add-shortcut-form button:hover {
-  background-color: var(--bg-tertiary, rgba(255, 255, 255, 0.14));
+  background-color: var(--bg-interactive-hover, var(--bg-tertiary, rgba(255, 255, 255, 0.14)));
   transform: translateY(-1px);
 }
 #add-shortcut-form button:active,

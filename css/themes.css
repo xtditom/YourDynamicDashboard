@@ -61,19 +61,253 @@ body.gradient-mode-active.transparency-active #search-dropdown {
 
 /* Light gradient glass needs a darker track so an off switch remains obvious. */
 body.gradient-mode-active.gradient-light .toggle-switch .slider {
-  background-color: rgba(48, 38, 78, 0.32) !important;
-  border: 1px solid rgba(48, 38, 78, 0.42);
+  background-color: var(--switch-bg) !important;
+  border-color: var(--switch-border) !important;
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
 }
 
 body.gradient-mode-active.gradient-light .toggle-switch .slider:before {
-  background-color: #ffffff !important;
+  background-color: var(--switch-thumb) !important;
   box-shadow: 0 1px 3px rgba(48, 38, 78, 0.35);
 }
 
 body.gradient-mode-active.gradient-light
   .toggle-switch input:checked + .slider {
-  background-color: var(--accent-color) !important;
+  background-color: var(--switch-active-bg) !important;
+}
+
+/* Theme-specific control colors: keep switches and editable fields distinct
+   without changing the primary palette used throughout each theme. */
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) {
+  --bg-interactive: #e1e5e9;
+  --bg-interactive-hover: #d1d7dd;
+  --border-color: #aeb6c0;
+  --switch-bg: #737c85;
+  --switch-border: #45505b;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #26313c;
+  --form-control-bg: #eef1f4;
+  --form-control-text: #17202a;
+  --form-control-placeholder: #5e6974;
+  --form-control-border: #8995a1;
+}
+
+body[data-theme-id="theme-3"][data-theme="light"]:not(.has-custom-bg) {
+  --bg-interactive: #075bb7;
+  --bg-interactive-hover: #0b72dc;
+  --border-color: #9fcfff;
+  --switch-bg: #1b4d87;
+  --switch-border: #c1e0ff;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #073f82;
+  --form-control-bg: #0755ad;
+  --form-control-text: #ffffff;
+  --form-control-placeholder: #d9edff;
+  --form-control-border: #abd5ff;
+}
+
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) {
+  --bg-interactive: #e4f7eb;
+  --bg-interactive-hover: #c8ebd4;
+  --border-color: #75ad88;
+  --switch-bg: #497a5b;
+  --switch-border: #2d5e42;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #328558;
+  --form-control-bg: #f5fff8;
+  --form-control-text: #245f3f;
+  --form-control-placeholder: #4c7d61;
+  --form-control-border: #73ac87;
+}
+
+body[data-theme-id="theme-5"][data-theme="light"]:not(.has-custom-bg) {
+  --bg-interactive: #f6bad8;
+  --bg-interactive-hover: #ed9fca;
+  --border-color: #c85c91;
+  --switch-bg: #687482;
+  --switch-border: #45505b;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #e83d97;
+  --form-control-bg: #fff4fa;
+  --form-control-text: #8b245e;
+  --form-control-placeholder: #9f5d7c;
+  --form-control-border: #c85c91;
+}
+
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) {
+  --bg-interactive: #ece7ff;
+  --bg-interactive-hover: #ddd4ff;
+  --border-color: #8d7cc2;
+  --switch-bg: #665a91;
+  --switch-border: #463b6d;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #6953b8;
+  --form-control-bg: #fbfaff;
+  --form-control-text: #3c2e6d;
+  --form-control-placeholder: #756991;
+  --form-control-border: #8d7cc2;
+}
+
+body[data-theme-id="theme-1"][data-theme="light"]:not(.has-custom-bg) {
+  --bg-interactive: #fff0f0;
+  --bg-interactive-hover: #ffdada;
+  --border-color: #cf6060;
+  --switch-bg: #8c4f4f;
+  --switch-border: #6e3030;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #c61a1a;
+  --form-control-bg: #fffafa;
+  --form-control-text: #8e1919;
+  --form-control-placeholder: #9d5d5d;
+  --form-control-border: #cf6060;
+}
+
+body[data-theme-id="theme-2"][data-theme="light"]:not(.has-custom-bg) {
+  --bg-interactive: #fff1b8;
+  --bg-interactive-hover: #ffe58a;
+  --border-color: #c78818;
+  --switch-bg: #9b7a26;
+  --switch-border: #6d4e08;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #8f4d00;
+  --form-control-bg: #fffdf3;
+  --form-control-text: #5a2d00;
+  --form-control-placeholder: #9b5d00;
+  --form-control-border: #c78818;
+}
+
+body[data-theme-id="theme-6"][data-theme="light"]:not(.has-custom-bg) {
+  --bg-interactive: #e0f8f8;
+  --bg-interactive-hover: #beecec;
+  --border-color: #278b99;
+  --switch-bg: #467d87;
+  --switch-border: #2e5e67;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #007b8a;
+  --form-control-bg: #fbffff;
+  --form-control-text: #075069;
+  --form-control-placeholder: #657f91;
+  --form-control-border: #278b99;
+}
+
+body[data-theme-id="theme-7"][data-theme="light"]:not(.has-custom-bg) {
+  --bg-interactive: #e5edd7;
+  --bg-interactive-hover: #d1dfbb;
+  --border-color: #789458;
+  --switch-bg: #64784b;
+  --switch-border: #465a31;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #294b27;
+  --form-control-bg: #fbfff4;
+  --form-control-text: #385d31;
+  --form-control-placeholder: #657554;
+  --form-control-border: #789458;
+}
+
+/* Dark variants also receive distinct editable fields and switch tracks. */
+body[data-theme-id="theme-1"][data-theme="dark"]:not(.has-custom-bg) {
+  --bg-interactive: #300d0d;
+  --bg-interactive-hover: #4a1515;
+  --border-color: #f45b5b;
+  --switch-bg: #6d2e2e;
+  --switch-border: #ff7777;
+  --switch-active-bg: #ff1010;
+  --form-control-bg: #260909;
+  --form-control-border: #ff5c5c;
+}
+
+body[data-theme-id="theme-2"][data-theme="dark"]:not(.has-custom-bg) {
+  --bg-interactive: #374d11;
+  --bg-interactive-hover: #4d6916;
+  --border-color: #b9ec22;
+  --switch-bg: #60752b;
+  --switch-border: #c8ff00;
+  --switch-active-bg: #9fc900;
+  --form-control-bg: #283b09;
+  --form-control-border: #b9ec22;
+}
+
+body[data-theme-id="theme-6"][data-theme="dark"]:not(.has-custom-bg) {
+  --bg-interactive: #1a285f;
+  --bg-interactive-hover: #28387c;
+  --border-color: #56efff;
+  --switch-bg: #405494;
+  --switch-border: #74f5ff;
+  --switch-active-bg: #00cfe8;
+  --form-control-bg: #111b4b;
+  --form-control-border: #56efff;
+}
+
+body[data-theme-id="theme-7"][data-theme="dark"]:not(.has-custom-bg) {
+  --bg-interactive: #373b31;
+  --bg-interactive-hover: #4a5140;
+  --border-color: #a9c279;
+  --switch-bg: #586448;
+  --switch-border: #a9c279;
+  --switch-active-bg: #789e4f;
+  --form-control-bg: #242820;
+  --form-control-border: #a9c279;
+}
+
+body[data-theme-id="theme-3"][data-theme="dark"]:not(.has-custom-bg) {
+  --bg-interactive: #214a78;
+  --bg-interactive-hover: #2c6197;
+  --border-color: #7cbaf0;
+  --switch-bg: #3d648f;
+  --switch-border: #9fc8ee;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #1475c9;
+  --form-control-bg: #173657;
+  --form-control-text: #eff9ff;
+  --form-control-placeholder: #b9d9f1;
+  --form-control-border: #7cbaf0;
+}
+
+body[data-theme-id="theme-4"][data-theme="dark"]:not(.has-custom-bg) {
+  --bg-interactive: #285738;
+  --bg-interactive-hover: #34734a;
+  --border-color: #91c9a3;
+  --switch-bg: #507b5d;
+  --switch-border: #a4d3b1;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #2f9a5b;
+  --form-control-bg: #1b3826;
+  --form-control-text: #e6ffed;
+  --form-control-placeholder: #bde4c8;
+  --form-control-border: #91c9a3;
+}
+
+body[data-theme-id="theme-5"][data-theme="dark"]:not(.has-custom-bg) {
+  --bg-interactive: #652b50;
+  --bg-interactive-hover: #7c3562;
+  --border-color: #efa9cf;
+  --switch-bg: #7e4b6e;
+  --switch-border: #efa9cf;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #c63b82;
+  --form-control-bg: #4c203b;
+  --form-control-text: #ffeaf4;
+  --form-control-placeholder: #f1b9d2;
+  --form-control-border: #efa9cf;
+}
+
+body[data-theme-id="theme-8"][data-theme="dark"]:not(.has-custom-bg) {
+  --bg-interactive: #493d70;
+  --bg-interactive-hover: #5d4e8c;
+  --border-color: #c6b9ff;
+  --switch-bg: #665a91;
+  --switch-border: #c6b9ff;
+  --switch-thumb: #ffffff;
+  --switch-active-bg: #795be0;
+  --form-control-bg: #362d59;
+  --form-control-text: #f2efff;
+  --form-control-placeholder: #d1c8f2;
+  --form-control-border: #c6b9ff;
+}
+
+/* The default Dark theme uses a black checked track for maximum contrast. */
+body[data-theme-id="default-dark"][data-theme="dark"]:not(.has-custom-bg) {
+  --switch-active-bg: #000000;
 }
 
 body.gradient-mode-active .widget-container {
@@ -202,6 +436,29 @@ body.has-custom-bg {
   --text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.7) !important;
   --widget-bg: rgba(20, 20, 20, 0.4) !important;
   --widget-border: rgba(255, 255, 255, 0.15) !important;
+  --switch-bg: rgba(12, 21, 37, 0.72) !important;
+  --switch-border: rgba(255, 255, 255, 0.86) !important;
+  --switch-thumb: #ffffff !important;
+  --switch-active-bg: rgba(20, 132, 88, 0.96) !important;
+  --form-control-bg: rgba(8, 14, 25, 0.62) !important;
+  --form-control-text: #ffffff !important;
+  --form-control-placeholder: rgba(255, 255, 255, 0.76) !important;
+  --form-control-border: rgba(255, 255, 255, 0.74) !important;
+}
+
+/* Keep editable controls legible on both light and dark wallpaper areas. */
+body.has-custom-bg .settings-button,
+body.has-custom-bg #add-shortcut-form button,
+body.has-custom-bg #fs-add-shortcut-form button {
+  background-color: var(--form-control-bg) !important;
+  color: var(--form-control-text) !important;
+  border-color: var(--form-control-border) !important;
+}
+
+body.has-custom-bg .settings-button:hover,
+body.has-custom-bg #add-shortcut-form button:hover,
+body.has-custom-bg #fs-add-shortcut-form button:hover {
+  background-color: rgba(20, 36, 60, 0.84) !important;
 }
 
 body.has-custom-bg .theme-preset-button,

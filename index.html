@@ -433,7 +433,17 @@
           </div>
           <div class="api-key-section">
             <div class="label">
-              <span>Weather Location</span>
+              <span class="mini-weather-location-label">
+                <span>Weather Location</span>
+                <span id="weather-location-updated-sticker" class="fs-updated-sticker" aria-label="Updated">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+                    <title>Updated</title>
+                    <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+                    <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
+                  </svg>
+                </span>
+              </span>
             </div>
             <div class="api-key-input-wrapper" style="display: flex; gap: 8px">
               <input
@@ -552,7 +562,17 @@
         <div id="look-content" class="settings-pane">
           <div class="setting-row">
             <div class="label">
-              <span>Dark / Light</span><small>Toggle the selected theme's appearance.</small>
+              <span class="mini-dark-mode-label">
+                Dark / Light
+                <span id="dark-mode-updated-sticker" class="fs-updated-sticker">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+                    <title>Updated</title>
+                    <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+                    <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
+                  </svg>
+                </span>
+              </span><small>Toggle the selected theme's appearance.</small>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="dark-mode-toggle" aria-label="Toggle selected theme appearance" />

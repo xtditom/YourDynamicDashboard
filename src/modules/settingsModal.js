@@ -83,6 +83,7 @@ export class FullSettingsModal {
     this._previousFocus = null;
     this._locationRequestId = 0;
     this._locationController = null;
+    this._generateThemeCooldown = false;
 
     window.__fullSettingsModalInstance = this;
 
@@ -115,6 +116,18 @@ export class FullSettingsModal {
       else if (c) el.appendChild(c);
     });
     return el;
+  }
+
+  _newSticker(className = "fs-new-sticker") {
+    return this._el("span", {
+      className,
+      innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
+        <title>New</title>
+        <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+        <text x="39" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">NEW</text>
+      </svg>`,
+    });
   }
 
   _row(label, desc, control) {
@@ -266,6 +279,7 @@ export class FullSettingsModal {
     const yearSpan = footer.querySelector(".fs-copyright-year");
     const year = new Date().getFullYear();
     if (year > 2025) yearSpan.textContent = `2025 - ${year}`;
+    this.els.footer = footer;
 
     // Assemble
     this.modal.append(titlebar, tabs, content, footer);
@@ -285,12 +299,14 @@ export class FullSettingsModal {
     const dateToggle = this._toggle("fs-date-toggle");
     const greetToggle = this._toggle("fs-hide-greetings-toggle");
     const editableToggle = this._toggle("fs-editable-text-toggle");
+    const disableAnimationsToggle = this._toggle("fs-disable-animations-toggle");
 
     this.els.fsClockType = clockToggle.input;
     this.els.fsClockFormat = formatToggle.input;
     this.els.fsDateToggle = dateToggle.input;
     this.els.fsHideGreetings = greetToggle.input;
     this.els.fsEditableText = editableToggle.input;
+    this.els.fsDisableAnimations = disableAnimationsToggle.input;
 
     const formatRow = this._row(
       "Clock Format",
@@ -298,6 +314,31 @@ export class FullSettingsModal {
       formatToggle.wrapper,
     );
     this.els.fsClockFormatRow = formatRow;
+
+    const disableAnimationsRow = this._row(
+      "Disable Animations/Transitions",
+      "Turn off all visual animations and transitions.",
+      disableAnimationsToggle.wrapper,
+    );
+    const disableAnimationsLabel = disableAnimationsRow.querySelector(
+      ".label > span",
+    );
+    if (disableAnimationsLabel) {
+      disableAnimationsLabel.classList.add("fs-disable-animations-label");
+      if ((Number(state.get("disableAnimationsToggleCount")) || 0) < 10) {
+        const newSticker = this._el("span", {
+          className: "fs-new-sticker",
+          innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
+            <title>New</title>
+            <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            <text x="39" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">NEW</text>
+          </svg>`,
+        });
+        disableAnimationsLabel.appendChild(newSticker);
+        this.els.fsDisableAnimationsNewSticker = newSticker;
+      }
+    }
 
     pane.appendChild(
       this._section("Clock & Display", [
@@ -314,10 +355,11 @@ export class FullSettingsModal {
           greetToggle.wrapper,
         ),
         this._row(
-          "Show Editable Text",
-          "Display custom text under greeting.",
+          "Hide Editable Text",
+          "Hide custom text under greeting.",
           editableToggle.wrapper,
         ),
+        disableAnimationsRow,
       ]),
     );
 
@@ -350,10 +392,25 @@ export class FullSettingsModal {
     this.els.fsLocGps = locGps;
 
     const locRow = this._el("div", { className: "api-key-section" });
+    const weatherLocationLabel = this._el("span", {
+      className: "fs-weather-location-label",
+    }, [this._el("span", { textContent: "Weather Location" })]);
+    this.els.fsWeatherLocationUpdatedSticker = null;
+    if ((Number(state.get("weatherLocationSaveCount")) || 0) < 2) {
+      const updatedSticker = this._el("span", {
+        className: "fs-updated-sticker",
+        innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+          <title>Updated</title>
+          <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+          <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
+        </svg>`,
+      });
+      weatherLocationLabel.appendChild(updatedSticker);
+      this.els.fsWeatherLocationUpdatedSticker = updatedSticker;
+    }
     locRow.appendChild(
-      this._el("div", { className: "label" }, [
-        this._el("span", { textContent: "Weather Location" }),
-      ]),
+      this._el("div", { className: "label" }, [weatherLocationLabel]),
     );
     const locWrapper = this._el("div", {
       style: { display: "flex", gap: "8px" },
@@ -473,6 +530,24 @@ export class FullSettingsModal {
       "Toggle this theme's dark or light appearance.",
       darkToggle.wrapper,
     );
+    const darkModeLabel = darkRow.querySelector(".label > span");
+    this.els.fsDarkUpdatedSticker = null;
+    if (darkModeLabel) {
+      darkModeLabel.classList.add("fs-dark-mode-label");
+      if ((Number(state.get("darkModeToggleUseCount")) || 0) < 20) {
+        const updatedSticker = this._el("span", {
+          className: "fs-updated-sticker",
+          innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+            <title>Updated</title>
+            <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
+          </svg>`,
+        });
+        darkModeLabel.appendChild(updatedSticker);
+        this.els.fsDarkUpdatedSticker = updatedSticker;
+      }
+    }
     this.els.fsDarkRow = darkRow;
 
     const autoThemeRow = this._row(
@@ -591,11 +666,24 @@ export class FullSettingsModal {
       ]),
     );
 
-    // Advanced Colors
+    // Advanced Options
+    const generateThemeBtn = this._el("button", {
+      type: "button",
+      className: "settings-button fs-generate-theme-btn",
+      textContent: "Generate a Theme",
+    });
+    this.els.fsThemeGeneratorNewSticker = null;
+    if ((Number(state.get("themeGeneratorUseCount")) || 0) < 1) {
+      const newSticker = this._newSticker("fs-generate-new-sticker");
+      generateThemeBtn.appendChild(newSticker);
+      this.els.fsThemeGeneratorNewSticker = newSticker;
+    }
+    this.els.fsGenerateThemeBtn = generateThemeBtn;
+
     const colorNote = this._el("p", {
       className: "settings-note hidden",
       id: "fs-color-warning",
-      textContent: "(Switch to Normal Theme to use Advanced Colors)",
+      textContent: "(Switch to a normal theme without a wallpaper to use Advanced Options)",
       style: {
         color: "var(--text-secondary)",
         fontWeight: "bold",
@@ -629,7 +717,9 @@ export class FullSettingsModal {
       colorGrid.appendChild(this._row(def.label, null, picker));
     });
 
-    pane.appendChild(this._section("Advanced Colors", [colorNote, colorGrid]));
+    pane.appendChild(
+      this._section("Advanced Options", [generateThemeBtn, colorNote, colorGrid]),
+    );
 
     return pane;
   }
@@ -841,6 +931,12 @@ export class FullSettingsModal {
     this.els.titlebar.addEventListener("mousedown", (e) =>
       this._handleDragStart(e),
     );
+    this.els.footer.addEventListener("mousedown", (e) => {
+      // The entire footer is a drag handle. Let the footer link receive its
+      // normal click/open behavior instead of starting a modal drag.
+      if (e.target.closest("a")) return;
+      this._handleDragStart(e);
+    });
 
     // Open full settings button (in mini popup)
     const openBtn = document.getElementById("open-full-settings-btn");
@@ -851,7 +947,11 @@ export class FullSettingsModal {
     this._bindToggle(this.els.fsClockFormat, "clockFormat", "24");
     this._bindToggle(this.els.fsDateToggle, "showDate", true);
     this._bindToggle(this.els.fsHideGreetings, "hideGreetings", true);
-    this._bindToggle(this.els.fsEditableText, "showEditableText", true);
+    this._bindHideToggle(this.els.fsEditableText, "showEditableText");
+    this.els.fsDisableAnimations.addEventListener("change", () => {
+      state.set("disableAnimations", this.els.fsDisableAnimations.checked);
+      this._recordDisableAnimationsToggle();
+    });
     this._bindToggle(this.els.fsTempUnit, "tempUnit", "imperial");
     this._bindToggle(this.els.fsTempDisplay, "tempDisplayMode", true);
 
@@ -875,7 +975,10 @@ export class FullSettingsModal {
     });
 
     // Location search
-    this.els.fsLocSave.addEventListener("click", () => this._searchLocation());
+    this.els.fsLocSave.addEventListener("click", () => {
+      this._sm()?.recordWeatherLocationSaveUse?.();
+      this._searchLocation();
+    });
     this.els.fsLocInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") this._searchLocation();
     });
@@ -891,6 +994,7 @@ export class FullSettingsModal {
       if (sm) sm.disableAutoTheme();
       if (sm) {
         sm.applyDarkModePreference?.(this.els.fsDark.checked);
+        sm.recordDarkModeToggleUse?.();
       }
     });
 
@@ -994,11 +1098,36 @@ export class FullSettingsModal {
           }
         }
         state.set("normalThemeId", "custom");
+        sm?.applyCustomThemeUI?.();
         this._updateColorControlsState();
       });
     }
 
     // Save theme
+    this.els.fsGenerateThemeBtn.addEventListener("click", () => {
+      if (this._generateThemeCooldown) return;
+      const sm = this._sm();
+      if (!sm?.generateCuratedTheme) return;
+
+      this._generateThemeCooldown = true;
+      this._updateColorControlsState();
+      try {
+        const generated = sm.generateCuratedTheme();
+        if (generated) {
+          sm.recordThemeGeneratorUse?.();
+          sm.showThemeGenerationHint?.();
+        }
+        this._syncColorPickers();
+      } catch (error) {
+        console.error("Theme generation failed:", error);
+      } finally {
+        window.setTimeout(() => {
+          this._generateThemeCooldown = false;
+          this._updateColorControlsState();
+        }, 1000);
+      }
+    });
+
     this.els.fsSaveThemeBtn.addEventListener("click", () => {
       const sm = this._sm();
       if (sm) {
@@ -1092,6 +1221,63 @@ export class FullSettingsModal {
     });
   }
 
+  _recordDisableAnimationsToggle() {
+    const currentCount = Math.max(
+      0,
+      Number(state.get("disableAnimationsToggleCount")) || 0,
+    );
+    const nextCount = Math.min(10, currentCount + 1);
+    if (!state.set("disableAnimationsToggleCount", nextCount)) return;
+
+    if (nextCount >= 10) {
+      this.els.fsDisableAnimationsNewSticker?.remove();
+      this.els.fsDisableAnimationsNewSticker = null;
+    }
+  }
+
+  updateDarkModeUpdatedBadge(hidden = null) {
+    const shouldHide =
+      hidden === null
+        ? (Number(state.get("darkModeToggleUseCount")) || 0) >= 20
+        : hidden;
+    if (this.els.fsDarkUpdatedSticker) {
+      this.els.fsDarkUpdatedSticker.hidden = shouldHide;
+    }
+  }
+
+  updateWeatherLocationBadge(hidden = null) {
+    const shouldHide =
+      hidden === null
+        ? (Number(state.get("weatherLocationSaveCount")) || 0) >= 2
+        : hidden;
+    if (this.els.fsWeatherLocationUpdatedSticker) {
+      this.els.fsWeatherLocationUpdatedSticker.hidden = shouldHide;
+    }
+  }
+
+  updateThemeBadges() {
+    const lavenderHidden =
+      (Number(state.get("lavenderMistThemeUseCount")) || 0) >= 1;
+    const dawnHidden =
+      (Number(state.get("dawnBloomThemeUseCount")) || 0) >= 1;
+    this.els.fsNormalThemes
+      ?.querySelector('[data-theme-feature-badge="lavenderMist"]')
+      ?.toggleAttribute("hidden", lavenderHidden);
+    this.els.fsGradientThemes
+      ?.querySelector('[data-theme-feature-badge="dawnBloom"]')
+      ?.toggleAttribute("hidden", dawnHidden);
+  }
+
+  updateThemeGeneratorBadge(hidden = null) {
+    const shouldHide =
+      hidden === null
+        ? (Number(state.get("themeGeneratorUseCount")) || 0) >= 1
+        : hidden;
+    if (this.els.fsThemeGeneratorNewSticker) {
+      this.els.fsThemeGeneratorNewSticker.hidden = shouldHide;
+    }
+  }
+
   // ─── State Subscription ────────────────────────────────────
 
   subscribeState() {
@@ -1131,7 +1317,8 @@ export class FullSettingsModal {
       clockFormat: { el: this.els.fsClockFormat, check: value === "24" },
       showDate: { el: this.els.fsDateToggle, check: value === true },
       hideGreetings: { el: this.els.fsHideGreetings, check: value === true },
-      showEditableText: { el: this.els.fsEditableText, check: value === true },
+      showEditableText: { el: this.els.fsEditableText, check: value === false },
+      disableAnimations: { el: this.els.fsDisableAnimations, check: value === true },
       tempUnit: { el: this.els.fsTempUnit, check: value === "imperial" },
       tempDisplayMode: { el: this.els.fsTempDisplay, check: value === true },
       darkMode: {
@@ -1177,7 +1364,8 @@ export class FullSettingsModal {
     this.els.fsClockFormat.checked = state.get("clockFormat") === "24";
     this.els.fsDateToggle.checked = state.get("showDate") === true;
     this.els.fsHideGreetings.checked = state.get("hideGreetings") === true;
-    this.els.fsEditableText.checked = state.get("showEditableText") !== false;
+    this.els.fsEditableText.checked = state.get("showEditableText") === false;
+    this.els.fsDisableAnimations.checked = state.get("disableAnimations") === true;
     this.els.fsTempUnit.checked = state.get("tempUnit") === "imperial";
     this.els.fsTempDisplay.checked = state.get("tempDisplayMode") === true;
     this.els.fsDark.checked = state.get("darkMode") === true;
@@ -1405,6 +1593,23 @@ export class FullSettingsModal {
         const btn = document.createElement("button");
         btn.className = `theme-preset-button ${isGradient ? "gradient" : ""}`;
         btn.textContent = theme.name;
+        const badgeKey =
+          theme.id === "theme-8"
+            ? "lavenderMist"
+            : theme.id === "dawn-bloom"
+              ? "dawnBloom"
+              : null;
+        const badgeCountKey =
+          badgeKey === "lavenderMist"
+            ? "lavenderMistThemeUseCount"
+            : badgeKey === "dawnBloom"
+              ? "dawnBloomThemeUseCount"
+              : null;
+        if (badgeKey && (Number(state.get(badgeCountKey)) || 0) < 1) {
+          const newSticker = this._newSticker("fs-theme-new-sticker");
+          newSticker.dataset.themeFeatureBadge = badgeKey;
+          btn.appendChild(newSticker);
+        }
         if (isGradient) {
           btn.style.background = `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]})`;
           btn.style.color = "#ffffff";
@@ -1428,6 +1633,7 @@ export class FullSettingsModal {
           if (
             await sm.applySelectedTheme(theme, isGradient)
           ) {
+            sm.recordThemePresetUse?.(theme.id);
             // Re-sync pickers and disabled states
             setTimeout(() => {
               this._syncColorPickers();
@@ -1541,6 +1747,11 @@ export class FullSettingsModal {
       document.body.classList.contains("gradient-mode-active") ||
       state.get("gradientModeActive") === true;
     const disabled = hasBg || isGradient;
+
+    if (this.els.fsGenerateThemeBtn) {
+      this.els.fsGenerateThemeBtn.disabled =
+        disabled || this._generateThemeCooldown;
+    }
 
     if (this.els.fsColorControls) {
       this.els.fsColorControls.style.opacity = disabled ? "0.4" : "1";
@@ -1946,7 +2157,29 @@ export class FullSettingsModal {
       }
 
       const row = this._el("div", { className: "key-row" });
-      row.appendChild(this._el("span", { textContent: labelText }));
+      const label = this._el("span", {
+        className: "shortcut-key-label",
+        textContent: labelText,
+      });
+      const usageCountKey =
+        action === "settings"
+          ? "settingsShortcutUseCount"
+          : action === "miniSettings"
+            ? "miniSettingsShortcutUseCount"
+            : null;
+      if (usageCountKey && (Number(state.get(usageCountKey)) || 0) < 8) {
+        const updatedSticker = this._el("span", {
+          className: "fs-shortcut-updated-sticker",
+          innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+            <title>Updated</title>
+            <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
+          </svg>`,
+        });
+        label.appendChild(updatedSticker);
+      }
+      row.appendChild(label);
 
       const controls = this._el("div", { className: "key-controls" });
       const baseline = DEFAULT_KEY_MAP[action];

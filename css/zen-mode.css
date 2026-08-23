@@ -118,6 +118,20 @@
   opacity: 0.75;
 }
 
+/* Wallpaper variables can make the accent and primary background transparent
+   or equally bright. Keep the acknowledgement action readable in that case. */
+body.has-custom-bg .zen-notice-understand {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border: 1px solid #111111;
+  text-shadow: none;
+}
+
+body.has-custom-bg .zen-notice-understand:hover {
+  background: #f0f0f0 !important;
+  color: #000000 !important;
+}
+
 @media (max-width: 600px) {
   .zen-mode-notice {
     right: 1rem;
