@@ -1,5 +1,5 @@
 import { CONFIG, DEFAULT_KEY_MAP, SEARCH_PROVIDERS } from "./config.js";
-import { sanitizeShortcuts } from "./validators.js";
+import { sanitizeCustomTools, sanitizeShortcuts } from "./validators.js";
 
 const STATE_SCHEMA_VERSION = 1;
 const VERSION_PREFIX = "ydd_state_version:";
@@ -34,6 +34,8 @@ class StateManager {
 
   normalizeValue(key, value) {
     if (key === "userShortcuts") return sanitizeShortcuts(value);
+    if (key === "customAiTools") return sanitizeCustomTools(value, "ai");
+    if (key === "customSocialLinks") return sanitizeCustomTools(value, "social");
     if (key === "searchHistory") {
       if (!Array.isArray(value)) throw new TypeError("Invalid search history");
       return value.filter(

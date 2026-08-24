@@ -297,6 +297,8 @@ body.loaded .corner-button {
   top: auto;
   bottom: 80px;
   left: 4.5rem;
+  max-height: min(78vh, 470px);
+  width: 360px;
   transform: scale(0.85);
   transform-origin: bottom left;
 }
@@ -323,7 +325,7 @@ body.loaded .corner-button {
   background: none;
   border: none;
   color: var(--text-primary);
-  font-size: 1.1rem;
+  font-size: 1.14rem;
   font-weight: 500;
   cursor: pointer;
   opacity: 0.5;
@@ -356,6 +358,19 @@ body.loaded .corner-button {
 .tool-edit-button:hover {
   background-color: var(--bg-hover-translucent);
 }
+.tool-add-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  z-index: 1;
+}
+.tool-add-button:hover {
+  color: var(--accent-color);
+}
+#tool-edit-button {
+  margin-left: auto;
+}
 
 body.gradient-light .tool-edit-button {
   color: #000000;
@@ -368,45 +383,54 @@ body.has-custom-bg .tool-edit-button {
 }
 .tool-list {
   display: none;
-  flex-direction: column;
-  gap: 0.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  min-height: 0;
   overflow-y: auto;
 }
 .tool-list.active {
-  display: flex;
+  display: grid;
 }
 .ai-tool-item {
   display: flex;
   align-items: center;
-  padding: 0.75rem;
+  min-width: 0;
+  padding: 0.64rem;
   border-radius: 8px;
   transition:
     background-color 0.2s ease,
     padding-left 0.2s ease;
   text-decoration: none;
   color: var(--text-primary);
+  font-size: 0.85rem;
   position: relative;
 }
 .ai-tool-item:hover {
   background-color: var(--bg-hover-translucent);
 }
 .ai-tool-icon {
-  width: 24px;
-  height: 24px;
-  margin-right: 1rem;
+  width: 28px;
+  height: 28px;
+  margin-right: 0.72rem;
   flex-shrink: 0;
+}
+.tool-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .ai-tool-item.is-hidden {
   opacity: 0.4;
 }
 .tool-new-badge {
   margin-left: auto;
-  padding: 0.12rem 0.32rem;
+  padding: 0.14rem 0.34rem;
   border: 1px solid #141414;
   border-radius: 4px;
   background: #ffe05b;
   color: #141414;
-  font-size: 0.56rem;
+  font-size: 0.59rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1.1;
@@ -417,27 +441,37 @@ body.has-custom-bg .tool-edit-button {
   top: 50%;
   left: 0.75rem;
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   background-color: rgba(0, 0, 0, 0.5);
   border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  place-items: center;
   color: white;
-  font-size: 1.5rem;
-  line-height: 1;
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s ease;
   pointer-events: none;
 }
+.edit-overlay svg {
+  display: block;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
 #ai-tools-popup.edit-mode .ai-tool-item .edit-overlay {
   opacity: 1;
   pointer-events: all;
 }
+#ai-tools-popup.edit-mode .ai-tool-item.custom-tool-item .custom-tool-action {
+  color: #ef4444;
+}
+#ai-tools-popup.edit-mode .ai-tool-item.custom-tool-item .custom-tool-action:hover {
+  color: #ff7777;
+  background-color: rgba(239, 68, 68, 0.2);
+}
 #ai-tools-popup.edit-mode .ai-tool-item {
-  padding-left: 3rem;
+  padding-left: 2.75rem;
 }
 .tool-icon {
   position: absolute;

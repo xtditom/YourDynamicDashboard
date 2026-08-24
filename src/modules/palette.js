@@ -383,8 +383,45 @@ export class CommandPalette {
       }
     });
 
+    this.syncCustomToolCommands();
+
     this.filteredCommands = [...this.mainCommands];
     this.init();
+  }
+
+  syncCustomToolCommands() {
+    this.aiCommands = (this.aiCommands || []).filter(
+      (command) => !command.id.startsWith("custom-ai-"),
+    );
+    this.socialCommands = (this.socialCommands || []).filter(
+      (command) => !command.id.startsWith("custom-social-"),
+    );
+
+    (state.get("customAiTools") || []).forEach((tool) => {
+      this.aiCommands.push({
+        id: tool.id,
+        name: tool.name,
+        icon: "🤖",
+        shortcut: "",
+        action: () => {
+          const targets = state.get("linkTargets") || {};
+          window.open(tool.url, targets.ai || "_blank");
+        },
+      });
+    });
+
+    (state.get("customSocialLinks") || []).forEach((tool) => {
+      this.socialCommands.push({
+        id: tool.id,
+        name: tool.name,
+        icon: "📱",
+        shortcut: "",
+        action: () => {
+          const targets = state.get("linkTargets") || {};
+          window.open(tool.url, targets.socials || targets.ai || "_blank");
+        },
+      });
+    });
   }
 
   init() {
@@ -396,8 +433,13 @@ export class CommandPalette {
         key === "backgroundImage" ||
         key === "randomBgMode" ||
         key === "savedBgUrl" ||
-        key === "disableAnimations"
+        key === "disableAnimations" ||
+        key === "customAiTools" ||
+        key === "customSocialLinks"
       ) {
+        if (key === "customAiTools" || key === "customSocialLinks") {
+          this.syncCustomToolCommands();
+        }
         this.filter(this.els.input?.value || "");
       }
     });

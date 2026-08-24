@@ -106,6 +106,13 @@ html.disable-animations *::after {
   scroll-behavior: auto !important;
 }
 
+/* Some widgets use an entrance animation to move from opacity 0 to visible.
+   Keep them visible when that animation is intentionally disabled. */
+html.disable-animations #pinned-tasks-widget:not(.hidden) {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 @keyframes ydd-tremble {
   0%,
   100% {

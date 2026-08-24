@@ -3,6 +3,8 @@ import { CONFIG } from "./config.js";
 const EXTRA_STORAGE_KEYS = [
   "activeToolTab",
   "aiToolsOrder",
+  "customAiTools",
+  "customSocialLinks",
   "backgroundImage",
   "bgBlurIntensity",
   "bgSavedDate",

@@ -83,10 +83,16 @@ body.loaded #shortcuts-container.position-top .shortcut-item {
   visibility: visible;
 }
 
-.shortcut-icon img,
-.ai-tool-icon img {
+.shortcut-icon img {
   width: 26px;
   height: 26px;
+  filter: var(--icon-filter);
+  opacity: var(--icon-opacity);
+  transition: all 0.25s ease-in-out;
+}
+.ai-tool-icon img {
+  width: 28px;
+  height: 28px;
   filter: var(--icon-filter);
   opacity: var(--icon-opacity);
   transition: all 0.25s ease-in-out;

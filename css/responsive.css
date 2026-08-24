@@ -79,7 +79,7 @@
   .sh-modal,
   .v2-1-modal {
     width: calc(100vw - 2rem) !important;
-    max-width: 320px !important;
+    max-width: 360px !important;
     padding: 1rem !important;
     max-height: 60vh !important; 
     overflow-y: auto !important;
@@ -155,31 +155,40 @@
     gap: 2px !important;
   }
   #ai-tools-popup {
-    max-height: 75vh !important;
+    max-height: 78vh !important;
+    max-width: 370px !important;
   }
   .ai-tool-icon {
-    width: 20px !important;
-    height: 28px !important;
-    margin-right: 1.5rem !important;
+    width: 26px !important;
+    height: 26px !important;
+    margin-right: 0.62rem !important;
+  }
+  .ai-tool-icon img {
+    width: 26px !important;
+    height: 26px !important;
   }
   .tool-tab-button {
-    font-size: 0.85rem !important;
+    font-size: 0.92rem !important;
     padding: 0.5rem !important;
   }
   .ai-tool-item {
     padding: 0.5rem !important;
-    font-size: 0.85rem !important;
+    font-size: 0.9rem !important;
   }
 
   #ai-tools-popup.edit-mode .ai-tool-item {
-    padding-left: 2.75rem !important; 
+    padding-left: 2.5rem !important;
   }
   #ai-tools-popup.edit-mode .edit-overlay {
-    width: 20px !important;
-    height: 20px !important;
-    font-size: 1rem !important;
+    width: 23px !important;
+    height: 23px !important;
     left: 0.5rem !important;
     transform: translateY(-50%) !important;
+  }
+
+  #ai-tools-popup.edit-mode .edit-overlay svg {
+    width: 13px !important;
+    height: 13px !important;
   }
 
   .sh-modal-header {
@@ -240,6 +249,9 @@
   .modal-box,
   .sh-modal {
     max-width: 100% !important;
+  }
+  #ai-tools-popup .tool-list.active {
+    grid-template-columns: 1fr;
   }
 }
 

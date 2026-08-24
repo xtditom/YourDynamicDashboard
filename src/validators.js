@@ -1,11 +1,15 @@
 export const MAX_SHORTCUTS = 20;
 export const MAX_SHORTCUT_NAME_LENGTH = 35;
 export const MAX_SHORTCUT_URL_LENGTH = 2048;
+export const MAX_CUSTOM_TOOLS = 50;
+export const MAX_CUSTOM_TOOL_NAME_LENGTH = 20;
+export const MAX_CUSTOM_TOOL_URL_LENGTH = 500;
+export const MAX_CUSTOM_TOOL_ICON_LENGTH = 1_000_000;
 
-export function normalizeHttpUrl(value) {
+export function normalizeHttpUrl(value, maxLength = MAX_SHORTCUT_URL_LENGTH) {
   let input = String(value || "").trim();
   if (!input) throw new TypeError("Enter a URL.");
-  if (input.length > MAX_SHORTCUT_URL_LENGTH) {
+  if (input.length > maxLength) {
     throw new TypeError("The URL is too long.");
   }
   if (!/^[a-z][a-z\d+.-]*:/i.test(input)) input = `https://${input}`;
@@ -22,10 +26,52 @@ export function normalizeHttpUrl(value) {
   if (parsed.username || parsed.password) {
     throw new TypeError("URLs containing login credentials are not supported.");
   }
-  if (parsed.href.length > MAX_SHORTCUT_URL_LENGTH) {
+  if (parsed.href.length > maxLength) {
     throw new TypeError("The URL is too long.");
   }
   return parsed.href;
+}
+
+export function sanitizeCustomTools(value, type) {
+  if (!Array.isArray(value)) return [];
+  const expectedPrefix = type === "social" ? "custom-social-" : "custom-ai-";
+  const seenIds = new Set();
+  const sanitized = [];
+
+  for (const item of value) {
+    if (sanitized.length >= MAX_CUSTOM_TOOLS) break;
+    if (!item) continue;
+    const id = String(item.id || "").trim();
+    if (
+      !id.startsWith(expectedPrefix) ||
+      id.length > 160 ||
+      !/^[a-z0-9-]+$/i.test(id) ||
+      seenIds.has(id)
+    ) continue;
+
+    const name = String(item.name || "").trim();
+    if (!name || name.length > MAX_CUSTOM_TOOL_NAME_LENGTH) continue;
+
+    let url;
+    try {
+      url = normalizeHttpUrl(item.url, MAX_CUSTOM_TOOL_URL_LENGTH);
+    } catch {
+      continue;
+    }
+
+    if (
+      typeof item.icon !== "string" ||
+      !item.icon.startsWith("data:image/") ||
+      item.icon.length > MAX_CUSTOM_TOOL_ICON_LENGTH
+    ) {
+      continue;
+    }
+
+    seenIds.add(id);
+    sanitized.push({ id, name, url, icon: item.icon });
+  }
+
+  return sanitized;
 }
 
 export function sanitizeShortcuts(value) {

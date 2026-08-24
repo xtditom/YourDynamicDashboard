@@ -304,38 +304,51 @@
         <button id="tool-edit-button" class="tool-edit-button" aria-label="Edit AI and social tools" aria-pressed="false">
           <svg
             class="icon-pencil"
-            width="16"
-            height="16"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
-            <path
-              d="M21.7312 2.26884C20.706 1.24372 19.044 1.24372 18.0188 2.26884L16.8617 3.42599L20.574 7.1383L21.7312 5.98116C22.7563 4.95603 22.7563 3.29397 21.7312 2.26884Z"
-              fill="currentColor"
-            />
-            <path
-              d="M19.5133 8.19896L15.801 4.48665L7.40019 12.8875C6.78341 13.5043 6.33002 14.265 6.081 15.101L5.28122 17.7859C5.2026 18.0498 5.27494 18.3356 5.46967 18.5303C5.6644 18.725 5.95019 18.7974 6.21412 18.7188L8.89901 17.919C9.73498 17.67 10.4957 17.2166 11.1125 16.5998L19.5133 8.19896Z"
-              fill="currentColor"
-            />
-            <path
-              d="M5.25 5.24999C3.59315 5.24999 2.25 6.59314 2.25 8.24999V18.75C2.25 20.4068 3.59315 21.75 5.25 21.75H15.75C17.4069 21.75 18.75 20.4068 18.75 18.75V13.5C18.75 13.0858 18.4142 12.75 18 12.75C17.5858 12.75 17.25 13.0858 17.25 13.5V18.75C17.25 19.5784 16.5784 20.25 15.75 20.25H5.25C4.42157 20.25 3.75 19.5784 3.75 18.75V8.24999C3.75 7.42156 4.42157 6.74999 5.25 6.74999H10.5C10.9142 6.74999 11.25 6.41421 11.25 5.99999C11.25 5.58578 10.9142 5.24999 10.5 5.24999H5.25Z"
-              fill="currentColor"
-            />
+            <path d="M3 21h4l13 -13a1.5 1.5 0 0 0 -4 -4l-13 13v4" />
+            <path d="M14.5 5.5l4 4" />
+            <path d="M12 8l-5 -5l-4 4l5 5" />
+            <path d="M7 8l-1.5 1.5" />
+            <path d="M16 12l5 5l-4 4l-5 -5" />
+            <path d="M16 17l-1.5 1.5" />
           </svg>
           <svg
             class="icon-check hidden"
             xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
+            width="28"
+            height="28"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="3"
+            stroke-width="1.8"
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <polyline points="20 6 9 17 4 12"></polyline>
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="7.5 12.2 10.5 15 16.5 9"></polyline>
+          </svg>
+        </button>
+        <button id="tool-add-button" class="tool-edit-button tool-add-button hidden" type="button" aria-label="Add a new AI tool" title="Add a new tool">
+          <svg
+            class="icon-add"
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 7V17M7 12H17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </button>
       </div>
