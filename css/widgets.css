@@ -590,6 +590,14 @@ html.disable-animations #search-dropdown.closing {
   border-radius: 3px;
   object-fit: contain;
 }
+.sh-history-globe-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  line-height: 1;
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
+}
 .sh-qd-text {
   flex: 1;
   font-size: 0.9rem;

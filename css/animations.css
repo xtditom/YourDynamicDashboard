@@ -141,6 +141,8 @@ html.disable-animations #pinned-tasks-widget:not(.hidden) {
 /* Reordering feedback for draggable dashboard items. */
 #apps-grid.is-reordering .app-icon,
 #ai-tools-popup.edit-mode .ai-tool-item .ai-tool-icon img,
+#search-dropdown.edit-mode .custom-search-provider-item,
+#search-dropdown .custom-search-provider-item.is-reordering,
 #shortcuts-editor-list.is-reordering .icon,
 .fs-shortcuts-list.is-reordering .icon {
   animation: ydd-tremble 0.40s ease-in-out infinite;

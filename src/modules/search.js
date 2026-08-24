@@ -400,13 +400,7 @@ export class Search {
       li.tabIndex = 0;
       li.setAttribute("aria-label", `Search again for ${item.query}`);
 
-      const icon = document.createElement("img");
-      const engineIcon = this._resolveEngineIcon(item.engineId);
-      icon.src = this._getProviderIconUrl(engineIcon);
-      icon.alt = item.engineId || "";
-      icon.width = 16;
-      icon.height = 16;
-      icon.onerror = () => { icon.style.display = "none"; };
+      const icon = this._createHistoryIcon(item.engineId, "", 16);
 
       const text = document.createElement("span");
       text.className = "sh-qd-text";
@@ -835,15 +829,7 @@ export class Search {
         const row = document.createElement("div");
         row.className = "sh-row";
 
-        const icon = document.createElement("img");
-        icon.src = this._getProviderIconUrl(
-          this._resolveEngineIcon(item.engineId),
-        );
-        icon.alt = item.engineId || "";
-        icon.width = 22;
-        icon.height = 22;
-        icon.className = "sh-row-icon";
-        icon.onerror = () => { icon.style.display = "none"; };
+        const icon = this._createHistoryIcon(item.engineId, "sh-row-icon", 22);
 
         const queryEl = document.createElement("span");
         queryEl.className = "sh-row-query";
@@ -970,14 +956,40 @@ export class Search {
     }).format(new Date(timestamp));
   }
 
+  _createHistoryIcon(engineId, className = "", size = 16) {
+    const engineIcon = this._resolveEngineIcon(engineId);
+    if (!engineIcon) {
+      const globe = document.createElement("span");
+      globe.className = `${className} sh-history-globe-icon`.trim();
+      globe.setAttribute("role", "img");
+      globe.setAttribute("aria-label", "Unknown search engine");
+      globe.textContent = "🌏";
+      globe.style.width = `${size}px`;
+      globe.style.height = `${size}px`;
+      globe.style.fontSize = `${Math.max(14, Math.round(size * 0.9))}px`;
+      return globe;
+    }
+
+    const icon = document.createElement("img");
+    icon.className = className;
+    icon.src = this._getProviderIconUrl(engineIcon);
+    icon.alt = engineId || "";
+    icon.width = size;
+    icon.height = size;
+    icon.onerror = () => {
+      icon.replaceWith(this._createHistoryIcon("__unknown_history_engine__", className, size));
+    };
+    return icon;
+  }
+
   _resolveEngineIcon(engineId) {
-    if (!engineId) return "google.png";
+    if (!engineId) return null;
     if (engineId === "brave") engineId = "perplexity";
     for (const type of ["engines", "platforms"]) {
       const found = this.getProviders(type).find((p) => p.id === engineId);
       if (found) return found.icon;
     }
-    return "google.png";
+    return null;
   }
 
   _getProviderIconUrl(icon) {
@@ -1348,6 +1360,9 @@ export class Search {
 
       if (p.isCustom) {
         div.classList.add("custom-search-provider-item");
+        if (this.customSearchEditMode) {
+          div.classList.add("is-reordering");
+        }
         const actionGroup = document.createElement("span");
         actionGroup.className = "custom-search-actions";
 
@@ -1417,6 +1432,10 @@ export class Search {
     );
 
     const customEngines = this.getCustomSearchEngines();
+    this.els.dropdown.classList.toggle(
+      "edit-mode",
+      Boolean(customEngines.length && this.customSearchEditMode),
+    );
     this.els.customEngineList.innerHTML = "";
     this.els.customEngineSection.classList.toggle("hidden", !customEngines.length);
     customEngines.forEach((provider) =>
