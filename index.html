@@ -839,13 +839,25 @@
 
           <div id="search-dropdown" class="hidden" role="listbox" aria-label="Search providers" aria-hidden="true">
             <div class="dropdown-section">
-              <h4>Search Engines</h4>
+              <h4 class="dropdown-section-heading">
+                <span>Search Engines</span>
+                <button
+                  type="button"
+                  id="custom-search-engine-action"
+                  class="dropdown-section-action"
+                  aria-label="Add a custom search engine"
+                >ADD</button>
+              </h4>
               <div id="dropdown-engines" class="dropdown-grid"></div>
             </div>
             <div class="dropdown-divider"></div>
             <div class="dropdown-section">
               <h4>Platforms</h4>
               <div id="dropdown-platforms" class="dropdown-grid"></div>
+            </div>
+            <div id="dropdown-custom-section" class="dropdown-section hidden" aria-labelledby="custom-search-heading">
+              <h4 id="custom-search-heading">CUSTOM</h4>
+              <div id="dropdown-custom-engines" class="dropdown-grid"></div>
             </div>
           </div>
         </form>

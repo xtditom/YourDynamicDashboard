@@ -8,7 +8,7 @@ import {
   normalizeHttpUrl,
   validateImageBlob,
 } from "../validators.js";
-import { classifyToolUrl } from "../toolUrlKeywords.js";
+import { classifyToolUrl } from "../keywords.js";
 
 const CUSTOM_TOOL_ICON_SIZE = 128;
 const CUSTOM_TOOL_ICON_MAX_BYTES = 5 * 1024 * 1024;

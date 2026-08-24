@@ -135,6 +135,16 @@
   color: var(--text-secondary);
   font-size: 0.86rem;
 }
+.ydd-search-engine-note {
+  margin: -0.55rem 0 1.1rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--form-control-border, var(--border-color));
+  border-radius: 8px;
+  background: var(--bg-hover-translucent);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
 .ydd-tool-icon-picker {
   display: flex;
   flex-direction: column;
@@ -203,16 +213,28 @@
 }
 .ydd-add-tool-field input {
   width: 100%;
+  box-sizing: border-box;
   padding: 0.65rem 0.75rem;
-  border: 1px solid var(--form-control-border);
+  border: 1px solid var(--form-control-border, var(--border-color));
   border-radius: 8px;
   outline: none;
-  background: var(--form-control-bg);
-  color: var(--form-control-text);
+  background-color: var(--form-control-bg, var(--bg-interactive));
+  color: var(--form-control-text, var(--text-primary)) !important;
+  caret-color: var(--accent-color, #ffffff);
   font: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 .ydd-add-tool-field input:focus {
   border-color: var(--accent-color);
+  background-color: var(--bg-secondary);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+.ydd-add-tool-field input::placeholder {
+  color: var(
+    --form-control-placeholder,
+    var(--text-secondary, var(--text-placeholder, #b8c0cc))
+  ) !important;
+  opacity: 1;
 }
 .ydd-add-tool-field input.is-invalid {
   border-color: #ef4444;
@@ -241,6 +263,141 @@
 .ydd-add-tool-cancel {
   background: var(--bg-interactive);
   color: var(--text-primary);
+}
+.ydd-search-query-fieldset {
+  min-width: 0;
+  margin: 0 0 0.85rem;
+  padding: 0.75rem;
+  border: 1px solid var(--form-control-border, var(--border-color));
+  border-radius: 8px;
+}
+.ydd-search-query-fieldset legend {
+  padding: 0 0.35rem;
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.ydd-search-query-hint {
+  margin: 0 0 0.55rem;
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+.ydd-search-query-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem 0.65rem;
+  max-height: 150px;
+  overflow-y: auto;
+}
+.ydd-search-custom-param-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+}
+.ydd-search-query-custom-input {
+  min-width: 0;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--form-control-border, var(--border-color));
+  border-radius: 7px;
+  outline: none;
+  background: var(--form-control-bg, var(--bg-interactive));
+  color: var(--form-control-text, var(--text-primary));
+  font: inherit;
+  font-size: 0.78rem;
+}
+.ydd-search-query-custom-input:focus {
+  border-color: var(--accent-color);
+}
+.ydd-search-query-custom-input.is-invalid {
+  border-color: #ef4444;
+}
+.ydd-search-query-add-button {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.75rem;
+}
+.ydd-search-custom-param-error {
+  margin-bottom: -0.25rem;
+}
+.ydd-search-query-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  color: var(--form-control-text, var(--text-primary));
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.ydd-search-query-option input {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-content: center;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid var(--form-control-border, var(--border-color));
+  border-radius: 50%;
+  background: var(--form-control-bg, var(--bg-interactive));
+  cursor: pointer;
+}
+.ydd-search-query-option input:checked {
+  background: radial-gradient(
+    circle,
+    var(--accent-color) 0 38%,
+    transparent 42%
+  ), var(--form-control-bg, var(--bg-interactive));
+}
+.ydd-search-query-option input:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Gradient widgets keep the add modal transparent; only its controls use
+   darker glass surfaces so text remains readable over any wallpaper. */
+body.gradient-mode-active .ydd-add-tool-modal {
+  background: transparent !important;
+  border-color: rgba(255, 255, 255, 0.62) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal h2,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal p,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal label,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal legend,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal span,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal input,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal button,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal .ydd-search-query-option {
+  color: #ffffff !important;
+}
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal input::placeholder {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal .ydd-add-tool-field input,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal .ydd-search-query-custom-input,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal .ydd-search-query-option input {
+  background: #34353d !important;
+  border-color: rgba(255, 255, 255, 0.62) !important;
+  color: #ffffff !important;
+}
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal .ydd-search-engine-note,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal .ydd-tool-icon-preview {
+  background: rgba(20, 22, 30, 0.72) !important;
+}
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal .settings-button {
+  background: #34353d !important;
+  border-color: rgba(255, 255, 255, 0.62) !important;
+  color: #ffffff !important;
+}
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal .ydd-add-tool-error,
+body.gradient-mode-active.gradient-light .ydd-add-tool-modal .ydd-add-tool-form-error {
+  color: #ef4444 !important;
 }
 #info-modal-overlay .modal-box,
 #night-mode-modal-overlay .modal-box {

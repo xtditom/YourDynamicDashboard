@@ -4,6 +4,7 @@ const EXTRA_STORAGE_KEYS = [
   "activeToolTab",
   "aiToolsOrder",
   "customAiTools",
+  "customSearchEngines",
   "customSocialLinks",
   "backgroundImage",
   "bgBlurIntensity",

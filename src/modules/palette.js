@@ -332,6 +332,8 @@ export class CommandPalette {
         },
       }));
 
+    this.syncCustomSearchCommands();
+
     // 2. Google Apps commands
     this.appCommands = [];
     (GOOGLE_APPS || []).forEach(app => {
@@ -424,6 +426,24 @@ export class CommandPalette {
     });
   }
 
+  syncCustomSearchCommands() {
+    this.searchCommands = (this.searchCommands || []).filter(
+      (command) => !command.id.startsWith("search-engines-custom-search-"),
+    );
+
+    (state.get("customSearchEngines") || []).forEach((provider) => {
+      this.searchCommands.push({
+        id: `search-engines-${provider.id}`,
+        name: provider.name,
+        icon: "🔎",
+        shortcut: "",
+        action: () => {
+          window.YD_Search?.setProvider(provider.id, "engines");
+        },
+      });
+    });
+  }
+
   init() {
     this.createDomElements();
     this.registerEvents();
@@ -435,11 +455,13 @@ export class CommandPalette {
         key === "savedBgUrl" ||
         key === "disableAnimations" ||
         key === "customAiTools" ||
+        key === "customSearchEngines" ||
         key === "customSocialLinks"
       ) {
         if (key === "customAiTools" || key === "customSocialLinks") {
           this.syncCustomToolCommands();
         }
+        if (key === "customSearchEngines") this.syncCustomSearchCommands();
         this.filter(this.els.input?.value || "");
       }
     });

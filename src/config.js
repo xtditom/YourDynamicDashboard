@@ -61,6 +61,7 @@ export const CONFIG = {
     ],
     welcomeText: "Click to edit",
     searchProvider: { id: "google", type: "engines" },
+    customSearchEngines: [],
     customAiTools: [],
     customSocialLinks: [],
     hiddenTools: {},

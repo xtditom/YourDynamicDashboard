@@ -1,5 +1,9 @@
 import { CONFIG, DEFAULT_KEY_MAP, SEARCH_PROVIDERS } from "./config.js";
-import { sanitizeCustomTools, sanitizeShortcuts } from "./validators.js";
+import {
+  sanitizeCustomSearchEngines,
+  sanitizeCustomTools,
+  sanitizeShortcuts,
+} from "./validators.js";
 
 const STATE_SCHEMA_VERSION = 1;
 const VERSION_PREFIX = "ydd_state_version:";
@@ -35,6 +39,7 @@ class StateManager {
   normalizeValue(key, value) {
     if (key === "userShortcuts") return sanitizeShortcuts(value);
     if (key === "customAiTools") return sanitizeCustomTools(value, "ai");
+    if (key === "customSearchEngines") return sanitizeCustomSearchEngines(value);
     if (key === "customSocialLinks") return sanitizeCustomTools(value, "social");
     if (key === "searchHistory") {
       if (!Array.isArray(value)) throw new TypeError("Invalid search history");
@@ -48,10 +53,16 @@ class StateManager {
     }
     if (key === "searchProvider") {
       const providers = SEARCH_PROVIDERS[value?.type];
+      const isCustomSearchEngine =
+        value?.type === "engines" &&
+        typeof value?.id === "string" &&
+        value.id.startsWith("custom-search-");
       if (
         !value ||
-        !Array.isArray(providers) ||
-        !providers.some((provider) => provider.id === value.id)
+        (!isCustomSearchEngine &&
+          (!Array.isArray(providers) ||
+            !providers.some((provider) => provider.id === value.id))) ||
+        (isCustomSearchEngine && !/^custom-search-[a-z0-9-]+$/i.test(value.id))
       ) throw new TypeError("Invalid search provider");
     }
     if (key === "keyMap") {

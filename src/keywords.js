@@ -419,3 +419,230 @@ export function classifyToolUrl(url, type) {
 export function isLikelyToolUrl(url, type) {
   return classifyToolUrl(url, type).matched;
 }
+
+// Search-engine and searchable-platform recognition.
+export const SEARCH_QUERY_PARAMETER_CANDIDATES = [
+  "q",
+  "query",
+  "search",
+  "search_query",
+  "text",
+  "term",
+  "keyword",
+  "keywords",
+  "k",
+  "p",
+  "s",
+  "wd",
+  "word",
+  "searchterm",
+  "search_term",
+  "qstr",
+  "querystring",
+];
+
+const SEARCH_PROVIDER_URL_KEYWORDS = [
+  // General web search engines.
+  "google",
+  "google.com",
+  "bing",
+  "bing.com",
+  "yahoo",
+  "yahoo.com",
+  "duckduckgo",
+  "duck.com",
+  "ddg",
+  "brave search",
+  "search.brave.com",
+  "brave.com",
+  "ecosia",
+  "ecosia.org",
+  "startpage",
+  "startpage.com",
+  "qwant",
+  "qwant.com",
+  "swisscows",
+  "swisscows.com",
+  "mojeek",
+  "mojeek.com",
+  "yandex",
+  "yandex.com",
+  "baidu",
+  "baidu.com",
+  "sogou",
+  "sogou.com",
+  "naver",
+  "naver.com",
+  "daum",
+  "daum.net",
+  "seznam",
+  "seznam.cz",
+  "aol search",
+  "search.aol.com",
+  "ask.com",
+  "ask jeeves",
+  "lycos",
+  "lycos.com",
+  "excite",
+  "excite.com",
+  "webcrawler",
+  "dogpile",
+  "info.com",
+  "gibiru",
+  "gibiru.com",
+  "kagi",
+  "kagi.com",
+  "neeva",
+  "presearch",
+  "presearch.com",
+  "yep.com",
+  "yep",
+  "metager",
+  "metager.org",
+  "marginalia",
+  "marginalia.search",
+  "wiby",
+  "wiby.me",
+  "searchcode",
+  "searchcode.com",
+  "wayback machine",
+  "web.archive.org",
+  // Privacy, self-hosted, and metasearch engines.
+  "searx",
+  "searxng",
+  "whoogle",
+  "whoogle search",
+  "4get",
+  "4get.ca",
+  "librex",
+  "librex.eu",
+  "metabrowser",
+  "private.sh",
+  "gigablast",
+  "gigablast.com",
+  "yacy",
+  "yacy.net",
+  "infinity search",
+  "andisearch",
+  "andi.search",
+  // AI-powered and specialist search providers.
+  "perplexity",
+  "perplexity.ai",
+  "you.com",
+  "you search",
+  "phind",
+  "phind.com",
+  "komo ai",
+  "komo.ai",
+  "brave leo",
+  "consensus",
+  "consensus.app",
+  "semantic scholar",
+  "semanticscholar.org",
+  "elicit",
+  "elicit.com",
+  "scite",
+  "scite.ai",
+  "research rabbit",
+  "researchrabbit.ai",
+  "connected papers",
+  "connectedpapers.com",
+  "google scholar",
+  "scholar.google.com",
+  "base search",
+  "wolframalpha",
+  "wolframalpha.com",
+  "wolfram alpha",
+  // Built-in searchable platforms and communities.
+  "youtube",
+  "youtube.com",
+  "spotify",
+  "spotify.com",
+  "wikipedia",
+  "wikipedia.org",
+  "pinterest",
+  "pinterest.com",
+  "reddit",
+  "reddit.com",
+  "quora",
+  "quora.com",
+  "github",
+  "github.com",
+  "gitlab",
+  "gitlab.com",
+  "stack overflow",
+  "stackoverflow.com",
+  "stackexchange",
+  "medium",
+  "medium.com",
+  "substack",
+  "substack.com",
+  "tiktok",
+  "tiktok.com",
+  "twitter",
+  "x.com",
+  "instagram",
+  "facebook",
+  "linkedin",
+  "discord",
+  "discord.com",
+  "ebay",
+  "amazon",
+  "amazon.com",
+  "walmart",
+  "walmart.com",
+  "etsy",
+  "etsy.com",
+  "indeed",
+  "indeed.com",
+  "glassdoor",
+  "glassdoor.com",
+  "booking.com",
+  "airbnb",
+  "airbnb.com",
+  "goodreads",
+  "goodreads.com",
+  "letterboxd",
+  "letterboxd.com",
+];
+
+const normalizeSearchHost = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const matchesSearchKeyword = (hostname, keyword) => {
+  const rawKeyword = String(keyword || "").toLowerCase();
+  const normalizedKeyword = normalizeSearchHost(keyword);
+  const hostLabels = hostname.split(".");
+  if (!normalizedKeyword || hostLabels.length < 2) return false;
+
+  if (rawKeyword.includes(".")) {
+    if (hostname === rawKeyword || hostname.endsWith(`.${rawKeyword}`)) return true;
+  }
+
+  const hostTokens = normalizeSearchHost(hostname).split(" ").filter(Boolean);
+  const targetTokens = normalizedKeyword.split(" ").filter(Boolean);
+  if (targetTokens.length === 1) return hostLabels.includes(targetTokens[0]);
+  if (targetTokens.length > hostTokens.length) return false;
+
+  return hostTokens.some((_, index) =>
+    targetTokens.every((token, offset) => hostTokens[index + offset] === token),
+  );
+};
+
+export function isLikelySearchProviderUrl(url) {
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    return false;
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+  return SEARCH_PROVIDER_URL_KEYWORDS.some((keyword) =>
+    matchesSearchKeyword(hostname, keyword),
+  );
+}
+

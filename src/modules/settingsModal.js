@@ -479,40 +479,6 @@ export class FullSettingsModal {
       ]),
     );
 
-    // Link Direction (inline)
-    const linkDirContainer = this._el("div", { className: "fs-key-grid" });
-    const resetLinkDirections = this._el("button", {
-      type: "button",
-      className: "settings-button danger",
-      textContent: "Reset Link Directions",
-    });
-    resetLinkDirections.hidden = true;
-    this.els.fsLinkDirList = linkDirContainer;
-    this.els.fsResetLinkDirections = resetLinkDirections;
-    pane.appendChild(
-      this._section("Link Direction", [linkDirContainer, resetLinkDirections]),
-    );
-
-    // Shortcut Keys (inline)
-    const keyContainer = this._el("div", { className: "fs-key-grid" });
-    const keyNoteContainer = this._el("div");
-    const resetKeys = this._el("button", {
-      type: "button",
-      className: "settings-button danger",
-      textContent: "Reset Keyboard Shortcuts",
-    });
-    resetKeys.hidden = true;
-    this.els.fsKeyList = keyContainer;
-    this.els.fsKeyNoteContainer = keyNoteContainer;
-    this.els.fsResetKeys = resetKeys;
-    pane.appendChild(
-      this._section("Keyboard Shortcuts", [
-        keyContainer,
-        keyNoteContainer,
-        resetKeys,
-      ]),
-    );
-
     return pane;
   }
 
@@ -832,6 +798,33 @@ export class FullSettingsModal {
   buildDataPane() {
     const pane = this._el("div");
 
+    // Backup & Restore
+    const backupBtn = this._el("button", {
+      className: "settings-button",
+      textContent: "Backup",
+    });
+    const restoreBtn = this._el("button", {
+      className: "settings-button",
+      textContent: "Restore",
+    });
+    const restoreInput = this._el("input", {
+      type: "file",
+      accept: ".json",
+      className: "hidden",
+    });
+    const resetBtn = this._el("button", {
+      className: "settings-button danger",
+      textContent: "Reset All",
+    });
+    this.els.fsBackup = backupBtn;
+    this.els.fsRestore = restoreBtn;
+    this.els.fsRestoreInput = restoreInput;
+    this.els.fsReset = resetBtn;
+
+    const backupControls = this._el("div", { className: "fs-backup-controls" });
+    backupControls.append(backupBtn, restoreBtn, restoreInput, resetBtn);
+    pane.appendChild(this._section("Backup & Restore", [backupControls]));
+
     // Visibility toggles
     const todoToggle = this._toggle("fs-todo-toggle");
     const appsToggle = this._toggle("fs-apps-toggle");
@@ -867,32 +860,30 @@ export class FullSettingsModal {
       ]),
     );
 
-    // Backup & Restore
-    const backupBtn = this._el("button", {
-      className: "settings-button",
-      textContent: "Backup",
-    });
-    const restoreBtn = this._el("button", {
-      className: "settings-button",
-      textContent: "Restore",
-    });
-    const restoreInput = this._el("input", {
-      type: "file",
-      accept: ".json",
-      className: "hidden",
-    });
-    const resetBtn = this._el("button", {
-      className: "settings-button danger",
-      textContent: "Reset All",
-    });
-    this.els.fsBackup = backupBtn;
-    this.els.fsRestore = restoreBtn;
-    this.els.fsRestoreInput = restoreInput;
-    this.els.fsReset = resetBtn;
+    // Link Direction
+    const linkDirContainer = this._el("div", { className: "fs-key-grid" });
+    this.els.fsLinkDirList = linkDirContainer;
+    pane.appendChild(this._section("Link Direction", [linkDirContainer]));
 
-    const backupControls = this._el("div", { className: "fs-backup-controls" });
-    backupControls.append(backupBtn, restoreBtn, restoreInput, resetBtn);
-    pane.appendChild(this._section("Backup & Restore", [backupControls]));
+    // Keyboard Shortcuts
+    const keyContainer = this._el("div", { className: "fs-key-grid" });
+    const keyNoteContainer = this._el("div");
+    const resetKeys = this._el("button", {
+      type: "button",
+      className: "settings-button danger",
+      textContent: "Reset Keyboard Shortcuts",
+    });
+    resetKeys.hidden = true;
+    this.els.fsKeyList = keyContainer;
+    this.els.fsKeyNoteContainer = keyNoteContainer;
+    this.els.fsResetKeys = resetKeys;
+    pane.appendChild(
+      this._section("Keyboard Shortcuts", [
+        keyContainer,
+        keyNoteContainer,
+        resetKeys,
+      ]),
+    );
 
     // About
     const updateBtn = this._el("button", {
@@ -994,19 +985,6 @@ export class FullSettingsModal {
     this.els.fsShortcutsPosition.addEventListener("change", (e) =>
       state.set("shortcutsPosition", e.target.value),
     );
-    this.els.fsResetKeys.addEventListener("click", async () => {
-      if (await showCustomModal("Reset keyboard shortcuts to default?", true)) {
-        state.set("keyMap", structuredClone(DEFAULT_KEY_MAP));
-        this._renderKeyEditor();
-      }
-    });
-    this.els.fsResetLinkDirections.addEventListener("click", async () => {
-      if (await showCustomModal("Reset link directions to default?", true)) {
-        state.set("linkTargets", { ...CONFIG.defaults.linkTargets });
-        this._renderLinkDirectionEditor();
-      }
-    });
-
     // Location search
     this.els.fsLocSave.addEventListener("click", () => {
       this._sm()?.recordWeatherLocationSaveUse?.();
@@ -1179,6 +1157,12 @@ export class FullSettingsModal {
     });
 
     // ─── Data tab events ───
+    this.els.fsResetKeys.addEventListener("click", async () => {
+      if (await showCustomModal("Reset keyboard shortcuts to default?", true)) {
+        state.set("keyMap", structuredClone(DEFAULT_KEY_MAP));
+        this._renderKeyEditor();
+      }
+    });
     this._bindHideToggle(this.els.fsTodoToggle, "showTodo");
     this._bindHideToggle(this.els.fsAppsToggle, "showApps");
     this._bindHideToggle(this.els.fsAiToggle, "showAiTools");
@@ -2417,12 +2401,6 @@ export class FullSettingsModal {
       searchOpen: "Search Open Button",
     };
     const defaults = CONFIG.defaults.linkTargets;
-    const hasChanges = Object.keys(labels).some(
-      (key) => targets[key] !== defaults[key],
-    );
-    if (this.els.fsResetLinkDirections) {
-      this.els.fsResetLinkDirections.hidden = !hasChanges;
-    }
 
     Object.entries(labels).forEach(([key, labelText]) => {
       const isNewTab = (targets[key] || "_blank") === "_blank";

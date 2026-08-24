@@ -2,9 +2,33 @@ import { state } from "../state.js";
 import { CONFIG, SEARCH_PROVIDERS, SEARCH_SUGGESTIONS } from "../config.js";
 import { makeKeyboardInteractive, showCustomModal } from "../utils.js";
 import { BANG_MAP } from "./palette.js";
+import {
+  MAX_CUSTOM_SEARCH_ENGINES,
+  MAX_CUSTOM_SEARCH_NAME_LENGTH,
+  MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH,
+  MAX_CUSTOM_SEARCH_QUERY_PARAMS,
+  MAX_CUSTOM_SEARCH_URL_LENGTH,
+  MAX_CUSTOM_TOOL_ICON_LENGTH,
+  normalizeHttpUrl,
+  validateImageBlob,
+} from "../validators.js";
+import {
+  isLikelySearchProviderUrl,
+  SEARCH_QUERY_PARAMETER_CANDIDATES,
+} from "../keywords.js";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const MAX_TIMEOUT_MS = 2_147_483_647;
+const CUSTOM_SEARCH_ICON_SIZE = 128;
+const CUSTOM_SEARCH_ICON_MAX_BYTES = 5 * 1024 * 1024;
+const CUSTOM_SEARCH_IMAGE_TYPES = new Set([
+  "image/avif",
+  "image/gif",
+  "image/jpeg",
+  "image/png",
+  "image/svg+xml",
+  "image/webp",
+]);
 
 export class Search {
   constructor() {
@@ -18,12 +42,18 @@ export class Search {
       voiceBtn: document.getElementById("voice-search-btn"),
       dropdown: document.getElementById("search-dropdown"),
       engineList: document.getElementById("dropdown-engines"),
+      customEngineSection: document.getElementById("dropdown-custom-section"),
+      customEngineList: document.getElementById("dropdown-custom-engines"),
+      customEngineAction: document.getElementById("custom-search-engine-action"),
       platformList: document.getElementById("dropdown-platforms"),
     };
 
     if (!this.els.form) return;
 
     this.current = this.getValidProvider(state.get("searchProvider"));
+    this.customSearchEditMode = false;
+    this.customSearchModal = null;
+    this._customSearchConfirmOpen = false;
     this._historyDropdownEl = null;
     this._blurTimer = null;
     this._dropdownCloseTimer = null;
@@ -46,6 +76,24 @@ export class Search {
     window.YD_Search = this;
   }
 
+  getCustomSearchEngines() {
+    return (state.get("customSearchEngines") || []).map((provider) => ({
+      ...provider,
+      providerType: "engines",
+      isCustom: true,
+    }));
+  }
+
+  getProviders(type) {
+    return type === "engines"
+      ? [...SEARCH_PROVIDERS.engines, ...this.getCustomSearchEngines()]
+      : [...(SEARCH_PROVIDERS[type] || [])];
+  }
+
+  getProvider(id, type) {
+    return this.getProviders(type).find((provider) => provider.id === id) || null;
+  }
+
   getValidProvider(value) {
     if (value?.id === "brave") {
       const replacement = { id: "perplexity", type: "engines" };
@@ -53,7 +101,7 @@ export class Search {
       return replacement;
     }
 
-    const providers = SEARCH_PROVIDERS[value?.type];
+    const providers = this.getProviders(value?.type);
     if (
       Array.isArray(providers) &&
       providers.some((provider) => provider.id === value.id)
@@ -70,6 +118,15 @@ export class Search {
     this.renderProviderDropdown();
     this.updateUI();
     this.updateButtons();
+    this.els.customEngineAction?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (!this.getCustomSearchEngines().length) {
+        this.openCustomSearchEngineModal();
+        return;
+      }
+      this.customSearchEditMode = !this.customSearchEditMode;
+      this.renderProviderDropdown();
+    });
     this.startTypewriterEffect();
     document.addEventListener("visibilitychange", this._visibilityHandler);
 
@@ -86,6 +143,12 @@ export class Search {
       }
       if (key === "searchHistory" || key === "searchAutoDeleteDays") {
         this.pruneExpiredHistory();
+      }
+      if (key === "customSearchEngines") {
+        this.current = this.getValidProvider(this.current);
+        this.renderProviderDropdown();
+        this.updateUI();
+        this.updateButtons();
       }
     });
     this.pruneExpiredHistory();
@@ -177,6 +240,7 @@ export class Search {
     }
 
     document.addEventListener("click", (e) => {
+      if (this._customSearchConfirmOpen || this.customSearchModal) return;
       if (
         !this.els.dropdown.contains(e.target) &&
         !this.els.providerBtn.contains(e.target)
@@ -822,25 +886,54 @@ export class Search {
     if (engineId === "brave") engineId = "perplexity";
     let provider = null;
     for (const type of ["engines", "platforms"]) {
-      provider = SEARCH_PROVIDERS[type].find((p) => p.id === engineId);
+      provider = this.getProviders(type).find((p) => p.id === engineId);
       if (provider) break;
     }
     if (!provider) {
-      provider = SEARCH_PROVIDERS[this.current.type].find(
-        (p) => p.id === this.current.id,
-      );
+      provider = this.getProvider(this.current.id, this.current.type);
     }
     if (!provider) return;
 
     this.saveSearch(query, engineId);
 
-    let url;
-    if (provider.searchType === "path") {
-      url = `${provider.url}/${encodeURIComponent(query)}`;
-    } else {
-      url = `${provider.url}?${provider.queryParam}=${encodeURIComponent(query)}`;
-    }
+    const url = this.buildProviderUrl(provider, query);
     window.location.href = url;
+  }
+
+  buildProviderUrl(provider, query) {
+    if (provider.searchType === "path") {
+      return `${provider.url}/${encodeURIComponent(query)}`;
+    }
+
+    try {
+      const url = new URL(provider.url);
+      const queryParams = Array.isArray(provider.queryParams) && provider.queryParams.length
+        ? provider.queryParams
+        : [provider.queryParam];
+      const selectedParams = [...new Set(queryParams.filter(Boolean))];
+      const preferredParam = selectedParams.includes(provider.queryParam)
+        ? provider.queryParam
+        : selectedParams[0];
+      const preferredNormalized = preferredParam?.toLowerCase();
+      const hasQAndQuery = selectedParams.some((param) => param.toLowerCase() === "q") &&
+        selectedParams.some((param) => param.toLowerCase() === "query");
+      selectedParams.forEach((param) => {
+        const normalizedParam = param.toLowerCase();
+        if (
+          hasQAndQuery &&
+          (normalizedParam === "q" || normalizedParam === "query") &&
+          normalizedParam !== preferredNormalized
+        ) {
+          url.searchParams.delete(param);
+          return;
+        }
+        url.searchParams.set(param, query);
+      });
+      return url.href;
+    } catch {
+      const queryParam = provider.queryParam || provider.queryParams?.[0] || "q";
+      return `${provider.url}?${queryParam}=${encodeURIComponent(query)}`;
+    }
   }
 
   // --- SECTION: HELPERS ---
@@ -881,7 +974,7 @@ export class Search {
     if (!engineId) return "google.png";
     if (engineId === "brave") engineId = "perplexity";
     for (const type of ["engines", "platforms"]) {
-      const found = SEARCH_PROVIDERS[type].find((p) => p.id === engineId);
+      const found = this.getProviders(type).find((p) => p.id === engineId);
       if (found) return found.icon;
     }
     return "google.png";
@@ -1247,10 +1340,61 @@ export class Search {
       img.alt = p.name;
 
       const span = document.createElement("span");
+      span.className = "custom-search-provider-name";
       span.textContent = p.name;
 
       div.appendChild(img);
       div.appendChild(span);
+
+      if (p.isCustom) {
+        div.classList.add("custom-search-provider-item");
+        const actionGroup = document.createElement("span");
+        actionGroup.className = "custom-search-actions";
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "custom-search-edit";
+        editButton.classList.toggle("hidden", !this.customSearchEditMode);
+        editButton.setAttribute("aria-label", `Edit ${p.name}`);
+        editButton.title = `Edit ${p.name}`;
+        editButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4L19.5 8.5a2.121 2.121 0 0 0-3-3L4 17v3Z"/><path d="m14.5 5.5 4 4"/></svg>';
+        editButton.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          this.openCustomSearchEngineModal(p);
+        });
+        editButton.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "custom-search-delete";
+        deleteButton.classList.toggle("hidden", !this.customSearchEditMode);
+        deleteButton.setAttribute("aria-label", `Delete ${p.name}`);
+        deleteButton.title = `Delete ${p.name}`;
+        deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        deleteButton.addEventListener("click", async (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          this._customSearchConfirmOpen = true;
+          try {
+            const confirmed = await showCustomModal(
+              `Delete the custom search engine "${p.name}"?`,
+              true,
+              true,
+            );
+            if (confirmed) this.deleteCustomSearchEngine(p.id);
+          } finally {
+            this._customSearchConfirmOpen = false;
+          }
+        });
+        deleteButton.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+        });
+        actionGroup.append(editButton, deleteButton);
+        div.appendChild(actionGroup);
+      }
 
       if (
         p.id === "perplexity" &&
@@ -1272,10 +1416,617 @@ export class Search {
       this.els.engineList.appendChild(createItem(p, "engines")),
     );
 
+    const customEngines = this.getCustomSearchEngines();
+    this.els.customEngineList.innerHTML = "";
+    this.els.customEngineSection.classList.toggle("hidden", !customEngines.length);
+    customEngines.forEach((provider) =>
+      this.els.customEngineList.appendChild(createItem(provider, "engines")),
+    );
+    if (customEngines.length && this.customSearchEditMode) {
+      const addItem = document.createElement("button");
+      addItem.type = "button";
+      addItem.className = "dropdown-add-custom-item";
+      addItem.textContent = "ADD";
+      addItem.setAttribute("aria-label", "Add another custom search engine");
+      addItem.addEventListener("click", (event) => {
+        event.stopPropagation();
+        this.openCustomSearchEngineModal();
+      });
+      this.els.customEngineList.appendChild(addItem);
+    }
+    if (this.els.customEngineAction) {
+      this.els.customEngineAction.textContent = customEngines.length
+        ? this.customSearchEditMode
+          ? "SAVE"
+          : "EDIT"
+        : "ADD";
+      this.els.customEngineAction.setAttribute(
+        "aria-label",
+        customEngines.length
+          ? this.customSearchEditMode
+            ? "Save custom search engine changes"
+            : "Edit custom search engines"
+          : "Add a custom search engine",
+      );
+      this.els.customEngineAction.setAttribute(
+        "aria-pressed",
+        String(Boolean(customEngines.length && this.customSearchEditMode)),
+      );
+    }
+
     this.els.platformList.innerHTML = "";
     SEARCH_PROVIDERS.platforms.forEach((p) =>
       this.els.platformList.appendChild(createItem(p, "platforms")),
     );
+  }
+
+  createCustomSearchEngineId() {
+    const existing = new Set(this.getCustomSearchEngines().map((provider) => provider.id));
+    let id;
+    do {
+      const randomPart = globalThis.crypto?.randomUUID?.() ||
+        `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+      id = `custom-search-${randomPart}`;
+    } while (existing.has(id));
+    return id;
+  }
+
+  async createScaledSearchIconData(file) {
+    const fileType = file?.type?.toLowerCase();
+    if (!file || !CUSTOM_SEARCH_IMAGE_TYPES.has(fileType)) {
+      throw new TypeError("Choose a PNG, JPEG, WebP, GIF, AVIF, or SVG icon.");
+    }
+    if (file.size <= 0 || file.size > CUSTOM_SEARCH_ICON_MAX_BYTES) {
+      throw new TypeError("The icon must be smaller than 5 MB.");
+    }
+    if (fileType !== "image/svg+xml") {
+      await validateImageBlob(file, {
+        maxBytes: CUSTOM_SEARCH_ICON_MAX_BYTES,
+        maxWidth: 8192,
+        maxHeight: 8192,
+        maxPixels: 40_000_000,
+      });
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    try {
+      const image = await new Promise((resolve, reject) => {
+        const element = new Image();
+        element.onload = () => resolve(element);
+        element.onerror = () => reject(new TypeError("The icon could not be decoded."));
+        element.src = objectUrl;
+      });
+      const width = image.naturalWidth;
+      const height = image.naturalHeight;
+      if (!width || !height || width * height > 40_000_000) {
+        throw new TypeError("The icon dimensions are too large.");
+      }
+
+      const scale = Math.min(1, CUSTOM_SEARCH_ICON_SIZE / width, CUSTOM_SEARCH_ICON_SIZE / height);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(width * scale));
+      canvas.height = Math.max(1, Math.round(height * scale));
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("The icon could not be processed.");
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/png");
+      if (dataUrl.length > MAX_CUSTOM_TOOL_ICON_LENGTH) {
+        throw new TypeError("The processed icon is too large.");
+      }
+      return dataUrl;
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+
+  getSearchQueryParamCandidates(rawUrl) {
+    let normalizedUrl;
+    try {
+      normalizedUrl = normalizeHttpUrl(rawUrl, MAX_CUSTOM_SEARCH_URL_LENGTH);
+    } catch {
+      return SEARCH_QUERY_PARAMETER_CANDIDATES.slice(0, MAX_CUSTOM_SEARCH_QUERY_PARAMS);
+    }
+
+    let existing = [];
+    try {
+      existing = [...new URL(normalizedUrl).searchParams.keys()];
+    } catch {
+      // The URL was already normalized; use the common candidates below.
+    }
+    return [...new Set([
+      ...existing,
+      ...SEARCH_QUERY_PARAMETER_CANDIDATES,
+    ])]
+      .filter((param) => /^[a-z][a-z\d._-]*$/i.test(param))
+      .filter((param) => param.length <= MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH)
+      .slice(0, MAX_CUSTOM_SEARCH_QUERY_PARAMS);
+  }
+
+  deleteCustomSearchEngine(id) {
+    const current = state.get("customSearchEngines") || [];
+    const next = current.filter((provider) => provider.id !== id);
+    if (next.length === current.length || !state.set("customSearchEngines", next)) return false;
+
+    if (this.current.id === id) {
+      this.current = this.getValidProvider(CONFIG.defaults.searchProvider);
+      state.set("searchProvider", this.current);
+      this.updateUI();
+      this.updateButtons();
+    }
+    const wasLastCustomEngine = next.length === 0;
+    if (wasLastCustomEngine) this.customSearchEditMode = false;
+    this.renderProviderDropdown();
+    if (wasLastCustomEngine) this.closeDropdown();
+    return true;
+  }
+
+  openCustomSearchEngineModal(editProvider = null) {
+    if (this.customSearchModal) return;
+
+    const isEditing = Boolean(editProvider?.id);
+    const wasEditing = this.customSearchEditMode;
+
+    const previousFocus = document.activeElement;
+    const overlay = document.createElement("div");
+    overlay.className = "ydd-add-tool-overlay";
+    overlay.setAttribute("role", "presentation");
+
+    const modal = document.createElement("section");
+    modal.className = "ydd-add-tool-modal ydd-add-search-engine-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "ydd-add-search-engine-title");
+
+    const title = document.createElement("h2");
+    title.id = "ydd-add-search-engine-title";
+    title.textContent = isEditing ? "Edit Search Engine" : "Add a new Search Engine";
+
+    const subtitle = document.createElement("p");
+    subtitle.className = "ydd-add-tool-subtitle";
+    subtitle.textContent = isEditing
+      ? "Update this custom search engine or searchable platform."
+      : "Add a custom search engine or searchable platform.";
+
+    const note = document.createElement("p");
+    note.className = "ydd-search-engine-note";
+    note.textContent = "NOTE: Be careful when adding a search engine. This is not like adding a shortcut, AI tool, or Google app. The URL and query parameter must be correct for searches to work.";
+
+    const form = document.createElement("form");
+    form.noValidate = true;
+
+    const iconLabel = document.createElement("label");
+    iconLabel.className = "ydd-tool-icon-picker";
+    iconLabel.tabIndex = 0;
+    iconLabel.setAttribute("aria-label", "Choose an icon image");
+    const iconPreview = document.createElement("span");
+    iconPreview.className = "ydd-tool-icon-preview";
+    iconPreview.textContent = "+";
+    const iconHint = document.createElement("span");
+    iconHint.className = "ydd-tool-icon-hint";
+    iconHint.textContent = "Choose icon";
+    const iconInput = document.createElement("input");
+    iconInput.type = "file";
+    iconInput.accept = "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml";
+    iconInput.className = "visually-hidden";
+    iconInput.setAttribute("aria-label", "Choose an icon image");
+    iconLabel.append(iconPreview, iconHint, iconInput);
+
+    const createField = (labelText, inputType, placeholder, limit) => {
+      const wrapper = document.createElement("label");
+      wrapper.className = "ydd-add-tool-field";
+      const labelRow = document.createElement("span");
+      labelRow.className = "ydd-add-tool-label-row";
+      const label = document.createElement("span");
+      label.textContent = labelText;
+      const count = document.createElement("span");
+      count.className = "ydd-add-tool-count";
+      count.textContent = `0/${limit}`;
+      labelRow.append(label, count);
+      const input = document.createElement("input");
+      input.type = inputType;
+      input.placeholder = placeholder;
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      input.maxLength = limit;
+      input.dataset.limit = String(limit);
+      input.setAttribute("aria-label", labelText);
+      const error = document.createElement("span");
+      error.className = "ydd-add-tool-error";
+      error.setAttribute("aria-live", "polite");
+      wrapper.append(labelRow, input, error);
+      return { wrapper, input, count, error };
+    };
+
+    const nameField = createField(
+      "Name",
+      "text",
+      "e.g. Ecosia",
+      MAX_CUSTOM_SEARCH_NAME_LENGTH,
+    );
+    const urlField = createField(
+      "Search URL",
+      "url",
+      "https://example.com/search",
+      MAX_CUSTOM_SEARCH_URL_LENGTH,
+    );
+    nameField.input.value = editProvider?.name || "";
+    urlField.input.value = editProvider?.url || "";
+
+    const queryFieldset = document.createElement("fieldset");
+    queryFieldset.className = "ydd-search-query-fieldset";
+    const queryLegend = document.createElement("legend");
+    queryLegend.textContent = "Query parameter(s)";
+    const queryHint = document.createElement("p");
+    queryHint.className = "ydd-search-query-hint";
+    queryHint.textContent = "Select one or more parameters. All selected parameters receive your search text; q and query are handled as one compatible pair.";
+    const queryOptions = document.createElement("div");
+    queryOptions.className = "ydd-search-query-options";
+    const customParamRow = document.createElement("div");
+    customParamRow.className = "ydd-search-custom-param-row";
+    const customParamInput = document.createElement("input");
+    customParamInput.type = "text";
+    customParamInput.className = "ydd-search-query-custom-input";
+    customParamInput.placeholder = "Custom parameter";
+    customParamInput.maxLength = MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH;
+    customParamInput.autocomplete = "off";
+    customParamInput.spellcheck = false;
+    customParamInput.setAttribute("aria-label", "Custom query parameter");
+    const customParamAddButton = document.createElement("button");
+    customParamAddButton.type = "button";
+    customParamAddButton.className = "settings-button ydd-search-query-add-button";
+    customParamAddButton.textContent = "Add";
+    customParamRow.append(customParamInput, customParamAddButton);
+    const customParamError = document.createElement("span");
+    customParamError.className = "ydd-add-tool-error ydd-search-custom-param-error";
+    customParamError.setAttribute("aria-live", "polite");
+    const queryError = document.createElement("span");
+    queryError.className = "ydd-add-tool-error";
+    queryError.setAttribute("aria-live", "polite");
+    queryFieldset.append(
+      queryLegend,
+      queryHint,
+      queryOptions,
+      customParamRow,
+      customParamError,
+      queryError,
+    );
+
+    const formError = document.createElement("p");
+    formError.className = "ydd-add-tool-form-error";
+    formError.setAttribute("aria-live", "polite");
+    const actions = document.createElement("div");
+    actions.className = "ydd-add-tool-actions";
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "settings-button ydd-add-tool-cancel";
+    cancelButton.textContent = "Cancel";
+    const addButton = document.createElement("button");
+    addButton.type = "submit";
+    addButton.className = "settings-button";
+    addButton.textContent = isEditing ? "Save" : "Add";
+    actions.append(cancelButton, addButton);
+
+    form.append(iconLabel, nameField.wrapper, urlField.wrapper, queryFieldset, formError, actions);
+    modal.append(title, subtitle, note, form);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    let iconData = editProvider?.icon || null;
+    let closing = false;
+    let isSubmitting = false;
+    const setFieldError = (field, message = "") => {
+      field.input.classList.toggle("is-invalid", Boolean(message));
+      field.input.setAttribute("aria-invalid", String(Boolean(message)));
+      field.error.textContent = message;
+    };
+    const updateCount = (field) => {
+      const length = field.input.value.length;
+      field.count.textContent = `${length}/${field.input.dataset.limit}`;
+      field.count.classList.toggle("is-over-limit", length > Number(field.input.dataset.limit));
+    };
+    const initialQueryParams = new Set(
+      editProvider?.queryParams?.length
+        ? editProvider.queryParams
+        : [editProvider?.queryParam].filter(Boolean),
+    );
+    const customQueryParams = new Set(
+      [...initialQueryParams].filter(
+        (param) => !SEARCH_QUERY_PARAMETER_CANDIDATES.includes(param),
+      ),
+    );
+    const renderQueryOptions = (preferUrlParams = false) => {
+      const previous = new Set(
+        [...queryOptions.querySelectorAll("input:checked")].map((input) => input.value),
+      );
+      const candidates = [...new Set([
+        ...customQueryParams,
+        ...this.getSearchQueryParamCandidates(urlField.input.value),
+      ])]
+        .filter((param) => /^[a-z][a-z\d._-]*$/i.test(param))
+        .filter((param) => param.length <= MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH)
+        .slice(0, MAX_CUSTOM_SEARCH_QUERY_PARAMS);
+      let urlParams = [];
+      try {
+        urlParams = [...new URL(
+          normalizeHttpUrl(urlField.input.value, MAX_CUSTOM_SEARCH_URL_LENGTH),
+        ).searchParams.keys()];
+      } catch {
+        // Use the common candidates when the URL is still being typed.
+      }
+      const selected = preferUrlParams && urlParams.length
+        ? new Set([...urlParams, ...customQueryParams])
+        : previous.size
+          ? previous
+          : initialQueryParams;
+      queryOptions.replaceChildren();
+      candidates.forEach((param, index) => {
+        const label = document.createElement("label");
+        label.className = "ydd-search-query-option";
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = param;
+        checkbox.checked = selected.size ? selected.has(param) : index === 0;
+        const text = document.createElement("span");
+        text.textContent = param;
+        label.append(checkbox, text);
+        queryOptions.appendChild(label);
+      });
+    };
+    const addCustomQueryParameter = () => {
+      const parameter = customParamInput.value.trim();
+      if (
+        !parameter ||
+        parameter.length > MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH ||
+        !/^[a-z][a-z\d._-]*$/i.test(parameter)
+      ) {
+        customParamError.textContent = "Use a parameter name beginning with a letter; letters, numbers, ., _, and - are allowed.";
+        customParamInput.classList.add("is-invalid");
+        return;
+      }
+      if (!customQueryParams.has(parameter) && customQueryParams.size >= MAX_CUSTOM_SEARCH_QUERY_PARAMS) {
+        customParamError.textContent = `You can add up to ${MAX_CUSTOM_SEARCH_QUERY_PARAMS} query parameters.`;
+        customParamInput.classList.add("is-invalid");
+        return;
+      }
+      customQueryParams.add(parameter);
+      customParamInput.value = "";
+      customParamInput.classList.remove("is-invalid");
+      customParamError.textContent = "";
+      renderQueryOptions();
+      const checkbox = [...queryOptions.querySelectorAll("input")]
+        .find((input) => input.value === parameter);
+      if (checkbox) checkbox.checked = true;
+    };
+    const getSelectedQueryParams = () =>
+      [...queryOptions.querySelectorAll("input:checked")].map((input) => input.value);
+    const validateFields = () => {
+      let valid = true;
+      updateCount(nameField);
+      updateCount(urlField);
+      const name = nameField.input.value.trim();
+      const rawUrl = urlField.input.value.trim();
+      const selectedParams = getSelectedQueryParams();
+
+      if (!name) {
+        setFieldError(nameField, "Enter a name.");
+        valid = false;
+      } else if (nameField.input.value.length > MAX_CUSTOM_SEARCH_NAME_LENGTH) {
+        setFieldError(nameField, `Name must be ${MAX_CUSTOM_SEARCH_NAME_LENGTH} characters or fewer.`);
+        valid = false;
+      } else {
+        setFieldError(nameField);
+      }
+      if (!rawUrl) {
+        setFieldError(urlField, "Enter a search URL.");
+        valid = false;
+      } else {
+        try {
+          normalizeHttpUrl(rawUrl, MAX_CUSTOM_SEARCH_URL_LENGTH);
+          setFieldError(urlField);
+        } catch (error) {
+          setFieldError(urlField, error.message);
+          valid = false;
+        }
+      }
+      queryError.textContent = selectedParams.length
+        ? ""
+        : "Select at least one query parameter.";
+      if (!selectedParams.length) valid = false;
+      if (!iconData) {
+        iconLabel.classList.add("is-invalid");
+        formError.textContent = "Choose an icon image.";
+        valid = false;
+      } else {
+        iconLabel.classList.remove("is-invalid");
+        if (formError.textContent === "Choose an icon image.") formError.textContent = "";
+      }
+      return valid;
+    };
+    const closeModal = (immediate = false) => {
+      if (closing) return;
+      closing = true;
+      document.removeEventListener("keydown", keyHandler, true);
+      overlay.classList.remove("is-open");
+      const remove = () => {
+        if (overlay.isConnected) overlay.remove();
+        if (this.customSearchModal?.overlay === overlay) this.customSearchModal = null;
+        if (previousFocus?.isConnected) window.setTimeout(() => previousFocus.focus(), 0);
+      };
+      if (immediate) remove();
+      else window.setTimeout(remove, 220);
+    };
+    const keyHandler = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeModal();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = modal.querySelectorAll("button, input, [tabindex]:not([tabindex='-1'])");
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    this.customSearchModal = {
+      overlay,
+      close: (immediate = false) => closeModal(immediate),
+    };
+    if (iconData) {
+      const preview = document.createElement("img");
+      preview.src = iconData;
+      preview.alt = "Current icon preview";
+      iconPreview.replaceChildren(preview);
+      iconHint.textContent = "Change icon";
+    }
+    renderQueryOptions();
+    updateCount(nameField);
+    updateCount(urlField);
+    customParamAddButton.addEventListener("click", addCustomQueryParameter);
+    customParamInput.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      addCustomQueryParameter();
+    });
+    customParamInput.addEventListener("input", () => {
+      customParamInput.classList.remove("is-invalid");
+      customParamError.textContent = "";
+    });
+    nameField.input.addEventListener("input", () => {
+      updateCount(nameField);
+      setFieldError(
+        nameField,
+        nameField.input.value.length > MAX_CUSTOM_SEARCH_NAME_LENGTH
+          ? `Name must be ${MAX_CUSTOM_SEARCH_NAME_LENGTH} characters or fewer.`
+          : "",
+      );
+    });
+    urlField.input.addEventListener("input", () => {
+      updateCount(urlField);
+      setFieldError(
+        urlField,
+        urlField.input.value.length > MAX_CUSTOM_SEARCH_URL_LENGTH
+          ? `Search URL must be ${MAX_CUSTOM_SEARCH_URL_LENGTH} characters or fewer.`
+          : "",
+      );
+      renderQueryOptions(true);
+    });
+    iconInput.addEventListener("change", async () => {
+      const file = iconInput.files?.[0];
+      if (!file) return;
+      iconInput.value = "";
+      iconInput.disabled = true;
+      try {
+        iconData = await this.createScaledSearchIconData(file);
+        const preview = document.createElement("img");
+        preview.src = iconData;
+        preview.alt = "Selected icon preview";
+        iconPreview.replaceChildren(preview);
+        iconHint.textContent = "Change icon";
+        iconLabel.classList.remove("is-invalid");
+        if (formError.textContent === "Choose an icon image.") formError.textContent = "";
+      } catch (error) {
+        iconData = null;
+        iconPreview.textContent = "+";
+        iconLabel.classList.add("is-invalid");
+        formError.textContent = error.message || "The icon could not be processed.";
+      } finally {
+        iconInput.disabled = false;
+      }
+    });
+    iconLabel.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        iconInput.click();
+      }
+    });
+    cancelButton.addEventListener("click", () => closeModal());
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) closeModal();
+    });
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (isSubmitting || !validateFields()) return;
+      isSubmitting = true;
+      addButton.disabled = true;
+      try {
+        const current = state.get("customSearchEngines") || [];
+        if (!isEditing && current.length >= MAX_CUSTOM_SEARCH_ENGINES) {
+          formError.textContent = `You can add up to ${MAX_CUSTOM_SEARCH_ENGINES} custom search engines.`;
+          return;
+        }
+        const cleanUrl = normalizeHttpUrl(urlField.input.value, MAX_CUSTOM_SEARCH_URL_LENGTH);
+        const queryParams = getSelectedQueryParams();
+        if (!isLikelySearchProviderUrl(cleanUrl)) {
+          const previousOverlayZIndex = overlay.style.zIndex;
+          overlay.style.zIndex = "11900";
+          let confirmation;
+          try {
+            confirmation = await showCustomModal(
+              "No known search-engine or searchable-platform keyword was found in this URL. This does not prove the URL is invalid, but verify its format and query parameter carefully before adding it.",
+              false,
+              false,
+              [
+                { text: "Add anyway", value: "add-anyway", width: "120px" },
+                {
+                  text: "Cancel",
+                  value: "cancel",
+                  width: "120px",
+                  style: "background: var(--bg-interactive); color: var(--text-primary);",
+                },
+              ],
+            );
+          } finally {
+            overlay.style.zIndex = previousOverlayZIndex;
+          }
+          if (confirmation !== "add-anyway") return;
+        }
+
+        const provider = {
+          id: isEditing ? editProvider.id : this.createCustomSearchEngineId(),
+          name: nameField.input.value.trim(),
+          url: cleanUrl,
+          icon: iconData,
+          queryParams,
+          queryParam: queryParams[0],
+        };
+        const next = isEditing
+          ? current.map((item) => (item.id === editProvider.id ? provider : item))
+          : [...current, provider];
+        if (!state.set("customSearchEngines", next)) {
+          formError.textContent = "The search engine could not be saved. Check browser storage.";
+          return;
+        }
+        if (!isEditing) {
+          this.current = { id: provider.id, type: "engines" };
+          state.set("searchProvider", this.current);
+        }
+        this.customSearchEditMode = isEditing || wasEditing;
+        this.updateUI();
+        this.updateButtons();
+        this.renderProviderDropdown();
+        closeModal();
+      } catch (error) {
+        formError.textContent = error.message || "The search engine could not be saved.";
+      } finally {
+        isSubmitting = false;
+        addButton.disabled = false;
+      }
+    });
+
+    document.addEventListener("keydown", keyHandler, true);
+    window.requestAnimationFrame(() => {
+      overlay.classList.add("is-open");
+      iconLabel.focus();
+    });
   }
 
   recordPerplexityUse() {
@@ -1293,9 +2044,7 @@ export class Search {
   }
 
   updateUI() {
-    const provider = SEARCH_PROVIDERS[this.current.type].find(
-      (p) => p.id === this.current.id,
-    );
+    const provider = this.getProvider(this.current.id, this.current.type);
     if (provider) {
       this.els.providerIcon.src = this._getProviderIconUrl(provider.icon);
       this.els.providerIcon.alt = provider.name;
@@ -1304,9 +2053,7 @@ export class Search {
 
   updateButtons() {
     const hasText = this.els.input.value.trim().length > 0;
-    const provider = SEARCH_PROVIDERS[this.current.type].find(
-      (p) => p.id === this.current.id,
-    );
+    const provider = this.getProvider(this.current.id, this.current.type);
 
     if (hasText) {
       this.els.searchBtn.classList.remove("hidden");
@@ -1342,6 +2089,7 @@ export class Search {
   openDropdown() {
     clearTimeout(this._dropdownCloseTimer);
     this._dropdownCloseTimer = null;
+    this.renderProviderDropdown();
     this.els.dropdown.classList.remove("closing");
     this.els.dropdown.classList.remove("hidden");
     this.els.dropdown.setAttribute("aria-hidden", "false");
@@ -1375,6 +2123,9 @@ export class Search {
   }
 
   closeDropdown() {
+    const wasEditing = this.customSearchEditMode;
+    this.customSearchEditMode = false;
+    if (wasEditing) this.renderProviderDropdown();
     if (
       this.els.dropdown.classList.contains("hidden") ||
       this.els.dropdown.classList.contains("closing")
@@ -1420,19 +2171,12 @@ export class Search {
     const query = this.els.input.value.trim();
     if (!query) return;
 
-    const provider = SEARCH_PROVIDERS[this.current.type].find(
-      (p) => p.id === this.current.id,
-    );
+    const provider = this.getProvider(this.current.id, this.current.type);
     if (!provider) return;
 
     this.saveSearch(query, this.current.id);
 
-    let url;
-    if (provider.searchType === "path") {
-      url = `${provider.url}/${encodeURIComponent(query)}`;
-    } else {
-      url = `${provider.url}?${provider.queryParam}=${encodeURIComponent(query)}`;
-    }
+    const url = this.buildProviderUrl(provider, query);
 
     window.location.href = url;
   }
