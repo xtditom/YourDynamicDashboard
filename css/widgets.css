@@ -146,15 +146,12 @@ body:not(.loaded) #weather-widget {
   overflow: hidden;
   opacity: 0;
 }
-#quote-widget.quote-dropdown-restore {
-  animation: quote-dropdown-reveal 0.36s ease-out both;
+#quote-widget.quote-dropdown-fade-in {
+  animation: quote-dropdown-fade-in 0.28s ease-out both;
 }
-@keyframes quote-dropdown-reveal {
+@keyframes quote-dropdown-fade-in {
   0% {
     opacity: 0;
-  }
-  45% {
-    opacity: 0.45;
   }
   100% {
     opacity: 1;

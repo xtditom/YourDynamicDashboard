@@ -66,6 +66,73 @@ function enqueueMutation(operation) {
   return pending;
 }
 
+function mutateRandomBackgroundQueue(mutator) {
+  return openDB().then(
+    (db) =>
+      new Promise((resolve, reject) => {
+        const transaction = db.transaction(STORE_NAME, "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        let result;
+        let settled = false;
+
+        const fail = (error) => {
+          if (settled) return;
+          settled = true;
+          try {
+            transaction.abort();
+          } catch (abortError) {
+            // The transaction may already be completing.
+          }
+          reject(error || new Error("Random background queue update failed."));
+        };
+
+        const request = store.get(RANDOM_BACKGROUND_QUEUE_KEY);
+        request.onerror = () => fail(request.error);
+        request.onsuccess = () => {
+          try {
+            const queue = Array.isArray(request.result)
+              ? request.result
+              : [];
+            const mutation = mutator(queue) || {};
+            result = Array.isArray(mutation.result)
+              ? mutation.result
+              : {
+                  ...(mutation.result || {}),
+                  queueExists: Array.isArray(request.result),
+                };
+            if (mutation.queue) {
+              store.put(mutation.queue, RANDOM_BACKGROUND_QUEUE_KEY);
+            }
+          } catch (error) {
+            fail(error);
+          }
+        };
+
+        transaction.oncomplete = () => {
+          if (!settled) {
+            settled = true;
+            resolve(result);
+          }
+        };
+        transaction.onerror = () => fail(transaction.error);
+        transaction.onabort = () => fail(transaction.error);
+      }),
+  );
+}
+
+function randomBackgroundIdentity(url) {
+  if (typeof url !== "string" || !url) return null;
+  try {
+    const parsed = new URL(url);
+    const picsumId = parsed.pathname.match(/\/id\/([^/]+)/)?.[1];
+    return picsumId
+      ? `picsum:${picsumId}`
+      : `${parsed.origin}${parsed.pathname}`;
+  } catch (error) {
+    return url;
+  }
+}
+
 export const secondStorage = {
   saveImage(blob) {
     return enqueueMutation(() =>
@@ -98,6 +165,44 @@ export const secondStorage = {
       store.get(RANDOM_BACKGROUND_QUEUE_KEY),
     );
     return Array.isArray(queue) ? queue : [];
+  },
+
+  takeRandomBackgroundQueue() {
+    return enqueueMutation(() =>
+      mutateRandomBackgroundQueue((queue) => {
+        const [entry, ...remaining] = queue;
+        return {
+          result: { entry: entry || null, queue: remaining },
+          queue: remaining,
+        };
+      }),
+    );
+  },
+
+  appendRandomBackgroundQueue(entries, limit = 2) {
+    return enqueueMutation(() =>
+      mutateRandomBackgroundQueue((queue) => {
+        const nextQueue = queue.filter((entry) =>
+          Boolean(randomBackgroundIdentity(entry?.url)),
+        );
+        const knownUrls = new Set(
+          nextQueue
+            .map((entry) => randomBackgroundIdentity(entry?.url))
+            .filter(Boolean),
+        );
+
+        for (const entry of Array.isArray(entries) ? entries : []) {
+          const identity = randomBackgroundIdentity(entry?.url);
+          if (!entry || !identity || knownUrls.has(identity)) continue;
+          nextQueue.push(entry);
+          knownUrls.add(identity);
+          if (nextQueue.length >= limit) break;
+        }
+
+        const limitedQueue = nextQueue.slice(0, limit);
+        return { result: limitedQueue, queue: limitedQueue };
+      }),
+    );
   },
 
   deleteRandomBackgroundQueue() {

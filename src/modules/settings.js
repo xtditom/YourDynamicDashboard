@@ -894,6 +894,7 @@ export class SettingsManager {
       randomBgFreeze: document.getElementById("random-bg-freeze-btn"),
       randomBgRnd: document.getElementById("random-bg-rnd-btn"),
       randomBgSchedule: document.getElementById("random-bg-schedule-select"),
+      randomBgUpdatedSticker: document.getElementById("random-bg-updated-sticker"),
       backup: document.getElementById("backup-button"),
       restore: document.getElementById("restore-button"),
       restoreInput: document.getElementById("restore-file-input"),
@@ -975,10 +976,13 @@ export class SettingsManager {
         key === "gradientModeActive" ||
         key === "backgroundImage" ||
         key === "randomBgMode" ||
+        key === "disableAnimations" ||
+        key === "randomBgScheduleBadgeDismissed" ||
         key === "normalThemeId" ||
         key === "gradientThemeId"
       ) {
         this.updateAutoThemeGlowState();
+        this.updateWarningText();
         this.updateDarkModeControlState();
       }
       if (key === "glowEffect") {
@@ -997,6 +1001,10 @@ export class SettingsManager {
             else parentRow.classList.remove("disabled");
           }
         }
+      }
+      if (key === "randomBgScheduleBadgeDismissed") {
+        this.updateRandomBgButtons();
+        window.__fullSettingsModalInstance?.updateRandomBackgroundBadge?.();
       }
     });
   }
@@ -2450,16 +2458,18 @@ export class SettingsManager {
 
   updateWarningText() {
     const isGradient = state.get("gradientModeActive");
+    const animationsDisabled = state.get("disableAnimations") === true;
     if (this.els.themeColorNote) {
       this.els.themeColorNote.style.display = "none";
     }
 
     const glowPicker = document.getElementById("glow-color-picker");
     if (this.els.glowToggle) {
-      this.els.glowToggle.disabled = isGradient;
+      const glowDisabled = isGradient || animationsDisabled;
+      this.els.glowToggle.disabled = glowDisabled;
       const glowRow = this.els.glowToggle.closest(".setting-row");
 
-      if (isGradient) {
+      if (glowDisabled) {
         if (glowRow) glowRow.classList.add("disabled");
 
         if (glowPicker) {
@@ -2715,6 +2725,25 @@ export class SettingsManager {
       : null;
   }
 
+  _getRandomBackgroundCurrentUrls() {
+    return [state.get("savedBgUrl"), state.get("backgroundImage")].filter(
+      (url) => typeof url === "string" && url,
+    );
+  }
+
+  _getRandomBackgroundIdentity(url) {
+    if (typeof url !== "string" || !url) return null;
+    try {
+      const parsed = new URL(url);
+      const picsumId = parsed.pathname.match(/\/id\/([^/]+)/)?.[1];
+      return picsumId
+        ? `picsum:${picsumId}`
+        : `${parsed.origin}${parsed.pathname}`;
+    } catch (error) {
+      return url;
+    }
+  }
+
   _getRandomBackgroundFallbackCurrent() {
     const url = state.get("savedBgUrl") || state.get("backgroundImage");
     if (typeof url !== "string" || !url.trim()) return null;
@@ -2778,30 +2807,61 @@ export class SettingsManager {
     }
     if (state.get("randomBgMode") !== "random") return false;
 
-    if (schedule === "refresh") {
+    if (
+      schedule === "refresh" &&
+      state.get("randomBgRefreshWarningDismissed") !== true
+    ) {
       const result = await showCustomModal(
         RANDOM_BG_REFRESH_WARNING,
         false,
         false,
         [
-          { text: "OK", value: "ok", width: "120px" },
+          {
+            text: "OK",
+            value: ({ checkboxChecked }) => ({
+              action: "ok",
+              remember: checkboxChecked,
+            }),
+            width: "120px",
+          },
           {
             text: "Cancel",
-            value: "cancel",
+            value: () => "cancel",
             width: "120px",
             style:
               "background: var(--bg-interactive); color: var(--text-primary);",
           },
         ],
+        false,
+        {
+          checkbox: {
+            label: "Don't show this warning again",
+          },
+        },
       );
-      if (result !== "ok") return false;
+      if (!result || (result !== "ok" && result.action !== "ok")) {
+        return false;
+      }
+      if (result.remember === true) {
+        state.set("randomBgRefreshWarningDismissed", true);
+      }
     }
 
+    this.dismissRandomBackgroundScheduleBadge();
     state.set("randomBgSchedule", schedule);
     if (schedule !== "refresh") this._markRandomBackgroundChanged();
     this.updateRandomBgButtons();
     this._scheduleRandomBackgroundRefresh();
     return true;
+  }
+
+  dismissRandomBackgroundScheduleBadge() {
+    if (state.get("randomBgScheduleBadgeDismissed") === true) return;
+    state.set("randomBgScheduleBadgeDismissed", true);
+    if (this.els.randomBgUpdatedSticker) {
+      this.els.randomBgUpdatedSticker.hidden = true;
+    }
+    window.__fullSettingsModalInstance?.updateRandomBackgroundBadge?.(true);
   }
 
   _scheduleRandomBackgroundRefresh() {
@@ -2890,9 +2950,9 @@ export class SettingsManager {
     };
   }
 
-  async _persistRandomBackgroundQueue(queue, fallbackEntry = null) {
+  async _persistRandomBackgroundQueue(queue) {
     const limitedQueue = queue.slice(0, RANDOM_BG_QUEUE_TARGET);
-    this._setRandomBackgroundNextMetadata(limitedQueue[0] || fallbackEntry);
+    this._setRandomBackgroundNextMetadata(limitedQueue[0] || null);
 
     try {
       await secondStorage.saveRandomBackgroundQueue(limitedQueue);
@@ -3021,67 +3081,119 @@ export class SettingsManager {
     }
   }
 
-  async _fetchRandomWallpaper() {
+  async _takeRandomBackgroundQueue() {
+    try {
+      const result = await secondStorage.takeRandomBackgroundQueue();
+      const remainingQueue = (result?.queue || [])
+        .map((entry) => this._normalizeRandomBackgroundEntry(entry))
+        .filter(Boolean);
+      this._setRandomBackgroundNextMetadata(remainingQueue[0] || null);
+      return {
+        hadEntry: Boolean(result?.entry),
+        queueExists: result?.queueExists === true,
+        entry: this._normalizeRandomBackgroundEntry(result?.entry),
+        queue: remainingQueue,
+      };
+    } catch (error) {
+      console.warn("Random background queue item could not be consumed:", error);
+      return { hadEntry: false, queueExists: false, entry: null, queue: [] };
+    }
+  }
+
+  async _takeNextDistinctRandomBackground(excludedUrls = []) {
+    const excluded = new Set(
+      (Array.isArray(excludedUrls) ? excludedUrls : []).filter(
+        (url) => typeof url === "string" && url,
+      ).map((url) => this._getRandomBackgroundIdentity(url)),
+    );
+    let consumed = await this._takeRandomBackgroundQueue();
+    while (
+      consumed.hadEntry &&
+      (!consumed.entry ||
+        excluded.has(this._getRandomBackgroundIdentity(consumed.entry.url)))
+    ) {
+      consumed = await this._takeRandomBackgroundQueue();
+    }
+    return consumed;
+  }
+
+  async _fetchRandomWallpaper(excludedUrls = []) {
     const width = Math.max(800, Math.min(1920, Math.round(window.innerWidth)));
     const height = Math.max(600, Math.min(1080, Math.round(window.innerHeight)));
-    const cacheKey = `${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0]}`;
-    const response = await fetch(
-      `https://picsum.photos/${width}/${height}?random=${cacheKey}`,
+    const excluded = new Set(
+      (Array.isArray(excludedUrls) ? excludedUrls : []).filter(
+        (url) => typeof url === "string" && url,
+      ).map((url) => this._getRandomBackgroundIdentity(url)),
     );
-    if (!response.ok) {
-      throw new Error(`Wallpaper service returned ${response.status}.`);
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const cacheKey = `${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0]}`;
+      const response = await fetch(
+        `https://picsum.photos/${width}/${height}?random=${cacheKey}`,
+      );
+      if (!response.ok) {
+        throw new Error(`Wallpaper service returned ${response.status}.`);
+      }
+
+      const finalUrl = response.url;
+      if (!finalUrl) throw new Error("Wallpaper service returned no image URL.");
+      if (excluded.has(this._getRandomBackgroundIdentity(finalUrl))) {
+        response.body?.cancel?.();
+        continue;
+      }
+
+      const wallpaperBlob = await response.blob();
+      await validateImageBlob(wallpaperBlob, {
+        maxBytes: 20 * 1024 * 1024,
+        maxWidth: 4096,
+        maxHeight: 4096,
+        maxPixels: 20_000_000,
+      });
+      return {
+        url: finalUrl,
+        blob: wallpaperBlob,
+        preview: await this._createRandomBackgroundPreview(wallpaperBlob),
+      };
     }
 
-    const finalUrl = response.url;
-    if (!finalUrl) throw new Error("Wallpaper service returned no image URL.");
-
-    const wallpaperBlob = await response.blob();
-    await validateImageBlob(wallpaperBlob, {
-      maxBytes: 20 * 1024 * 1024,
-      maxWidth: 4096,
-      maxHeight: 4096,
-      maxPixels: 20_000_000,
-    });
-    return {
-      url: finalUrl,
-      blob: wallpaperBlob,
-      preview: await this._createRandomBackgroundPreview(wallpaperBlob),
-    };
+    throw new Error("Wallpaper service repeatedly returned the current image.");
   }
 
   async _advanceRandomBackground(origin = "schedule", operationId = null) {
     const activeOperationId = operationId || ++this._backgroundOperationId;
     try {
-      const storedQueue = await this._getStoredRandomBackgroundQueue();
+      const consumedQueue = await this._takeNextDistinctRandomBackground(
+        this._getRandomBackgroundCurrentUrls(),
+      );
       if (activeOperationId !== this._backgroundOperationId) return false;
 
-      if (storedQueue.length > 0) {
-        const [entry, ...remainingQueue] = storedQueue;
-        const fallbackEntry = {
-          url: entry.url,
-          preview: entry.preview || this._getRandomBackgroundNextPreview(),
-        };
-        if (!(await this._useRandomBackgroundEntry(entry, activeOperationId))) {
+      if (consumedQueue.entry) {
+        if (
+          !(await this._useRandomBackgroundEntry(
+            consumedQueue.entry,
+            activeOperationId,
+          ))
+        ) {
           return false;
         }
-        await this._persistRandomBackgroundQueue(remainingQueue, fallbackEntry);
         this._syncBackgroundControls();
         void this._fillRandomBackgroundQueue(
           activeOperationId,
-          remainingQueue,
-          fallbackEntry,
+          consumedQueue.queue,
         );
         return true;
       }
 
-      const entry = await this._fetchRandomWallpaper();
+      const entry = await this._fetchRandomWallpaper([
+        ...this._getRandomBackgroundCurrentUrls(),
+      ]);
       if (activeOperationId !== this._backgroundOperationId) return false;
       if (!(await this._useRandomBackgroundEntry(entry, activeOperationId))) {
         return false;
       }
-      await this._persistRandomBackgroundQueue([], entry);
+      await this._persistRandomBackgroundQueue([]);
       this._syncBackgroundControls();
-      void this._fillRandomBackgroundQueue(activeOperationId, [], entry);
+      void this._fillRandomBackgroundQueue(activeOperationId, []);
       return true;
     } catch (error) {
       if (activeOperationId === this._backgroundOperationId) {
@@ -3112,11 +3224,7 @@ export class SettingsManager {
         const queue = await this._getStoredRandomBackgroundQueue();
         if (operationId !== this._backgroundOperationId) return;
         this._syncBackgroundControls();
-        void this._fillRandomBackgroundQueue(
-          operationId,
-          queue,
-          currentEntry,
-        );
+        void this._fillRandomBackgroundQueue(operationId, queue);
         this._scheduleRandomBackgroundRefresh();
         return;
       }
@@ -3126,40 +3234,42 @@ export class SettingsManager {
       return;
     }
 
-    const storedQueue = await this._getStoredRandomBackgroundQueue();
+    const consumedQueue = await this._takeNextDistinctRandomBackground(
+      this._getRandomBackgroundCurrentUrls(),
+    );
     if (operationId !== this._backgroundOperationId) return;
 
-    if (storedQueue.length > 0) {
-      const [entry, ...remainingQueue] = storedQueue;
-      const fallbackEntry = {
-        url: entry.url,
-        preview: entry.preview || this._getRandomBackgroundNextPreview(),
-      };
-      if (!(await this._useRandomBackgroundEntry(entry, operationId))) return;
-
-      await this._persistRandomBackgroundQueue(remainingQueue, fallbackEntry);
+    if (consumedQueue.entry) {
+      if (!(await this._useRandomBackgroundEntry(consumedQueue.entry, operationId))) {
+        return;
+      }
       this._syncBackgroundControls();
-      void this._fillRandomBackgroundQueue(operationId, remainingQueue, fallbackEntry);
+      void this._fillRandomBackgroundQueue(operationId, consumedQueue.queue);
       return;
     }
 
     const queuedUrl = this._getRandomBackgroundNextUrl();
-    if (queuedUrl) {
+    const queuedUrlIsCurrent = this._getRandomBackgroundCurrentUrls()
+      .map((url) => this._getRandomBackgroundIdentity(url))
+      .includes(this._getRandomBackgroundIdentity(queuedUrl));
+    if (queuedUrl && !queuedUrlIsCurrent && !consumedQueue.queueExists) {
       const legacyEntry = {
         url: queuedUrl,
         preview: this._getRandomBackgroundNextPreview(),
       };
       if (!(await this._useRandomBackgroundEntry(legacyEntry, operationId))) return;
-      await this._persistRandomBackgroundQueue([], legacyEntry);
+      await this._persistRandomBackgroundQueue([]);
       this._syncBackgroundControls();
-      void this._fillRandomBackgroundQueue(operationId, [], legacyEntry);
+      void this._fillRandomBackgroundQueue(operationId, []);
       return;
     }
+    if (queuedUrl) this._setRandomBackgroundNextMetadata(null);
 
     try {
+      const currentUrls = this._getRandomBackgroundCurrentUrls();
       const results = await Promise.allSettled([
-        this._fetchRandomWallpaper(),
-        this._fetchRandomWallpaper(),
+        this._fetchRandomWallpaper(currentUrls),
+        this._fetchRandomWallpaper(currentUrls),
       ]);
       if (operationId !== this._backgroundOperationId) return;
 
@@ -3170,11 +3280,37 @@ export class SettingsManager {
         throw new Error("No valid random wallpaper was returned.");
       }
 
-      const [currentEntry, ...nextEntries] = entries;
+      const uniqueEntries = [];
+      const knownUrls = new Set(
+        currentUrls
+          .map((url) => this._getRandomBackgroundIdentity(url))
+          .filter(Boolean),
+      );
+      entries.forEach((entry) => {
+        const identity = this._getRandomBackgroundIdentity(entry.url);
+        if (!identity || knownUrls.has(identity)) return;
+        knownUrls.add(identity);
+        uniqueEntries.push(entry);
+      });
+      while (uniqueEntries.length < 2) {
+        try {
+          const entry = await this._fetchRandomWallpaper(
+            [...currentUrls, ...uniqueEntries.map((item) => item.url)],
+          );
+          const identity = this._getRandomBackgroundIdentity(entry.url);
+          if (!identity || knownUrls.has(identity)) continue;
+          knownUrls.add(identity);
+          uniqueEntries.push(entry);
+        } catch (error) {
+          break;
+        }
+      }
+      const [currentEntry, ...nextEntries] = uniqueEntries;
+      if (!currentEntry) throw new Error("No valid random wallpaper was returned.");
       if (!(await this._useRandomBackgroundEntry(currentEntry, operationId))) return;
-      await this._persistRandomBackgroundQueue(nextEntries, currentEntry);
+      await this._persistRandomBackgroundQueue(nextEntries);
       this._syncBackgroundControls();
-      void this._fillRandomBackgroundQueue(operationId, nextEntries, currentEntry);
+      void this._fillRandomBackgroundQueue(operationId, nextEntries);
     } catch (error) {
       if (operationId === this._backgroundOperationId) {
         console.error("Initial random background failed:", error);
@@ -3182,34 +3318,51 @@ export class SettingsManager {
     }
   }
 
-  async _fillRandomBackgroundQueue(operationId, queue, fallbackEntry) {
-    const currentQueue = queue.slice(0, RANDOM_BG_QUEUE_TARGET);
-    const missingCount = RANDOM_BG_QUEUE_TARGET - currentQueue.length;
-    if (missingCount <= 0) return true;
+  async _fillRandomBackgroundQueue(operationId, queue = []) {
+    let storedQueue = Array.isArray(queue)
+      ? queue.slice(0, RANDOM_BG_QUEUE_TARGET)
+      : [];
 
-    const fillOne = async () => {
+    while (storedQueue.length < RANDOM_BG_QUEUE_TARGET) {
       try {
-        const entry = await this._fetchRandomWallpaper();
         if (
           operationId !== this._backgroundOperationId ||
           state.get("randomBgMode") !== "random"
-        ) return false;
+        ) {
+          return storedQueue.length > 0;
+        }
 
-        currentQueue.push(entry);
-        await this._persistRandomBackgroundQueue(currentQueue, fallbackEntry);
-        return true;
+        storedQueue = await this._getStoredRandomBackgroundQueue();
+        if (storedQueue.length >= RANDOM_BG_QUEUE_TARGET) break;
+
+        const entry = await this._fetchRandomWallpaper([
+          ...this._getRandomBackgroundCurrentUrls(),
+          ...storedQueue.map((item) => item.url),
+        ]);
+        if (
+          operationId !== this._backgroundOperationId ||
+          state.get("randomBgMode") !== "random"
+        ) {
+          return storedQueue.length > 0;
+        }
+
+        storedQueue = await secondStorage.appendRandomBackgroundQueue(
+          [entry],
+          RANDOM_BG_QUEUE_TARGET,
+        );
+        storedQueue = storedQueue
+          .map((item) => this._normalizeRandomBackgroundEntry(item))
+          .filter(Boolean);
+        this._setRandomBackgroundNextMetadata(storedQueue[0] || null);
       } catch (error) {
         if (operationId === this._backgroundOperationId) {
           console.warn("Random background prefetch failed:", error);
         }
-        return false;
+        break;
       }
-    };
+    }
 
-    await Promise.all(
-      Array.from({ length: missingCount }, () => fillOne()),
-    );
-    return currentQueue.length > 0;
+    return storedQueue.length > 0;
   }
 
   async handleBgUpload(file) {
@@ -3791,19 +3944,21 @@ export class SettingsManager {
     });
 
     try {
-      const entry = await this._fetchRandomWallpaper();
+      const entry = await this._fetchRandomWallpaper(
+        this._getRandomBackgroundCurrentUrls(),
+      );
       if (operationId !== this._backgroundOperationId) return false;
 
       await secondStorage.deleteImage();
       if (operationId !== this._backgroundOperationId) return false;
 
       if (!(await this._useRandomBackgroundEntry(entry, operationId))) return false;
-      await this._persistRandomBackgroundQueue([], entry);
+      await this._persistRandomBackgroundQueue([]);
       localStorage.removeItem("has_idb_bg");
       localStorage.removeItem("lowResBg");
       this.disableAutoTheme();
       this._syncBackgroundControls();
-      void this._fillRandomBackgroundQueue(operationId, [], entry);
+      void this._fillRandomBackgroundQueue(operationId, []);
       this._scheduleRandomBackgroundRefresh();
       return true;
     } catch (err) {
@@ -3861,13 +4016,19 @@ export class SettingsManager {
       this.els.randomBgSchedule.value = schedule;
       this.els.randomBgSchedule.classList.toggle("hidden", mode !== "random");
     }
+    if (this.els.randomBgUpdatedSticker) {
+      this.els.randomBgUpdatedSticker.hidden =
+        state.get("randomBgScheduleBadgeDismissed") === true;
+    }
   }
 
   updateAutoThemeGlowState() {
     const hasBg = document.body.classList.contains("has-custom-bg");
     const isGradient = document.body.classList.contains("gradient-mode-active");
+    const animationsDisabled = state.get("disableAnimations") === true;
     const autoThemeDisabled = hasBg;
-    const disabledControls = hasBg || isGradient;
+    const colorControlsDisabled = hasBg || isGradient;
+    const glowDisabled = colorControlsDisabled || animationsDisabled;
 
     if (this.els.blurRow) {
       if (hasBg) {
@@ -3884,9 +4045,9 @@ export class SettingsManager {
     }
 
     if (this.els.glowToggle) {
-      this.els.glowToggle.disabled = disabledControls;
+      this.els.glowToggle.disabled = glowDisabled;
       const parentRow = this.els.glowToggle.closest(".setting-row");
-      if (parentRow) parentRow.style.opacity = disabledControls ? "0.5" : "1";
+      if (parentRow) parentRow.style.opacity = glowDisabled ? "0.5" : "1";
     }
 
     const advancedColorsContainer = document.getElementById(
@@ -3899,7 +4060,7 @@ export class SettingsManager {
 
     if (advancedColorsContainer) {
       const colorInputs = advancedColorsContainer.querySelectorAll("input");
-      if (disabledControls) {
+      if (colorControlsDisabled) {
         advancedColorsContainer.classList.add("advanced-colors-disabled");
         advancedColorsContainer.classList.add("disabled");
         advancedColorsContainer.style.opacity = "0.5";

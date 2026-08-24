@@ -12,6 +12,8 @@ export const CONFIG = {
     disableAnimations: false,
     disableAnimationsToggleCount: 0,
     randomBgSchedule: "1m",
+    randomBgScheduleBadgeDismissed: false,
+    randomBgRefreshWarningDismissed: false,
     randomBgLastChangedAt: 0,
     randomBgLastChangedDate: "",
     randomBgCurrentPreview: "",

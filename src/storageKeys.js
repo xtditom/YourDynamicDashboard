@@ -26,6 +26,8 @@ const EXTRA_STORAGE_KEYS = [
   "randomBgLastChangedDate",
   "randomBgNextPreview",
   "randomBgNextUrl",
+  "randomBgScheduleBadgeDismissed",
+  "randomBgRefreshWarningDismissed",
   "randomBgSchedule",
   "randomBgTime",
   "savedBgUrl",

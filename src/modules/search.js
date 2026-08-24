@@ -27,6 +27,7 @@ export class Search {
     this._historyDropdownEl = null;
     this._blurTimer = null;
     this._dropdownCloseTimer = null;
+    this._quoteRestoreTimer = null;
     this._historyExpiryTimer = null;
     this._historyModalClose = null;
     this._historyPreviousFocus = null;
@@ -72,12 +73,16 @@ export class Search {
     this.startTypewriterEffect();
     document.addEventListener("visibilitychange", this._visibilityHandler);
 
-    state.subscribe((key, value) => {
+    state.subscribe((key) => {
       if (key === "linkTargets") this.updateButtons();
       if (key === "hideVoiceSearch") this.updateVoiceButton();
       if (key === "widgetControl") this.syncTypewriterVisibility();
-      if (key === "disableAnimations" && value === true) {
-        this._restoreQuotesImmediately();
+      if (key === "disableAnimations") {
+        if (this._isSearchOverlayOpen()) {
+          this._hideQuoteForOverlay();
+        } else {
+          this._restoreQuotesImmediately();
+        }
       }
       if (key === "searchHistory" || key === "searchAutoDeleteDays") {
         this.pruneExpiredHistory();
@@ -423,30 +428,61 @@ export class Search {
       this._quoteHiddenBySearch = false;
       const quoteWidget = document.getElementById("quote-widget");
       if (quoteWidget) {
+        clearTimeout(this._quoteRestoreTimer);
+        this._quoteRestoreTimer = null;
         quoteWidget.style.removeProperty("visibility");
-        quoteWidget.classList.remove("quote-dropdown-restore");
+        quoteWidget.classList.remove(
+          "fade-up",
+          "fade-down",
+          "popup-scale-entry",
+          "quote-dropdown-fade-in",
+        );
         if (state.get("disableAnimations") === true) {
           quoteWidget.style.opacity = "1";
         } else {
-          quoteWidget.style.opacity = "";
+          quoteWidget.style.opacity = "0";
           void quoteWidget.offsetWidth;
-          quoteWidget.classList.add("quote-dropdown-restore");
-          window.setTimeout(
-            () => quoteWidget.classList.remove("quote-dropdown-restore"),
-            400,
-          );
+          quoteWidget.classList.add("quote-dropdown-fade-in");
+          this._quoteRestoreTimer = window.setTimeout(() => {
+            quoteWidget.classList.remove("quote-dropdown-fade-in");
+            quoteWidget.style.opacity = "1";
+            this._quoteRestoreTimer = null;
+          }, 280);
         }
       }
     }
   }
 
+  _isSearchOverlayOpen() {
+    const mainDropdownOpen = !this.els.dropdown.classList.contains("hidden");
+    const historyDropdownOpen = Boolean(
+      this._historyDropdownEl || document.getElementById("sh-quick-dropdown"),
+    );
+    return mainDropdownOpen || historyDropdownOpen;
+  }
+
   _hideQuoteForOverlay() {
-    if (state.get("disableAnimations") === true) return;
-
     const quoteWidget = document.getElementById("quote-widget");
-    if (!quoteWidget) return;
+    const hasOverlaySurface =
+      document.body.classList.contains("has-custom-bg") ||
+      document.body.classList.contains("gradient-mode-active");
+    if (
+      !quoteWidget ||
+      quoteWidget.classList.contains("hidden") ||
+      !hasOverlaySurface
+    ) {
+      return;
+    }
 
+    clearTimeout(this._quoteRestoreTimer);
+    this._quoteRestoreTimer = null;
     this._quoteHiddenBySearch = true;
+    quoteWidget.classList.remove(
+      "fade-up",
+      "fade-down",
+      "popup-scale-entry",
+      "quote-dropdown-fade-in",
+    );
     quoteWidget.style.setProperty("visibility", "hidden", "important");
     quoteWidget.style.opacity = "0";
   }
@@ -458,9 +494,16 @@ export class Search {
     const quoteWidget = document.getElementById("quote-widget");
     if (!quoteWidget) return;
 
+    clearTimeout(this._quoteRestoreTimer);
+    this._quoteRestoreTimer = null;
     quoteWidget.style.removeProperty("visibility");
     quoteWidget.style.opacity = "1";
-    quoteWidget.classList.remove("quote-dropdown-restore");
+    quoteWidget.classList.remove(
+      "fade-up",
+      "fade-down",
+      "popup-scale-entry",
+      "quote-dropdown-fade-in",
+    );
   }
 
   // --- SECTION: LAYER 2 — FULL HISTORY MODAL ---

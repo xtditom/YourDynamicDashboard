@@ -133,7 +133,11 @@ export class FullSettingsModal {
   _row(label, desc, control) {
     const row = this._el("div", { className: "setting-row" });
     const labelDiv = this._el("div", { className: "label" });
-    labelDiv.appendChild(this._el("span", { textContent: label }));
+    labelDiv.appendChild(
+      typeof label === "string"
+        ? this._el("span", { textContent: label })
+        : label,
+    );
     if (desc) labelDiv.appendChild(this._el("small", { textContent: desc }));
     const controlId = control?.querySelector?.("[id]")?.id;
     if (controlId) {
@@ -605,6 +609,23 @@ export class FullSettingsModal {
       id: "fs-rnd-btn",
       textContent: "Random",
     });
+    const randomBgLabel = this._el("span", {
+      className: "fs-random-bg-label",
+    }, [this._el("span", { textContent: "Random BG" })]);
+    this.els.fsRandomBgUpdatedSticker = null;
+    if (state.get("randomBgScheduleBadgeDismissed") !== true) {
+      const updatedSticker = this._el("span", {
+        className: "fs-updated-sticker",
+        innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+          <title>Updated</title>
+          <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+          <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
+        </svg>`,
+      });
+      randomBgLabel.appendChild(updatedSticker);
+      this.els.fsRandomBgUpdatedSticker = updatedSticker;
+    }
     const scheduleSelect = this._dropdown("fs-random-bg-schedule-select", [
       ["refresh", "Every refresh"],
       ["30s", "Every 30 seconds"],
@@ -641,7 +662,7 @@ export class FullSettingsModal {
     pane.appendChild(
       this._section("Background", [
         this._row("Custom BG", "Upload an image.", bgControls),
-        this._row("Random BG", "Fetch image from Lorem Picsum.", rndControls),
+        this._row(randomBgLabel, "Fetch image from Lorem Picsum.", rndControls),
         blurRow,
       ]),
     );
@@ -1126,27 +1147,7 @@ export class FullSettingsModal {
 
     // Save theme
     this.els.fsGenerateThemeBtn.addEventListener("click", () => {
-      if (this._generateThemeCooldown) return;
-      const sm = this._sm();
-      if (!sm?.generateCuratedTheme) return;
-
-      this._generateThemeCooldown = true;
-      this._updateColorControlsState();
-      try {
-        const generated = sm.generateCuratedTheme();
-        if (generated) {
-          sm.recordThemeGeneratorUse?.();
-          sm.showThemeGenerationHint?.();
-        }
-        this._syncColorPickers();
-      } catch (error) {
-        console.error("Theme generation failed:", error);
-      } finally {
-        window.setTimeout(() => {
-          this._generateThemeCooldown = false;
-          this._updateColorControlsState();
-        }, 1000);
-      }
+      this.generateTheme();
     });
 
     this.els.fsSaveThemeBtn.addEventListener("click", () => {
@@ -1299,6 +1300,40 @@ export class FullSettingsModal {
     }
   }
 
+  generateTheme() {
+    if (this._generateThemeCooldown) return false;
+    const sm = this._sm();
+    if (!sm?.generateCuratedTheme) return false;
+
+    this._generateThemeCooldown = true;
+    this._updateColorControlsState();
+    let generated = false;
+    try {
+      generated = sm.generateCuratedTheme() === true;
+      if (generated) {
+        sm.recordThemeGeneratorUse?.();
+        sm.showThemeGenerationHint?.();
+      }
+      this._syncColorPickers();
+    } catch (error) {
+      console.error("Theme generation failed:", error);
+    } finally {
+      window.setTimeout(() => {
+        this._generateThemeCooldown = false;
+        this._updateColorControlsState();
+      }, 1000);
+    }
+    return generated;
+  }
+
+  updateRandomBackgroundBadge(hidden = null) {
+    if (!this.els.fsRandomBgUpdatedSticker) return;
+    this.els.fsRandomBgUpdatedSticker.hidden =
+      hidden === null
+        ? state.get("randomBgScheduleBadgeDismissed") === true
+        : hidden;
+  }
+
   // ─── State Subscription ────────────────────────────────────
 
   subscribeState() {
@@ -1315,6 +1350,8 @@ export class FullSettingsModal {
         key === "gradientModeActive" ||
         key === "backgroundImage" ||
         key === "randomBgMode" ||
+        key === "disableAnimations" ||
+        key === "randomBgScheduleBadgeDismissed" ||
         key === "randomBgSchedule" ||
         key === "normalThemeId" ||
         key === "gradientThemeId" ||
@@ -1799,7 +1836,10 @@ export class FullSettingsModal {
       document.body.classList.contains("gradient-mode-active") ||
       state.get("gradientModeActive") === true;
     const autoThemeDisabled = hasBg;
-    const glowDisabled = hasBg || isGradient;
+    const glowDisabled =
+      hasBg ||
+      isGradient ||
+      state.get("disableAnimations") === true;
 
     const setDisabled = (input, row, disabled) => {
       if (input) input.disabled = disabled;
@@ -1877,6 +1917,7 @@ export class FullSettingsModal {
       this.els.fsRandomBgSchedule.value = schedule;
       this.els.fsRandomBgSchedule.classList.toggle("hidden", mode !== "random");
     }
+    this.updateRandomBackgroundBadge();
     if (this.els.fsRndBtn) {
       this.els.fsRndBtn.classList.toggle("hidden", mode === "random");
     }

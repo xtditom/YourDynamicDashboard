@@ -343,6 +343,14 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.38));
 }
 
+.setting-row .label .mini-random-bg-label,
+.setting-row .label .fs-random-bg-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
 .fs-updated-sticker svg,
 .fs-new-sticker svg {
   display: block;

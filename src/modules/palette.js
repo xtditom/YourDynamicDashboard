@@ -94,10 +94,34 @@ export class CommandPalette {
       },
       {
         id: "date-visibility",
-        name: "Toggle Date Visibility",
+        name: "Toggle Day & Date Visibility",
         icon: "📅",
         shortcut: () => this.getShortcutLabel("date"),
         action: () => this.toggleBooleanState("showDate", false)
+      },
+      {
+        id: "disable-animations",
+        name: "Toggle Disable Animations",
+        icon: "🎞️",
+        shortcut: "",
+        action: () => this.toggleBooleanState("disableAnimations", false)
+      },
+      {
+        id: "glow-effect",
+        name: "Toggle Glow Effect",
+        icon: "✨",
+        shortcut: "",
+        action: () => {
+          if (state.get("disableAnimations") === true) return;
+          this.toggleBooleanState("glowEffect", true);
+        }
+      },
+      {
+        id: "generate-theme",
+        name: "Generate a New Theme",
+        icon: "🎨",
+        shortcut: "",
+        action: () => window.__fullSettingsModalInstance?.generateTheme?.()
       },
       {
         id: "auto-theme",
@@ -116,6 +140,24 @@ export class CommandPalette {
         icon: "🌡️",
         shortcut: () => this.getShortcutLabel("tempDisplay"),
         action: () => this.toggleBooleanState("tempDisplayMode", false)
+      },
+      {
+        id: "temperature-unit",
+        name: "Toggle Temperature Unit (°C / °F)",
+        icon: "🌡️",
+        shortcut: "",
+        action: () =>
+          state.set(
+            "tempUnit",
+            state.get("tempUnit") === "imperial" ? "metric" : "imperial",
+          )
+      },
+      {
+        id: "detect-weather-location",
+        name: "Detect Weather Location Automatically",
+        icon: "📍",
+        shortcut: "",
+        action: () => window.__settingsManagerInstance?.detectLocation?.()
       },
       {
         id: "greeting-visibility",
@@ -353,7 +395,8 @@ export class CommandPalette {
         key === "hideVoiceSearch" ||
         key === "backgroundImage" ||
         key === "randomBgMode" ||
-        key === "savedBgUrl"
+        key === "savedBgUrl" ||
+        key === "disableAnimations"
       ) {
         this.filter(this.els.input?.value || "");
       }
@@ -373,6 +416,10 @@ export class CommandPalette {
   isCommandVisible(command) {
     if (command?.id === "voice-search") {
       return state.get("hideVoiceSearch") !== true;
+    }
+
+    if (command?.id === "glow-effect") {
+      return state.get("disableAnimations") !== true;
     }
 
     if (!BACKGROUND_COMMAND_IDS.has(command?.id)) return true;
