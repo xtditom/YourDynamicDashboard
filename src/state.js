@@ -1,4 +1,9 @@
-import { CONFIG, DEFAULT_KEY_MAP, SEARCH_PROVIDERS } from "./config.js";
+import {
+  CONFIG,
+  DEFAULT_KEY_MAP,
+  SEARCH_PROVIDERS,
+  SEARCH_SUGGESTION_MODES,
+} from "./config.js";
 import {
   sanitizeCustomSearchEngines,
   sanitizeCustomApps,
@@ -40,6 +45,16 @@ class StateManager {
   }
 
   normalizeValue(key, value) {
+    if (key === "searchSuggestionMode") {
+      if (value === "history-local-online") return SEARCH_SUGGESTION_MODES.HISTORY_ONLINE;
+      if (value === "history-local") return SEARCH_SUGGESTION_MODES.HISTORY_ONLY;
+    }
+    if (key === "searchSuggestionProxyUrl") {
+      if (value === "") return value;
+      const url = new URL(value);
+      if (url.protocol !== "https:") throw new TypeError("Suggestion proxy must use HTTPS");
+      return url.toString();
+    }
     if (key === "userShortcuts") return sanitizeShortcuts(value);
     if (key === "customAiTools") return sanitizeCustomTools(value, "ai");
     if (key === "customApps") return sanitizeCustomApps(value);
@@ -76,6 +91,12 @@ class StateManager {
       !["shortcuts", "most-visited", "both"].includes(value)
     ) {
       throw new TypeError("Invalid shortcut display mode");
+    }
+    if (
+      key === "searchSuggestionMode" &&
+      !Object.values(SEARCH_SUGGESTION_MODES).includes(value)
+    ) {
+      throw new TypeError("Invalid search suggestion mode");
     }
     if (key === "keyMap") {
       if (!value || typeof value !== "object" || Array.isArray(value)) {

@@ -1,7 +1,18 @@
 import { state } from "../state.js";
-import { CONFIG, SEARCH_PROVIDERS, SEARCH_SUGGESTIONS } from "../config.js";
+import {
+  CONFIG,
+  SEARCH_PROVIDERS,
+  SEARCH_SUGGESTIONS,
+  SEARCH_SUGGESTION_MODES,
+} from "../config.js";
 import { makeKeyboardInteractive, showCustomModal } from "../utils.js";
 import { BANG_MAP } from "./palette.js";
+import {
+  MAX_QUERY_LENGTH,
+  SuggestionEngine,
+  dismissSearchSuggestionBadge,
+  isOnlineSuggestionMode,
+} from "./suggestions.js";
 import {
   MAX_CUSTOM_SEARCH_ENGINES,
   MAX_CUSTOM_SEARCH_NAME_LENGTH,
@@ -70,7 +81,19 @@ export class Search {
     this._typewriterInterval = null;
     this._typewriterRunId = 0;
     this._visibilityHandler = () => this.handleVisibilityChange();
+    this._resizeHandler = () => {
+      if (this._historyDropdownEl) this.renderSuggestionsForCurrentInput();
+    };
     this.currentFilteredHistory = [];
+    this.suggestions = new SuggestionEngine();
+    this._suggestionDebounceTimer = null;
+    this._suggestionController = null;
+    this._suggestionRequestId = 0;
+    this._onlineSuggestions = [];
+    this._onlineSuggestionQuery = "";
+    this._onlineRequestCompletedQuery = "";
+    this._suggestionItems = [];
+    this._activeSuggestionIndex = -1;
     this._quoteHiddenBySearch = false;
     this.init();
     window.YD_Search = this;
@@ -115,6 +138,10 @@ export class Search {
   }
 
   init() {
+    this.els.input.setAttribute("role", "combobox");
+    this.els.input.setAttribute("aria-autocomplete", "list");
+    this.els.input.setAttribute("aria-controls", "sh-quick-dropdown");
+    this.els.input.setAttribute("aria-expanded", "false");
     this.renderProviderDropdown();
     this.updateUI();
     this.updateButtons();
@@ -129,6 +156,7 @@ export class Search {
     });
     this.startTypewriterEffect();
     document.addEventListener("visibilitychange", this._visibilityHandler);
+    window.addEventListener("resize", this._resizeHandler);
 
     state.subscribe((key) => {
       if (key === "linkTargets") this.updateButtons();
@@ -144,6 +172,9 @@ export class Search {
       if (key === "searchHistory" || key === "searchAutoDeleteDays") {
         this.pruneExpiredHistory();
       }
+      if (key === "searchSuggestionMode" && this._historyDropdownEl) {
+        this.renderSuggestionsForCurrentInput();
+      }
       if (key === "customSearchEngines") {
         this.current = this.getValidProvider(this.current);
         this.renderProviderDropdown();
@@ -155,7 +186,6 @@ export class Search {
 
     this.els.input.addEventListener("input", (e) => {
       this.updateButtons();
-      
       const val = e.target.value;
 
       // --- Reactive Bang Search Engine Switcher (!yt , !g , !sp , !ddg , etc.) ---
@@ -165,44 +195,45 @@ export class Search {
         if (target) {
           this.setProvider(target.id, target.type);
           this.els.input.value = "";
+          this.renderSuggestionsForCurrentInput();
           return;
         }
       }
 
-      const lowerVal = val.toLowerCase();
-      const history = state.get("searchHistory") || [];
-
-      if (!val) {
-        this.currentFilteredHistory = history.slice(0, 5);
-        this.renderHistoryDropdown(this.currentFilteredHistory);
-        return;
-      }
-
-      this.currentFilteredHistory = history
-        .filter((item) => item.query.toLowerCase().startsWith(lowerVal))
-        .slice(0, 5);
-
-      this.renderHistoryDropdown(this.currentFilteredHistory);
-
-      if (
-        this.currentFilteredHistory.length === 1 && 
-        e.inputType !== "deleteContentBackward" && 
-        e.inputType !== "deleteContentForward"
-      ) {
-        const match = this.currentFilteredHistory[0].query;
-        if (match.toLowerCase().startsWith(lowerVal)) {
-          const originalLength = val.length;
-          const remainder = match.substring(originalLength);
-          
-          this.els.input.value = val + remainder;
-          this.els.input.setSelectionRange(originalLength, this.els.input.value.length);
-        }
-      }
+      this.renderSuggestionsForCurrentInput();
     });
 
     this.els.input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        if (!this._suggestionItems.length) return;
+        e.preventDefault();
+        const direction = e.key === "ArrowDown" ? 1 : -1;
+        const next = this._activeSuggestionIndex + direction;
+        this._setActiveSuggestion(
+          next < 0
+            ? this._suggestionItems.length - 1
+            : next >= this._suggestionItems.length
+              ? 0
+              : next,
+        );
+        return;
+      }
+
+      if (e.key === "Escape" && this._historyDropdownEl) {
+        e.preventDefault();
+        this._removeHistoryDropdown();
+        return;
+      }
+
       if (e.key === "Enter") {
         e.preventDefault();
+        if (this._activeSuggestionIndex >= 0) {
+          const item = this._suggestionItems[this._activeSuggestionIndex];
+          if (item) {
+            this._selectSuggestion(item);
+            return;
+          }
+        }
         const val = this.els.input.value.trim();
         if (!val) return;
 
@@ -211,9 +242,8 @@ export class Search {
     });
 
     this.els.input.addEventListener("focus", () => {
-      const history = state.get("searchHistory") || [];
-      this.currentFilteredHistory = history.slice(0, 5);
-      this.renderHistoryDropdown(this.currentFilteredHistory);
+      clearTimeout(this._blurTimer);
+      this.renderSuggestionsForCurrentInput();
     });
     this.els.input.addEventListener("blur", () => {
       this._blurTimer = setTimeout(() => this._removeHistoryDropdown(), 150);
@@ -318,13 +348,7 @@ export class Search {
 
   refreshOpenHistoryViews(history) {
     if (this._historyDropdownEl) {
-      const filter = this.els.input.value.trim().toLowerCase();
-      this.currentFilteredHistory = history
-        .filter((item) =>
-          filter ? item.query.toLowerCase().startsWith(filter) : true,
-        )
-        .slice(0, 5);
-      this.renderHistoryDropdown(this.currentFilteredHistory);
+      this.renderSuggestionsForCurrentInput();
     }
 
     const modalList = document.getElementById("sh-list-container");
@@ -336,6 +360,17 @@ export class Search {
   }
 
   saveSearch(query, engineId) {
+    const suggestionMode = state.get("searchSuggestionMode");
+    if (
+      [
+        SEARCH_SUGGESTION_MODES.HISTORY_ONLINE,
+        SEARCH_SUGGESTION_MODES.HISTORY_CUSTOM,
+        "history-local-online",
+      ].includes(suggestionMode) &&
+      state.get("searchSuggestionBadgeDismissed") !== true
+    ) {
+      dismissSearchSuggestionBadge();
+    }
     if (state.get("searchHistoryPaused")) return;
 
     if (engineId === "brave") engineId = "perplexity";
@@ -350,29 +385,155 @@ export class Search {
     state.set("searchHistory", history);
   }
 
-  // --- SECTION: LAYER 1 — QUICK HISTORY DROPDOWN ---
-  renderHistoryDropdown(items = null) {
-    const history = items || state.get("searchHistory") || [];
-    if (history.length === 0) {
+  // --- SECTION: SEARCH SUGGESTIONS DROPDOWN ---
+  getHistorySuggestions(rawQuery) {
+    const typed = String(rawQuery || "").trim().toLocaleLowerCase();
+    const history = state.get("searchHistory") || [];
+    const seen = new Set();
+    return history
+      .filter((item) => {
+        const query = item.query.toLocaleLowerCase();
+        if ((typed && !query.startsWith(typed)) || query === typed || seen.has(query)) {
+          return false;
+        }
+        seen.add(query);
+        return true;
+      })
+      .slice(0, 2)
+      .map((item) => ({
+        query: item.query,
+        source: "history",
+        section: "history",
+        icon: item.engineId || "history",
+        timestamp: item.timestamp,
+        engineId: item.engineId,
+      }));
+  }
+
+  renderSuggestionsForCurrentInput() {
+    const rawQuery = this.els.input.value || "";
+    const mode =
+      state.get("searchSuggestionMode") || SEARCH_SUGGESTION_MODES.HISTORY_ONLY;
+    const queryKey = rawQuery.trim().toLocaleLowerCase();
+    const history = this.getHistorySuggestions(rawQuery);
+    this.currentFilteredHistory = history;
+
+    if (queryKey !== this._onlineSuggestionQuery) {
+      this._onlineSuggestionQuery = queryKey;
+      this._onlineRequestCompletedQuery = "";
+      this._onlineSuggestions = [];
+    }
+
+    const online = isOnlineSuggestionMode(mode) ? this._onlineSuggestions : [];
+
+    this._renderSuggestionSections(history, online);
+
+    if (isOnlineSuggestionMode(mode)) {
+      this._scheduleOnlineSuggestions(rawQuery);
+    } else {
+      this._cancelOnlineSuggestions();
+      this._onlineSuggestions = [];
+      this._onlineRequestCompletedQuery = "";
+    }
+  }
+
+  _scheduleOnlineSuggestions(rawQuery) {
+    clearTimeout(this._suggestionDebounceTimer);
+    this._suggestionDebounceTimer = null;
+    if (this._suggestionController) {
+      this._suggestionController.abort();
+      this._suggestionController = null;
+    }
+    this._suggestionRequestId += 1;
+
+    const query = String(rawQuery || "");
+    const trimmed = query.trim();
+    if (
+      trimmed.length < 2 ||
+      query.length > MAX_QUERY_LENGTH ||
+      this._onlineRequestCompletedQuery === trimmed.toLocaleLowerCase()
+    ) {
+      return;
+    }
+
+    const requestId = this._suggestionRequestId;
+    this._suggestionDebounceTimer = window.setTimeout(async () => {
+      this._suggestionDebounceTimer = null;
+      const controller = new AbortController();
+      this._suggestionController = controller;
+      const suggestions = await this.suggestions.fetchOnlineSuggestions(
+        query,
+        controller.signal,
+      );
+      if (
+        requestId !== this._suggestionRequestId ||
+        controller.signal.aborted ||
+        this.els.input.value !== query
+      ) {
+        return;
+      }
+      this._suggestionController = null;
+      this._onlineRequestCompletedQuery = trimmed.toLocaleLowerCase();
+      this._onlineSuggestions = suggestions;
+      this.renderSuggestionsForCurrentInput();
+    }, 250);
+  }
+
+  _cancelOnlineSuggestions() {
+    clearTimeout(this._suggestionDebounceTimer);
+    this._suggestionDebounceTimer = null;
+    if (this._suggestionController) {
+      this._suggestionController.abort();
+      this._suggestionController = null;
+    }
+    this._suggestionRequestId += 1;
+  }
+
+  _renderSuggestionSections(history, online) {
+    const seen = new Set();
+    const uniqueItems = (items, limit) =>
+      items.filter((item) => {
+        const key = item.query.trim().toLocaleLowerCase();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).slice(0, limit);
+    const historyLimit = window.innerHeight < 900 ? 1 : 2;
+    const visibleHistory = uniqueItems(history, historyLimit);
+    const visibleOnline = uniqueItems(online, 10);
+    const sections = [
+      ["Recent searches", visibleHistory],
+      ["Online suggestions", visibleOnline],
+    ].filter(([, items]) => items.length > 0);
+
+    this._suggestionItems = sections.flatMap(([, items]) => items);
+    this._activeSuggestionIndex = -1;
+    this.els.input.removeAttribute("aria-activedescendant");
+
+    if (!this._suggestionItems.length) {
       this._removeHistoryDropdown();
       return;
     }
 
-    const top5 = history.slice(0, 5);
     let ul = this._historyDropdownEl;
     const isNew = !ul;
-
     if (isNew) {
       ul = document.createElement("ul");
       ul.id = "sh-quick-dropdown";
+      ul.setAttribute("role", "listbox");
+      ul.setAttribute("aria-label", "Search suggestions");
       document.body.appendChild(ul);
       this._historyDropdownEl = ul;
     } else {
       ul.classList.remove("closing");
       ul.innerHTML = "";
     }
+    this.els.input.setAttribute("aria-expanded", "true");
 
-    if (document.body.classList.contains("has-custom-bg") || document.body.classList.contains("gradient-mode-active")) {
+    if (
+      document.body.classList.contains("has-custom-bg") ||
+      document.body.classList.contains("gradient-mode-active")
+    ) {
       if (!document.documentElement.classList.contains("high-bg-blur")) {
         ul.style.setProperty("backdrop-filter", "blur(40px)", "important");
         ul.style.setProperty("-webkit-backdrop-filter", "blur(40px)", "important");
@@ -383,7 +544,6 @@ export class Search {
       const isDark = document.body.getAttribute("data-theme") === "dark";
       ul.style.setProperty("background-color", "var(--widget-bg)", "important");
       ul.style.setProperty("color", isDark ? "#ffffff" : "#000000", "important");
-
       if (isNew) this._hideQuoteForOverlay();
     } else {
       ul.style.removeProperty("backdrop-filter");
@@ -394,71 +554,126 @@ export class Search {
       ul.style.color = "var(--text-primary)";
     }
 
-    top5.forEach((item) => {
-      const li = document.createElement("li");
-      li.setAttribute("role", "option");
-      li.tabIndex = 0;
-      li.setAttribute("aria-label", `Search again for ${item.query}`);
+    let itemIndex = 0;
+    sections.forEach(([title, items]) => {
+      const heading = document.createElement("li");
+      heading.className = "sh-suggestion-section";
+      heading.setAttribute("role", "presentation");
+      heading.textContent = title;
+      ul.appendChild(heading);
 
-      const icon = this._createHistoryIcon(item.engineId, "", 16);
+      items.forEach((item) => {
+        const index = itemIndex;
+        const li = document.createElement("li");
+        li.className = `sh-suggestion-row sh-suggestion-${item.source}`;
+        li.dataset.suggestionIndex = String(index);
+        li.id = `sh-suggestion-${index}`;
+        li.setAttribute("role", "option");
+        li.setAttribute("aria-selected", "false");
+        li.setAttribute(
+          "aria-label",
+          `${item.source === "history" ? "Recent search" : "Search suggestion"}: ${item.query}`,
+        );
 
-      const text = document.createElement("span");
-      text.className = "sh-qd-text";
-      text.textContent = item.query;
+        const text = document.createElement("span");
+        text.className = "sh-qd-text";
+        text.textContent = item.query;
+        if (item.source === "history") li.append(this._createSuggestionIcon(item));
+        li.append(text);
 
-      const time = document.createElement("span");
-      time.className = "sh-qd-time";
-      time.textContent = this._formatTime(item.timestamp);
+        if (item.source === "history") {
+          const time = document.createElement("span");
+          time.className = "sh-qd-time";
+          time.textContent = this._formatTime(item.timestamp);
+          li.appendChild(time);
+        }
 
-      li.appendChild(icon);
-      li.appendChild(text);
-      li.appendChild(time);
+        li.addEventListener("mousedown", (event) => {
+          event.preventDefault();
+          clearTimeout(this._blurTimer);
+          this._selectSuggestion(item);
+        });
+        li.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            this._selectSuggestion(item);
+          }
+        });
+        ul.appendChild(li);
+        itemIndex += 1;
+      });
+    });
 
-      li.addEventListener("mousedown", (e) => {
-        e.preventDefault();
+    if (visibleHistory.length) {
+      const footerLi = document.createElement("li");
+      footerLi.className = "sh-full-history-btn";
+      footerLi.setAttribute("role", "button");
+      footerLi.tabIndex = 0;
+      footerLi.setAttribute("aria-label", "Open full search history");
+      footerLi.textContent = "Full Search History";
+      footerLi.addEventListener("mousedown", (event) => {
+        event.preventDefault();
         clearTimeout(this._blurTimer);
         this._removeHistoryDropdown();
-        this._executeViaEngine(item.query, this.current.id);
+        this.buildHistoryModal();
       });
-      li.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
+      footerLi.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
           this._removeHistoryDropdown();
-          this._executeViaEngine(item.query, this.current.id);
+          this.buildHistoryModal();
         }
       });
-
-      ul.appendChild(li);
-    });
-
-    const footerLi = document.createElement("li");
-    footerLi.className = "sh-full-history-btn";
-    footerLi.setAttribute("role", "button");
-    footerLi.tabIndex = 0;
-    footerLi.setAttribute("aria-label", "Open full search history");
-    footerLi.textContent = "Full Search History";
-    footerLi.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      clearTimeout(this._blurTimer);
-      this._removeHistoryDropdown();
-      this.buildHistoryModal();
-    });
-    footerLi.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        this._removeHistoryDropdown();
-        this.buildHistoryModal();
-      }
-    });
-    ul.appendChild(footerLi);
+      ul.appendChild(footerLi);
+    }
 
     const inputRect = this.els.input.getBoundingClientRect();
-    ul.style.top   = inputRect.bottom + window.scrollY + "px";
-    ul.style.left  = inputRect.left   + window.scrollX + "px";
-    ul.style.width = inputRect.width  + "px";
+    const dropdownWidth = Math.min(360, window.innerWidth - 32);
+    ul.style.top = inputRect.bottom + window.scrollY + "px";
+    ul.style.left = Math.max(16, inputRect.left + window.scrollX) + "px";
+    ul.style.width = dropdownWidth + "px";
+  }
+
+  _createSuggestionIcon(item) {
+    return this._createHistoryIcon(item.engineId, "", 16);
+  }
+
+  _selectSuggestion(item) {
+    if (item.source === "history") {
+      this._removeHistoryDropdown();
+      this._executeViaEngine(item.query, this.current.id);
+      return;
+    }
+    this._removeHistoryDropdown();
+    this._executeViaEngine(item.query, this.current.id);
+  }
+
+  _setActiveSuggestion(index) {
+    if (index < 0 || index >= this._suggestionItems.length) return;
+    this._activeSuggestionIndex = index;
+    const rows = this._historyDropdownEl?.querySelectorAll("[data-suggestion-index]") || [];
+    rows.forEach((row) => {
+      const active = Number(row.dataset.suggestionIndex) === index;
+      row.classList.toggle("is-active", active);
+      row.setAttribute("aria-selected", String(active));
+      if (active) {
+        this.els.input.setAttribute("aria-activedescendant", row.id);
+        row.scrollIntoView({ block: "nearest" });
+      }
+    });
+  }
+
+  // Kept as a compatibility wrapper for existing history refresh callers.
+  renderHistoryDropdown() {
+    this.renderSuggestionsForCurrentInput();
   }
 
   _removeHistoryDropdown(immediate = false) {
+    this._cancelOnlineSuggestions();
+    this._suggestionItems = [];
+    this._activeSuggestionIndex = -1;
+    this.els.input?.setAttribute("aria-expanded", "false");
+    this.els.input?.removeAttribute("aria-activedescendant");
     if (this._historyDropdownEl) {
       const el = this._historyDropdownEl;
       this._historyDropdownEl = null;
@@ -2194,7 +2409,6 @@ export class Search {
     if (!provider) return;
 
     this.saveSearch(query, this.current.id);
-
     const url = this.buildProviderUrl(provider, query);
 
     window.location.href = url;

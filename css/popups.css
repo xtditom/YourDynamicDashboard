@@ -986,6 +986,42 @@ body.gradient-mode-active .settings-dropdown option {
   color: var(--text-secondary);
   border-top: 1px solid var(--bg-tertiary);
 }
+.mini-search-suggestion-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.mini-search-suggestion-select {
+  border-radius: 7px !important;
+}
+.mini-new-sticker {
+  width: 3.2rem;
+  height: 1.25rem;
+}
+.fs-suggestion-proxy-control {
+  display: flex;
+  width: min(100%, 440px);
+}
+.fs-suggestion-proxy-control input {
+  flex: 1;
+  min-width: 0;
+}
+.fs-suggestion-proxy-control input::placeholder {
+  opacity: 0.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fs-search-suggestion-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+@media (max-width: 700px) {
+  .fs-suggestion-proxy-control {
+    width: 100%;
+  }
+}
 .apps-footer-label {
   min-width: 0;
   grid-column: 2;

@@ -522,6 +522,23 @@
           </div>
           <div class="setting-row">
             <div class="label">
+              <span class="mini-search-suggestion-label">Search Suggestions</span>
+              <span class="fs-new-sticker mini-new-sticker" aria-label="New">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
+                    <title>New</title>
+                    <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+                    <text x="39" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">NEW</text>
+                  </svg>
+              </span>
+            </div>
+            <select id="search-suggestion-mode-select" aria-label="Search suggestion mode" class="settings-dropdown" style="padding: 5px; border-radius: 5px; background: var(--bg-interactive); color: var(--text-primary); border: none;">
+              <option value="history-only">History Only</option>
+              <option value="history-online">History + Online</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div class="label">
               <span>Widget Control</span>
               <small>Control widget visibility.</small>
             </div>
@@ -567,28 +584,6 @@
               <option value="bottom">Bottom</option>
               <option value="top">Top</option>
               <option value="hide">Hide</option>
-            </select>
-          </div>
-          <div class="setting-row">
-            <div class="label">
-              <span>Shortcut Display</span>
-              <small>Choose manual shortcuts, most visited sites, or both.</small>
-            </div>
-            <select
-              id="shortcuts-display-mode-select"
-              aria-label="Shortcut display mode"
-              class="settings-dropdown"
-              style="
-                padding: 5px;
-                border-radius: 5px;
-                background: var(--bg-interactive);
-                color: var(--text-primary);
-                border: none;
-              "
-            >
-              <option value="shortcuts">Manual Shortcuts</option>
-              <option value="most-visited">Most Visited Sites</option>
-              <option value="both">Both</option>
             </select>
           </div>
           <div class="setting-row" style="margin-top: 0.5rem; justify-content: center;">

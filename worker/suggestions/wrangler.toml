@@ -1,0 +1,7 @@
+name = "ydd-search-suggestions"
+main = "src/index.js"
+compatibility_date = "2026-08-25"
+workers_dev = true
+
+[observability]
+enabled = false

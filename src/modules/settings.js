@@ -14,6 +14,10 @@ import {
   validateYddStorageEntries,
 } from "../storageKeys.js";
 import {
+  requestSearchSuggestionConsent,
+  syncSuggestionModeSelect,
+} from "./suggestions.js";
+import {
   MAX_SHORTCUTS,
   MAX_SHORTCUT_NAME_LENGTH,
   normalizeHttpUrl,
@@ -905,7 +909,7 @@ export class SettingsManager {
       apps: document.getElementById("apps-visibility-toggle"),
       ai: document.getElementById("ai-tools-visibility-toggle"),
       shortcutsPosition: document.getElementById("shortcuts-position-select"),
-      shortcutsDisplayMode: document.getElementById("shortcuts-display-mode-select"),
+      searchSuggestionMode: document.getElementById("search-suggestion-mode-select"),
       dark: document.getElementById("dark-mode-toggle"),
       autoThemeToggle: document.getElementById("auto-theme-toggle"),
       glowToggle: document.getElementById("glow-effect-toggle"),
@@ -989,8 +993,13 @@ export class SettingsManager {
           this.els.dateToggle.checked = value;
         }
       }
-      if (key === "shortcutsDisplayMode" && this.els.shortcutsDisplayMode) {
-        this.els.shortcutsDisplayMode.value = value || "shortcuts";
+      if (key === "searchSuggestionMode" && this.els.searchSuggestionMode) {
+        this.els.searchSuggestionMode.value = value || "history-only";
+        syncSuggestionModeSelect(this.els.searchSuggestionMode);
+      }
+      if (key === "searchSuggestionBadgeDismissed") {
+        const badge = document.querySelector("#settings-popup .mini-new-sticker");
+        if (badge) badge.hidden = value === true;
       }
       if (key === "hideGreetings") {
         if (this.els.hideGreetings) {
@@ -1071,9 +1080,19 @@ export class SettingsManager {
         state.set("shortcutsPosition", "hide");
       }
     }
-    if (this.els.shortcutsDisplayMode) {
-      this.els.shortcutsDisplayMode.value =
-        state.get("shortcutsDisplayMode") || "shortcuts";
+    if (this.els.searchSuggestionMode) {
+      this.els.searchSuggestionMode.value = state.get("searchSuggestionMode") || "history-only";
+      syncSuggestionModeSelect(this.els.searchSuggestionMode);
+      this.els.searchSuggestionMode.addEventListener("focus", () =>
+        syncSuggestionModeSelect(this.els.searchSuggestionMode, true),
+      );
+      this.els.searchSuggestionMode.addEventListener("blur", () =>
+        syncSuggestionModeSelect(this.els.searchSuggestionMode),
+      );
+    }
+    const searchSuggestionBadge = document.querySelector("#settings-popup .mini-new-sticker");
+    if (searchSuggestionBadge) {
+      searchSuggestionBadge.hidden = state.get("searchSuggestionBadgeDismissed") === true;
     }
 
     this.bindSimpleToggle(this.els.glowToggle, "glowEffect", true);
@@ -1497,15 +1516,18 @@ export class SettingsManager {
       });
     }
 
-    if (this.els.shortcutsDisplayMode) {
-      this.els.shortcutsDisplayMode.addEventListener("change", async (e) => {
-        const shortcuts = window.__shortcutsInstance;
-        const accepted = shortcuts?.setDisplayMode
-          ? await shortcuts.setDisplayMode(e.target.value)
-          : state.set("shortcutsDisplayMode", e.target.value);
-        if (!accepted) {
-          e.target.value = state.get("shortcutsDisplayMode") || "shortcuts";
+    if (this.els.searchSuggestionMode) {
+      this.els.searchSuggestionMode.addEventListener("change", async (event) => {
+        const select = event.currentTarget;
+        const requestedMode = select.value;
+        if (requestedMode === "history-online" && !(await requestSearchSuggestionConsent())) {
+          select.value = state.get("searchSuggestionMode") || "history-only";
+          syncSuggestionModeSelect(select);
+          return;
         }
+        state.set("searchSuggestionMode", requestedMode);
+        select.value = requestedMode;
+        syncSuggestionModeSelect(select);
       });
     }
 

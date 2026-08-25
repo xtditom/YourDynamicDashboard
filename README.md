@@ -37,6 +37,7 @@ Do not treat this README as a stable-release manual. Store listings and packaged
 │   ├── theme-init.js       # Early theme/background preload
 │   └── modules/            # Settings, search, palette, weather, widgets, etc.
 ├── assets/                 # Icons, search providers, themes, and screenshots
+├── worker/suggestions/     # Free Cloudflare Worker for online autocomplete
 ├── privacy-policy.html     # User-facing privacy policy
 └── releasenotes.md         # Release-focused notes; this README is dev-focused
 ```
@@ -59,6 +60,31 @@ Do not treat this README as a stable-release manual. Store listings and packaged
 4. Open a new tab and inspect the page from the browser’s extension tools.
 
 Temporary Gecko installations are removed when the browser restarts. For a persistent test install, package and sign the extension according to the target browser’s rules.
+
+## Deploy the free search-suggestion relay
+
+Online suggestions use the Cloudflare Worker in `worker/suggestions`. A free
+`workers.dev` address is sufficient; no domain or paid autocomplete API is
+required.
+
+1. Create a free Cloudflare account.
+2. From `worker/suggestions`, run `npx wrangler login` and approve the browser login.
+3. Run `npx wrangler deploy` and copy the resulting `https://...workers.dev` URL.
+4. In `src/modules/suggestions.js`, replace `YOUR-SUBDOMAIN` in
+   `ONLINE_SUGGESTION_ENDPOINT` with the assigned subdomain.
+5. Open `<worker-url>/suggest?q=today` and verify that it returns a JSON
+   `suggestions` array, then reload the extension.
+
+The Worker is deliberately not a general CORS proxy: it accepts only `/suggest`
+requests and contacts only DuckDuckGo. Cloudflare observability is disabled in
+its configuration, and neither the Worker nor the extension persist prefixes or
+results. If the Worker is unavailable or its free quota is exhausted, YDD falls
+back silently to local search history.
+
+Users may configure their own HTTPS suggestion endpoint in Full Settings. It
+must accept a `q` query parameter, allow extension CORS requests, and return
+`{"suggestions":[...]}`. Online results are cached locally with creation and
+expiry timestamps for up to 24 hours, then automatically removed.
 
 ## Development workflow
 
@@ -87,7 +113,7 @@ Do not start a local server unless the feature under test specifically requires 
 - `secondStorage.js` stores larger background/theme data in IndexedDB. Background operations must remain serialized and object URLs must be released when replaced.
 - `SettingsManager` owns mini settings, theme application, backgrounds, shortcuts, and legacy integration points.
 - `FullSettingsModal` dynamically builds the full settings dialog and synchronizes through the shared state manager.
-- `Search` owns provider selection, history, voice search, and search overlays.
+- `Search` owns provider selection, history, voice search, and search overlays. `src/modules/suggestions.js` owns the optional relay-backed DuckDuckGo autocomplete adapter.
 - `CommandPalette` exposes command actions and must use the same state contracts as visible controls.
 - CSS is split by responsibility and imported through `css/main.css`; theme-specific overrides live in `css/themes.css`.
 
@@ -99,7 +125,7 @@ Do not start a local server unless the feature under test specifically requires 
 - Gradient themes use the transparency/glass UI contract. Custom backgrounds and gradient themes intentionally restrict controls that would conflict with their rendering.
 - Full Settings must close on `Escape`, restore focus, and cancel an active key-capture listener.
 - Resetting one key binding must not silently create a duplicate active key. If a default key is occupied, the UI must explain the conflict before swapping bindings.
-- Search history, custom backgrounds, and saved themes are local browser data. Do not add telemetry or remote persistence without an explicit product decision.
+- Search history, custom backgrounds, and saved themes are local browser data. Search suggestions default to history only. The optional online mode sends only the current typed prefix through YDD's Cloudflare Worker to DuckDuckGo, never saves the returned suggestions, and must not be changed into telemetry or remote persistence without an explicit product decision.
 
 ## Manual verification checklist
 
@@ -109,7 +135,7 @@ Before considering a development change complete, check the affected behavior in
 - Full Settings open/close, `Escape`, focus restoration, and drag behavior.
 - Mini Settings and Full Settings synchronization.
 - Theme changes, custom backgrounds, random/frozen backgrounds, and Auto Theme.
-- Search provider changes, history expiry, keyboard/palette overlays, and voice permission failure.
+- Search provider changes, history expiry, history-only/local/online suggestions, stale autocomplete responses, keyboard/palette overlays, and voice permission failure.
 - Shortcut add/edit/delete/reorder, custom icon reset, URL validation, and the 20-item limit.
 - Chromium unpacked loading and Firefox temporary loading when manifest changes are involved.
 
@@ -144,7 +170,7 @@ Do not commit generated build output, browser profiles, local screenshots, or pr
 
 ## License and privacy
 
-YDD is licensed under GPLv3; see [LICENSE](LICENSE). The project is designed for local-first use. Weather uses Open-Meteo, shortcut icons may use Google’s favicon service, and the dashboard typography uses Google Fonts. Voice recognition is provided by the browser’s Web Speech API (with processing location determined by the browser). See [privacy-policy.html](https://ditom.me/YourDynamicDashboard/privacy-policy.html) for the user-facing policy.
+YDD is licensed under GPLv3; see [LICENSE](LICENSE). The project is designed for local-first use. Weather uses Open-Meteo, optional online search suggestions use DuckDuckGo only after explicit opt-in, shortcut icons may use Google’s favicon service, and the dashboard typography uses Google Fonts. Voice recognition is provided by the browser’s Web Speech API (with processing location determined by the browser). See [privacy-policy.html](https://ditom.me/YourDynamicDashboard/privacy-policy.html) for the user-facing policy.
 
 ## Stable-release references
 

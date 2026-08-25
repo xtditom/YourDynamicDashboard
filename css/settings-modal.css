@@ -31,8 +31,8 @@
   border: 1px solid var(--border-color);
   border-radius: 16px;
   width: 90%;
-  max-width: 680px;
-  max-height: 80vh;
+  max-width: 720px;
+  max-height: 78vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -361,6 +361,12 @@
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.fs-search-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .fs-weather-location-label {

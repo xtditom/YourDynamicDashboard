@@ -240,10 +240,12 @@
           </h2>
           <p>
             All your customizations and data are stored locally in your browser
-            using
-            <code>localStorage</code> and <code>IndexedDB</code>. This data
-            never leaves your computer. We do not have servers, and we cannot
-            see your data.
+            using <code>localStorage</code> and <code>IndexedDB</code>. YDD has
+            does not upload this local data to its suggestion relay or any YDD
+            account. If you explicitly enable
+            online search suggestions, the current typed prefix is sent through
+            YDD's Cloudflare-hosted suggestion relay to DuckDuckGo; the prefix
+            and returned suggestions are not saved by YDD.
           </p>
           <div class="info-grid">
             <div class="info-card">
@@ -257,12 +259,13 @@
             <div class="info-card">
               <h3>🔍 Search History</h3>
               <p>
-                Your search queries are strictly stored locally on your device
-                to provide the Quick Search History feature.
-                <strong
-                  >They are never transmitted to us or any third-party tracking
-                  server.</strong
-                >
+                Your submitted search queries are stored locally on your device
+                to provide the Quick Search History feature. They are never
+                transmitted to YDD or a third-party tracking server. If you
+                enable the optional online suggestion mode, only the text
+                currently typed in the search box is sent through YDD's relay
+                to DuckDuckGo; online suggestions never enter search history,
+                backups, or browser storage.
               </p>
             </div>
           </div>
@@ -306,6 +309,18 @@
                 permission prompt. Your coordinates are sent directly to the
                 weather provider and saved locally. We do not store or monitor
                 this data.
+              </p>
+            </div>
+            <div class="info-card">
+              <h3>🌐 Online Search Suggestions</h3>
+              <p>
+                <strong>Strictly Opt-In.</strong> Selecting the online search
+                suggestion mode sends requests to YDD's narrowly restricted
+                Cloudflare-hosted relay, which contacts DuckDuckGo autocomplete.
+                Only the current typed prefix is sent over HTTPS, with
+                no location, cookies, account data, or YDD search history. You
+                can use History Only without making these requests. No browser
+                host permission is requested for this feature.
               </p>
             </div>
             <div class="info-card full-width">
@@ -366,6 +381,26 @@
                 Used for "Reverse Geocoding" (converting raw GPS coordinates
                 into a readable City Name) only when the auto-detect location
                 feature is used.
+              </p>
+            </div>
+            <div class="info-card">
+              <h3>DuckDuckGo Autocomplete</h3>
+              <p>
+                Used only when online search suggestions are explicitly
+                enabled. YDD sends the current typed prefix through a
+                Cloudflare-hosted YDD relay to DuckDuckGo's autocomplete
+                endpoint. The browser may cache suggestion responses locally,
+                with creation and expiry timestamps, for up to 24 hours before
+                automatically deleting them. Users who configure a custom
+                relay send prefixes to that relay instead. YDD does not send
+                submitted search history, location, cookies, or
+                account data. Cloudflare processes the request and its normal
+                network metadata during delivery; DuckDuckGo receives the
+                prefix from the relay.<br /><br /><a
+                  href="https://duckduckgo.com/privacy"
+                  target="_blank"
+                  >duckduckgo.com/privacy</a
+                >
               </p>
             </div>
             <div class="info-card">

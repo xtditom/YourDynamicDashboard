@@ -224,8 +224,8 @@
 
   #search-dropdown,
   #sh-quick-dropdown {
-    width: 80% !important;
-    left: 10% !important;
+    width: calc(100% - 32px) !important;
+    left: 16px !important;
     max-height: 16.7vh !important;
     overflow-y: auto !important;
   }

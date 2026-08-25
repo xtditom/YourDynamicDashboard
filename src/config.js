@@ -62,6 +62,10 @@ export const CONFIG = {
     ],
     welcomeText: "Click to edit",
     searchProvider: { id: "google", type: "engines" },
+    searchSuggestionMode: "history-only",
+    searchSuggestionProxyUrl: "",
+    searchSuggestionConsentRemembered: false,
+    searchSuggestionBadgeDismissed: false,
     customSearchEngines: [],
     customAiTools: [],
     customSocialLinks: [],
@@ -616,6 +620,12 @@ export const SEARCH_SUGGESTIONS = [
   "Biohacking tips for longevity",
   "How LLMs are changing software engineering",
 ];
+
+export const SEARCH_SUGGESTION_MODES = Object.freeze({
+  HISTORY_ONLY: "history-only",
+  HISTORY_ONLINE: "history-online",
+  HISTORY_CUSTOM: "history-custom",
+});
 
 export const DEFAULT_KEY_MAP = {
   todo: { key: "t", enabled: true },

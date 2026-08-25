@@ -564,9 +564,11 @@ html.disable-animations #search-dropdown.closing {
   padding: 6px 0;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
+  border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  overflow: hidden;
+  max-height: min(365px, 60vh);
+  overflow-x: hidden;
+  overflow-y: auto;
   animation: dd-intro 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
@@ -574,6 +576,13 @@ html.disable-animations #search-dropdown.closing {
   animation: dd-outro 0.18s cubic-bezier(0.4, 0, 0.2, 1) both;
   pointer-events: none;
 }
+
+@media (max-height: 899px) {
+  #sh-quick-dropdown {
+    max-height: min(290px, 60vh);
+  }
+}
+
 #sh-quick-dropdown li {
   display: flex;
   align-items: center;
@@ -583,6 +592,23 @@ html.disable-animations #search-dropdown.closing {
   transition: background-color 0.15s ease;
 }
 #sh-quick-dropdown li:hover {
+  background-color: var(--bg-hover-translucent);
+}
+#sh-quick-dropdown .sh-suggestion-section {
+  padding: 8px 14px 4px;
+  color: var(--text-secondary);
+  cursor: default;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+#sh-quick-dropdown .sh-suggestion-section:hover {
+  background-color: transparent;
+}
+#sh-quick-dropdown .sh-suggestion-row.is-active,
+#sh-quick-dropdown .sh-suggestion-row:hover {
   background-color: var(--bg-hover-translucent);
 }
 #sh-quick-dropdown img {

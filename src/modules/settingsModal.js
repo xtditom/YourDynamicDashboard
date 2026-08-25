@@ -12,6 +12,11 @@ import {
   validateImageBlob,
   MAX_SHORTCUTS,
 } from "../validators.js";
+import {
+  requestSearchSuggestionConsent,
+  syncSuggestionModeSelect,
+  validateCustomSuggestionRelay,
+} from "./suggestions.js";
 
 const KEY_LABELS = Object.freeze({
   todo: "Toggle To-Do",
@@ -84,6 +89,9 @@ export class FullSettingsModal {
     this._locationRequestId = 0;
     this._locationController = null;
     this._generateThemeCooldown = false;
+    this._searchSuggestionProxyDirty = false;
+    this._searchSuggestionRelayValidationPending = false;
+    this._searchSuggestionValidationId = 0;
 
     window.__fullSettingsModalInstance = this;
 
@@ -139,10 +147,13 @@ export class FullSettingsModal {
         : label,
     );
     if (desc) labelDiv.appendChild(this._el("small", { textContent: desc }));
-    const controlId = control?.querySelector?.("[id]")?.id;
+    const labelledControl = control?.id
+      ? control
+      : control?.querySelector?.("[id]");
+    const controlId = labelledControl?.id;
     if (controlId) {
       labelDiv.id = `${controlId}-label`;
-      control.querySelector("[id]")?.setAttribute("aria-labelledby", labelDiv.id);
+      labelledControl.setAttribute("aria-labelledby", labelDiv.id);
     }
     row.appendChild(labelDiv);
     if (control) row.appendChild(control);
@@ -160,9 +171,10 @@ export class FullSettingsModal {
 
   _section(title, children = []) {
     const sec = this._el("div", { className: "fs-section" });
-    sec.appendChild(
-      this._el("h3", { className: "fs-section-title", textContent: title }),
-    );
+    const heading = this._el("h3", { className: "fs-section-title" });
+    if (typeof title === "string") heading.textContent = title;
+    else if (title) heading.appendChild(title);
+    sec.appendChild(heading);
     children.forEach((c) => {
       if (c) sec.appendChild(c);
     });
@@ -312,6 +324,14 @@ export class FullSettingsModal {
     this.els.fsEditableText = editableToggle.input;
     this.els.fsDisableAnimations = disableAnimationsToggle.input;
 
+    const widgetSelect = this._dropdown("fs-widget-control", [
+      ["all", "All Visible"], ["search-only", "Search Only"],
+      ["weather-only", "Weather Only"], ["quote-only", "Quote Only"],
+      ["search-weather", "Search & Weather"], ["search-quote", "Search & Quote"],
+      ["weather-quote", "Weather & Quote"], ["nothing", "Nothing"],
+    ]);
+    this.els.fsWidgetControl = widgetSelect;
+
     const formatRow = this._row(
       "Clock Format",
       "Toggle for 24-hour format.",
@@ -364,6 +384,7 @@ export class FullSettingsModal {
           editableToggle.wrapper,
         ),
         disableAnimationsRow,
+        this._row("Widget Control", "Control widget visibility.", widgetSelect),
       ]),
     );
 
@@ -448,36 +469,44 @@ export class FullSettingsModal {
       ]),
     );
 
-    // Controls
-    const widgetSelect = this._dropdown("fs-widget-control", [
-      ["all", "All Visible"],
-      ["search-only", "Search Only"],
-      ["weather-only", "Weather Only"],
-      ["quote-only", "Quote Only"],
-      ["search-weather", "Search & Weather"],
-      ["search-quote", "Search & Quote"],
-      ["weather-quote", "Weather & Quote"],
-      ["nothing", "Nothing"],
+    // Search suggestions
+    const suggestionModeSelect = this._dropdown("fs-search-suggestion-mode", [
+      ["history-only", "History Only"],
+      ["history-online", "History + Online"],
+      ["history-custom", "History + Custom"],
     ]);
-    this.els.fsWidgetControl = widgetSelect;
-
-    const posSelect = this._dropdown("fs-shortcuts-position", [
-      ["bottom", "Bottom"],
-      ["top", "Top"],
-      ["hide", "Hide"],
-    ]);
-    this.els.fsShortcutsPosition = posSelect;
-
-    pane.appendChild(
-      this._section("Controls", [
-        this._row("Widget Control", "Control widget visibility.", widgetSelect),
-        this._row(
-          "Shortcuts Position",
-          "Position or hide the shortcuts bar.",
-          posSelect,
-        ),
-      ]),
+    this.els.fsSearchSuggestionMode = suggestionModeSelect;
+    suggestionModeSelect.addEventListener("focus", () =>
+      syncSuggestionModeSelect(suggestionModeSelect, true),
     );
+    suggestionModeSelect.addEventListener("blur", () =>
+      syncSuggestionModeSelect(suggestionModeSelect),
+    );
+    const searchLabel = this._el("span", { textContent: "Search Suggestions" });
+    const searchSectionTitle = this._el("span", { className: "fs-search-section-title" });
+    const searchSectionBadge = this._newSticker();
+    searchSectionBadge.hidden = state.get("searchSuggestionBadgeDismissed") === true;
+    this.els.fsSearchSuggestionNewSticker = searchSectionBadge;
+    searchSectionTitle.append(this._el("span", { textContent: "Search" }), searchSectionBadge);
+    const proxyInput = this._el("input", {
+      id: "fs-search-suggestion-proxy",
+      className: "fs-location-input",
+      type: "url",
+      placeholder: "https://ydd-search-suggestions.yddbyxtditom.workers.dev/suggest",
+    });
+    const proxyControl = this._el("div", { className: "fs-suggestion-proxy-control" });
+    proxyControl.append(proxyInput);
+    this.els.fsSearchSuggestionProxy = proxyInput;
+    const proxyRow = this._row(
+      "Custom Suggestion Relay",
+      "Optional HTTPS endpoint accepting ?q= and returning a suggestions array.",
+      proxyControl,
+    );
+    this.els.fsSearchSuggestionProxyRow = proxyRow;
+    pane.appendChild(this._section(searchSectionTitle, [
+      this._row(searchLabel, "Choose local history only or add online autocomplete.", suggestionModeSelect),
+      proxyRow,
+    ]));
 
     return pane;
   }
@@ -1020,9 +1049,34 @@ export class FullSettingsModal {
     this.els.fsWidgetControl.addEventListener("change", (e) =>
       state.set("widgetControl", e.target.value),
     );
-    this.els.fsShortcutsPosition.addEventListener("change", (e) =>
-      state.set("shortcutsPosition", e.target.value),
-    );
+    this.els.fsSearchSuggestionMode.addEventListener("change", async (event) => {
+      const previousMode = state.get("searchSuggestionMode") || "history-only";
+      const requestedMode = event.target.value;
+      this._saveSearchSuggestionProxy();
+
+      if (requestedMode === "history-custom") {
+        const relay = state.get("searchSuggestionProxyUrl");
+        if (!(await requestSearchSuggestionConsent(relay || "your custom relay"))) {
+          state.set("searchSuggestionMode", previousMode);
+          event.target.value = previousMode;
+          syncSuggestionModeSelect(event.target);
+          this._updateSearchSuggestionRelayAvailability();
+          return;
+        }
+      } else if (requestedMode === "history-online" && !(await requestSearchSuggestionConsent())) {
+        event.target.value = state.get("searchSuggestionMode") || "history-only";
+        syncSuggestionModeSelect(event.target);
+        return;
+      }
+      state.set("searchSuggestionMode", requestedMode);
+      syncSuggestionModeSelect(event.target);
+      this._searchSuggestionRelayValidationPending = requestedMode === "history-custom";
+      this._updateSearchSuggestionRelayAvailability();
+    });
+    this.els.fsSearchSuggestionProxy.addEventListener("input", () => {
+      this._searchSuggestionProxyDirty = true;
+      this._searchSuggestionRelayValidationPending = true;
+    });
     this.els.fsShortcutsDisplayMode.addEventListener("change", async (e) => {
       const shortcuts = window.__shortcutsInstance;
       const accepted = shortcuts?.setDisplayMode
@@ -1391,6 +1445,14 @@ export class FullSettingsModal {
       if (key === "shortcutsDisplayMode" && this.els.fsShortcutsDisplayMode) {
         this.els.fsShortcutsDisplayMode.value = value || "shortcuts";
       }
+      if (key === "searchSuggestionMode" && this.els.fsSearchSuggestionMode) {
+        this.els.fsSearchSuggestionMode.value = value || "history-only";
+        syncSuggestionModeSelect(this.els.fsSearchSuggestionMode);
+        this._updateSearchSuggestionRelayAvailability();
+      }
+      if (key === "searchSuggestionBadgeDismissed" && this.els.fsSearchSuggestionNewSticker) {
+        this.els.fsSearchSuggestionNewSticker.hidden = value === true;
+      }
       if (key === "userSavedThemes") {
         this._renderSavedThemes();
       }
@@ -1449,7 +1511,6 @@ export class FullSettingsModal {
     if (key === "widgetControl")
       this.els.fsWidgetControl.value = value || "all";
     if (key === "shortcutsPosition") {
-      this.els.fsShortcutsPosition.value = value || "bottom";
       this.els.fsScPosition.value = value || "bottom";
     }
     if (key === "yd_city" && this.els.fsLocInput)
@@ -1487,10 +1548,17 @@ export class FullSettingsModal {
 
     // Dropdowns
     this.els.fsWidgetControl.value = state.get("widgetControl") || "all";
-    this.els.fsShortcutsPosition.value =
-      state.get("shortcutsPosition") || "bottom";
     this.els.fsShortcutsDisplayMode.value =
       state.get("shortcutsDisplayMode") || "shortcuts";
+    this.els.fsSearchSuggestionMode.value =
+      state.get("searchSuggestionMode") || "history-only";
+    syncSuggestionModeSelect(this.els.fsSearchSuggestionMode);
+    this.els.fsSearchSuggestionProxy.value =
+      state.get("searchSuggestionProxyUrl") || "";
+    this._searchSuggestionProxyDirty = false;
+    this._searchSuggestionRelayValidationPending =
+      state.get("searchSuggestionMode") === "history-custom";
+    this._updateSearchSuggestionRelayAvailability();
     this.els.fsScPosition.value = state.get("shortcutsPosition") || "bottom";
     this.els.fsLocInput.value = state.get("yd_city") || "";
     this.els.fsBlurSelect.value = state.get("bgBlurIntensity") || "0";
@@ -1520,6 +1588,7 @@ export class FullSettingsModal {
 
   open() {
     if (this.isOpen) return;
+    this._searchSuggestionValidationId += 1;
     state.set("fullSettingsEverOpened", true);
     // Close the mini popup if open
     const miniPopup = document.getElementById("settings-popup");
@@ -1548,6 +1617,12 @@ export class FullSettingsModal {
 
   close() {
     if (!this.isOpen) return;
+    this._saveSearchSuggestionProxy();
+    const validationId = ++this._searchSuggestionValidationId;
+    const shouldValidateRelay =
+      state.get("searchSuggestionMode") === "history-custom" &&
+      this._searchSuggestionRelayValidationPending === true;
+    const relayToValidate = state.get("searchSuggestionProxyUrl");
     if (this._activeKeyCleanup) this._activeKeyCleanup();
     this._handleDragEnd();
     window.removeEventListener("keydown", this._onDialogKeyDown, true);
@@ -1563,6 +1638,46 @@ export class FullSettingsModal {
     if (previousFocus && typeof previousFocus.focus === "function") {
       window.setTimeout(() => previousFocus.focus(), 0);
     }
+
+    if (shouldValidateRelay) {
+      void this._validateCustomSuggestionRelayAfterClose(relayToValidate, validationId);
+    }
+  }
+
+  _saveSearchSuggestionProxy() {
+    if (!this._searchSuggestionProxyDirty || !this.els.fsSearchSuggestionProxy) return;
+    const value = this.els.fsSearchSuggestionProxy.value.trim();
+    try {
+      const saved = state.set("searchSuggestionProxyUrl", value);
+      if (!saved) {
+        state.set("searchSuggestionProxyUrl", "");
+        this.els.fsSearchSuggestionProxy.value = "";
+      }
+      window.YD_Search?.suggestions?.clearCache?.();
+      this._searchSuggestionProxyDirty = false;
+    } catch {
+      this.els.fsSearchSuggestionProxy.value = state.get("searchSuggestionProxyUrl") || "";
+    }
+  }
+
+  async _validateCustomSuggestionRelayAfterClose(relay, validationId) {
+    const isValid = Boolean(relay) && await validateCustomSuggestionRelay(relay);
+    if (
+      validationId !== this._searchSuggestionValidationId ||
+      state.get("searchSuggestionMode") !== "history-custom" ||
+      state.get("searchSuggestionProxyUrl") !== relay
+    ) return;
+    if (isValid) {
+      this._searchSuggestionRelayValidationPending = false;
+      return;
+    }
+
+    state.set("searchSuggestionMode", "history-only");
+    this._searchSuggestionRelayValidationPending = false;
+    this._updateSearchSuggestionRelayAvailability();
+    await showCustomModal(
+      "Error: This custom relay is not working properly. History Only has been restored.",
+    );
   }
 
   _handleDialogKeyDown(event) {
@@ -1988,6 +2103,23 @@ export class FullSettingsModal {
       this.els.fsTempDisplayRow,
       temperatureDisabled,
     );
+
+    this._updateSearchSuggestionRelayAvailability();
+  }
+
+  _updateSearchSuggestionRelayAvailability() {
+    const customMode = state.get("searchSuggestionMode") === "history-custom";
+    const row = this.els.fsSearchSuggestionProxyRow;
+    const input = this.els.fsSearchSuggestionProxy;
+
+    if (row) {
+      row.classList.toggle("disabled", !customMode);
+      row.setAttribute("aria-disabled", String(!customMode));
+    }
+    if (input) {
+      input.disabled = !customMode;
+      input.setAttribute("aria-disabled", String(!customMode));
+    }
   }
 
   isDarkModeAvailable() {
