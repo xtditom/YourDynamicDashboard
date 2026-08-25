@@ -10,6 +10,9 @@ export const MAX_CUSTOM_SEARCH_NAME_LENGTH = 35;
 export const MAX_CUSTOM_SEARCH_URL_LENGTH = 2048;
 export const MAX_CUSTOM_SEARCH_QUERY_PARAMS = 8;
 export const MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH = 64;
+export const MAX_CUSTOM_APPS = 20;
+export const MAX_CUSTOM_APP_NAME_LENGTH = 35;
+export const MAX_CUSTOM_APP_URL_LENGTH = 2048;
 
 export function normalizeHttpUrl(value, maxLength = MAX_SHORTCUT_URL_LENGTH) {
   let input = String(value || "").trim();
@@ -138,6 +141,88 @@ export function sanitizeCustomSearchEngines(value) {
     });
   }
 
+  return sanitized;
+}
+
+export function sanitizeCustomApps(value) {
+  if (!Array.isArray(value)) return [];
+  const seenIds = new Set();
+  const sanitized = [];
+
+  for (const item of value) {
+    if (sanitized.length >= MAX_CUSTOM_APPS) break;
+    if (!item) continue;
+
+    const id = String(item.id || "").trim();
+    if (
+      !id.startsWith("custom-app-") ||
+      id.length > 160 ||
+      !/^[a-z0-9-]+$/i.test(id) ||
+      seenIds.has(id)
+    ) continue;
+
+    const name = String(item.name || "").trim();
+    if (!name || name.length > MAX_CUSTOM_APP_NAME_LENGTH) continue;
+
+    let url;
+    try {
+      url = normalizeHttpUrl(item.url, MAX_CUSTOM_APP_URL_LENGTH);
+      const hostname = new URL(url).hostname;
+      if (!hostname.includes(".") && hostname !== "localhost" && !hostname.includes(":")) {
+        continue;
+      }
+    } catch {
+      continue;
+    }
+
+    if (
+      typeof item.icon !== "string" ||
+      !item.icon.startsWith("data:image/") ||
+      item.icon.length > MAX_CUSTOM_TOOL_ICON_LENGTH
+    ) continue;
+
+    seenIds.add(id);
+    sanitized.push({ id, name, url, icon: item.icon });
+  }
+
+  return sanitized;
+}
+
+export function sanitizeGoogleAppOverrides(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const sanitized = {};
+
+  Object.entries(value).forEach(([id, override]) => {
+    if (!/^app-default-[a-z0-9-]+$/i.test(id) || !override || typeof override !== "object") {
+      return;
+    }
+    const next = {};
+    const name = String(override.name || "").trim();
+    if (name && name.length <= MAX_CUSTOM_APP_NAME_LENGTH) next.name = name;
+    if (
+      typeof override.icon === "string" &&
+      override.icon.startsWith("data:image/") &&
+      override.icon.length <= MAX_CUSTOM_TOOL_ICON_LENGTH
+    ) {
+      next.icon = override.icon;
+    }
+    if (Object.keys(next).length) sanitized[id] = next;
+  });
+
+  return sanitized;
+}
+
+export function sanitizeHiddenApps(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const sanitized = {};
+  Object.entries(value).forEach(([id, hidden]) => {
+    if (
+      hidden === true &&
+      /^(?:app-default-|custom-app-)[a-z0-9-]+$/i.test(id)
+    ) {
+      sanitized[id] = true;
+    }
+  });
   return sanitized;
 }
 

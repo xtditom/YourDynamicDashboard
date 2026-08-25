@@ -334,22 +334,9 @@ export class CommandPalette {
 
     this.syncCustomSearchCommands();
 
-    // 2. Google Apps commands
+    // 2. Google Apps and user-added app commands
     this.appCommands = [];
-    (GOOGLE_APPS || []).forEach(app => {
-      if (app.name && app.name !== "divider") {
-        this.appCommands.push({
-          id: `app-${app.name.toLowerCase()}`,
-          name: app.name,
-          icon: "🚀",
-          shortcut: "",
-          action: () => {
-            const targets = state.get("linkTargets") || {};
-            window.open(app.url, targets.apps || "_blank");
-          }
-        });
-      }
-    });
+    this.syncAppCommands();
 
     // 3. AI Tools commands
     this.aiCommands = [];
@@ -444,6 +431,21 @@ export class CommandPalette {
     });
   }
 
+  syncAppCommands() {
+    const apps = window.YD_Apps?.getVisibleApps?.() ||
+      (GOOGLE_APPS || []).filter((app) => app.name && app.name !== "divider");
+    this.appCommands = apps.map((app) => ({
+      id: `app-${app.id || app.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+      name: app.name,
+      icon: "🚀",
+      shortcut: "",
+      action: () => {
+        const targets = state.get("linkTargets") || {};
+        window.open(app.url, targets.apps || "_blank");
+      },
+    }));
+  }
+
   init() {
     this.createDomElements();
     this.registerEvents();
@@ -454,6 +456,9 @@ export class CommandPalette {
         key === "randomBgMode" ||
         key === "savedBgUrl" ||
         key === "disableAnimations" ||
+        key === "customApps" ||
+        key === "googleAppOverrides" ||
+        key === "hiddenApps" ||
         key === "customAiTools" ||
         key === "customSearchEngines" ||
         key === "customSocialLinks"
@@ -462,6 +467,13 @@ export class CommandPalette {
           this.syncCustomToolCommands();
         }
         if (key === "customSearchEngines") this.syncCustomSearchCommands();
+        if (
+          key === "customApps" ||
+          key === "googleAppOverrides" ||
+          key === "hiddenApps"
+        ) {
+          this.syncAppCommands();
+        }
         this.filter(this.els.input?.value || "");
       }
     });

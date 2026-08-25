@@ -713,7 +713,24 @@ export class FullSettingsModal {
         id: def.id,
         className: "color-picker",
       });
-      colorGrid.appendChild(this._row(def.label, null, picker));
+      const row = this._row(def.label, null, picker);
+      row.classList.add("fs-normal-color-row");
+      colorGrid.appendChild(row);
+    });
+
+    const gradientColorDefs = [
+      { id: "fs-gradient-color-1-picker", label: "Gradient Color 1" },
+      { id: "fs-gradient-color-2-picker", label: "Gradient Color 2" },
+    ];
+    gradientColorDefs.forEach((def) => {
+      const picker = this._el("input", {
+        type: "color",
+        id: def.id,
+        className: "color-picker fs-gradient-color-picker",
+      });
+      const row = this._row(def.label, null, picker);
+      row.classList.add("fs-gradient-color-row");
+      colorGrid.appendChild(row);
     });
 
     pane.appendChild(
@@ -727,6 +744,27 @@ export class FullSettingsModal {
 
   buildShortcutsPane() {
     const pane = this._el("div");
+
+    const displayModeSelect = this._dropdown("fs-shortcuts-display-mode", [
+      ["shortcuts", "Manual Shortcuts"],
+      ["most-visited", "Most Visited Sites"],
+      ["both", "Both"],
+    ]);
+    this.els.fsShortcutsDisplayMode = displayModeSelect;
+    pane.appendChild(
+      this._section("Shortcut Display", [
+        this._row(
+          "Display Mode",
+          "Choose manual shortcuts, most visited sites, or both.",
+          displayModeSelect,
+        ),
+        this._el("p", {
+          className: "settings-note",
+          textContent:
+            "Most Visited Sites requires optional browser permission. In Both mode, manual shortcuts are shown first and the remaining slots are filled with top sites.",
+        }),
+      ]),
+    );
 
     const posSelect = this._dropdown("fs-sc-position", [
       ["bottom", "Bottom"],
@@ -985,6 +1023,15 @@ export class FullSettingsModal {
     this.els.fsShortcutsPosition.addEventListener("change", (e) =>
       state.set("shortcutsPosition", e.target.value),
     );
+    this.els.fsShortcutsDisplayMode.addEventListener("change", async (e) => {
+      const shortcuts = window.__shortcutsInstance;
+      const accepted = shortcuts?.setDisplayMode
+        ? await shortcuts.setDisplayMode(e.target.value)
+        : state.set("shortcutsDisplayMode", e.target.value);
+      if (!accepted) {
+        e.target.value = state.get("shortcutsDisplayMode") || "shortcuts";
+      }
+    });
     // Location search
     this.els.fsLocSave.addEventListener("click", () => {
       this._sm()?.recordWeatherLocationSaveUse?.();
@@ -1087,14 +1134,20 @@ export class FullSettingsModal {
     if (this.els.fsColorControls) {
       this.els.fsColorControls.addEventListener("input", (e) => {
         if (!e.target.classList.contains("color-picker")) return;
-        const hasBg =
-          document.body.classList.contains("has-custom-bg") ||
-          !!state.get("backgroundImage") ||
-          !!state.get("randomBgMode");
+        const hasBg = this.hasCustomBackground();
         const isGradient =
           document.body.classList.contains("gradient-mode-active") ||
           state.get("gradientModeActive") === true;
-        if (hasBg || isGradient) return;
+        if (hasBg) return;
+
+        if (isGradient) {
+          const gradientIndex = e.target.id === "fs-gradient-color-1-picker" ? 0 :
+            e.target.id === "fs-gradient-color-2-picker" ? 1 : -1;
+          if (gradientIndex >= 0) {
+            this._sm()?.updateGradientColor?.(gradientIndex, e.target.value);
+          }
+          return;
+        }
 
         const sm = this._sm();
         if (sm) sm.disableAutoTheme();
@@ -1286,6 +1339,14 @@ export class FullSettingsModal {
 
   generateTheme() {
     if (this._generateThemeCooldown) return false;
+    if (
+      this.hasCustomBackground() ||
+      document.body.classList.contains("gradient-mode-active") ||
+      state.get("gradientModeActive") === true
+    ) {
+      this._updateColorControlsState();
+      return false;
+    }
     const sm = this._sm();
     if (!sm?.generateCuratedTheme) return false;
 
@@ -1327,6 +1388,9 @@ export class FullSettingsModal {
       if (key === "keyMap") {
         this._renderKeyEditor();
       }
+      if (key === "shortcutsDisplayMode" && this.els.fsShortcutsDisplayMode) {
+        this.els.fsShortcutsDisplayMode.value = value || "shortcuts";
+      }
       if (key === "userSavedThemes") {
         this._renderSavedThemes();
       }
@@ -1339,6 +1403,8 @@ export class FullSettingsModal {
         key === "randomBgSchedule" ||
         key === "normalThemeId" ||
         key === "gradientThemeId" ||
+        key === "gradientColor1" ||
+        key === "gradientColor2" ||
         key === "autoTheme" ||
         key === "darkMode" ||
         key === "widgetControl" ||
@@ -1423,6 +1489,8 @@ export class FullSettingsModal {
     this.els.fsWidgetControl.value = state.get("widgetControl") || "all";
     this.els.fsShortcutsPosition.value =
       state.get("shortcutsPosition") || "bottom";
+    this.els.fsShortcutsDisplayMode.value =
+      state.get("shortcutsDisplayMode") || "shortcuts";
     this.els.fsScPosition.value = state.get("shortcutsPosition") || "bottom";
     this.els.fsLocInput.value = state.get("yd_city") || "";
     this.els.fsBlurSelect.value = state.get("bgBlurIntensity") || "0";
@@ -1562,6 +1630,15 @@ export class FullSettingsModal {
 
   _sm() {
     return window.__settingsManagerInstance || null;
+  }
+
+  hasCustomBackground() {
+    return Boolean(
+      document.body.classList.contains("has-custom-bg") ||
+        state.get("backgroundImage") ||
+        state.get("randomBgMode") ||
+        localStorage.getItem("has_idb_bg") === "true",
+    );
   }
 
   // ─── Location Search ───────────────────────────────────────
@@ -1781,41 +1858,76 @@ export class FullSettingsModal {
         if (val) el.value = val;
       }
     });
+    const toPickerColor = (value) => {
+      const raw = String(value || "").trim().replace(/^#/, "");
+      if (![3, 4, 6, 8].includes(raw.length) || !/^[\da-f]+$/i.test(raw)) {
+        return "";
+      }
+      const rgb = raw.length <= 4 ? raw.slice(0, 3) : raw.slice(0, 6);
+      const expanded = rgb.length === 3
+        ? rgb.split("").map((channel) => channel + channel).join("")
+        : rgb;
+      return `#${expanded}`;
+    };
+    const gradientValues = [
+      state.get("gradientColor1") || getComputedStyle(document.body).getPropertyValue("--gradient-color-1").trim(),
+      state.get("gradientColor2") || getComputedStyle(document.body).getPropertyValue("--gradient-color-2").trim(),
+    ].map(toPickerColor);
+    ["fs-gradient-color-1-picker", "fs-gradient-color-2-picker"].forEach((id, index) => {
+      const picker = document.getElementById(id);
+      if (picker && gradientValues[index]) {
+        picker.value = gradientValues[index].toLowerCase();
+      }
+    });
   }
 
   _updateColorControlsState() {
-    const hasBg =
-      document.body.classList.contains("has-custom-bg") ||
-      !!state.get("backgroundImage") ||
-      !!state.get("randomBgMode");
+    const hasBg = this.hasCustomBackground();
     const isGradient =
       document.body.classList.contains("gradient-mode-active") ||
       state.get("gradientModeActive") === true;
     const disabled = hasBg || isGradient;
 
     if (this.els.fsGenerateThemeBtn) {
-      this.els.fsGenerateThemeBtn.disabled =
-        disabled || this._generateThemeCooldown;
+      const generatorDisabled = disabled || this._generateThemeCooldown;
+      this.els.fsGenerateThemeBtn.disabled = generatorDisabled;
+      this.els.fsGenerateThemeBtn.style.pointerEvents = generatorDisabled
+        ? "none"
+        : "auto";
+      this.els.fsGenerateThemeBtn.style.cursor = generatorDisabled
+        ? "not-allowed"
+        : "pointer";
+      this.els.fsGenerateThemeBtn.setAttribute(
+        "aria-disabled",
+        String(generatorDisabled),
+      );
     }
 
     if (this.els.fsColorControls) {
-      this.els.fsColorControls.style.opacity = disabled ? "0.4" : "1";
-      this.els.fsColorControls.style.pointerEvents = disabled ? "none" : "auto";
-      this.els.fsColorControls
-        .querySelectorAll("input")
-        .forEach((i) => (i.disabled = disabled));
+      this.els.fsColorControls.style.opacity = hasBg ? "0.4" : "1";
+      this.els.fsColorControls.style.pointerEvents = hasBg ? "none" : "auto";
+      this.els.fsColorControls.querySelectorAll(".fs-normal-color-row").forEach((row) => {
+        const active = !isGradient && !hasBg;
+        row.classList.toggle("hidden", !active);
+        row.querySelectorAll("input").forEach((input) => (input.disabled = !active));
+      });
+      this.els.fsColorControls.querySelectorAll(".fs-gradient-color-row").forEach((row) => {
+        const active = isGradient && !hasBg;
+        row.classList.toggle("hidden", !active);
+        row.querySelectorAll("input").forEach((input) => (input.disabled = !active));
+      });
     }
     if (this.els.fsColorWarning) {
-      this.els.fsColorWarning.classList.toggle("hidden", !disabled);
+      this.els.fsColorWarning.textContent = hasBg
+        ? "(Advance Options is not available in Background)"
+        : "";
+      this.els.fsColorWarning.classList.toggle("hidden", !hasBg);
     }
     this._updateControlAvailability();
   }
 
   _updateControlAvailability() {
-    const hasBg =
-      document.body.classList.contains("has-custom-bg") ||
-      !!state.get("backgroundImage") ||
-      !!state.get("randomBgMode");
+    const hasBg = this.hasCustomBackground();
     const isGradient =
       document.body.classList.contains("gradient-mode-active") ||
       state.get("gradientModeActive") === true;
@@ -1890,10 +2002,7 @@ export class FullSettingsModal {
   // ─── Background State ─────────────────────────────────────
 
   _updateBgState() {
-    const hasBg =
-      document.body.classList.contains("has-custom-bg") ||
-      !!state.get("backgroundImage") ||
-      !!state.get("randomBgMode");
+    const hasBg = this.hasCustomBackground();
     const mode = state.get("randomBgMode");
     const schedule = state.get("randomBgSchedule") || "1m";
 

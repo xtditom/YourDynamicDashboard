@@ -354,8 +354,41 @@
     <div id="apps-popup" class="popup-container" role="dialog" aria-labelledby="apps-popup-title" aria-hidden="true">
       <h2 id="apps-popup-title" class="visually-hidden">Google Apps</h2>
       <div id="apps-grid"></div>
-      <div class="apps-footer">Drag and drop to rearrange apps</div>
+      <div class="apps-footer">
+        <button id="apps-edit-button" class="tool-edit-button apps-footer-action" type="button" aria-label="Edit apps" aria-pressed="false">
+          <svg class="icon-pencil" stroke="currentColor" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path opacity="0.4" d="M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16.0399 3.01976L8.15988 10.8998C7.85988 11.1998 7.55988 11.7898 7.49988 12.2198L7.06988 15.2298C6.90988 16.3198 7.67988 17.0798 8.76988 16.9299L11.7799 16.4998C12.1999 16.4398 12.7899 16.1398 13.0999 15.8398L20.9799 7.95976C22.3399 6.59976 22.9799 5.01976 20.9799 3.01976C18.9799 1.01976 17.3999 1.65976 16.0399 3.01976Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+            <path opacity="0.4" d="M14.9102 4.1499C15.5802 6.5399 17.4502 8.4099 19.8502 9.0899" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg class="icon-check hidden" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" opacity="0.55"></circle>
+            <polyline points="7.5 12.2 10.5 15 16.5 9"></polyline>
+          </svg>
+        </button>
+        <span class="apps-footer-label">Drag and drop to rearrange apps</span>
+        <div class="apps-footer-actions">
+          <button id="apps-more-button" class="tool-edit-button apps-footer-action hidden" type="button" aria-label="Actions for selected apps">
+            <svg stroke="currentColor" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <g clip-path="url(#apps-more-clip)">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="12.01" y="12" width="0.01" height="0.01" transform="rotate(90 12.01 12)" stroke="currentColor" stroke-width="2.25" stroke-linejoin="round"/>
+                <rect x="16.51" y="12" width="0.01" height="0.01" transform="rotate(90 16.51 12)" stroke="currentColor" stroke-width="2.25" stroke-linejoin="round"/>
+                <rect x="7.51001" y="12" width="0.01" height="0.01" transform="rotate(90 7.51001 12)" stroke="currentColor" stroke-width="2.25" stroke-linejoin="round"/>
+              </g>
+              <defs><clipPath id="apps-more-clip"><rect width="24" height="24" fill="currentColor"/></clipPath></defs>
+            </svg>
+          </button>
+          <button id="apps-add-button" class="tool-edit-button apps-footer-action hidden" type="button" aria-label="Add a new app">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8" opacity="0.55"/>
+              <path d="M12 7V17M7 12H17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
+    <div id="apps-edit-hint" class="apps-edit-hint hidden" role="status" aria-live="polite"></div>
 
     <div id="settings-popup" class="popup-container" role="dialog" aria-labelledby="settings-popup-title" aria-hidden="true">
       <div style="position: relative; text-align: center; margin-bottom: 1rem">
@@ -534,6 +567,28 @@
               <option value="bottom">Bottom</option>
               <option value="top">Top</option>
               <option value="hide">Hide</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div class="label">
+              <span>Shortcut Display</span>
+              <small>Choose manual shortcuts, most visited sites, or both.</small>
+            </div>
+            <select
+              id="shortcuts-display-mode-select"
+              aria-label="Shortcut display mode"
+              class="settings-dropdown"
+              style="
+                padding: 5px;
+                border-radius: 5px;
+                background: var(--bg-interactive);
+                color: var(--text-primary);
+                border: none;
+              "
+            >
+              <option value="shortcuts">Manual Shortcuts</option>
+              <option value="most-visited">Most Visited Sites</option>
+              <option value="both">Both</option>
             </select>
           </div>
           <div class="setting-row" style="margin-top: 0.5rem; justify-content: center;">

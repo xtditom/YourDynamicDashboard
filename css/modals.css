@@ -88,6 +88,9 @@
   cursor: not-allowed;
   opacity: 0.45;
 }
+.ydd-custom-modal-overlay {
+  z-index: 12200 !important;
+}
 
 .ydd-add-tool-overlay {
   position: fixed;
@@ -239,6 +242,11 @@
 .ydd-add-tool-field input.is-invalid {
   border-color: #ef4444;
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.16);
+}
+.ydd-add-tool-field.is-readonly input {
+  cursor: not-allowed;
+  opacity: 0.72;
+  background-color: var(--bg-interactive);
 }
 .ydd-add-tool-error,
 .ydd-add-tool-form-error {

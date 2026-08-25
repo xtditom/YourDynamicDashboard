@@ -100,6 +100,17 @@
     transform-origin: bottom left !important;
   }
 
+  .mini-settings-hint,
+  .apps-edit-hint {
+    left: 4.5rem;
+    width: min(330px, calc(100vw - 5.5rem));
+  }
+
+  .zen-mode-notice {
+    right: 4.5rem;
+    width: min(330px, calc(100vw - 5.5rem));
+  }
+
   #apps-popup,
   #settings-popup,
   #todo-popup,

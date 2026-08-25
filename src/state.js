@@ -1,6 +1,9 @@
 import { CONFIG, DEFAULT_KEY_MAP, SEARCH_PROVIDERS } from "./config.js";
 import {
   sanitizeCustomSearchEngines,
+  sanitizeCustomApps,
+  sanitizeGoogleAppOverrides,
+  sanitizeHiddenApps,
   sanitizeCustomTools,
   sanitizeShortcuts,
 } from "./validators.js";
@@ -39,6 +42,9 @@ class StateManager {
   normalizeValue(key, value) {
     if (key === "userShortcuts") return sanitizeShortcuts(value);
     if (key === "customAiTools") return sanitizeCustomTools(value, "ai");
+    if (key === "customApps") return sanitizeCustomApps(value);
+    if (key === "googleAppOverrides") return sanitizeGoogleAppOverrides(value);
+    if (key === "hiddenApps") return sanitizeHiddenApps(value);
     if (key === "customSearchEngines") return sanitizeCustomSearchEngines(value);
     if (key === "customSocialLinks") return sanitizeCustomTools(value, "social");
     if (key === "searchHistory") {
@@ -64,6 +70,12 @@ class StateManager {
             !providers.some((provider) => provider.id === value.id))) ||
         (isCustomSearchEngine && !/^custom-search-[a-z0-9-]+$/i.test(value.id))
       ) throw new TypeError("Invalid search provider");
+    }
+    if (
+      key === "shortcutsDisplayMode" &&
+      !["shortcuts", "most-visited", "both"].includes(value)
+    ) {
+      throw new TypeError("Invalid shortcut display mode");
     }
     if (key === "keyMap") {
       if (!value || typeof value !== "object" || Array.isArray(value)) {

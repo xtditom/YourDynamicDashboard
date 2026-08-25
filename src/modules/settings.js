@@ -55,6 +55,10 @@ const ALIEN_LIGHT = {
   "--form-control-text": "#172033",
   "--form-control-placeholder": "#37455f",
   "--form-control-border": "rgba(28, 35, 54, 0.72)",
+  "--widget-bg": "rgba(255, 255, 255, 0.15)",
+  "--widget-border": "rgba(255, 255, 255, 0.35)",
+  "--text-color": "#1a1a1a",
+  "--text-shadow": "0 1px 2px rgba(255, 255, 255, 0.35)",
   "--icon-filter": "grayscale(0%)",
   "--icon-opacity": "1",
 };
@@ -77,6 +81,10 @@ const ALIEN_DARK = {
   "--form-control-text": "#ffffff",
   "--form-control-placeholder": "rgba(255, 255, 255, 0.8)",
   "--form-control-border": "rgba(255, 255, 255, 0.62)",
+  "--widget-bg": "rgba(0, 0, 0, 0.25)",
+  "--widget-border": "rgba(255, 255, 255, 0.18)",
+  "--text-color": "#f0f0f0",
+  "--text-shadow": "0 2px 4px rgba(0, 0, 0, 0.7)",
   "--icon-filter": "grayscale(0%) brightness(1.0)",
   "--icon-opacity": "0.9",
 };
@@ -176,6 +184,32 @@ function relativeLuminance(color) {
     channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
   );
   return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+}
+
+function classifyGradientType(colors) {
+  const usable = (Array.isArray(colors) ? colors : [])
+    .map((color) => relativeLuminance(color))
+    .filter((value) => Number.isFinite(value));
+  const average = usable.length
+    ? usable.reduce((sum, value) => sum + value, 0) / usable.length
+    : 0;
+  return average >= 0.22 ? "light" : "dark";
+}
+
+function isHexColor(value) {
+  return Boolean(normalizeHexColor(value));
+}
+
+function normalizeHexColor(value) {
+  const raw = String(value || "").trim().replace(/^#/, "");
+  if (![3, 4, 6, 8].includes(raw.length) || !/^[\da-f]+$/i.test(raw)) {
+    return "";
+  }
+  const rgb = raw.length <= 4 ? raw.slice(0, 3) : raw.slice(0, 6);
+  const expanded = rgb.length === 3
+    ? rgb.split("").map((channel) => channel + channel).join("")
+    : rgb;
+  return `#${expanded.toLowerCase()}`;
 }
 
 function contrastRatio(foreground, background) {
@@ -871,6 +905,7 @@ export class SettingsManager {
       apps: document.getElementById("apps-visibility-toggle"),
       ai: document.getElementById("ai-tools-visibility-toggle"),
       shortcutsPosition: document.getElementById("shortcuts-position-select"),
+      shortcutsDisplayMode: document.getElementById("shortcuts-display-mode-select"),
       dark: document.getElementById("dark-mode-toggle"),
       autoThemeToggle: document.getElementById("auto-theme-toggle"),
       glowToggle: document.getElementById("glow-effect-toggle"),
@@ -954,6 +989,9 @@ export class SettingsManager {
           this.els.dateToggle.checked = value;
         }
       }
+      if (key === "shortcutsDisplayMode" && this.els.shortcutsDisplayMode) {
+        this.els.shortcutsDisplayMode.value = value || "shortcuts";
+      }
       if (key === "hideGreetings") {
         if (this.els.hideGreetings) {
           this.els.hideGreetings.checked = value === true;
@@ -1032,6 +1070,10 @@ export class SettingsManager {
         this.els.shortcutsPosition.value = "hide";
         state.set("shortcutsPosition", "hide");
       }
+    }
+    if (this.els.shortcutsDisplayMode) {
+      this.els.shortcutsDisplayMode.value =
+        state.get("shortcutsDisplayMode") || "shortcuts";
     }
 
     this.bindSimpleToggle(this.els.glowToggle, "glowEffect", true);
@@ -1222,10 +1264,7 @@ export class SettingsManager {
   }
 
   generateCuratedTheme() {
-    const hasBackground =
-      document.body.classList.contains("has-custom-bg") ||
-      !!state.get("backgroundImage") ||
-      !!state.get("randomBgMode");
+    const hasBackground = this.hasCustomBackground();
     if (state.get("gradientModeActive") === true || hasBackground) return false;
 
     const mode = state.get("darkMode") === true ? "dark" : "light";
@@ -1458,6 +1497,18 @@ export class SettingsManager {
       });
     }
 
+    if (this.els.shortcutsDisplayMode) {
+      this.els.shortcutsDisplayMode.addEventListener("change", async (e) => {
+        const shortcuts = window.__shortcutsInstance;
+        const accepted = shortcuts?.setDisplayMode
+          ? await shortcuts.setDisplayMode(e.target.value)
+          : state.set("shortcutsDisplayMode", e.target.value);
+        if (!accepted) {
+          e.target.value = state.get("shortcutsDisplayMode") || "shortcuts";
+        }
+      });
+    }
+
     if (this.els.dark) {
       this.els.dark.addEventListener("change", () => {
         if (!this.isDarkModeAvailable()) {
@@ -1491,6 +1542,17 @@ export class SettingsManager {
     if (this.els.colorControls) {
       this.els.colorControls.addEventListener("input", (e) => {
         if (e.target.classList.contains("color-picker")) {
+          const isGradient =
+            document.body.classList.contains("gradient-mode-active") ||
+            state.get("gradientModeActive") === true;
+          if (isGradient) {
+            const gradientIndex = e.target.id === "gradient-color-1-picker" ? 0 :
+              e.target.id === "gradient-color-2-picker" ? 1 : -1;
+            if (gradientIndex >= 0) {
+              this.updateGradientColor(gradientIndex, e.target.value);
+            }
+            return;
+          }
           this.disableAutoTheme();
 
           import("../utils.js").then((utils) => {
@@ -1500,25 +1562,6 @@ export class SettingsManager {
           if (state.get("darkMode")) {
             state.set("darkMode", false);
             if (this.els.dark) this.els.dark.checked = false;
-          }
-
-          if (state.get("gradientModeActive")) {
-            state.set("gradientModeActive", false);
-            document.body.classList.remove("gradient-mode-active");
-            state.set("transparencyActive", false);
-            document.body.classList.remove("transparency-active");
-
-            const lastId = state.get("normalThemeId") || "default-light";
-            let lastTheme = THEMES.normal.find((t) => t.id === lastId);
-
-            if (!lastTheme) lastTheme = THEMES.normal[0];
-
-            Object.entries(lastTheme.colors).forEach(([k, v]) => {
-              document.body.style.setProperty(k, v);
-              state.set(`custom-${k}`, v);
-            });
-
-            state.set("normalThemeId", "custom");
           }
 
           const mapping = {
@@ -2053,33 +2096,65 @@ export class SettingsManager {
     this.applyNormalTheme(this.getDarkModeTheme(baseTheme, enabled));
   }
 
-  applyGradientTheme(theme, save = true) {
+  applyGradientTheme(theme, save = true, preserveMotion = false) {
+    if (!theme?.colors?.length || theme.colors.length < 2) return;
+    const storedThemeId = state.get("gradientColorThemeId");
+    const storedColors = [
+      normalizeHexColor(state.get("gradientColor1")),
+      normalizeHexColor(state.get("gradientColor2")),
+    ];
+    const hasStoredColors =
+      !save &&
+      storedThemeId === theme.id &&
+      storedColors.every((color) => isHexColor(color));
+    const gradientColors = hasStoredColors
+      ? storedColors
+      : theme.colors.slice(0, 2).map(normalizeHexColor);
+
     if (save) {
       state.set("gradientModeActive", true);
       state.set("gradientThemeId", theme.id);
       state.set("transparencyActive", true);
+      state.set("gradientColorThemeId", theme.id);
+      state.set("gradientColor1", gradientColors[0]);
+      state.set("gradientColor2", gradientColors[1]);
+    } else if (!storedThemeId) {
+      state.set("gradientColorThemeId", theme.id);
+      state.set("gradientColor1", gradientColors[0]);
+      state.set("gradientColor2", gradientColors[1]);
     }
 
-    const isDarkType = theme.type === "dark";
+    const builtInTheme = THEMES.gradient.find((item) => item.id === theme.id);
+    const colorsWereCustomized =
+      Boolean(builtInTheme) &&
+      gradientColors.some(
+        (color, index) => color !== normalizeHexColor(builtInTheme.colors[index]),
+      );
+    const gradientType = colorsWereCustomized
+      ? classifyGradientType(gradientColors)
+      : theme.type || classifyGradientType(gradientColors);
+    const isDarkType = gradientType === "dark";
     state.set("darkMode", isDarkType);
     if (this.els.dark) this.els.dark.checked = isDarkType;
 
-    document.body.style.setProperty("--gradient-color-1", theme.colors[0]);
-    document.body.style.setProperty("--gradient-color-2", theme.colors[1]);
+    document.body.style.setProperty("--gradient-color-1", gradientColors[0]);
+    document.body.style.setProperty("--gradient-color-2", gradientColors[1]);
 
-    const angles = [0, 45, 90, 135, 180, 225, 270, 315];
-    const timings = ["ease", "linear", "ease-in-out"];
-    const randomAngle = angles[Math.floor(Math.random() * angles.length)];
-    const randomTiming = timings[Math.floor(Math.random() * timings.length)];
+    if (!preserveMotion) {
+      const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+      const timings = ["ease", "linear", "ease-in-out"];
+      const randomAngle = angles[Math.floor(Math.random() * angles.length)];
+      const randomTiming = timings[Math.floor(Math.random() * timings.length)];
 
-    document.body.style.setProperty("--gradient-angle", `${randomAngle}deg`);
-    document.body.style.setProperty("--gradient-timing", randomTiming);
+      document.body.style.setProperty("--gradient-angle", `${randomAngle}deg`);
+      document.body.style.setProperty("--gradient-timing", randomTiming);
+    }
 
     document.body.classList.add("gradient-mode-active");
     document.body.classList.add("transparency-active");
 
     document.body.classList.remove("gradient-dark", "gradient-light");
-    if (theme.type === "dark") {
+    if (isDarkType) {
       document.body.classList.add("gradient-dark");
       document.body.setAttribute("data-theme", "dark");
     } else {
@@ -2087,19 +2162,19 @@ export class SettingsManager {
       document.body.setAttribute("data-theme", "light");
     }
 
-    const forceWhiteTextThemes = [
-      "electric-sky",
-      "cotton-candy",
-      "glacier",
-      "bio-lime",
-    ];
-    if (forceWhiteTextThemes.includes(theme.id)) {
+    if (!isDarkType) {
       document.body.classList.add("force-white-text");
     } else {
       document.body.classList.remove("force-white-text");
     }
 
-    Object.entries(theme.ui).forEach(([key, val]) => {
+    const useCustomGradientUI = colorsWereCustomized;
+    const gradientUI = useCustomGradientUI
+      ? isDarkType
+        ? ALIEN_DARK
+        : ALIEN_LIGHT
+      : theme.ui;
+    Object.entries(gradientUI).forEach(([key, val]) => {
       document.body.style.setProperty(key, val);
     });
     this.syncThemeIdentity(`gradient-${theme.id || "gradient"}`);
@@ -2107,6 +2182,23 @@ export class SettingsManager {
     this.updateWarningText();
     this.updateAutoThemeGlowState();
     this.updateDarkModeControlState();
+  }
+
+  updateGradientColor(index, value) {
+    const color = String(value || "").trim();
+    if (![0, 1].includes(index) || !isHexColor(color)) return false;
+    const themeId = state.get("gradientThemeId") || state.get("gradientColorThemeId");
+    const theme = THEMES.gradient.find((item) => item.id === themeId) || THEMES.gradient[0];
+    const current = [
+      normalizeHexColor(state.get("gradientColor1")) || normalizeHexColor(theme.colors[0]),
+      normalizeHexColor(state.get("gradientColor2")) || normalizeHexColor(theme.colors[1]),
+    ];
+    current[index] = color;
+    state.set("gradientColorThemeId", theme.id);
+    state.set("gradientColor1", current[0]);
+    state.set("gradientColor2", current[1]);
+    this.applyGradientTheme({ ...theme, colors: current }, false, true);
+    return true;
   }
 
   isDarkModeAvailable() {
@@ -4027,7 +4119,7 @@ export class SettingsManager {
     const isGradient = document.body.classList.contains("gradient-mode-active");
     const animationsDisabled = state.get("disableAnimations") === true;
     const autoThemeDisabled = hasBg;
-    const colorControlsDisabled = hasBg || isGradient;
+    const colorControlsDisabled = hasBg;
     const glowDisabled = colorControlsDisabled || animationsDisabled;
 
     if (this.els.blurRow) {
