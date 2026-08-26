@@ -111,6 +111,18 @@
         font-weight: 500;
       }
 
+      .policy-note {
+        margin-top: 1.25rem;
+        padding: 1rem 1.15rem;
+        border-left: 3px solid var(--accent-color);
+        border-radius: 0 8px 8px 0;
+        background-color: rgba(221, 109, 4, 0.08);
+      }
+
+      .policy-note p:last-child {
+        margin-bottom: 0;
+      }
+
       /* --- Grid & Cards --- */
       .info-grid {
         display: grid;
@@ -187,7 +199,7 @@
       <header>
         <h1>Privacy Policy</h1>
         <p class="subtitle">YourDynamicDashboard Extension</p>
-        <span class="last-updated">Last Updated: August 21, 2026</span>
+        <span class="last-updated">Last Updated: August 25, 2026</span>
       </header>
 
       <main>
@@ -215,8 +227,14 @@
           </p>
           <p>
             <strong>The Short Version:</strong> YourDynamicDashboard does not
-            collect, store, or sell your personal data. Location data and Search
-            History are strictly local to your device.
+            sell personal data, create advertising profiles, or include YDD
+            behavioral analytics. Most dashboard data, including search
+            history and location preferences, stays in your browser. Search
+            suggestions default to <strong>History Only</strong>, which makes
+            no autocomplete network requests. If you explicitly enable an
+            online mode, the text currently being typed and ordinary network
+            metadata are processed by the selected suggestion relay and its
+            provider as described below.
           </p>
         </section>
 
@@ -240,12 +258,10 @@
           </h2>
           <p>
             All your customizations and data are stored locally in your browser
-            using <code>localStorage</code> and <code>IndexedDB</code>. YDD has
-            does not upload this local data to its suggestion relay or any YDD
-            account. If you explicitly enable
-            online search suggestions, the current typed prefix is sent through
-            YDD's Cloudflare-hosted suggestion relay to DuckDuckGo; the prefix
-            and returned suggestions are not saved by YDD.
+            using <code>localStorage</code> and <code>IndexedDB</code>. YDD does
+            not provide an account or automatically upload this local data to
+            a YDD database. Optional online features make limited network
+            requests that are explained in this policy.
           </p>
           <div class="info-grid">
             <div class="info-card">
@@ -261,14 +277,111 @@
               <p>
                 Your submitted search queries are stored locally on your device
                 to provide the Quick Search History feature. They are never
-                transmitted to YDD or a third-party tracking server. If you
-                enable the optional online suggestion mode, only the text
-                currently typed in the search box is sent through YDD's relay
-                to DuckDuckGo; online suggestions never enter search history,
-                backups, or browser storage.
+                uploaded to a YDD account or suggestion database. When you
+                submit a search, the query is sent to your selected search
+                provider so that provider can return results. A suggestion is
+                added to local history only if you select or submit it as a
+                search. Search history can be paused, cleared, or configured to
+                auto-delete after 30, 90, 180, or 365 days.
+              </p>
+            </div>
+            <div class="info-card">
+              <h3>💾 Suggestion Cache</h3>
+              <p>
+                In online modes, YDD locally caches the typed prefix, returned
+                suggestions, relay address, and exact creation and expiry
+                timestamps. Each entry expires after 24 hours and is deleted at
+                expiry while YDD is running or the next time it loads. This
+                cache is not included in YDD backup files.
+              </p>
+            </div>
+            <div class="info-card">
+              <h3>📦 Backups</h3>
+              <p>
+                A backup file is created only when you request one. It may
+                contain local settings, search history, the selected suggestion
+                mode, remembered consent, and a saved custom relay URL. Online
+                suggestion cache entries are excluded. You control where the
+                downloaded backup file is stored or shared.
               </p>
             </div>
           </div>
+        </section>
+
+        <section>
+          <h2>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Search Suggestions
+          </h2>
+          <p>
+            Search suggestions combine local history with optional online
+            autocomplete:
+          </p>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>History Only</h3>
+              <p>
+                <strong>Default and local.</strong> Uses only submitted searches
+                saved in your browser. Nothing typed is sent online.
+              </p>
+            </div>
+            <div class="info-card">
+              <h3>History + Online</h3>
+              <p>
+                After consent, the current typed prefix goes through YDD's
+                Cloudflare relay to DuckDuckGo. Local history remains first.
+              </p>
+            </div>
+            <div class="info-card full-width">
+              <h3>History + Custom</h3>
+              <p>
+                Sends prefixes to the HTTPS relay you provide. That relay's
+                operator controls its provider, logging, and retention.
+              </p>
+            </div>
+          </div>
+
+          <div class="policy-note">
+            <p><strong>Online data flow</strong></p>
+            <p>
+              Requests begin after two characters, use HTTPS, and contain only
+              the current prefix (maximum 256 characters). YDD does not attach
+              history, location, account details, or cookies. The browser may
+              cache results locally for 24 hours; the built-in relay may cache
+              responses at Cloudflare for up to five minutes. Normal network
+              metadata can still be processed by relay and provider services.
+            </p>
+          </div>
+
+          <div class="policy-note">
+            <p><strong>Custom relay validation</strong></p>
+            <p>
+              On save, YDD tests the relay with <code>test</code>,
+              <code>hello</code>, and <code>today</code>, stopping after the first
+              valid response. If all fail, YDD restores History Only. The URL is
+              stored locally and preserved when another mode is selected.
+            </p>
+          </div>
+
+          <p>
+            Online modes require consent. Selecting
+            <strong>Remember choice</strong> saves consent locally. Choose
+            History Only to stop online requests; clearing extension data also
+            removes local history, preferences, and suggestion cache data.
+          </p>
         </section>
 
         <section>
@@ -311,16 +424,15 @@
                 this data.
               </p>
             </div>
-            <div class="info-card">
+            <div class="info-card full-width">
               <h3>🌐 Online Search Suggestions</h3>
               <p>
-                <strong>Strictly Opt-In.</strong> Selecting the online search
-                suggestion mode sends requests to YDD's narrowly restricted
-                Cloudflare-hosted relay, which contacts DuckDuckGo autocomplete.
-                Only the current typed prefix is sent over HTTPS, with
-                no location, cookies, account data, or YDD search history. You
-                can use History Only without making these requests. No browser
-                host permission is requested for this feature.
+                <strong>Strictly Opt-In.</strong> History Only is the default.
+                History + Online uses YDD's restricted Cloudflare relay and
+                DuckDuckGo; History + Custom uses the HTTPS relay entered by the
+                user. The extension does not request a broad browser host
+                permission for this feature. See “Search Suggestions” above for
+                the exact transmission and retention details.
               </p>
             </div>
             <div class="info-card full-width">
@@ -354,13 +466,11 @@
             External Services (APIs)
           </h2>
           <p>
-            To provide dynamic features, the extension communicates directly
-            with the following third-party services. While we do not send
-            personal identifiers, please note that communicating with any web
-            server natively exposes standard network requests (like your IP
-            address) to that service. The dashboard requests Google Fonts for
-            its interface typography. Built-in and custom shortcut icons may
-            also use Google's favicon service.
+            To provide dynamic features, the extension communicates with the
+            following third-party services. Any network request can expose
+            standard delivery metadata, including an IP address, to the service
+            receiving the connection and intervening infrastructure. Each
+            provider processes data under its own terms and privacy policy.
           </p>
 
           <div class="info-grid">
@@ -384,23 +494,45 @@
               </p>
             </div>
             <div class="info-card">
+              <h3>Cloudflare / YDD Suggestion Relay</h3>
+              <p>
+                Hosts the built-in autocomplete relay. Cloudflare processes the
+                typed prefix and normal network/security metadata while routing
+                the request. Worker observability is disabled, but Cloudflare
+                may process Network Data and short-lived cached responses under
+                its own policy.<br /><br /><a
+                  href="https://www.cloudflare.com/policies/privacy/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >cloudflare.com/policies/privacy</a
+                >
+              </p>
+            </div>
+            <div class="info-card">
               <h3>DuckDuckGo Autocomplete</h3>
               <p>
-                Used only when online search suggestions are explicitly
-                enabled. YDD sends the current typed prefix through a
-                Cloudflare-hosted YDD relay to DuckDuckGo's autocomplete
-                endpoint. The browser may cache suggestion responses locally,
-                with creation and expiry timestamps, for up to 24 hours before
-                automatically deleting them. Users who configure a custom
-                relay send prefixes to that relay instead. YDD does not send
-                submitted search history, location, cookies, or
-                account data. Cloudflare processes the request and its normal
-                network metadata during delivery; DuckDuckGo receives the
-                prefix from the relay.<br /><br /><a
+                Supplies autocomplete results to the built-in YDD relay only
+                after online suggestions are enabled. DuckDuckGo receives the
+                typed prefix from the relay. DuckDuckGo states that it does not
+                save or share individual search histories and does not save IP
+                addresses alongside searches; its current policy controls its
+                handling of these requests.<br /><br /><a
                   href="https://duckduckgo.com/privacy"
                   target="_blank"
+                  rel="noopener noreferrer"
                   >duckduckgo.com/privacy</a
                 >
+              </p>
+            </div>
+            <div class="info-card full-width">
+              <h3>Custom Suggestion Relays</h3>
+              <p>
+                If History + Custom is selected, the browser connects to the
+                user-provided HTTPS endpoint. That endpoint receives validation
+                prefixes, live typed prefixes, and ordinary network metadata.
+                YDD does not control the endpoint's provider, logging, security,
+                retention, or onward sharing. Its operator's privacy policy
+                applies.
               </p>
             </div>
             <div class="info-card">

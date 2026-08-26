@@ -4,6 +4,7 @@ import {
   AI_TOOLS,
   SOCIAL_LINKS,
   SEARCH_PROVIDERS,
+  COMMAND_PALETTE_SHORTCUT_USE_LIMIT,
 } from "../config.js";
 
 // Complete Bang Mapping for Search Engines & Platforms
@@ -476,6 +477,9 @@ export class CommandPalette {
         }
         this.filter(this.els.input?.value || "");
       }
+      if (key === "commandPaletteShortcutUseCount") {
+        this.syncShortcutBadge();
+      }
     });
     window.YD_CommandPalette = this;
   }
@@ -545,6 +549,7 @@ export class CommandPalette {
   registerEvents() {
     const badge = document.getElementById("search-cp-badge");
     if (badge) {
+      this.syncShortcutBadge();
       badge.setAttribute("role", "button");
       badge.tabIndex = 0;
       badge.setAttribute("aria-label", "Open command palette");
@@ -617,6 +622,17 @@ export class CommandPalette {
         this.switchMenu("main");
       }
     });
+  }
+
+  syncShortcutBadge() {
+    const badge = document.getElementById("search-cp-badge");
+    if (!badge) return;
+    const hidden =
+      (Number(state.get("commandPaletteShortcutUseCount")) || 0) >=
+      COMMAND_PALETTE_SHORTCUT_USE_LIMIT;
+    badge.hidden = hidden;
+    badge.classList.toggle("hidden", hidden);
+    badge.setAttribute("aria-hidden", String(hidden));
   }
 
   open() {

@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { getIconUrl, showCustomModal } from "../utils.js";
 import { CONFIG } from "../config.js";
+import { MIN_SHORTCUTS } from "../validators.js";
 
 function isMicrosoftEdgeBrowser() {
   const userAgent = String(globalThis.navigator?.userAgent || "");
@@ -36,18 +37,16 @@ export class Shortcuts {
       state.set("shortcutsDisplayMode", "shortcuts");
     }
 
-    if (!current || !Array.isArray(current)) {
-      const withIcons = this.defaults.map((shortcut) => ({
-        ...shortcut,
-        icon: getIconUrl(shortcut.url),
-      }));
-      state.set("userShortcuts", withIcons);
-    }
+    this.ensureMinimumShortcuts(current);
 
     this.render();
 
     state.subscribe((key) => {
-      if (key === "userShortcuts" || key === "shortcutsDisplayMode") {
+      if (key === "userShortcuts") {
+        this.ensureMinimumShortcuts();
+        this.render();
+      }
+      if (key === "shortcutsDisplayMode") {
         this.render();
       }
       if (key === "shortcutsPosition" || key === "showShortcuts") this.updateVisibility();
@@ -55,6 +54,24 @@ export class Shortcuts {
     });
 
     this.updateVisibility();
+  }
+
+  ensureMinimumShortcuts(current = state.get("userShortcuts")) {
+    const next = Array.isArray(current) ? [...current] : [];
+    if (next.length >= MIN_SHORTCUTS) return true;
+
+    const existingUrls = new Set(next.map((shortcut) => shortcut.url));
+    for (const shortcut of this.defaults) {
+      if (next.length >= MIN_SHORTCUTS) break;
+      if (existingUrls.has(shortcut.url)) continue;
+      next.push({
+        ...shortcut,
+        icon: getIconUrl(shortcut.url),
+      });
+      existingUrls.add(shortcut.url);
+    }
+
+    return next.length >= MIN_SHORTCUTS && state.set("userShortcuts", next);
   }
 
   _getExtensionApi() {
@@ -240,7 +257,18 @@ export class Shortcuts {
       }
     }
 
-    document.body.classList.remove("shortcuts-at-top", "shortcuts-at-bottom");
+    document.body.classList.remove(
+      "shortcuts-at-top",
+      "shortcuts-at-bottom",
+      "shortcuts-at-left",
+      "shortcuts-at-right",
+    );
+    this.container.classList.remove(
+      "position-top",
+      "position-bottom",
+      "position-left",
+      "position-right",
+    );
 
     if (position === "hide") {
       this.container.classList.add("hidden");
@@ -249,8 +277,14 @@ export class Shortcuts {
       if (position === "top") {
         this.container.classList.add("position-top");
         document.body.classList.add("shortcuts-at-top");
+      } else if (position === "left") {
+        this.container.classList.add("position-left");
+        document.body.classList.add("shortcuts-at-left");
+      } else if (position === "right") {
+        this.container.classList.add("position-right");
+        document.body.classList.add("shortcuts-at-right");
       } else {
-        this.container.classList.remove("position-top");
+        this.container.classList.add("position-bottom");
         document.body.classList.add("shortcuts-at-bottom");
       }
     }

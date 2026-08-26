@@ -14,6 +14,29 @@
   bottom: auto;
   top: 2rem;
 }
+#shortcuts-container.position-bottom {
+  flex-wrap: wrap-reverse;
+}
+#shortcuts-container.position-left,
+#shortcuts-container.position-right {
+  top: 50%;
+  bottom: auto;
+  width: auto;
+  max-width: calc(100vw - 4rem);
+  height: calc(12 * 52px + 11 * 0.75rem);
+  flex-direction: column;
+  flex-wrap: wrap;
+  transform: translateY(-50%);
+}
+#shortcuts-container.position-left {
+  left: 2rem;
+  right: auto;
+}
+#shortcuts-container.position-right {
+  left: auto;
+  right: 2rem;
+  flex-wrap: wrap-reverse;
+}
 .shortcut-item {
   opacity: 0;
   transform: translateY(20px);
@@ -39,6 +62,20 @@ body.loaded #shortcuts-container.position-top .shortcut-item {
   transform: translateY(0);
 }
 
+#shortcuts-container.position-left .shortcut-item {
+  transform: translateX(-20px);
+}
+body.loaded #shortcuts-container.position-left .shortcut-item {
+  transform: translateX(0);
+}
+
+#shortcuts-container.position-right .shortcut-item {
+  transform: translateX(20px);
+}
+body.loaded #shortcuts-container.position-right .shortcut-item {
+  transform: translateX(0);
+}
+
 .shortcut-icon {
   background-color: var(--bg-tertiary);
   width: 52px;
@@ -52,6 +89,11 @@ body.loaded #shortcuts-container.position-top .shortcut-item {
 
 .shortcut-item:hover .shortcut-icon {
   background-color: var(--bg-interactive);
+}
+
+.shortcut-item:hover,
+.shortcut-item:focus-visible {
+  z-index: 30;
 }
 
 .shortcut-item:hover .shortcut-icon img {
@@ -74,11 +116,29 @@ body.loaded #shortcuts-container.position-top .shortcut-item {
     opacity 0.2s ease,
     visibility 0.2s ease;
   white-space: nowrap;
+  z-index: 20;
+  pointer-events: none;
 }
 
 #shortcuts-container.position-top .shortcut-label {
   bottom: auto;
   top: 120%;
+}
+
+#shortcuts-container.position-left .shortcut-label {
+  left: 120%;
+  right: auto;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+#shortcuts-container.position-right .shortcut-label {
+  left: auto;
+  right: 120%;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
 }
 
 .shortcut-item:hover .shortcut-label {
@@ -288,6 +348,16 @@ body.gradient-mode-active:not(.gradient-dark)
   }
   #shortcuts-container.position-top {
     top: 7rem;
+  }
+  #shortcuts-container.position-left {
+    left: 0.75rem;
+  }
+  #shortcuts-container.position-right {
+    right: 0.75rem;
+  }
+  #shortcuts-container.position-left,
+  #shortcuts-container.position-right {
+    height: calc(12 * 48px + 11 * 0.5rem);
   }
   .shortcut-icon {
     width: 48px;

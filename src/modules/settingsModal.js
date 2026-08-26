@@ -10,6 +10,7 @@ import { CONFIG, DEFAULT_KEY_MAP } from "../config.js";
 import {
   getBindableKey,
   validateImageBlob,
+  MIN_SHORTCUTS,
   MAX_SHORTCUTS,
 } from "../validators.js";
 import {
@@ -787,17 +788,14 @@ export class FullSettingsModal {
           "Choose manual shortcuts, most visited sites, or both.",
           displayModeSelect,
         ),
-        this._el("p", {
-          className: "settings-note",
-          textContent:
-            "Most Visited Sites requires optional browser permission. In Both mode, manual shortcuts are shown first and the remaining slots are filled with top sites.",
-        }),
       ]),
     );
 
     const posSelect = this._dropdown("fs-sc-position", [
       ["bottom", "Bottom"],
       ["top", "Top"],
+      ["left", "Left"],
+      ["right", "Right"],
       ["hide", "Hide"],
     ]);
     this.els.fsScPosition = posSelect;

@@ -18,6 +18,7 @@ import {
   syncSuggestionModeSelect,
 } from "./suggestions.js";
 import {
+  MIN_SHORTCUTS,
   MAX_SHORTCUTS,
   MAX_SHORTCUT_NAME_LENGTH,
   normalizeHttpUrl,
@@ -3828,6 +3829,10 @@ export class SettingsManager {
   deleteShortcut(index) {
     const current = [...(state.get("userShortcuts") || [])];
     if (!Number.isInteger(index) || index < 0 || index >= current.length) {
+      return false;
+    }
+    if (current.length <= MIN_SHORTCUTS) {
+      void showCustomModal(`There must be at least ${MIN_SHORTCUTS} shortcuts.`);
       return false;
     }
     current.splice(index, 1);

@@ -1,4 +1,5 @@
 import { state } from "../state.js";
+import { COMMAND_PALETTE_SHORTCUT_USE_LIMIT } from "../config.js";
 
 export class KeyboardManager {
   constructor() {
@@ -22,6 +23,7 @@ export class KeyboardManager {
           window.YD_CommandPalette.close();
         } else {
           window.YD_CommandPalette.open();
+          this.recordCommandPaletteShortcutUse();
         }
       }
       return;
@@ -104,6 +106,18 @@ export class KeyboardManager {
         this.launchShortcut(parseInt(key) - 1);
       }
     }
+  }
+
+  recordCommandPaletteShortcutUse() {
+    const current = Math.max(
+      0,
+      Number(state.get("commandPaletteShortcutUseCount")) || 0,
+    );
+    if (current >= COMMAND_PALETTE_SHORTCUT_USE_LIMIT) return;
+    state.set(
+      "commandPaletteShortcutUseCount",
+      Math.min(current + 1, COMMAND_PALETTE_SHORTCUT_USE_LIMIT),
+    );
   }
 
   clickButton(id) {

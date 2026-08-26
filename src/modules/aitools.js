@@ -28,6 +28,7 @@ const LEGACY_DEFAULT_HIDDEN_TOOLS = [
   "social-linkedin",
   "social-tiktok",
 ];
+const MIN_VISIBLE_TOOLS = 2;
 
 export class AiTools {
   constructor() {
@@ -64,6 +65,8 @@ export class AiTools {
   }
 
   init() {
+    this.initializeOrderState();
+    this.enforceMinimumVisibleTools();
     this.renderAll();
 
     this.els.btn.addEventListener("click", (e) => {
@@ -110,6 +113,7 @@ export class AiTools {
       if (key === "linkTargets") this.renderAll();
       if (key === "hiddenTools") {
         this.hiddenTools = { ...(state.get("hiddenTools") || {}) };
+        this.enforceMinimumVisibleTools();
         this.renderAll();
       }
       if (
@@ -119,11 +123,11 @@ export class AiTools {
         key === "customSocialLinks"
       ) {
         this.initializeOrderState();
+        this.enforceMinimumVisibleTools();
         this.renderAll();
       }
     });
 
-    this.initializeOrderState();
     this.switchTab(this.activeTab === "social" ? "social" : "ai");
 
     this.updateVisibility();
@@ -159,6 +163,55 @@ export class AiTools {
 
   getAllToolIds(type) {
     return this.getAllTools(type).map((tool) => tool.id);
+  }
+
+  getOrderedToolIds(type) {
+    const orderKey = type === "social" ? "socialToolsOrder" : "aiToolsOrder";
+    const validIds = new Set(this.getAllToolIds(type));
+    const storedOrder = state.get(orderKey);
+    const order = Array.isArray(storedOrder) ? storedOrder : [];
+    return [
+      ...order.filter((id) => validIds.has(id)),
+      ...this.getAllToolIds(type).filter((id) => !order.includes(id)),
+    ];
+  }
+
+  getProtectedToolIds(type) {
+    return new Set(this.getOrderedToolIds(type).slice(0, MIN_VISIBLE_TOOLS));
+  }
+
+  enforceMinimumVisibleTools(type = null) {
+    const types = type ? [type] : ["ai", "social"];
+    const nextHiddenTools = { ...(state.get("hiddenTools") || {}) };
+    let changed = false;
+
+    types.forEach((toolType) => {
+      const orderedIds = this.getOrderedToolIds(toolType);
+      orderedIds.slice(0, MIN_VISIBLE_TOOLS).forEach((id) => {
+        if (nextHiddenTools[id] === true) {
+          delete nextHiddenTools[id];
+          changed = true;
+        }
+      });
+      let visibleCount = orderedIds.filter(
+        (id) => nextHiddenTools[id] !== true,
+      ).length;
+      if (visibleCount >= MIN_VISIBLE_TOOLS) return;
+
+      orderedIds.forEach((id) => {
+        if (visibleCount >= MIN_VISIBLE_TOOLS) return;
+        if (nextHiddenTools[id] === true) {
+          delete nextHiddenTools[id];
+          visibleCount += 1;
+          changed = true;
+        }
+      });
+    });
+
+    if (changed && state.set("hiddenTools", nextHiddenTools)) {
+      this.hiddenTools = { ...nextHiddenTools };
+    }
+    return !changed || this.hiddenTools;
   }
 
   toggle() {
@@ -253,12 +306,19 @@ export class AiTools {
     const socialOrder =
       state.get("socialToolsOrder") || socialTools.map((t) => t.id);
 
-    this.renderList(this.els.aiList, aiTools, aiOrder, CONFIG.paths.ai);
+    this.renderList(
+      this.els.aiList,
+      aiTools,
+      aiOrder,
+      CONFIG.paths.ai,
+      "ai",
+    );
     this.renderList(
       this.els.socialList,
       socialTools,
       socialOrder,
       CONFIG.paths.social,
+      "social",
     );
 
     if (this.isEditMode) {
@@ -266,7 +326,7 @@ export class AiTools {
     }
   }
 
-  renderList(container, allItems, orderList, pathPrefix) {
+  renderList(container, allItems, orderList, pathPrefix, type) {
     container.innerHTML = "";
 
     const itemMap = {};
@@ -320,15 +380,19 @@ export class AiTools {
       if (this.isEditMode) {
         const overlay = document.createElement("div");
         overlay.className = `edit-overlay${tool.isCustom ? " custom-tool-action" : ""}`;
+        const protectedTool = this.getProtectedToolIds(type).has(tool.id);
+        if (protectedTool) overlay.classList.add("is-protected");
         const action = tool.isCustom
-          ? () => this.handleCustomToolAction(tool, this.activeTab)
-          : () => this.toggleToolVisibility(tool.id);
+          ? () => this.handleCustomToolAction(tool, type)
+          : () => this.toggleToolVisibility(tool.id, type);
         makeKeyboardInteractive(
           overlay,
           action,
           tool.isCustom
             ? `${isHidden ? "Enable" : "Disable or delete"} ${tool.name}`
-            : `${isHidden ? "Show" : "Hide"} ${tool.name}`,
+            : protectedTool
+              ? `Keep ${tool.name} visible`
+              : `${isHidden ? "Show" : "Hide"} ${tool.name}`,
         );
 
         const actionIcon = document.createElementNS(
@@ -387,8 +451,32 @@ export class AiTools {
     });
   }
 
-  toggleToolVisibility(id) {
+  toggleToolVisibility(id, type = this.activeTab) {
     const nextHiddenTools = { ...this.hiddenTools };
+    const normalizedType = type === "social" ? "social" : "ai";
+    const orderedIds = this.getOrderedToolIds(normalizedType);
+    const protectedIds = new Set(orderedIds.slice(0, MIN_VISIBLE_TOOLS));
+    const isCurrentlyVisible = nextHiddenTools[id] !== true;
+
+    if (isCurrentlyVisible && protectedIds.has(id)) {
+      void showCustomModal(
+        `The first ${MIN_VISIBLE_TOOLS} ${normalizedType === "social" ? "social links" : "AI tools"} must remain visible.`,
+      );
+      return false;
+    }
+
+    if (isCurrentlyVisible) {
+      const visibleCount = orderedIds.filter(
+        (toolId) => nextHiddenTools[toolId] !== true,
+      ).length;
+      if (visibleCount <= MIN_VISIBLE_TOOLS) {
+        void showCustomModal(
+          `At least ${MIN_VISIBLE_TOOLS} ${normalizedType === "social" ? "social links" : "AI tools"} must remain visible.`,
+        );
+        return false;
+      }
+    }
+
     if (nextHiddenTools[id]) {
       nextHiddenTools[id] = false;
     } else {
@@ -429,7 +517,7 @@ export class AiTools {
     );
 
     if (action === "toggle") {
-      this.toggleToolVisibility(tool.id);
+      this.toggleToolVisibility(tool.id, type);
     } else if (action === "delete") {
       this.deleteCustomTool(tool.id, type);
     }

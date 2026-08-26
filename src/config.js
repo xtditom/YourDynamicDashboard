@@ -62,6 +62,9 @@ export const CONFIG = {
     ],
     welcomeText: "Click to edit",
     searchProvider: { id: "google", type: "engines" },
+    googleAiSearchActive: false,
+    googleAiSearchUsed: false,
+    googleAiSearchHintShownCount: 0,
     searchSuggestionMode: "history-only",
     searchSuggestionProxyUrl: "",
     searchSuggestionConsentRemembered: false,
@@ -96,6 +99,7 @@ export const CONFIG = {
     searchHistory: [],
     searchHistoryPaused: false,
     searchAutoDeleteDays: 365,
+    commandPaletteShortcutUseCount: 0,
     commandUsage: {},
   },
   paths: {
@@ -106,6 +110,8 @@ export const CONFIG = {
     social: "assets/socials/",
   },
 };
+
+export const COMMAND_PALETTE_SHORTCUT_USE_LIMIT = 3;
 
 export const QUOTES = [
   {

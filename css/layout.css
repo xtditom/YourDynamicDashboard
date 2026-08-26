@@ -80,6 +80,16 @@ body:not(.loaded) {
     top: 8rem;
     height: calc(100% - 8rem);
   }
+
+  body.shortcuts-at-left:not(.zen-mode) .layout-container {
+    width: calc(100% - 7rem);
+    margin-left: 7rem;
+  }
+
+  body.shortcuts-at-right:not(.zen-mode) .layout-container {
+    width: calc(100% - 7rem);
+    margin-right: 7rem;
+  }
 }
 
 @media (max-width: 600px), (max-height: 700px) {
@@ -91,6 +101,16 @@ body:not(.loaded) {
     position: relative;
     top: 13rem;
     height: calc(100% - 13rem);
+  }
+
+  body.shortcuts-at-left:not(.zen-mode) .layout-container {
+    width: calc(100% - 6rem);
+    margin-left: 6rem;
+  }
+
+  body.shortcuts-at-right:not(.zen-mode) .layout-container {
+    width: calc(100% - 6rem);
+    margin-right: 6rem;
   }
 }
 

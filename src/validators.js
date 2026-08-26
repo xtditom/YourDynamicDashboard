@@ -1,7 +1,8 @@
 export const MAX_SHORTCUTS = 20;
+export const MIN_SHORTCUTS = 5;
 export const MAX_SHORTCUT_NAME_LENGTH = 35;
 export const MAX_SHORTCUT_URL_LENGTH = 2048;
-export const MAX_CUSTOM_TOOLS = 50;
+export const MAX_CUSTOM_TOOLS = 8;
 export const MAX_CUSTOM_TOOL_NAME_LENGTH = 20;
 export const MAX_CUSTOM_TOOL_URL_LENGTH = 500;
 export const MAX_CUSTOM_TOOL_ICON_LENGTH = 1_000_000;

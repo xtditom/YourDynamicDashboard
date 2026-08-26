@@ -40,6 +40,12 @@ const CUSTOM_SEARCH_IMAGE_TYPES = new Set([
   "image/svg+xml",
   "image/webp",
 ]);
+const GOOGLE_PROVIDER_ID = "google";
+const GOOGLE_AI_ICON = "google-ai.png";
+const GOOGLE_AI_QUERY_PARAMETER = "udm";
+const GOOGLE_AI_QUERY_VALUE = "50";
+const GOOGLE_AI_HINT_DURATION_MS = 8 * 1000;
+const GOOGLE_AI_HINT_MAX_SHOWS = 5;
 
 export class Search {
   constructor() {
@@ -70,6 +76,8 @@ export class Search {
     this._dropdownCloseTimer = null;
     this._quoteRestoreTimer = null;
     this._historyExpiryTimer = null;
+    this._googleAiHintTimer = null;
+    this._googleAiHintElement = null;
     this._historyModalClose = null;
     this._historyPreviousFocus = null;
     this.recognition = null;
@@ -161,6 +169,10 @@ export class Search {
     state.subscribe((key) => {
       if (key === "linkTargets") this.updateButtons();
       if (key === "hideVoiceSearch") this.updateVoiceButton();
+      if (key === "googleAiSearchActive") {
+        this.updateUI();
+        this.updateGoogleAiBadge();
+      }
       if (key === "widgetControl") this.syncTypewriterVisibility();
       if (key === "disableAnimations") {
         if (this._isSearchOverlayOpen()) {
@@ -1095,6 +1107,7 @@ export class Search {
     }
     if (!provider) return;
 
+    this._markGoogleAiSearchUsed(provider);
     this.saveSearch(query, engineId);
 
     const url = this.buildProviderUrl(provider, query);
@@ -1130,6 +1143,12 @@ export class Search {
         }
         url.searchParams.set(param, query);
       });
+      if (
+        provider.id === GOOGLE_PROVIDER_ID &&
+        state.get("googleAiSearchActive") === true
+      ) {
+        url.searchParams.set(GOOGLE_AI_QUERY_PARAMETER, GOOGLE_AI_QUERY_VALUE);
+      }
       return url.href;
     } catch {
       const queryParam = provider.queryParam || provider.queryParams?.[0] || "q";
@@ -1210,6 +1229,65 @@ export class Search {
   _getProviderIconUrl(icon) {
     if (!icon) return `${CONFIG.paths.search}google.png`;
     return icon.includes("/") ? icon : `${CONFIG.paths.search}${icon}`;
+  }
+
+  _isGoogleAiActive() {
+    return state.get("googleAiSearchActive") === true;
+  }
+
+  _markGoogleAiSearchUsed(provider = null) {
+    const selectedProvider =
+      provider || this.getProvider(this.current.id, this.current.type);
+    if (
+      selectedProvider?.id !== GOOGLE_PROVIDER_ID ||
+      !this._isGoogleAiActive() ||
+      state.get("googleAiSearchUsed") === true
+    ) {
+      return;
+    }
+    state.set("googleAiSearchUsed", true);
+  }
+
+  _getProviderIconAsset(provider, type = "engines") {
+    if (
+      provider?.id === GOOGLE_PROVIDER_ID &&
+      type === "engines" &&
+      this._isGoogleAiActive()
+    ) {
+      return GOOGLE_AI_ICON;
+    }
+    return provider?.icon;
+  }
+
+  updateGoogleAiBadge() {
+    const active = this._isGoogleAiActive();
+    this.els.dropdown
+      ?.querySelectorAll("[data-google-ai-badge]")
+      .forEach((badge) => {
+        badge.classList.toggle("is-active", active);
+        badge.setAttribute("aria-pressed", String(active));
+        badge.setAttribute(
+          "aria-label",
+          active ? "Disable Google AI Search" : "Enable Google AI Search",
+        );
+        badge.title = active
+          ? "Google AI Search enabled"
+          : "Enable Google AI Search";
+      });
+  }
+
+  toggleGoogleAiSearch(event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const nextActive = !this._isGoogleAiActive();
+    if (
+      nextActive &&
+      (this.current.id !== GOOGLE_PROVIDER_ID || this.current.type !== "engines")
+    ) {
+      this.setProvider(GOOGLE_PROVIDER_ID, "engines");
+    }
+    state.set("googleAiSearchActive", nextActive);
   }
 
   // --- SECTION: VOICE SEARCH ---
@@ -1573,6 +1651,23 @@ export class Search {
       div.appendChild(img);
       div.appendChild(span);
 
+      if (p.id === GOOGLE_PROVIDER_ID && type === "engines") {
+        const aiBadge = document.createElement("button");
+        aiBadge.type = "button";
+        aiBadge.className = "google-ai-badge";
+        aiBadge.dataset.googleAiBadge = "true";
+        aiBadge.textContent = "AI";
+        aiBadge.addEventListener("click", (event) =>
+          this.toggleGoogleAiSearch(event),
+        );
+        aiBadge.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.stopPropagation();
+          }
+        });
+        div.appendChild(aiBadge);
+      }
+
       if (p.isCustom) {
         div.classList.add("custom-search-provider-item");
         if (this.customSearchEditMode) {
@@ -1692,6 +1787,7 @@ export class Search {
     SEARCH_PROVIDERS.platforms.forEach((p) =>
       this.els.platformList.appendChild(createItem(p, "platforms")),
     );
+    this.updateGoogleAiBadge();
   }
 
   createCustomSearchEngineId() {
@@ -2280,8 +2376,21 @@ export class Search {
   updateUI() {
     const provider = this.getProvider(this.current.id, this.current.type);
     if (provider) {
-      this.els.providerIcon.src = this._getProviderIconUrl(provider.icon);
-      this.els.providerIcon.alt = provider.name;
+      const googleAiActive =
+        provider.id === GOOGLE_PROVIDER_ID &&
+        this.current.type === "engines" &&
+        this._isGoogleAiActive();
+      this.els.providerIcon.src = this._getProviderIconUrl(
+        this._getProviderIconAsset(provider, this.current.type),
+      );
+      this.els.providerIcon.alt = googleAiActive
+        ? `${provider.name} AI Search`
+        : provider.name;
+      this.els.providerBtn.classList.toggle("google-ai-current", googleAiActive);
+      this.els.providerBtn.setAttribute(
+        "data-google-ai-active",
+        String(googleAiActive),
+      );
     }
   }
 
@@ -2351,12 +2460,66 @@ export class Search {
       this.els.dropdown.style.removeProperty("color");
     }
 
+    this.showGoogleAiHint();
+
     import("../utils.js").then((utils) => {
       utils.completeDefaultTask("dt-4");
     });
   }
 
+  showGoogleAiHint() {
+    if (state.get("googleAiSearchUsed") === true) return;
+
+    const shownCount = Math.max(
+      0,
+      Number(state.get("googleAiSearchHintShownCount")) || 0,
+    );
+    if (shownCount >= GOOGLE_AI_HINT_MAX_SHOWS) return;
+    if (!state.set("googleAiSearchHintShownCount", shownCount + 1)) return;
+
+    this.hideGoogleAiHint(true);
+
+    const hint = document.createElement("div");
+    hint.className = "apps-edit-hint google-ai-search-hint";
+    hint.setAttribute("role", "status");
+    hint.setAttribute("aria-live", "polite");
+    hint.textContent = this._isGoogleAiActive()
+      ? "Google AI Search is active. Click the AI badge to switch it off."
+      : "Click the AI badge beside Google to search directly with Google AI.";
+
+    const timer = document.createElement("div");
+    timer.className = "apps-edit-hint-timer google-ai-search-hint-timer";
+    timer.setAttribute("aria-hidden", "true");
+    hint.style.setProperty(
+      "--apps-hint-duration",
+      `${GOOGLE_AI_HINT_DURATION_MS}ms`,
+    );
+    hint.appendChild(timer);
+    document.body.appendChild(hint);
+    this._googleAiHintElement = hint;
+
+    window.requestAnimationFrame(() => hint.classList.add("is-visible"));
+    this._googleAiHintTimer = window.setTimeout(
+      () => this.hideGoogleAiHint(),
+      GOOGLE_AI_HINT_DURATION_MS,
+    );
+  }
+
+  hideGoogleAiHint(immediate = false) {
+    clearTimeout(this._googleAiHintTimer);
+    this._googleAiHintTimer = null;
+    const hint = this._googleAiHintElement;
+    if (!hint) return;
+
+    this._googleAiHintElement = null;
+    hint.classList.remove("is-visible");
+    const remove = () => hint.remove();
+    if (immediate) remove();
+    else window.setTimeout(remove, 180);
+  }
+
   closeDropdown() {
+    this.hideGoogleAiHint(true);
     const wasEditing = this.customSearchEditMode;
     this.customSearchEditMode = false;
     if (wasEditing) this.renderProviderDropdown();
@@ -2408,6 +2571,7 @@ export class Search {
     const provider = this.getProvider(this.current.id, this.current.type);
     if (!provider) return;
 
+    this._markGoogleAiSearchUsed(provider);
     this.saveSearch(query, this.current.id);
     const url = this.buildProviderUrl(provider, query);
 
