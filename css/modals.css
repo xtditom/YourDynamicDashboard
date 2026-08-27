@@ -867,8 +867,10 @@ body.transparency-active .ydd-custom-modal-overlay {
 
 html.zen-mode-preload .corner-button,
 html.zen-mode-preload #shortcuts-container,
+html.zen-mode-preload #news-feed-container,
 body.zen-mode .corner-button,
-body.zen-mode #shortcuts-container {
+body.zen-mode #shortcuts-container,
+body.zen-mode #news-feed-container {
   opacity: 0 !important;
   pointer-events: none !important;
   transition: opacity 0.5s ease-in-out;

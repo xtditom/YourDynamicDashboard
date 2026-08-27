@@ -170,7 +170,7 @@ Do not commit generated build output, browser profiles, local screenshots, or pr
 
 ## License and privacy
 
-YDD is licensed under GPLv3; see [LICENSE](LICENSE). The project is designed for local-first use. Weather uses Open-Meteo, optional online search suggestions use DuckDuckGo only after explicit opt-in, shortcut icons may use Google’s favicon service, and the dashboard typography uses Google Fonts. Voice recognition is provided by the browser’s Web Speech API (with processing location determined by the browser). See [privacy-policy.html](https://ditom.me/YourDynamicDashboard/privacy-policy.html) for the user-facing policy.
+YDD is licensed under GPLv3; see [LICENSE](LICENSE). The project is designed for local-first use. Weather uses Open-Meteo, optional online search suggestions use DuckDuckGo only after explicit opt-in, and optional News Feeds fetch RSS and story images directly from user-selected publishers after explicit opt-in. News metadata is cached locally and no news relay or account is used. Shortcut icons may use Google’s favicon service, and the dashboard typography uses Google Fonts. Voice recognition is provided by the browser’s Web Speech API (with processing location determined by the browser). See [privacy-policy.html](https://ditom.me/YourDynamicDashboard/privacy-policy.html) for the user-facing policy.
 
 ## Stable-release references
 

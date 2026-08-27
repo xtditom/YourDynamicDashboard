@@ -523,7 +523,7 @@
           <div class="setting-row">
             <div class="label">
               <span class="mini-search-suggestion-label">Search Suggestions</span>
-              <span class="fs-new-sticker mini-new-sticker" aria-label="New">
+              <span id="search-suggestion-new-sticker" class="fs-new-sticker mini-new-sticker" aria-label="New">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
                     <title>New</title>
                     <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
@@ -536,6 +536,29 @@
               <option value="history-only">History Only</option>
               <option value="history-online">History + Online</option>
             </select>
+          </div>
+          <div class="setting-row mini-news-row">
+            <div class="label">
+              <span class="mini-news-label">
+                <span>News Feeds</span>
+                <span id="news-feeds-new-sticker" class="fs-new-sticker mini-new-sticker" aria-label="New">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
+                    <title>New</title>
+                    <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+                    <text x="39" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">NEW</text>
+                  </svg>
+                </span>
+              </span>
+              <small>Enable or configure news feeds.</small>
+            </div>
+            <div class="mini-news-controls">
+              <label class="toggle-switch" title="Enable news feeds">
+                <input type="checkbox" id="news-enabled-toggle" aria-label="Enable news feeds" />
+                <span class="slider"></span>
+              </label>
+              <button id="configure-news-btn" class="settings-button">Configure</button>
+            </div>
           </div>
           <div class="setting-row">
             <div class="label">
@@ -640,9 +663,9 @@
           </div>
           <div class="setting-row">
             <div class="label">
-              <span>Custom Background</span><small>Upload your custom wallpaper.</small>
+              <span>Custom BG</span><small>Upload your custom wallpaper.</small>
             </div>
-            <div style="display: flex; gap: 8px">
+            <div class="mini-bg-actions mini-custom-bg-actions">
               <button id="upload-bg-button" class="settings-button" aria-label="Upload custom background">Upload</button>
               <input type="file" id="bg-file-input" accept="image/*" class="hidden" aria-label="Choose background image" />
               <button id="remove-bg-button" class="settings-button hidden" aria-label="Remove custom background">Remove</button>
@@ -651,7 +674,7 @@
           <div class="setting-row">
             <div class="label">
               <span class="mini-random-bg-label">
-                <span>Random Background</span>
+                <span>Random BG</span>
                 <span id="random-bg-updated-sticker" class="fs-updated-sticker" aria-label="Updated">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
                     <title>Updated</title>
@@ -663,17 +686,9 @@
               </span>
               <small>Picsum wallpaper features.</small>
             </div>
-            <div style="display: flex; gap: 8px">
+            <div class="mini-bg-actions mini-random-bg-actions">
               <button id="random-bg-rnd-btn" class="settings-button" title="Get new random wallpaper" aria-label="Get a new random background">New BG</button>
-              <select id="random-bg-schedule-select" class="settings-dropdown hidden" aria-label="Random background schedule" title="Choose when the background changes">
-                <option value="refresh">Every refresh</option>
-                <option value="30s">Every 30 seconds</option>
-                <option value="1m" selected>Every minute</option>
-                <option value="1h">Every hour</option>
-                <option value="6h">Every 6 hours</option>
-                <option value="day">Every day</option>
-              </select>
-              <button id="random-bg-freeze-btn" class="settings-button" title="Freeze current wallpaper" aria-label="Freeze current background">Freeze</button>
+              <button id="random-bg-freeze-btn" class="settings-button hidden" title="Freeze random background" aria-label="Freeze random background">Freeze</button>
             </div>
           </div>
           <div class="setting-row">
@@ -966,6 +981,7 @@
       </div>
     </div>
 
+    <section id="news-feed-container" class="hidden" aria-label="News feeds"></section>
     <div id="shortcuts-container"></div>
 
     <script type="module" src="src/main.js"></script>

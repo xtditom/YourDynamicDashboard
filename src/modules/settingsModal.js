@@ -6,7 +6,15 @@ import {
   makeKeyboardInteractive,
   showCustomModal,
 } from "../utils.js";
-import { CONFIG, DEFAULT_KEY_MAP } from "../config.js";
+import {
+  CONFIG,
+  DEFAULT_KEY_MAP,
+  NEWS_CATEGORIES,
+  NEWS_CARD_COUNTS,
+  NEWS_HEADLINE_OPACITIES,
+  NEWS_PROVIDERS,
+  NEWS_REFRESH_INTERVALS,
+} from "../config.js";
 import {
   getBindableKey,
   validateImageBlob,
@@ -36,6 +44,19 @@ const KEY_LABELS = Object.freeze({
   zen: "Key for Zen Mode",
   voice: "Key for Voice Search",
 });
+
+function createNewsCheckmark() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "fs-news-choice-check");
+  svg.setAttribute("viewBox", "0 0 20 20");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("class", "fs-news-choice-check-mark");
+  path.setAttribute("d", "M3.5 10.5 8 15 16.5 5.5");
+  svg.appendChild(path);
+  return svg;
+}
 
 const FULL_NORMAL_THEME_ORDER = Object.freeze([
   "default-light",
@@ -93,6 +114,9 @@ export class FullSettingsModal {
     this._searchSuggestionProxyDirty = false;
     this._searchSuggestionRelayValidationPending = false;
     this._searchSuggestionValidationId = 0;
+    this._newsDraftDirty = false;
+    this._newsDisplayDraftDirty = false;
+    this._newsRefreshBusy = false;
 
     window.__fullSettingsModalInstance = this;
 
@@ -137,6 +161,13 @@ export class FullSettingsModal {
         <text x="39" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">NEW</text>
       </svg>`,
     });
+  }
+
+  _dismissNewsBadge() {
+    if (state.get("newsBadgeDismissed") !== true) {
+      state.set("newsBadgeDismissed", true);
+    }
+    this.els.fsNewsNewSticker?.setAttribute("hidden", "");
   }
 
   _row(label, desc, control) {
@@ -252,6 +283,7 @@ export class FullSettingsModal {
     const tabDefs = [
       { id: "fs-tab-general", label: "General" },
       { id: "fs-tab-appearance", label: "Appearance" },
+      { id: "fs-tab-news", label: "News" },
       { id: "fs-tab-shortcuts", label: "Shortcuts" },
       { id: "fs-tab-data", label: "Extras" },
     ];
@@ -274,11 +306,12 @@ export class FullSettingsModal {
     this.els.panes = [];
 
     const generalPane = this.buildGeneralPane();
+    const newsPane = this.buildNewsPane();
     const appearancePane = this.buildAppearancePane();
     const shortcutsPane = this.buildShortcutsPane();
     const dataPane = this.buildDataPane();
 
-    [generalPane, appearancePane, shortcutsPane, dataPane].forEach(
+    [generalPane, appearancePane, newsPane, shortcutsPane, dataPane].forEach(
       (pane, i) => {
         pane.id = tabDefs[i].id;
         pane.classList.add("fs-pane");
@@ -291,8 +324,7 @@ export class FullSettingsModal {
     // Footer
     const footer = this._el("div", { className: "fs-footer" });
     footer.innerHTML = `<p>&copy; Ditom Baroi Antu <span class="fs-copyright-year">2025</span></p>
-<p><strong>YourDynamicDashboard</strong> V3.0.0</p>
-<p>Weather data provided by <a href="https://open-meteo.com/" target="_blank">Open-Meteo.com</a></p>`;
+<p><strong>YourDynamicDashboard</strong> V3.0.0</p>`;
     const yearSpan = footer.querySelector(".fs-copyright-year");
     const year = new Date().getFullYear();
     if (year > 2025) yearSpan.textContent = `2025 - ${year}`;
@@ -1435,6 +1467,10 @@ export class FullSettingsModal {
 
   subscribeState() {
     state.subscribe((key, value) => {
+      if (key === "newsEnabled" && value === true) this._dismissNewsBadge();
+      if (key === "newsBadgeDismissed" && this.els.fsNewsNewSticker) {
+        this.els.fsNewsNewSticker.hidden = value === true;
+      }
       if (!this.isOpen) return;
       this._syncToggle(key, value);
       if (key === "keyMap") {
@@ -1453,6 +1489,21 @@ export class FullSettingsModal {
       }
       if (key === "userSavedThemes") {
         this._renderSavedThemes();
+      }
+      if ([
+        "newsEnabled",
+        "newsProviderIds",
+        "newsCategoryIds",
+        "newsShowHeadlines",
+        "newsHeadlineOpacity",
+        "newsTotalCards",
+        "newsRefreshIntervalMinutes",
+        "newsPosition",
+        "newsCache",
+        "shortcutsPosition",
+        "clockFormat",
+      ].includes(key)) {
+        this._populateNewsSettings();
       }
       if (
         key === "gradientModeActive" ||
@@ -1577,6 +1628,7 @@ export class FullSettingsModal {
     this._renderShortcutEditor();
     this._renderKeyEditor();
     this._renderLinkDirectionEditor();
+    this._populateNewsSettings();
     this._updateBgState();
     this._updateColorControlsState();
     this._updateControlAvailability();
@@ -1640,6 +1692,338 @@ export class FullSettingsModal {
     if (shouldValidateRelay) {
       void this._validateCustomSuggestionRelayAfterClose(relayToValidate, validationId);
     }
+  }
+
+  openTab(tabId) {
+    this.open();
+    const index = this.els.tabBtns.findIndex((button) => button.dataset.tab === tabId);
+    if (index < 0) return;
+    this.els.tabBtns.forEach((button, buttonIndex) => {
+      const active = buttonIndex === index;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", String(active));
+      this.els.panes[buttonIndex]?.classList.toggle("active", active);
+    });
+    this.els.tabBtns[index].focus();
+  }
+
+  buildNewsPane() {
+    const pane = this._el("div", { className: "fs-news-pane" });
+    if (state.get("newsEnabled") === true) this._dismissNewsBadge();
+    const enabledToggle = this._toggle("fs-news-enabled-toggle");
+    this.els.fsNewsEnabled = enabledToggle.input;
+    const refreshButton = this._el("button", {
+      className: "settings-button fs-news-refresh-button",
+      textContent: "Refresh",
+      type: "button",
+    });
+    refreshButton.disabled = true;
+    refreshButton.setAttribute("aria-label", "Refresh News");
+    this.els.fsNewsRefresh = refreshButton;
+    this.els.fsNewsStatus = this._el("span", {
+      className: "fs-news-header-status",
+      role: "status",
+    });
+    const refreshRow = this._row(
+      "Refresh News",
+      "Only usable if provider or news type is modified.",
+      refreshButton,
+    );
+    refreshRow.classList.add("fs-news-refresh-row");
+    const newsSection = this._section("News Feeds", [
+      this._row(
+        "Enable News Feeds",
+        "Off by default. Connects only to publishers you select.",
+        enabledToggle.wrapper,
+      ),
+      refreshRow,
+    ]);
+    const newsSectionTitle = newsSection.querySelector(".fs-section-title");
+    newsSectionTitle.classList.add("fs-news-section-title");
+    newsSectionTitle.textContent = "";
+    const newsTitleLabel = this._el("span", { className: "fs-news-title-label" });
+    const newsBadge = this._newSticker();
+    newsBadge.hidden = state.get("newsBadgeDismissed") === true;
+    this.els.fsNewsNewSticker = newsBadge;
+    newsTitleLabel.append(this._el("span", { textContent: "News Feeds" }), newsBadge);
+    newsSectionTitle.append(newsTitleLabel, this.els.fsNewsStatus);
+    pane.appendChild(newsSection);
+
+    const providerGrid = this._el("div", { className: "fs-news-choice-grid" });
+    this.els.fsNewsProviders = NEWS_PROVIDERS.map((provider) => {
+      const input = this._el("input", { type: "checkbox", value: provider.id });
+      const label = this._el("label", { className: "fs-news-choice" }, [input, createNewsCheckmark()]);
+      label.appendChild(this._el("span", { textContent: provider.name }));
+      providerGrid.appendChild(label);
+      return input;
+    });
+    const providersSection = this._section("Providers", [
+      this._el("p", { className: "fs-news-help", textContent: "Select one or more privacy-first direct RSS sources." }),
+      providerGrid,
+    ]);
+    providersSection.classList.add("fs-news-provider-section");
+    pane.appendChild(providersSection);
+
+    const categoryGrid = this._el("div", { className: "fs-news-choice-grid" });
+    this.els.fsNewsCategories = NEWS_CATEGORIES.map((category) => {
+      const input = this._el("input", { type: "checkbox", value: category.id });
+      const label = this._el("label", { className: "fs-news-choice" }, [input, createNewsCheckmark()]);
+      label.appendChild(this._el("span", { textContent: category.label }));
+      categoryGrid.appendChild(label);
+      return input;
+    });
+    const categoriesSection = this._section("News Types", [
+      this._el("p", {
+        className: "fs-news-help",
+        textContent: "Only news types supported by at least one selected provider can be selected.",
+      }),
+      categoryGrid,
+    ]);
+    categoriesSection.classList.add("fs-news-types-section");
+    pane.appendChild(categoriesSection);
+
+    const showHeadlinesToggle = this._toggle("fs-news-show-headlines-toggle");
+    const headlineOpacity = this._dropdown(
+      "fs-news-headline-opacity",
+      NEWS_HEADLINE_OPACITIES.map((opacity) => [String(opacity), `${opacity}%`]),
+    );
+    const totalCards = this._dropdown(
+      "fs-news-total-cards",
+      NEWS_CARD_COUNTS.map((count) => [String(count), `${count} cards`]),
+    );
+    this.els.fsNewsShowHeadlines = showHeadlinesToggle.input;
+    this.els.fsNewsHeadlineOpacity = headlineOpacity;
+    this.els.fsNewsTotalCards = totalCards;
+    const headlineOpacityRow = this._row(
+      "Headline Opacity",
+      "Opacity before hovering over a card.",
+      headlineOpacity,
+    );
+    headlineOpacityRow.classList.add("fs-news-headline-opacity-row");
+    this.els.fsNewsHeadlineOpacityRow = headlineOpacityRow;
+    const displaySection = this._section("Card Display", [
+      this._row(
+        "Show Headlines",
+        "Show story headlines over the news images.",
+        showHeadlinesToggle.wrapper,
+      ),
+      headlineOpacityRow,
+      this._row(
+        "Total Cards",
+        "Choose how many stories appear on the dashboard.",
+        totalCards,
+      ),
+    ]);
+    displaySection.classList.add("fs-news-display-section");
+    pane.appendChild(displaySection);
+
+    const interval = this._dropdown(
+      "fs-news-refresh-interval",
+      NEWS_REFRESH_INTERVALS.map((minutes) => [String(minutes), `${minutes} minutes`]),
+    );
+    const position = this._dropdown("fs-news-position", [["top", "Top"], ["bottom", "Bottom"]]);
+    this.els.fsNewsInterval = interval;
+    this.els.fsNewsPosition = position;
+    this.els.fsNewsPositionHelp = this._el("small", { className: "fs-news-position-help" });
+    const positionControl = this._el("div", { className: "fs-news-position-control" }, [position, this.els.fsNewsPositionHelp]);
+    const updatesSection = this._section("Updates & Position", [
+      this._row("Automatic Update", "Choose how often news is automatically refreshed.", interval),
+      this._row("News Feed Position", "Used when shortcuts are left, right, or hidden.", positionControl),
+    ]);
+    updatesSection.classList.add("fs-news-updates-section");
+    pane.appendChild(updatesSection);
+
+    pane.appendChild(this._el("p", {
+      className: "fs-news-privacy fs-news-footer",
+      textContent: "YDD fetches RSS directly from selected publishers and stores only feed metadata locally. Story images load from publisher servers. No relay, account, tracking profile, or custom feed is used.",
+    }));
+
+    const applyNewsDraft = async (
+      refreshReason = "configuration",
+      forceRefresh = false,
+      refreshOnChange = true,
+    ) => {
+      const manager = window.__newsFeedInstance;
+      return manager?.applyConfiguration({
+        enabled: enabledToggle.input.checked,
+        providerIds: this.els.fsNewsProviders.filter((input) => input.checked).map((input) => input.value),
+        categoryIds: this.els.fsNewsCategories.filter((input) => input.checked).map((input) => input.value),
+        showHeadlines: this.els.fsNewsShowHeadlines.checked,
+        headlineOpacity: Number(this.els.fsNewsHeadlineOpacity.value),
+        totalCards: Number(this.els.fsNewsTotalCards.value),
+        intervalMinutes: Number(interval.value),
+        position: position.value,
+        refreshReason,
+        forceRefresh,
+        refreshOnChange,
+      });
+    };
+    const applyLiveNewsDraft = async () => {
+      await applyNewsDraft("configuration", false, false);
+      this._populateNewsSettings();
+    };
+    const applyLiveNewsDraftFromChange = (event) => {
+      this._updateNewsCategoryAvailability(this.els.fsNewsProviders.includes(event?.target));
+      void applyLiveNewsDraft();
+    };
+    this.els.fsNewsProviders.forEach((input) => input.addEventListener("change", applyLiveNewsDraftFromChange));
+    this.els.fsNewsCategories.forEach((input) => input.addEventListener("change", applyLiveNewsDraftFromChange));
+    this.els.fsNewsShowHeadlines.addEventListener("change", applyLiveNewsDraftFromChange);
+    this.els.fsNewsHeadlineOpacity.addEventListener("change", applyLiveNewsDraftFromChange);
+    this.els.fsNewsTotalCards.addEventListener("change", applyLiveNewsDraftFromChange);
+    interval.addEventListener("change", applyLiveNewsDraftFromChange);
+    position.addEventListener("change", applyLiveNewsDraftFromChange);
+    const markNewsDisplayDraftDirty = () => { this._newsDisplayDraftDirty = true; };
+    this.els.fsNewsShowHeadlines.addEventListener("change", markNewsDisplayDraftDirty);
+    this.els.fsNewsHeadlineOpacity.addEventListener("change", markNewsDisplayDraftDirty);
+    enabledToggle.input.addEventListener("change", async () => {
+      enabledToggle.input.disabled = true;
+      const success = await applyNewsDraft();
+      enabledToggle.input.disabled = false;
+      if (!success) enabledToggle.input.checked = state.get("newsEnabled") === true;
+      this._populateNewsSettings(success ? "News settings saved." : "");
+    });
+    refreshButton.addEventListener("click", async () => {
+      if (this._newsRefreshBusy) return;
+      this._newsRefreshBusy = true;
+      refreshButton.disabled = true;
+      try {
+        const success = await applyNewsDraft("manual", true, true);
+        if (success) this._populateNewsSettings("News refreshed with the selected providers and types.");
+        else this._populateNewsSettings();
+      } finally {
+        this._newsRefreshBusy = false;
+        this._updateNewsRefreshAvailability();
+      }
+    });
+    window.addEventListener("ydd-news-status", (event) => {
+      if (this.isOpen) this._populateNewsSettings(event.detail?.message || "");
+    });
+    return pane;
+  }
+
+  _newsSelectionKey(providerInputs, categoryInputs) {
+    return JSON.stringify({
+      providers: providerInputs.filter((input) => input.checked).map((input) => input.value).sort(),
+      categories: categoryInputs.filter((input) => input.checked).map((input) => input.value).sort(),
+    });
+  }
+
+  _updateNewsCategoryAvailability(providerChanged = false) {
+    if (!this.els.fsNewsProviders || !this.els.fsNewsCategories) return;
+    const enabled = state.get("newsEnabled") === true;
+    const selectedProviderIds = new Set(
+      this.els.fsNewsProviders
+        .filter((input) => input.checked)
+        .map((input) => input.value),
+    );
+    const supportedCategoryIds = new Set(
+      NEWS_CATEGORIES
+        .filter((category) => NEWS_PROVIDERS.some(
+          (provider) => selectedProviderIds.has(provider.id) && provider.feeds[category.id],
+        ))
+        .map((category) => category.id),
+    );
+    const hadSelectedCategory = this.els.fsNewsCategories.some((input) => input.checked);
+
+    this.els.fsNewsCategories.forEach((input) => {
+      const supported = supportedCategoryIds.has(input.value);
+      if (!supported) input.checked = false;
+      input.disabled = !enabled || !supported;
+      input.closest(".fs-news-choice")?.classList.toggle("is-unavailable", enabled && !supported);
+    });
+
+    if (enabled && providerChanged && hadSelectedCategory && !this.els.fsNewsCategories.some((input) => input.checked)) {
+      const firstSupported = this.els.fsNewsCategories.find((input) => supportedCategoryIds.has(input.value));
+      if (firstSupported) firstSupported.checked = true;
+    }
+  }
+
+  _updateNewsRefreshAvailability() {
+    if (!this.els.fsNewsRefresh || !this.els.fsNewsProviders || !this.els.fsNewsCategories) return;
+    const cache = state.get("newsCache") || CONFIG.defaults.newsCache;
+    const draftKey = this._newsSelectionKey(this.els.fsNewsProviders, this.els.fsNewsCategories);
+    this._newsDraftDirty = draftKey !== (cache.selectionKey || "");
+    const enabled = state.get("newsEnabled") === true;
+    this.els.fsNewsEnabled.closest(".fs-news-pane")?.classList.toggle("is-disabled", !enabled);
+    this.els.fsNewsRefresh.disabled = !enabled || !this._newsDraftDirty || this._newsRefreshBusy;
+    this.els.fsNewsRefresh.title = !enabled
+      ? "Enable News Feeds first"
+      : !this._newsDraftDirty
+        ? "Modify a provider or news type first"
+        : "Refresh News";
+    this.els.fsNewsRefresh.setAttribute("aria-label", "Refresh News");
+  }
+
+  _formatNewsTimestamp(timestamp) {
+    if (!timestamp) return "Never";
+    const date = new Date(timestamp);
+    const datePart = [
+      String(date.getDate()).padStart(2, "0"),
+      String(date.getMonth() + 1).padStart(2, "0"),
+      String(date.getFullYear()).slice(-2),
+    ].join("/");
+    const timePart = new Intl.DateTimeFormat(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: state.get("clockFormat") === "12",
+    }).format(date);
+    return `${datePart} | ${timePart}`;
+  }
+
+  _populateNewsSettings(message = "") {
+    if (!this.els.fsNewsEnabled) return;
+    this.els.fsNewsEnabled.checked = state.get("newsEnabled") === true;
+    const providerIds = state.get("newsProviderIds") || [];
+    const categoryIds = state.get("newsCategoryIds") || [];
+    const savedShowHeadlines = state.get("newsShowHeadlines") !== false;
+    const savedHeadlineOpacity = Number(state.get("newsHeadlineOpacity") ?? 50);
+    const savedTotalCards = NEWS_CARD_COUNTS.includes(Number(state.get("newsTotalCards")))
+      ? Number(state.get("newsTotalCards"))
+      : CONFIG.defaults.newsTotalCards;
+    const enabled = state.get("newsEnabled") === true;
+    this.els.fsNewsProviders.forEach((input) => { input.checked = providerIds.includes(input.value); });
+    this.els.fsNewsCategories.forEach((input) => { input.checked = categoryIds.includes(input.value); });
+    [
+      ...this.els.fsNewsProviders,
+      ...this.els.fsNewsCategories,
+      this.els.fsNewsShowHeadlines,
+      this.els.fsNewsHeadlineOpacity,
+      this.els.fsNewsTotalCards,
+      this.els.fsNewsInterval,
+    ].forEach((control) => { control.disabled = !enabled; });
+    this._updateNewsCategoryAvailability();
+    const displayDraftMatchesState =
+      this.els.fsNewsShowHeadlines.checked === savedShowHeadlines &&
+      Number(this.els.fsNewsHeadlineOpacity.value) === savedHeadlineOpacity;
+    if (!this._newsDisplayDraftDirty || displayDraftMatchesState) {
+      this.els.fsNewsShowHeadlines.checked = savedShowHeadlines;
+      this.els.fsNewsHeadlineOpacity.value = String(savedHeadlineOpacity);
+      this._newsDisplayDraftDirty = false;
+    }
+    const showHeadlines = this.els.fsNewsShowHeadlines.checked;
+    this.els.fsNewsHeadlineOpacity.disabled = !enabled || !showHeadlines;
+    this.els.fsNewsHeadlineOpacityRow?.classList.toggle(
+      "is-disabled",
+      enabled && !showHeadlines,
+    );
+    this.els.fsNewsInterval.value = String(state.get("newsRefreshIntervalMinutes") || 2);
+    this.els.fsNewsTotalCards.value = String(savedTotalCards);
+    this.els.fsNewsPosition.value = state.get("newsPosition") || "bottom";
+    const shortcutsPosition = state.get("shortcutsPosition") || "bottom";
+    const forced = shortcutsPosition === "top" || shortcutsPosition === "bottom";
+    this.els.fsNewsPosition.disabled = !enabled || forced;
+    this.els.fsNewsPositionHelp.textContent = forced
+      ? `Currently placed ${shortcutsPosition === "top" ? "at the bottom" : "at the top"} to stay opposite shortcuts.`
+      : "Choose the top or bottom edge.";
+    const cache = state.get("newsCache") || CONFIG.defaults.newsCache;
+    this._updateNewsRefreshAvailability();
+    this.els.fsNewsStatus.textContent = enabled
+      ? `Last updated: ${this._formatNewsTimestamp(cache.fetchedAt)}`
+      : "";
+    this.els.fsNewsStatus.title = enabled
+      ? message || this.els.fsNewsStatus.textContent
+      : "";
   }
 
   _saveSearchSuggestionProxy() {
@@ -2638,6 +3022,7 @@ export class FullSettingsModal {
       apps: "Google Apps",
       shortcuts: "Shortcuts",
       searchOpen: "Search Open Button",
+      news: "News Stories",
     };
     const defaults = CONFIG.defaults.linkTargets;
 

@@ -8,6 +8,14 @@
   "short_name": "YDD",
   "permissions": ["geolocation"],
   "optional_permissions": ["topSites"],
+  "optional_host_permissions": [
+    "https://feeds.bbci.co.uk/*",
+    "https://www.theguardian.com/*",
+    "https://rss.dw.com/*",
+    "https://www.euronews.com/*",
+    "https://www.voanews.com/*",
+    "https://feeds.npr.org/*"
+  ],
   "chrome_url_overrides": {
     "newtab": "index.html"
   },

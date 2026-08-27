@@ -1,6 +1,11 @@
 import {
   CONFIG,
   DEFAULT_KEY_MAP,
+  NEWS_CATEGORIES,
+  NEWS_CARD_COUNTS,
+  NEWS_HEADLINE_OPACITIES,
+  NEWS_PROVIDERS,
+  NEWS_REFRESH_INTERVALS,
   SEARCH_PROVIDERS,
   SEARCH_SUGGESTION_MODES,
 } from "./config.js";
@@ -45,6 +50,96 @@ class StateManager {
   }
 
   normalizeValue(key, value) {
+    if (key === "newsProviderIds") {
+      if (!Array.isArray(value)) throw new TypeError("Invalid news providers");
+      const allowed = new Set(NEWS_PROVIDERS.map((provider) => provider.id));
+      return [...new Set(value.filter((id) => typeof id === "string" && allowed.has(id)))];
+    }
+    if (key === "newsCategoryIds") {
+      if (!Array.isArray(value)) throw new TypeError("Invalid news categories");
+      const allowed = new Set(NEWS_CATEGORIES.map((category) => category.id));
+      return [...new Set(value.filter((id) => typeof id === "string" && allowed.has(id)))];
+    }
+    if (key === "newsShowHeadlines" && typeof value !== "boolean") {
+      throw new TypeError("Invalid news headline visibility");
+    }
+    if (key === "newsHeadlineOpacity") {
+      const opacity = Number(value);
+      if (opacity === 80) return 70;
+      if (!NEWS_HEADLINE_OPACITIES.includes(opacity)) {
+        throw new TypeError("Invalid news headline opacity");
+      }
+      return opacity;
+    }
+    if (key === "newsTotalCards" && !NEWS_CARD_COUNTS.includes(Number(value))) {
+      throw new TypeError("Invalid news card count");
+    }
+    if (
+      key === "newsRefreshIntervalMinutes" &&
+      !NEWS_REFRESH_INTERVALS.includes(Number(value))
+    ) {
+      throw new TypeError("Invalid news refresh interval");
+    }
+    if (key === "newsPosition" && !["top", "bottom"].includes(value)) {
+      throw new TypeError("Invalid news position");
+    }
+    if (key === "newsCache") {
+      if (!value || typeof value !== "object" || Array.isArray(value)) {
+        throw new TypeError("Invalid news cache");
+      }
+      const safeUrl = (candidate) => {
+        try {
+          const url = new URL(candidate);
+          return ["http:", "https:"].includes(url.protocol) ? url.toString() : "";
+        } catch {
+          return "";
+        }
+      };
+      const safeImageUrl = (candidate) => {
+        const url = safeUrl(candidate);
+        try {
+          return url && !/\.(?:avi|m4v|m3u8|mkv|mov|mp4|mpeg|mpg|webm|wmv)$/i.test(
+            new URL(url).pathname,
+          )
+            ? url
+            : "";
+        } catch {
+          return "";
+        }
+      };
+      const items = Array.isArray(value.items)
+        ? value.items.slice(0, 30).map((item) => {
+            const imageCandidates = [...new Set([
+              item?.imageUrl,
+              ...(Array.isArray(item?.imageCandidates) ? item.imageCandidates : []),
+            ].map(safeImageUrl).filter(Boolean))].slice(0, 8);
+            return {
+              id: String(item?.id || "").slice(0, 500),
+              title: String(item?.title || "").trim().slice(0, 300),
+              url: safeUrl(item?.url),
+              imageUrl: imageCandidates[0] || "",
+              imageCandidates,
+              providerId: String(item?.providerId || "").slice(0, 40),
+              providerName: String(item?.providerName || "").slice(0, 80),
+              publishedAt: Number.isFinite(Number(item?.publishedAt))
+                ? Number(item.publishedAt)
+                : 0,
+            };
+          }).filter((item) => item.title && item.url)
+        : [];
+      return {
+        version: 2,
+        imageParserVersion: Math.max(0, Number(value.imageParserVersion) || 0),
+        ageMinutes: Math.max(0, Number(value.ageMinutes) || 0),
+        selectionKey: String(value.selectionKey || "").slice(0, 1000),
+        lastAttemptAt: Math.max(0, Number(value.lastAttemptAt) || 0),
+        fetchedAt: Math.max(0, Number(value.fetchedAt) || 0),
+        items,
+        failures: Array.isArray(value.failures)
+          ? value.failures.slice(0, 20).map((failure) => String(failure).slice(0, 200))
+          : [],
+      };
+    }
     if (key === "searchSuggestionMode") {
       if (value === "history-local-online") return SEARCH_SUGGESTION_MODES.HISTORY_ONLINE;
       if (value === "history-local") return SEARCH_SUGGESTION_MODES.HISTORY_ONLY;
@@ -213,6 +308,10 @@ class StateManager {
     return () => {
       this.listeners = this.listeners.filter((listener) => listener !== callback);
     };
+  }
+
+  clearCache(key) {
+    delete this.cache[key];
   }
 
   notify(key, value) {

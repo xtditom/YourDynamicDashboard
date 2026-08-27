@@ -7,6 +7,7 @@ import { TodoManager } from "./modules/todo.js";
 import { AppGrid } from "./modules/apps.js";
 import { AiTools } from "./modules/aitools.js";
 import { Shortcuts } from "./modules/shortcuts.js";
+import { NewsManager } from "./modules/news.js";
 import { SettingsManager } from "./modules/settings.js";
 import { FullSettingsModal } from "./modules/settingsModal.js";
 import { KeyboardManager } from "./modules/keyboard.js";
@@ -64,6 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initialize("Google Apps", () => new AppGrid());
   initialize("AI Tools", () => new AiTools());
   initialize("Shortcuts", () => new Shortcuts());
+  initialize("News Feeds", () => new NewsManager());
   initialize("Settings", () => new SettingsManager());
   initialize("Full Settings", () => new FullSettingsModal());
   initialize("Keyboard", () => new KeyboardManager());

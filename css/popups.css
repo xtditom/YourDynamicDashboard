@@ -786,6 +786,40 @@ body.has-custom-bg .tool-edit-button {
   justify-content: flex-end;
 }
 
+.mini-bg-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.mini-bg-actions #upload-bg-button,
+.mini-bg-actions #remove-bg-button,
+.mini-bg-actions #random-bg-freeze-btn,
+.mini-bg-actions #random-bg-rnd-btn {
+  width: 68px !important;
+  flex: 0 0 68px !important;
+  padding: 0.4rem 0.25rem !important;
+  font-size: 0.75rem;
+}
+
+.mini-bg-actions #random-bg-schedule-select {
+  width: 100px !important;
+  flex: 0 0 100px !important;
+  padding: 0.4rem 0.2rem !important;
+  font-size: 0.75rem;
+  border: 1px solid var(--form-control-border) !important;
+  border-radius: 8px !important;
+  background-color: var(--bg-interactive) !important;
+  color: var(--accent-color) !important;
+}
+
+.mini-random-bg-label {
+  align-self: flex-start;
+  white-space: nowrap;
+}
+
 #edit-keys-btn,
 #edit-link-direction-btn,
 #upload-bg-button,
@@ -990,6 +1024,27 @@ body.gradient-mode-active .settings-dropdown option {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+}
+.mini-news-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: flex-start;
+  white-space: nowrap;
+}
+.mini-news-row {
+  gap: 0.75rem;
+}
+.mini-news-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.mini-news-controls .settings-button {
+  white-space: nowrap;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.75rem;
 }
 .mini-search-suggestion-select {
   border-radius: 7px !important;

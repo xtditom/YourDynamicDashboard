@@ -910,6 +910,9 @@ export class SettingsManager {
       apps: document.getElementById("apps-visibility-toggle"),
       ai: document.getElementById("ai-tools-visibility-toggle"),
       shortcutsPosition: document.getElementById("shortcuts-position-select"),
+      newsEnabled: document.getElementById("news-enabled-toggle"),
+      newsBadge: document.getElementById("news-feeds-new-sticker"),
+      configureNews: document.getElementById("configure-news-btn"),
       searchSuggestionMode: document.getElementById("search-suggestion-mode-select"),
       dark: document.getElementById("dark-mode-toggle"),
       autoThemeToggle: document.getElementById("auto-theme-toggle"),
@@ -999,8 +1002,11 @@ export class SettingsManager {
         syncSuggestionModeSelect(this.els.searchSuggestionMode);
       }
       if (key === "searchSuggestionBadgeDismissed") {
-        const badge = document.querySelector("#settings-popup .mini-new-sticker");
+        const badge = document.getElementById("search-suggestion-new-sticker");
         if (badge) badge.hidden = value === true;
+      }
+      if (key === "newsBadgeDismissed" && this.els.newsBadge) {
+        this.els.newsBadge.hidden = value === true;
       }
       if (key === "hideGreetings") {
         if (this.els.hideGreetings) {
@@ -1054,6 +1060,9 @@ export class SettingsManager {
         this.updateRandomBgButtons();
         window.__fullSettingsModalInstance?.updateRandomBackgroundBadge?.();
       }
+      if (key === "newsEnabled" && this.els.newsEnabled) {
+        this.els.newsEnabled.checked = value === true;
+      }
     });
   }
 
@@ -1081,6 +1090,9 @@ export class SettingsManager {
         state.set("shortcutsPosition", "hide");
       }
     }
+    if (this.els.newsEnabled) {
+      this.els.newsEnabled.checked = state.get("newsEnabled") === true;
+    }
     if (this.els.searchSuggestionMode) {
       this.els.searchSuggestionMode.value = state.get("searchSuggestionMode") || "history-only";
       syncSuggestionModeSelect(this.els.searchSuggestionMode);
@@ -1091,9 +1103,12 @@ export class SettingsManager {
         syncSuggestionModeSelect(this.els.searchSuggestionMode),
       );
     }
-    const searchSuggestionBadge = document.querySelector("#settings-popup .mini-new-sticker");
+    const searchSuggestionBadge = document.getElementById("search-suggestion-new-sticker");
     if (searchSuggestionBadge) {
       searchSuggestionBadge.hidden = state.get("searchSuggestionBadgeDismissed") === true;
+    }
+    if (this.els.newsBadge) {
+      this.els.newsBadge.hidden = state.get("newsBadgeDismissed") === true;
     }
 
     this.bindSimpleToggle(this.els.glowToggle, "glowEffect", true);
@@ -1516,6 +1531,22 @@ export class SettingsManager {
         state.set("shortcutsPosition", e.target.value);
       });
     }
+
+    if (this.els.newsEnabled) {
+      this.els.newsEnabled.addEventListener("change", async (event) => {
+        const enabled = event.target.checked;
+        const success = await window.__newsFeedInstance?.setEnabledFromUser(enabled);
+        if (!success) {
+          event.target.checked = state.get("newsEnabled") === true;
+          if (enabled && !(state.get("newsProviderIds") || []).length) {
+            window.__fullSettingsModalInstance?.openTab?.("fs-tab-news");
+          }
+        }
+      });
+    }
+    this.els.configureNews?.addEventListener("click", () => {
+      window.__fullSettingsModalInstance?.openTab?.("fs-tab-news");
+    });
 
     if (this.els.searchSuggestionMode) {
       this.els.searchSuggestionMode.addEventListener("change", async (event) => {
@@ -2227,6 +2258,7 @@ export class SettingsManager {
   isDarkModeAvailable() {
     return (
       state.get("gradientModeActive") !== true &&
+      !this.hasCustomBackground() &&
       DARK_MODE_THEME_IDS.has(state.get("normalThemeId"))
     );
   }
@@ -2492,7 +2524,7 @@ export class SettingsManager {
         "(for weather) and BigDataCloud (for the city name).\n\n" +
         "This data is saved locally on your device. We do not track you " +
         "in the background, and we have no server to store your location data.\n\n" +
-        "Select Remember choice to skip this explanation next time. Your browser still controls location permission.",
+        "Select Remember choice to skip this notice next time. Your browser still controls location permission.",
       false,
       false,
       [
@@ -2514,11 +2546,12 @@ export class SettingsManager {
       ],
       false,
       {
+        title: "Please Read",
         checkbox: {
           label: "Remember choice",
         },
         italicText:
-          "Select Remember choice to skip this explanation next time. Your browser still controls location permission.",
+          "Select Remember choice to skip this notice next time. Your browser still controls location permission.",
       },
     );
 
@@ -3534,6 +3567,7 @@ export class SettingsManager {
       state.set("randomBgTime", null);
       localStorage.removeItem("has_idb_bg");
       localStorage.removeItem("lowResBg");
+      document.documentElement.classList.remove("ydd-custom-bg-pending");
       document.body.classList.remove("has-custom-bg");
       document.body.style.removeProperty("background-image");
       document.body.style.removeProperty("background-size");

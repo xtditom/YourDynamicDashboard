@@ -119,7 +119,7 @@ export function showCustomModal(
       title.textContent = "🎉 Congratulations 🎊";
       title.style.fontSize = "1.8rem";
     } else {
-      title.textContent = isConfirm ? "Confirm Action" : "Notice";
+      title.textContent = modalOptions?.title || (isConfirm ? "Confirm Action" : "Notice");
     }
 
     const text = document.createElement("p");

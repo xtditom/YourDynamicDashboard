@@ -70,7 +70,7 @@ export async function requestSearchSuggestionConsent(endpointOverride = "") {
       { text: "Cancel", value: "cancel", width: "130px", style: "background: var(--bg-interactive); color: var(--text-primary);" },
     ],
     false,
-    { checkbox: { label: "Remember choice" }, italicText: "You can disable online suggestions or change the relay at any time." },
+    { title: "Please Read", checkbox: { label: "Remember choice" }, italicText: "You can disable online suggestions or change the relay at any time." },
   );
   if (!result || result === "cancel" || result.action !== "agree") return false;
   if (result.remember) state.set("searchSuggestionConsentRemembered", true);

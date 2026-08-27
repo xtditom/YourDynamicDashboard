@@ -232,6 +232,11 @@ try {
   }
 
   var hasIdbBg = localStorage.getItem("has_idb_bg") === "true";
+  if (imgUrl || hasIdbBg) {
+    // Mark the custom-background state before IndexedDB finishes loading so
+    // checked controls do not briefly inherit a normal theme's accent color.
+    document.documentElement.classList.add("ydd-custom-bg-pending");
+  }
   var fallback = THEME_COLORS[thId] || "#0a0a0a";
   var randomModeWithoutImage = bgMode === '"random"' && !imgUrl;
   if ((hasIdbBg && bgMode !== '"random"') || bgMode === '"freeze"' || randomModeWithoutImage) {
@@ -288,11 +293,14 @@ try {
               document.body.classList.add("has-custom-bg");
             });
           }
+        } else if (!imgUrl) {
+          document.documentElement.classList.remove("ydd-custom-bg-pending");
         }
         var p = document.getElementById("idb-preloader");
         if (p) p.remove();
       };
       getRequest.onerror = function() {
+        if (!imgUrl) document.documentElement.classList.remove("ydd-custom-bg-pending");
         var p = document.getElementById("idb-preloader");
         if (p) p.remove();
       };
@@ -303,6 +311,7 @@ try {
     }
   };
   request.onerror = function() {
+    if (!imgUrl) document.documentElement.classList.remove("ydd-custom-bg-pending");
     var p = document.getElementById("idb-preloader");
     if (p) p.remove();
   };

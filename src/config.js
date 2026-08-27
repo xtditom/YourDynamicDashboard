@@ -8,6 +8,26 @@ export const CONFIG = {
     showApps: true,
     shortcutsPosition: "bottom",
     shortcutsDisplayMode: "shortcuts",
+    newsEnabled: false,
+    newsBadgeDismissed: false,
+    newsProviderIds: ["bbc", "guardian", "voa", "npr"],
+    newsCategoryIds: ["top", "world"],
+    newsShowHeadlines: true,
+    newsHeadlineOpacity: 50,
+    newsTotalCards: 6,
+    newsRefreshIntervalMinutes: 2,
+    newsPosition: "bottom",
+    newsConsentRemembered: false,
+    newsCache: {
+      version: 2,
+      imageParserVersion: 6,
+      ageMinutes: 0,
+      selectionKey: "",
+      lastAttemptAt: 0,
+      fetchedAt: 0,
+      items: [],
+      failures: [],
+    },
     showAiTools: true,
     showEditableText: true,
     disableAnimations: false,
@@ -95,6 +115,7 @@ export const CONFIG = {
       apps: "_blank",
       shortcuts: "_blank",
       searchOpen: "_blank",
+      news: "_blank",
     },
     searchHistory: [],
     searchHistoryPaused: false,
@@ -110,6 +131,104 @@ export const CONFIG = {
     social: "assets/socials/",
   },
 };
+
+export const NEWS_REFRESH_INTERVALS = Object.freeze([1, 2, 5, 10]);
+export const NEWS_HEADLINE_OPACITIES = Object.freeze([0, 30, 50, 70]);
+export const NEWS_CARD_COUNTS = Object.freeze([4, 5, 6, 7]);
+export const NEWS_MIN_REFETCH_MS = 60 * 1000;
+
+export const NEWS_CATEGORIES = Object.freeze([
+  { id: "top", label: "Top stories" },
+  { id: "world", label: "World" },
+  { id: "politics", label: "Politics" },
+  { id: "business", label: "Business" },
+  { id: "technology", label: "Technology" },
+  { id: "science", label: "Science" },
+  { id: "health", label: "Health" },
+  { id: "sports", label: "Sports" },
+  { id: "entertainment", label: "Culture" },
+  { id: "environment", label: "Environment" },
+  { id: "finance", label: "Finance" },
+  { id: "education", label: "Education" },
+  { id: "travel", label: "Travel" },
+  { id: "lifestyle", label: "Lifestyle" },
+  { id: "opinion", label: "Opinion" },
+  { id: "crime", label: "Crime" },
+]);
+
+export const NEWS_PROVIDERS = Object.freeze([
+  {
+    id: "bbc", name: "BBC News", shortName: "BBC", color: "#bb1919",
+    permission: "https://feeds.bbci.co.uk/*",
+    feeds: {
+      top: "https://feeds.bbci.co.uk/news/rss.xml",
+      world: "https://feeds.bbci.co.uk/news/world/rss.xml",
+      politics: "https://feeds.bbci.co.uk/news/politics/rss.xml",
+      business: "https://feeds.bbci.co.uk/news/business/rss.xml",
+      technology: "https://feeds.bbci.co.uk/news/technology/rss.xml",
+      science: "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+      health: "https://feeds.bbci.co.uk/news/health/rss.xml",
+      sports: "https://feeds.bbci.co.uk/sport/rss.xml",
+      entertainment: "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+    },
+  },
+  {
+    id: "guardian", name: "The Guardian", shortName: "G", color: "#052962",
+    permission: "https://www.theguardian.com/*",
+    feeds: {
+      top: "https://www.theguardian.com/international/rss",
+      world: "https://www.theguardian.com/world/rss",
+      politics: "https://www.theguardian.com/politics/rss",
+      business: "https://www.theguardian.com/business/rss",
+      technology: "https://www.theguardian.com/technology/rss",
+      science: "https://www.theguardian.com/science/rss",
+      health: "https://www.theguardian.com/society/health/rss",
+      sports: "https://www.theguardian.com/sport/rss",
+      entertainment: "https://www.theguardian.com/culture/rss",
+      environment: "https://www.theguardian.com/environment/rss",
+      finance: "https://www.theguardian.com/money/rss",
+      education: "https://www.theguardian.com/education/rss",
+      travel: "https://www.theguardian.com/travel/rss",
+      lifestyle: "https://www.theguardian.com/lifeandstyle/rss",
+      opinion: "https://www.theguardian.com/commentisfree/rss",
+      crime: "https://www.theguardian.com/uk-news/crime/rss",
+    },
+  },
+  {
+    id: "voa", name: "Voice of America", shortName: "VOA", color: "#133f70",
+    permission: "https://www.voanews.com/*",
+    feeds: {
+      top: "https://www.voanews.com/api/zqboml-vomx-tpeivmy",
+      world: "https://www.voanews.com/api/z-botl-vomx-tpertmq",
+      business: "https://www.voanews.com/api/zyboql-vomx-tpetvmi",
+      technology: "https://www.voanews.com/api/zyritl-vomx-tpettmq",
+      health: "https://www.voanews.com/api/ztbopl-vomx-tpekvmm",
+    },
+  },
+  {
+    id: "npr", name: "NPR", shortName: "NPR", color: "#d62021",
+    permission: "https://feeds.npr.org/*",
+    feeds: { top: "https://feeds.npr.org/1001/rss.xml", world: "https://feeds.npr.org/1001/rss.xml" },
+  },
+  {
+    id: "dw", name: "DW", shortName: "DW", color: "#0087c9",
+    permission: "https://rss.dw.com/*",
+    feeds: { top: "https://rss.dw.com/rdf/rss-en-all", world: "https://rss.dw.com/rdf/rss-en-all" },
+  },
+  {
+    id: "euronews", name: "Euronews", shortName: "EU", color: "#003399",
+    permission: "https://www.euronews.com/*",
+    feeds: {
+      top: "https://www.euronews.com/rss?level=theme&name=news",
+      world: "https://www.euronews.com/rss?level=theme&name=news",
+      business: "https://www.euronews.com/rss?level=theme&name=business",
+      technology: "https://www.euronews.com/rss?level=theme&name=next",
+      sports: "https://www.euronews.com/rss?level=theme&name=sport",
+      entertainment: "https://www.euronews.com/rss?level=theme&name=culture",
+      environment: "https://www.euronews.com/rss?level=theme&name=green",
+    },
+  },
+]);
 
 export const COMMAND_PALETTE_SHORTCUT_USE_LIMIT = 3;
 

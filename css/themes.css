@@ -110,8 +110,8 @@ body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) {
   --bg-interactive: #e4f7eb;
   --bg-interactive-hover: #c8ebd4;
   --border-color: #75ad88;
-  --switch-bg: #497a5b;
-  --switch-border: #2d5e42;
+  --switch-bg: #687482;
+  --switch-border: #45505b;
   --switch-thumb: #ffffff;
   --switch-active-bg: #328558;
   --form-control-bg: #f5fff8;
@@ -439,11 +439,30 @@ body.has-custom-bg {
   --switch-bg: rgba(12, 21, 37, 0.72) !important;
   --switch-border: rgba(255, 255, 255, 0.86) !important;
   --switch-thumb: #ffffff !important;
-  --switch-active-bg: rgba(20, 132, 88, 0.96) !important;
+  --switch-active-bg: #ffffff !important;
   --form-control-bg: rgba(8, 14, 25, 0.62) !important;
   --form-control-text: #ffffff !important;
   --form-control-placeholder: rgba(255, 255, 255, 0.76) !important;
   --form-control-border: rgba(255, 255, 255, 0.74) !important;
+}
+
+/* The background image can arrive from IndexedDB after the controls render. */
+html.ydd-custom-bg-pending .toggle-switch input:checked + .slider {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+html.ydd-custom-bg-pending .toggle-switch input:checked + .slider:before {
+  background-color: #000000 !important;
+}
+
+html.ydd-custom-bg-pending .fs-news-choice input[type="checkbox"] {
+  border-color: #ffffff !important;
+  background: transparent !important;
+}
+
+html.ydd-custom-bg-pending .fs-news-choice-check {
+  color: #ffffff !important;
 }
 
 /* Keep editable controls legible on both light and dark wallpaper areas. */
