@@ -80,13 +80,18 @@ body:not(.loaded) #weather-widget {
   line-height: 1;
 }
 #current-temp {
-  font-family: "Inter", sans-serif;
+  font-family: inherit;
   font-weight: 725;
   font-feature-settings: "tnum" 1;
   font-variant-numeric: tabular-nums;
   font-size: 3.75rem;
   margin-left: 0.5rem;
   letter-spacing: -0.05em;
+}
+
+/* Preserve the original Lexend-mode temperature typography. */
+html[data-font-family="lexend"] #current-temp {
+  font-family: "Inter", sans-serif;
 }
 
 #weather-setup-ui {
@@ -232,12 +237,22 @@ body:not(.loaded) #search-form {
   background-color: transparent;
   color: var(--text-primary);
   font-size: 1rem;
+  font-weight: 400;
   padding: 0.5rem;
   outline: none;
 }
 #search-input::placeholder {
   color: var(--text-placeholder);
+  font-weight: 400;
+  opacity: 1;
   transition: opacity 0.5s ease-in-out;
+}
+
+/* Keep the default search face identical to the original Lexend dashboard. */
+html[data-font-family="lexend"] #search-input,
+html[data-font-family="lexend"] #search-input::placeholder {
+  font-family: "Lexend", sans-serif;
+  font-weight: 400;
 }
 .search-btn {
   background-color: var(--bg-tertiary);

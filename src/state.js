@@ -1,6 +1,7 @@
 import {
   CONFIG,
   DEFAULT_KEY_MAP,
+  FONT_OPTIONS,
   NEWS_CATEGORIES,
   NEWS_CARD_COUNTS,
   NEWS_HEADLINE_OPACITIES,
@@ -50,6 +51,13 @@ class StateManager {
   }
 
   normalizeValue(key, value) {
+    if (key === "fontFamily") {
+      const fontId = String(value || "");
+      if (!FONT_OPTIONS.some((font) => font.id === fontId)) {
+        throw new TypeError("Invalid font family");
+      }
+      return fontId;
+    }
     if (key === "newsProviderIds") {
       if (!Array.isArray(value)) throw new TypeError("Invalid news providers");
       const allowed = new Set(NEWS_PROVIDERS.map((provider) => provider.id));

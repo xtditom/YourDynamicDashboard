@@ -1,4 +1,5 @@
 import { state } from "../state.js";
+import { syncFontSelect } from "./fontLoader.js";
 import {
   chooseGeocodingResult,
   getGeocodingResults,
@@ -8,6 +9,7 @@ import {
 } from "../utils.js";
 import {
   CONFIG,
+  FONT_OPTIONS,
   DEFAULT_KEY_MAP,
   NEWS_CATEGORIES,
   NEWS_CARD_COUNTS,
@@ -515,12 +517,12 @@ export class FullSettingsModal {
     suggestionModeSelect.addEventListener("blur", () =>
       syncSuggestionModeSelect(suggestionModeSelect),
     );
-    const searchLabel = this._el("span", { textContent: "Search Suggestions" });
+    const searchLabel = this._el("span", { textContent: "Dynamic Search Suggestions" });
     const searchSectionTitle = this._el("span", { className: "fs-search-section-title" });
     const searchSectionBadge = this._newSticker();
     searchSectionBadge.hidden = state.get("searchSuggestionBadgeDismissed") === true;
     this.els.fsSearchSuggestionNewSticker = searchSectionBadge;
-    searchSectionTitle.append(this._el("span", { textContent: "Search" }), searchSectionBadge);
+    searchSectionTitle.append(this._el("span", { textContent: "Search Suggestions" }), searchSectionBadge);
     const proxyInput = this._el("input", {
       id: "fs-search-suggestion-proxy",
       className: "fs-location-input",
@@ -592,6 +594,18 @@ export class FullSettingsModal {
       "Toggle clock glow & pulsing.",
       glowToggle.wrapper,
     );
+    const fontSelect = this._dropdown(
+      "fs-font-family-select",
+      FONT_OPTIONS.map((font) => [font.id, font.label]),
+    );
+    fontSelect.setAttribute("aria-label", "Choose dashboard font");
+    this.els.fsFontFamily = fontSelect;
+    const fontRow = this._row(
+      "Font Style",
+      "Choose the dashboard font.",
+      fontSelect,
+    );
+    this.els.fsFontFamilyRow = fontRow;
     this.els.fsAutoThemeRow = autoThemeRow;
     this.els.fsGlowRow = glowRow;
 
@@ -600,6 +614,7 @@ export class FullSettingsModal {
         darkRow,
         autoThemeRow,
         glowRow,
+        fontRow,
       ]),
     );
 
@@ -1152,6 +1167,12 @@ export class FullSettingsModal {
       state.set("glowEffect", this.els.fsGlow.checked);
       document.body.classList.toggle("no-glow", !this.els.fsGlow.checked);
     });
+    this.els.fsFontFamily.addEventListener("change", () => {
+      const previousFont = state.get("fontFamily") || "lexend";
+      if (!state.set("fontFamily", this.els.fsFontFamily.value)) {
+        syncFontSelect(this.els.fsFontFamily, previousFont);
+      }
+    });
 
     // BG upload
     this.els.fsUploadBg.addEventListener("click", () => {
@@ -1556,6 +1577,9 @@ export class FullSettingsModal {
     if (map[key]) {
       map[key].el.checked = map[key].check;
     }
+    if (key === "fontFamily" && this.els.fsFontFamily) {
+      syncFontSelect(this.els.fsFontFamily, value);
+    }
 
     if (key === "widgetControl")
       this.els.fsWidgetControl.value = value || "all";
@@ -1590,6 +1614,7 @@ export class FullSettingsModal {
     this.els.fsDark.checked = state.get("darkMode") === true;
     this.els.fsAutoTheme.checked = state.get("autoTheme") === true;
     this.els.fsGlow.checked = state.get("glowEffect") !== false;
+    syncFontSelect(this.els.fsFontFamily, state.get("fontFamily") || "lexend");
     this.els.fsTodoToggle.checked = state.get("showTodo") === false;
     this.els.fsAppsToggle.checked = state.get("showApps") === false;
     this.els.fsAiToggle.checked = state.get("showAiTools") === false;

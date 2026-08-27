@@ -645,10 +645,15 @@ body.transparency-active .ydd-custom-modal-overlay {
   flex-direction: column;
   position: relative;
   color: #f0f0f0;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: inherit;
   opacity: 0;
   transform: scale(0.96);
   transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Preserve the original Lexend-mode modal typography. */
+html[data-font-family="lexend"] .ydd-custom-modal-overlay {
+  font-family: "Inter", system-ui, sans-serif;
 }
 #welcome-modal-overlay:not(.hidden) #welcome-modal {
   opacity: 1;

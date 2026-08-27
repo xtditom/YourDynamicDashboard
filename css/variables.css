@@ -5,6 +5,13 @@
   box-sizing: border-box;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 :root {
   --bg-primary: #bdbdbd;
   --bg-secondary: #ffffff;
@@ -27,6 +34,7 @@
   --form-control-border: #aeb6c0;
   --icon-filter: grayscale(0%);
   --icon-opacity: 1;
+  --ydd-font-family: "Lexend", system-ui, sans-serif;
   --glow-color: rgba(0, 0, 0, 0.8);
 
   --gradient-color-1: #89f7fe;

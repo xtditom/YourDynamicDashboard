@@ -1,4 +1,5 @@
 import { state } from "./state.js";
+import { applyFontFamily } from "./modules/fontLoader.js";
 import { Clock } from "./modules/clock.js";
 import { Weather } from "./modules/weather.js";
 import { Search } from "./modules/search.js";
@@ -16,6 +17,7 @@ import { ZenModeController } from "./modules/zenMode.js";
 import { initializeDefaultTasks } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  applyFontFamily(state.get("fontFamily"));
   document.documentElement.classList.toggle(
     "disable-animations",
     state.get("disableAnimations") === true,
@@ -89,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   state.subscribe((key, value) => {
+    if (key === "fontFamily") applyFontFamily(value);
     if (key === "transparencyActive") {
       document.body.classList.toggle("transparency-active", value);
     }

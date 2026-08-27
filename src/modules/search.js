@@ -88,7 +88,6 @@ export class Search {
     this._typewriterTimer = null;
     this._typewriterInterval = null;
     this._typewriterRunId = 0;
-    this._visibilityHandler = () => this.handleVisibilityChange();
     this._resizeHandler = () => {
       if (this._historyDropdownEl) this.renderSuggestionsForCurrentInput();
     };
@@ -163,7 +162,6 @@ export class Search {
       this.renderProviderDropdown();
     });
     this.startTypewriterEffect();
-    document.addEventListener("visibilitychange", this._visibilityHandler);
     window.addEventListener("resize", this._resizeHandler);
 
     state.subscribe((key) => {
@@ -307,12 +305,8 @@ export class Search {
     return ["all", "search-only", "search-weather", "search-quote"].includes(control);
   }
 
-  handleVisibilityChange() {
-    this.syncTypewriterVisibility();
-  }
-
   syncTypewriterVisibility() {
-    if (document.hidden || !this.isSearchVisible()) {
+    if (!this.isSearchVisible()) {
       this.stopTypewriterEffect();
     } else if (!this._typewriterTimer && !this._typewriterInterval) {
       this.startTypewriterEffect();
@@ -1539,7 +1533,7 @@ export class Search {
   // --- SECTION: UI & ANIMATION ---
   startTypewriterEffect() {
     this.stopTypewriterEffect();
-    if (document.hidden || !this.isSearchVisible()) return;
+    if (!this.isSearchVisible()) return;
 
     const typeSpeed = 50;
     const deleteSpeed = 25;
@@ -1551,7 +1545,6 @@ export class Search {
         this._typewriterTimer = null;
         if (
           runId !== this._typewriterRunId ||
-          document.hidden ||
           !this.isSearchVisible()
         ) return;
         if (this.isListening || this._voiceStartPending) {
@@ -1567,7 +1560,6 @@ export class Search {
         this._typewriterInterval = window.setInterval(() => {
           if (
             runId !== this._typewriterRunId ||
-            document.hidden ||
             !this.isSearchVisible() ||
             this.isListening ||
             this._voiceStartPending
@@ -1589,7 +1581,6 @@ export class Search {
               this._typewriterInterval = window.setInterval(() => {
                 if (
                   runId !== this._typewriterRunId ||
-                  document.hidden ||
                   !this.isSearchVisible() ||
                   this.isListening ||
                   this._voiceStartPending

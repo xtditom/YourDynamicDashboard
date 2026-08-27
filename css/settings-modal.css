@@ -645,3 +645,7 @@
   cursor: not-allowed;
   opacity: 0.35;
 }
+/* Slightly stronger Full Settings surface for light gradients. */
+body.gradient-mode-active.gradient-light #full-settings-modal {
+  background-color: rgba(248, 248, 248, 0.65) !important;
+}

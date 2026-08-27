@@ -1,4 +1,5 @@
 import { state } from "../state.js";
+import { applyFontFamily, syncFontSelect } from "./fontLoader.js";
 import {
   chooseGeocodingResult,
   completeDefaultTask,
@@ -917,6 +918,7 @@ export class SettingsManager {
       dark: document.getElementById("dark-mode-toggle"),
       autoThemeToggle: document.getElementById("auto-theme-toggle"),
       glowToggle: document.getElementById("glow-effect-toggle"),
+      fontFamily: document.getElementById("font-family-select"),
       editableTextToggle: document.getElementById("editable-text-toggle"),
       widgetControl: document.getElementById("widget-control-select"),
       colorControls: document.getElementById("advanced-color-controls"),
@@ -1063,6 +1065,10 @@ export class SettingsManager {
       if (key === "newsEnabled" && this.els.newsEnabled) {
         this.els.newsEnabled.checked = value === true;
       }
+      if (key === "fontFamily") {
+        const fontId = applyFontFamily(value);
+        syncFontSelect(this.els.fontFamily, fontId);
+      }
     });
   }
 
@@ -1112,6 +1118,17 @@ export class SettingsManager {
     }
 
     this.bindSimpleToggle(this.els.glowToggle, "glowEffect", true);
+    if (this.els.fontFamily) {
+      const savedFont = state.get("fontFamily") || "lexend";
+      applyFontFamily(savedFont);
+      syncFontSelect(this.els.fontFamily, savedFont);
+      this.els.fontFamily.addEventListener("change", () => {
+        const previousFont = state.get("fontFamily") || "lexend";
+        if (!state.set("fontFamily", this.els.fontFamily.value)) {
+          syncFontSelect(this.els.fontFamily, previousFont);
+        }
+      });
+    }
 
     if (this.els.dark) {
       this.els.dark.checked = state.get("darkMode") === true;

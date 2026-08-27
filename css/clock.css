@@ -19,13 +19,18 @@
   display: flex;
   align-items: baseline;
   justify-content: center;
-  font-family: "Inter", sans-serif;
+  font-family: inherit;
   font-weight: 750;
   font-feature-settings: "tnum" 1;
   font-variant-numeric: tabular-nums;
   font-size: 5.5rem;
   color: var(--accent-color);
   width: 100%;
+}
+
+/* Preserve the original Lexend-mode display typography. */
+html[data-font-family="lexend"] #digital-clock-container {
+  font-family: "Inter", sans-serif;
 }
 
 #clock-date-row {
@@ -230,9 +235,21 @@ body.loaded .clock-separator {
   text-align: center;
 }
 #greeting-text {
-  font-family: "monospace";
+  font-family: inherit;
   font-size: 2.25rem;
   font-weight: 500;
+}
+
+/* Match the reference's legacy Lexend-mode greeting face. */
+html[data-font-family="lexend"] #greeting-text {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+
+/* Keep the editable credit line in the original regular Lexend face. */
+html[data-font-family="lexend"] #welcome-text {
+  font-family: "Lexend", sans-serif;
+  font-weight: 400;
 }
 #greeting-text.typing-effect::after {
   content: "|";

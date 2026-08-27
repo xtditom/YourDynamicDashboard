@@ -12,6 +12,7 @@ import { showCustomModal } from "../utils.js";
 const MAX_ITEMS = Math.max(...NEWS_CARD_COUNTS);
 const IMAGE_PARSER_VERSION = 6;
 const IMAGE_TARGET_WIDTH = 960;
+const MAX_NEWS_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 12000;
 const LOCK_KEY = "ydd_news_fetch_lock";
 const LOCK_TTL_MS = 30000;
@@ -304,7 +305,7 @@ function parseFeed(xmlText, source) {
   }).map((item) => ({
     ...item,
     imageUrl: item.imageCandidates[0] || "",
-  })).filter((item) => item.title && item.url);
+  })).filter((item) => item.title && item.url && isFreshStory(item));
 }
 
 function storyKeys(item) {
@@ -360,6 +361,19 @@ function formatRelativeAge(timestamp) {
 function getAgeMinutes(timestamp) {
   if (!timestamp) return 0;
   return Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
+}
+function isFreshStory(item, now = Date.now()) {
+  const publishedAt = Number(item?.publishedAt);
+  // A missing date cannot be compared safely; dated stories are capped at seven days.
+  return !Number.isFinite(publishedAt) ||
+    publishedAt <= 0 ||
+    now - publishedAt < MAX_NEWS_AGE_MS;
+}
+
+function filterFreshStories(items, now = Date.now()) {
+  return Array.isArray(items)
+    ? items.filter((item) => isFreshStory(item, now))
+    : [];
 }
 
 async function requestNewsConsent() {
@@ -762,11 +776,18 @@ export class NewsManager {
       const eligibleProviders = selection.providers.filter((provider) =>
         selection.sources.some((source) => source.provider.id === provider.id),
       );
-      const deduped = selectBalancedStories(items, eligibleProviders, MAX_ITEMS);
-      const fetchedAt = deduped.length ? Date.now() : cache.fetchedAt;
+      const deduped = filterFreshStories(
+        selectBalancedStories(items, eligibleProviders, MAX_ITEMS),
+        Date.now(),
+      );
       const itemsForSelection = cache.selectionKey === selection.selectionKey
-        ? cache.items
+        ? filterFreshStories(cache.items, Date.now())
         : [];
+      const fetchedAt = deduped.length
+        ? Date.now()
+        : itemsForSelection.length
+          ? cache.fetchedAt
+          : 0;
       state.set("newsCache", {
         version: 2,
         imageParserVersion: IMAGE_PARSER_VERSION,
@@ -780,7 +801,19 @@ export class NewsManager {
       this.emitStatus(deduped.length ? `Updated ${deduped.length} stories.` : "Could not update news; showing saved stories.");
       return deduped.length > 0;
     } catch (error) {
-      state.set("newsCache", { ...cache, selectionKey: selection.selectionKey, lastAttemptAt: attemptAt, failures: [error.message] });
+      const fallbackItems = cache.selectionKey === selection.selectionKey
+        ? filterFreshStories(cache.items, Date.now())
+        : [];
+      const fallbackFetchedAt = fallbackItems.length ? cache.fetchedAt : 0;
+      state.set("newsCache", {
+        ...cache,
+        selectionKey: selection.selectionKey,
+        lastAttemptAt: attemptAt,
+        fetchedAt: fallbackFetchedAt,
+        ageMinutes: getAgeMinutes(fallbackFetchedAt),
+        items: fallbackItems,
+        failures: [error.message],
+      });
       this.emitStatus("Could not update news; showing saved stories.");
       return false;
     } finally {
@@ -796,6 +829,18 @@ export class NewsManager {
     let cache = state.get("newsCache") || CONFIG.defaults.newsCache;
     const selection = this.getSelection();
     if (!selection.sources.length) return;
+    const freshItems = filterFreshStories(cache.items);
+    if (freshItems.length !== cache.items.length) {
+      const fetchedAt = freshItems.length ? cache.fetchedAt : 0;
+      cache = {
+        ...cache,
+        items: freshItems,
+        fetchedAt,
+        ageMinutes: getAgeMinutes(fetchedAt),
+        lastAttemptAt: 0,
+      };
+      state.set("newsCache", cache);
+    }
     if (cache.items.length && cache.imageParserVersion !== IMAGE_PARSER_VERSION) {
       cache = { ...cache, imageParserVersion: IMAGE_PARSER_VERSION, lastAttemptAt: 0 };
       state.set("newsCache", cache);
@@ -838,7 +883,7 @@ export class NewsManager {
     const totalCards = this.getTotalCards();
     this.container.dataset.totalCards = String(totalCards);
     const items = cache.selectionKey === selection.selectionKey
-      ? cache.items.slice(0, totalCards)
+      ? filterFreshStories(cache.items).slice(0, totalCards)
       : [];
     const showHeadlines = state.get("newsShowHeadlines") !== false;
     const headlineOpacity = Math.max(

@@ -331,6 +331,11 @@ body.loaded .corner-button {
   opacity: 0.5;
   transition: opacity 0.2s ease;
 }
+
+/* Keep the original button face for the default Lexend presentation. */
+html[data-font-family="lexend"] .tool-tab-button {
+  font-family: Arial, sans-serif;
+}
 .tool-tab-button.active {
   opacity: 1;
 }
