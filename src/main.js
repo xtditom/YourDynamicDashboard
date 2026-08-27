@@ -1,5 +1,6 @@
 import { state } from "./state.js";
 import { applyFontFamily } from "./modules/fontLoader.js";
+import { installInteractionPolicy } from "./modules/interactionPolicy.js";
 import { Clock } from "./modules/clock.js";
 import { Weather } from "./modules/weather.js";
 import { Search } from "./modules/search.js";
@@ -32,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  initialize("Interaction Policy", () => installInteractionPolicy(document));
   initialize("Zen Mode", () => new ZenModeController());
   initialize("Clock", () => new Clock());
   initialize("Weather", () => new Weather());

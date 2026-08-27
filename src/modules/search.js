@@ -1199,7 +1199,7 @@ export class Search {
     }
 
     const icon = document.createElement("img");
-    icon.className = className;
+    icon.className = [className, "ydd-asset-image"].filter(Boolean).join(" ");
     icon.src = this._getProviderIconUrl(engineIcon);
     icon.alt = engineId || "";
     icon.width = size;
@@ -1632,6 +1632,7 @@ export class Search {
       div.setAttribute("aria-selected", String(p.id === this.current.id));
 
       const img = document.createElement("img");
+      img.className = "ydd-asset-image";
       img.src = this._getProviderIconUrl(p.icon);
       img.alt = p.name;
 

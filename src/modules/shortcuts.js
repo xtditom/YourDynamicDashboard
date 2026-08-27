@@ -210,6 +210,7 @@ export class Shortcuts {
       iconDiv.className = "shortcut-icon";
 
       const img = document.createElement("img");
+      img.className = "ydd-asset-image";
       img.src =
         shortcut.customIcon || shortcut.icon || getIconUrl(shortcut.url);
       img.alt = shortcut.name;

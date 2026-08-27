@@ -13,5 +13,116 @@
 @import url("palette.css");
 @import url("zen-mode.css");
 @import url("responsive.css");
+@import url("interaction-policy.css");
 
 /* [css/main.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */
+
+/* --- LIGHT GRADIENT DASHBOARD SURFACES ---
+   Mirrors the legacy dashboard: white transparency over the active gradient,
+   with no glass blur. This is limited to dashboard widgets and search
+   surfaces, so Full Settings and other theme modes retain their own styles. */
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) .widget-container,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #search-dropdown,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #sh-quick-dropdown,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) .sh-modal {
+  --bg-secondary: rgba(255, 255, 255, 0.25) !important;
+  --bg-tertiary: rgba(255, 255, 255, 0.35) !important;
+  --bg-interactive: rgba(255, 255, 255, 0.5) !important;
+  --bg-interactive-hover: rgba(255, 255, 255, 0.65) !important;
+  --bg-hover-translucent: rgba(255, 255, 255, 0.25) !important;
+  --text-primary: #000000 !important;
+  --text-secondary: #000000 !important;
+  --text-placeholder: rgba(0, 0, 0, 0.62) !important;
+  --accent-color: #000000 !important;
+  --border-color: rgba(0, 0, 0, 0.05) !important;
+  --widget-bg: rgba(255, 255, 255, 0.4) !important;
+  --widget-border: rgba(0, 0, 0, 0.05) !important;
+  --text-color: #000000 !important;
+  --text-shadow: none !important;
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  background-image: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) .widget-container *,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #search-dropdown *,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #sh-quick-dropdown *,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) .sh-modal * {
+  text-shadow: none !important;
+}
+
+/* The clock area stays white on light gradients. */
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #digital-clock-container,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #digital-clock-container *,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #clock-date-row,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #greeting-text,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #welcome-text {
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+}
+
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) .clock-hands * {
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #analog-clock-svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7)) !important;
+}
+
+/* Legacy widget treatment keeps the temperature as the white visual accent. */
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) #weather-widget #current-temp {
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* --- CUSTOM-BACKGROUND FULL SETTINGS SURFACE ---
+   Keep Full Settings on its own dark palette when a custom wallpaper is
+   active. This deliberately wins over light-gradient variables without
+   changing the normal light-gradient Full Settings appearance. */
+body.has-custom-bg #full-settings-modal,
+body.has-custom-bg.gradient-mode-active.gradient-light #full-settings-modal {
+  --bg-primary: #101010 !important;
+  --bg-secondary: rgba(0, 0, 0, 0.25) !important;
+  --bg-tertiary: rgba(0, 0, 0, 0.45) !important;
+  --bg-interactive: rgba(255, 255, 255, 0.1) !important;
+  --bg-interactive-hover: rgba(255, 255, 255, 0.18) !important;
+  --bg-hover-translucent: rgba(255, 255, 255, 0.05) !important;
+  --text-primary: #f0f0f0 !important;
+  --text-secondary: #d1d5db !important;
+  --text-placeholder: #9ca3af !important;
+  --accent-color: #f0f0f0 !important;
+  --border-color: rgba(255, 255, 255, 0.5) !important;
+  --switch-bg: rgba(255, 255, 255, 0.34) !important;
+  --switch-border: rgba(255, 255, 255, 0.76) !important;
+  --switch-thumb: #f8fafc !important;
+  --switch-active-bg: #84a8ff !important;
+  --form-control-bg: rgba(0, 0, 0, 0.36) !important;
+  --form-control-text: #ffffff !important;
+  --form-control-placeholder: rgba(255, 255, 255, 0.8) !important;
+  --form-control-border: rgba(255, 255, 255, 0.62) !important;
+  --widget-bg: rgba(0, 0, 0, 0.25) !important;
+  --widget-border: rgba(255, 255, 255, 0.18) !important;
+  --text-color: #f0f0f0 !important;
+  --text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+  color: #f0f0f0 !important;
+  color-scheme: dark;
+  background-color: rgba(16, 16, 16, 0.6) !important;
+  background-image: none !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+/* Dashboard asset images belong to their owning control, not a separate
+   browser image resource. Keep normal parent clicks and hover states intact
+   while preventing image dragging and image-level new-tab actions. */
+.ydd-asset-image {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+}

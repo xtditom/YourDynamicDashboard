@@ -362,7 +362,7 @@ export class AppGrid {
         item.style.cursor = "pointer";
 
         const img = document.createElement("img");
-        img.className = "app-icon";
+        img.className = "app-icon ydd-asset-image";
         img.src = this.getAppIconUrl(app);
         img.alt = app.name;
         if (!app.icon?.startsWith("data:image/")) {
@@ -698,6 +698,7 @@ export class AppGrid {
 
     if (isEditing) {
       const preview = document.createElement("img");
+      preview.className = "ydd-asset-image";
       preview.src = this.getAppIconUrl(app);
       preview.alt = `${app.name} icon`;
       iconPreview.appendChild(preview);
@@ -909,6 +910,7 @@ export class AppGrid {
         iconData = await this.createScaledIconData(file);
         iconChanged = true;
         const preview = document.createElement("img");
+        preview.className = "ydd-asset-image";
         preview.src = iconData;
         preview.alt = "Selected icon preview";
         iconPreview.replaceChildren(preview);

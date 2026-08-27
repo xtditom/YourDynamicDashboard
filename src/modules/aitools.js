@@ -374,6 +374,7 @@ export class AiTools {
       const iconDiv = document.createElement("div");
       iconDiv.className = "ai-tool-icon";
       const img = document.createElement("img");
+      img.className = "ydd-asset-image";
       img.src = tool.isCustom ? tool.icon : pathPrefix + tool.icon;
       img.alt = tool.name;
 
@@ -834,6 +835,7 @@ export class AiTools {
       try {
         iconData = await this.createScaledIconData(file);
         const preview = document.createElement("img");
+        preview.className = "ydd-asset-image";
         preview.src = iconData;
         preview.alt = "Selected icon preview";
         iconPreview.replaceChildren(preview);

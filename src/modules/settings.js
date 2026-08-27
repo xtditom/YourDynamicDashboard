@@ -3645,7 +3645,7 @@ export class SettingsManager {
 
       const img = document.createElement("img");
       img.src = s.customIcon || s.icon || getIconUrl(s.url);
-      img.className = "icon";
+      img.className = "icon ydd-asset-image";
       img.alt = `${s.name} icon`;
 
       const fileInput = document.createElement("input");
