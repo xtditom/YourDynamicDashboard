@@ -56,11 +56,6 @@ export class KeyboardManager {
 
     if (isEnabled("search")) {
       e.preventDefault();
-      const search = document.getElementById("search-input");
-      if (search) {
-        search.focus();
-        search.select();
-      }
     } else if (isEnabled("todo")) this.clickButton("todo-toggle-button");
     else if (isEnabled("ai")) this.clickButton("ai-tools-toggle-button");
     else if (isEnabled("apps")) this.clickButton("apps-toggle-button");

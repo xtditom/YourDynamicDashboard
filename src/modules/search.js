@@ -79,7 +79,6 @@ export class Search {
     this._googleAiHintTimer = null;
     this._googleAiHintElement = null;
     this._historyModalClose = null;
-    this._historyPreviousFocus = null;
     this.recognition = null;
     this.isListening = false;
     this._voiceStartPending = false;
@@ -961,10 +960,6 @@ export class Search {
       const finishClose = () => {
         closeTimer = null;
         overlay.remove();
-        if (this._historyPreviousFocus?.focus) {
-          window.setTimeout(() => this._historyPreviousFocus.focus(), 0);
-        }
-        this._historyPreviousFocus = null;
         if (this._historyModalClose === closeOverlay) {
           this._historyModalClose = null;
         }
@@ -997,11 +992,9 @@ export class Search {
     };
 
     this._historyModalClose = closeOverlay;
-    this._historyPreviousFocus = document.activeElement;
     closeBtn.addEventListener("click", closeOverlay);
     overlay.addEventListener("click", closeOverlay);
     document.addEventListener("keydown", escHandler);
-    window.setTimeout(() => filterInput.focus(), 0);
   }
 
   closeHistoryModal(immediate = false) {
@@ -1889,7 +1882,6 @@ export class Search {
     const isEditing = Boolean(editProvider?.id);
     const wasEditing = this.customSearchEditMode;
 
-    const previousFocus = document.activeElement;
     const overlay = document.createElement("div");
     overlay.className = "ydd-add-tool-overlay";
     overlay.setAttribute("role", "presentation");
@@ -2173,7 +2165,6 @@ export class Search {
       const remove = () => {
         if (overlay.isConnected) overlay.remove();
         if (this.customSearchModal?.overlay === overlay) this.customSearchModal = null;
-        if (previousFocus?.isConnected) window.setTimeout(() => previousFocus.focus(), 0);
       };
       if (immediate) remove();
       else window.setTimeout(remove, 220);
@@ -2347,7 +2338,6 @@ export class Search {
     document.addEventListener("keydown", keyHandler, true);
     window.requestAnimationFrame(() => {
       overlay.classList.add("is-open");
-      iconLabel.focus();
     });
   }
 

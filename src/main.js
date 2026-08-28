@@ -168,20 +168,17 @@ document.addEventListener("DOMContentLoaded", () => {
 // --- POPUP MANAGER ---
 function manageWelcomePopup() {
   const overlay = document.getElementById("welcome-modal-overlay");
-  const dialog = document.getElementById("welcome-modal");
 
-  if (!overlay || !dialog) return;
+  if (!overlay) return;
 
   const versionKey = "welcomeShown_v3.0.0";
   const alreadyShown = localStorage.getItem(versionKey);
-  const previousFocus = document.activeElement;
   overlay.inert = true;
   const closeWelcome = () => {
     overlay.classList.add("hidden");
     overlay.setAttribute("aria-hidden", "true");
     overlay.inert = true;
     document.removeEventListener("keydown", onKeyDown);
-    if (previousFocus?.focus) window.setTimeout(() => previousFocus.focus(), 0);
     localStorage.setItem(versionKey, "true");
   };
   const onKeyDown = (event) => {
@@ -210,7 +207,6 @@ function manageWelcomePopup() {
     overlay.setAttribute("aria-hidden", "false");
     overlay.inert = false;
     document.addEventListener("keydown", onKeyDown);
-    window.setTimeout(() => dialog.focus({ preventScroll: true }), 0);
   }
 
   overlay

@@ -878,7 +878,6 @@ export class SettingsManager {
     this._locationRequestId = 0;
     this._locationController = null;
     this._gpsRequestId = 0;
-    this._infoPreviousFocus = null;
     this._infoKeyHandler = null;
     window.addEventListener(
       "pagehide",
@@ -1789,7 +1788,6 @@ export class SettingsManager {
   openInfoModal() {
     if (!this.els.infoOverlay) return;
     if (!this.els.infoOverlay.classList.contains("hidden")) return;
-    this._infoPreviousFocus = document.activeElement;
     this.els.infoOverlay.classList.remove("hidden");
     this.els.infoOverlay.inert = false;
     this.els.infoOverlay.setAttribute("aria-hidden", "false");
@@ -1812,7 +1810,6 @@ export class SettingsManager {
       }
     };
     document.addEventListener("keydown", this._infoKeyHandler);
-    window.setTimeout(() => this.els.infoClose?.focus(), 0);
   }
 
   closeInfoModal() {
@@ -1824,10 +1821,6 @@ export class SettingsManager {
       document.removeEventListener("keydown", this._infoKeyHandler);
       this._infoKeyHandler = null;
     }
-    if (this._infoPreviousFocus?.focus) {
-      window.setTimeout(() => this._infoPreviousFocus.focus(), 0);
-    }
-    this._infoPreviousFocus = null;
   }
 
   saveCurrentTheme() {

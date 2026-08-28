@@ -109,7 +109,6 @@ export class FullSettingsModal {
     // Element cache
     this.els = {};
     this._activeKeyCleanup = null;
-    this._previousFocus = null;
     this._locationRequestId = 0;
     this._locationController = null;
     this._generateThemeCooldown = false;
@@ -1673,7 +1672,6 @@ export class FullSettingsModal {
       document.getElementById("settings-toggle-button")?.setAttribute("aria-expanded", "false");
     }
 
-    this._previousFocus = document.activeElement;
     this.populateAll();
     this.overlay.classList.remove("hidden");
     this.overlay.inert = false;
@@ -1687,7 +1685,6 @@ export class FullSettingsModal {
     this.modal.style.transform = "";
     this.offsetX = 0;
     this.offsetY = 0;
-    window.setTimeout(() => this.els.closeBtn.focus(), 0);
   }
 
   close() {
@@ -1708,11 +1705,6 @@ export class FullSettingsModal {
     this.overlay.setAttribute("aria-hidden", "true");
     this.isOpen = false;
     state.set("lastSettingsView", "full");
-    const previousFocus = this._previousFocus;
-    this._previousFocus = null;
-    if (previousFocus && typeof previousFocus.focus === "function") {
-      window.setTimeout(() => previousFocus.focus(), 0);
-    }
 
     if (shouldValidateRelay) {
       void this._validateCustomSuggestionRelayAfterClose(relayToValidate, validationId);
@@ -1729,7 +1721,6 @@ export class FullSettingsModal {
       button.setAttribute("aria-selected", String(active));
       this.els.panes[buttonIndex]?.classList.toggle("active", active);
     });
-    this.els.tabBtns[index].focus();
   }
 
   buildNewsPane() {

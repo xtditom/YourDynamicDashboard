@@ -50,7 +50,6 @@ export class CommandPalette {
     this.activeIndex = 0;
     this.currentMenu = "main"; // "main", "search", "apps", "ai", "socials"
     this._helpModalClose = null;
-    this._previousFocus = null;
 
     // 1. Core main commands
     this.mainCommands = [
@@ -636,7 +635,6 @@ export class CommandPalette {
   }
 
   open() {
-    if (!this.isOpen) this._previousFocus = document.activeElement;
     this.isOpen = true;
     this.els.overlay.classList.remove("hidden");
     this.els.overlay.inert = false;
@@ -645,10 +643,6 @@ export class CommandPalette {
     this.currentMenu = "main";
     this.activeIndex = 0;
     this.filter("");
-    
-    setTimeout(() => {
-      this.els.input.focus();
-    }, 50);
   }
 
   close() {
@@ -656,11 +650,6 @@ export class CommandPalette {
     this.els.overlay.classList.add("hidden");
     this.els.overlay.inert = true;
     this.els.overlay.setAttribute("aria-hidden", "true");
-    this.els.input.blur();
-    if (this._previousFocus?.focus) {
-      window.setTimeout(() => this._previousFocus.focus(), 0);
-    }
-    this._previousFocus = null;
   }
 
   switchMenu(menuName) {
@@ -680,9 +669,6 @@ export class CommandPalette {
     this.els.input.placeholder = placeholders[targetMenu];
     
     this.filter("");
-    setTimeout(() => {
-      this.els.input.focus();
-    }, 50);
   }
 
   getCommandUsage() {
@@ -1037,10 +1023,6 @@ export class CommandPalette {
       const finishClose = () => {
         closeTimer = null;
         overlay.remove();
-        if (this._previousFocus?.focus) {
-          window.setTimeout(() => this._previousFocus.focus(), 0);
-        }
-        this._previousFocus = null;
         if (this._helpModalClose === closeHandler) {
           this._helpModalClose = null;
         }
@@ -1054,13 +1036,11 @@ export class CommandPalette {
     };
 
     this._helpModalClose = closeHandler;
-    this._previousFocus = document.activeElement;
     overlay
       .querySelector("#cp-help-modal-close")
       .addEventListener("click", closeHandler);
     overlay.addEventListener("click", closeHandler);
     document.addEventListener("keydown", escHandler);
-    window.setTimeout(() => overlay.querySelector("#cp-help-modal-close")?.focus(), 0);
   }
 
   getShortcutLabel(action) {

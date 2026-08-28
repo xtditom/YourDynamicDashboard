@@ -656,7 +656,6 @@ export class AppGrid {
     if (this.appModal) return;
     const isEditing = Boolean(app?.id);
     const isDefault = isEditing && !app.isCustom;
-    const previousFocus = document.activeElement;
 
     const overlay = document.createElement("div");
     overlay.className = "ydd-add-tool-overlay";
@@ -857,11 +856,6 @@ export class AppGrid {
       const remove = () => {
         overlay.remove();
         if (this.appModal?.overlay === overlay) this.appModal = null;
-        const focusTarget =
-          previousFocus?.isConnected && !previousFocus.classList.contains("hidden")
-            ? previousFocus
-            : this.els.addBtn;
-        window.setTimeout(() => focusTarget?.focus?.(), 0);
       };
       if (immediate) remove();
       else window.setTimeout(remove, 220);
@@ -1002,7 +996,6 @@ export class AppGrid {
     document.addEventListener("keydown", keyHandler, true);
     window.requestAnimationFrame(() => {
       overlay.classList.add("is-open");
-      iconLabel.focus();
     });
   }
 
@@ -1070,9 +1063,6 @@ export class AppGrid {
     if (index < 0 || target < 0 || target >= order.length) return;
     [order[index], order[target]] = [order[target], order[index]];
     state.set("googleAppsOrder", order);
-    this.els.grid
-      .querySelector(`.app-item[data-app-id="${CSS.escape(id)}"]`)
-      ?.focus();
   }
 
   updateVisibility() {

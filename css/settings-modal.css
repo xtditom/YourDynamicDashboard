@@ -423,7 +423,11 @@
   font-size: 0.75rem;
   padding: 0.75rem 1.25rem;
   flex-shrink: 0;
-  cursor: grab;
+  cursor: var(--drag-cursor), grab;
+}
+.fs-footer:active,
+#full-settings-modal.is-dragging .fs-footer {
+  cursor: var(--drag-cursor), grabbing;
 }
 .fs-footer a {
   cursor: pointer;

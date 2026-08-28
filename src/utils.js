@@ -255,7 +255,6 @@ export function showCustomModal(
       }
     };
     document.addEventListener("keydown", dialogKeyHandler);
-    window.setTimeout(() => box.querySelector("button, input")?.focus(), 0);
   });
 }
 
@@ -334,11 +333,6 @@ export function showCustomPrompt(message, defaultValue = "") {
     void box.offsetWidth;
     box.style.opacity = "1";
     box.style.transform = "scale(1)";
-
-    setTimeout(() => {
-      input.focus();
-      input.select();
-    }, 100);
 
     const cleanup = (result) => {
       document.removeEventListener("keydown", promptKeyHandler);

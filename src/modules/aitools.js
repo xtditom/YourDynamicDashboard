@@ -611,7 +611,6 @@ export class AiTools {
     if (this.addToolModal) return;
 
     const isSocial = type === "social";
-    const previousFocus = document.activeElement;
     const overlay = document.createElement("div");
     overlay.className = "ydd-add-tool-overlay";
     overlay.setAttribute("role", "presentation");
@@ -709,7 +708,6 @@ export class AiTools {
     document.body.appendChild(overlay);
     this.addToolModal = {
       overlay,
-      previousFocus,
       close: (immediate = false) => closeModal(immediate),
     };
 
@@ -780,11 +778,6 @@ export class AiTools {
       const remove = () => {
         if (overlay.isConnected) overlay.remove();
         if (this.addToolModal?.overlay === overlay) this.addToolModal = null;
-        const focusTarget =
-          previousFocus?.isConnected && !previousFocus.classList.contains("hidden")
-            ? previousFocus
-            : this.els.editBtn;
-        if (focusTarget?.focus) window.setTimeout(() => focusTarget.focus(), 0);
       };
       if (immediate) remove();
       else window.setTimeout(remove, 220);
@@ -947,7 +940,6 @@ export class AiTools {
     document.addEventListener("keydown", keyHandler, true);
     window.requestAnimationFrame(() => {
       overlay.classList.add("is-open");
-      iconLabel.focus();
     });
   }
 
@@ -1044,7 +1036,6 @@ export class AiTools {
     if (index < 0 || target < 0 || target >= order.length) return;
     [order[index], order[target]] = [order[target], order[index]];
     state.set(orderKey, order);
-    this.els.popup.querySelector(`[data-id="${CSS.escape(id)}"]`)?.focus();
   }
 }
 // [src/modules/aitools.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

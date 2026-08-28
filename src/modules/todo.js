@@ -156,7 +156,6 @@ export class TodoManager {
     };
 
     itemElement.replaceChild(input, textElement);
-    input.focus();
   }
 
   toggleStatus(index) {
@@ -208,7 +207,6 @@ export class TodoManager {
     ) return;
     [todos[index], todos[target]] = [todos[target], todos[index]];
     state.set("todos", todos);
-    window.setTimeout(() => this.els.list?.querySelectorAll(".todo-item")[target]?.focus(), 0);
   }
 
   getNormalizedTodos() {
