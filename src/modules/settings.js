@@ -28,6 +28,7 @@ import {
 
 const RANDOM_BG_QUEUE_TARGET = 2;
 const RANDOM_BG_PREVIEW_WIDTH = 480;
+const RANDOM_BG_FETCH_TIMEOUT_MS = 12000;
 const RANDOM_BG_SCHEDULES = Object.freeze({
   refresh: { label: "Every refresh", interval: null },
   "30s": { label: "Every 30 seconds", interval: 30_000 },
@@ -873,6 +874,7 @@ export class SettingsManager {
     SettingsManager.instance = this;
     SettingsManager.THEMES = THEMES;
     this._backgroundOperationId = 0;
+    this._backgroundReady = Promise.resolve();
     this._randomBgScheduleTimer = null;
     this._activeBackgroundObjectUrl = null;
     this._locationRequestId = 0;
@@ -1071,6 +1073,10 @@ export class SettingsManager {
     });
   }
 
+  whenBackgroundReady() {
+    return this._backgroundReady || Promise.resolve();
+  }
+
   loadInitialState() {
     this.bindSimpleToggle(this.els.clockType, "clockType", "analog");
     this.bindSimpleToggle(this.els.clockFormat, "clockFormat", "24");
@@ -1170,10 +1176,11 @@ export class SettingsManager {
     const bg = state.get("backgroundImage");
     const randomBgMode = state.get("randomBgMode");
     const randomBgTime = state.get("randomBgTime");
+    let backgroundReady = Promise.resolve();
 
     if (randomBgMode === "random") {
       document.body.classList.add("has-custom-bg");
-      this.initializeRandomBackground();
+      backgroundReady = this.initializeRandomBackground();
     } else if (randomBgMode === "freeze") {
       document.body.classList.add("has-custom-bg");
       if (randomBgTime === -1) {
@@ -1184,7 +1191,7 @@ export class SettingsManager {
         }
         if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
       } else if (randomBgTime && Date.now() - randomBgTime > 259200000) {
-        this.fetchRandomBackground("startup");
+        backgroundReady = this.fetchRandomBackground("startup");
       } else if (state.get("savedBgUrl")) {
         document.body.style.backgroundImage = `url(${state.get("savedBgUrl")})`;
         if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
@@ -1200,7 +1207,7 @@ export class SettingsManager {
       document.body.classList.remove("has-custom-bg");
     }
 
-    secondStorage
+    const storedBackgroundReady = secondStorage
       .getImage()
       .then((blob) => {
         if (blob) {
@@ -1210,6 +1217,10 @@ export class SettingsManager {
         }
       })
       .catch((err) => console.error("IndexedDB load error:", err));
+    this._backgroundReady = Promise.allSettled([
+      backgroundReady,
+      storedBackgroundReady,
+    ]).then(() => undefined);
 
     this.updateRandomBgButtons();
     this.updateAutoThemeGlowState();
@@ -3275,7 +3286,7 @@ export class SettingsManager {
     return consumed;
   }
 
-  async _fetchRandomWallpaper(excludedUrls = []) {
+  async _fetchRandomWallpaper(excludedUrls = [], { priority = "high" } = {}) {
     const width = Math.max(800, Math.min(1920, Math.round(window.innerWidth)));
     const height = Math.max(600, Math.min(1080, Math.round(window.innerHeight)));
     const excluded = new Set(
@@ -3284,37 +3295,58 @@ export class SettingsManager {
       ).map((url) => this._getRandomBackgroundIdentity(url)),
     );
 
+    let lastError = null;
     for (let attempt = 0; attempt < 5; attempt += 1) {
       const cacheKey = `${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0]}`;
-      const response = await fetch(
-        `https://picsum.photos/${width}/${height}?random=${cacheKey}`,
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(
+        () => controller.abort(),
+        RANDOM_BG_FETCH_TIMEOUT_MS,
       );
-      if (!response.ok) {
-        throw new Error(`Wallpaper service returned ${response.status}.`);
-      }
+      try {
+        const response = await fetch(
+          `https://picsum.photos/${width}/${height}?random=${cacheKey}`,
+          {
+            signal: controller.signal,
+            credentials: "omit",
+            cache: "no-store",
+            referrerPolicy: "no-referrer",
+            priority,
+          },
+        );
+        if (!response.ok) {
+          throw new Error(`Wallpaper service returned ${response.status}.`);
+        }
 
-      const finalUrl = response.url;
-      if (!finalUrl) throw new Error("Wallpaper service returned no image URL.");
-      if (excluded.has(this._getRandomBackgroundIdentity(finalUrl))) {
-        response.body?.cancel?.();
-        continue;
-      }
+        const finalUrl = response.url;
+        if (!finalUrl) throw new Error("Wallpaper service returned no image URL.");
+        if (excluded.has(this._getRandomBackgroundIdentity(finalUrl))) {
+          await response.body?.cancel?.();
+          continue;
+        }
 
-      const wallpaperBlob = await response.blob();
-      await validateImageBlob(wallpaperBlob, {
-        maxBytes: 20 * 1024 * 1024,
-        maxWidth: 4096,
-        maxHeight: 4096,
-        maxPixels: 20_000_000,
-      });
-      return {
-        url: finalUrl,
-        blob: wallpaperBlob,
-        preview: await this._createRandomBackgroundPreview(wallpaperBlob),
-      };
+        const wallpaperBlob = await response.blob();
+        await validateImageBlob(wallpaperBlob, {
+          maxBytes: 20 * 1024 * 1024,
+          maxWidth: 4096,
+          maxHeight: 4096,
+          maxPixels: 20_000_000,
+        });
+        return {
+          url: finalUrl,
+          blob: wallpaperBlob,
+          preview: await this._createRandomBackgroundPreview(wallpaperBlob),
+        };
+      } catch (error) {
+        lastError = error?.name === "AbortError"
+          ? new Error("Wallpaper request timed out.")
+          : error;
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
     }
 
-    throw new Error("Wallpaper service repeatedly returned the current image.");
+    throw lastError || new Error("Wallpaper service repeatedly returned the current image.");
   }
 
   async _advanceRandomBackground(origin = "schedule", operationId = null) {
@@ -3425,50 +3457,16 @@ export class SettingsManager {
 
     try {
       const currentUrls = this._getRandomBackgroundCurrentUrls();
-      const results = await Promise.allSettled([
-        this._fetchRandomWallpaper(currentUrls),
-        this._fetchRandomWallpaper(currentUrls),
-      ]);
-      if (operationId !== this._backgroundOperationId) return;
-
-      const entries = results
-        .filter((result) => result.status === "fulfilled")
-        .map((result) => result.value);
-      if (entries.length === 0) {
-        throw new Error("No valid random wallpaper was returned.");
-      }
-
-      const uniqueEntries = [];
-      const knownUrls = new Set(
-        currentUrls
-          .map((url) => this._getRandomBackgroundIdentity(url))
-          .filter(Boolean),
-      );
-      entries.forEach((entry) => {
-        const identity = this._getRandomBackgroundIdentity(entry.url);
-        if (!identity || knownUrls.has(identity)) return;
-        knownUrls.add(identity);
-        uniqueEntries.push(entry);
+      const currentEntry = await this._fetchRandomWallpaper(currentUrls, {
+        priority: "high",
       });
-      while (uniqueEntries.length < 2) {
-        try {
-          const entry = await this._fetchRandomWallpaper(
-            [...currentUrls, ...uniqueEntries.map((item) => item.url)],
-          );
-          const identity = this._getRandomBackgroundIdentity(entry.url);
-          if (!identity || knownUrls.has(identity)) continue;
-          knownUrls.add(identity);
-          uniqueEntries.push(entry);
-        } catch (error) {
-          break;
-        }
-      }
-      const [currentEntry, ...nextEntries] = uniqueEntries;
-      if (!currentEntry) throw new Error("No valid random wallpaper was returned.");
+      if (operationId !== this._backgroundOperationId) return;
       if (!(await this._useRandomBackgroundEntry(currentEntry, operationId))) return;
-      await this._persistRandomBackgroundQueue(nextEntries);
+      await this._persistRandomBackgroundQueue([]);
       this._syncBackgroundControls();
-      void this._fillRandomBackgroundQueue(operationId, nextEntries);
+      // The current wallpaper is the foreground operation. Refill the queue
+      // afterward at low priority so it cannot compete with weather or RSS.
+      void this._fillRandomBackgroundQueue(operationId, []);
     } catch (error) {
       if (operationId === this._backgroundOperationId) {
         console.error("Initial random background failed:", error);
@@ -3493,10 +3491,13 @@ export class SettingsManager {
         storedQueue = await this._getStoredRandomBackgroundQueue();
         if (storedQueue.length >= RANDOM_BG_QUEUE_TARGET) break;
 
-        const entry = await this._fetchRandomWallpaper([
-          ...this._getRandomBackgroundCurrentUrls(),
-          ...storedQueue.map((item) => item.url),
-        ]);
+        const entry = await this._fetchRandomWallpaper(
+          [
+            ...this._getRandomBackgroundCurrentUrls(),
+            ...storedQueue.map((item) => item.url),
+          ],
+          { priority: "low" },
+        );
         if (
           operationId !== this._backgroundOperationId ||
           state.get("randomBgMode") !== "random"

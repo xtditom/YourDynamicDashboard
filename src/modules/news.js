@@ -16,6 +16,7 @@ const MAX_NEWS_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 12000;
 const LOCK_KEY = "ydd_news_fetch_lock";
 const LOCK_TTL_MS = 30000;
+const PAGE_START_TIME = globalThis.performance?.now?.() ?? Date.now();
 
 const api = globalThis.browser || globalThis.chrome;
 
@@ -410,7 +411,7 @@ async function requestNewsConsent() {
 export class NewsManager {
   constructor() {
     this.container = document.getElementById("news-feed-container");
-    this.pageLoadedAt = globalThis.performance?.now?.() ?? Date.now();
+    this.pageLoadedAt = PAGE_START_TIME;
     this.timer = null;
     this.ageTimer = null;
     this.lastRenderedCacheKey = "";
@@ -934,6 +935,21 @@ export class NewsManager {
       const provider = NEWS_PROVIDERS.find((entry) => entry.id === item.providerId);
       const card = document.createElement("a");
       card.className = "news-card";
+      const animationsDisabled =
+        state.get("disableAnimations") === true ||
+        document.documentElement.classList.contains("disable-animations");
+      if (!animationsDisabled) {
+        card.classList.add("news-card-entering");
+        card.addEventListener(
+          "animationend",
+          (event) => {
+            if (!event.animationName.startsWith("news-card-intro-")) return;
+            card.classList.remove("news-card-entering");
+            card.style.removeProperty("--news-intro-delay");
+          },
+          { once: true },
+        );
+      }
       card.style.setProperty("--news-intro-delay", `${160 + index * 115}ms`);
       card.href = item.url;
       card.target = target;
@@ -990,10 +1006,6 @@ export class NewsManager {
     this.scheduleAgeTicker();
     window.requestAnimationFrame(() => {
       if (this.container) this.container.classList.add("news-intro-ready");
-    });
-    items.forEach((_, index) => {
-      const card = list.children[index];
-      window.setTimeout(() => card?.style.removeProperty("--news-intro-delay"), 1010 + index * 115);
     });
   }
 }

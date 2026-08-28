@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initialize("Interaction Policy", () => installInteractionPolicy(document));
   initialize("Zen Mode", () => new ZenModeController());
   initialize("Clock", () => new Clock());
-  initialize("Weather", () => new Weather());
   initialize("Search", () => new Search());
   initialize("Quote", () => new QuoteWidget());
 
@@ -69,12 +68,33 @@ document.addEventListener("DOMContentLoaded", () => {
   initialize("Google Apps", () => new AppGrid());
   initialize("AI Tools", () => new AiTools());
   initialize("Shortcuts", () => new Shortcuts());
-  initialize("News Feeds", () => new NewsManager());
-  initialize("Settings", () => new SettingsManager());
-  initialize("Full Settings", () => new FullSettingsModal());
-  initialize("Keyboard", () => new KeyboardManager());
-  initialize("Command Palette", () => new CommandPalette());
-  initialize("Welcome popup", () => manageWelcomePopup());
+  const settingsManager = initialize("Settings", () => new SettingsManager());
+
+  // Keep startup phases ordered. Local/visible UI is initialized first;
+  // SettingsManager starts the optional background phase; network-backed
+  // weather and RSS work begin only after that phase has settled.
+  const continueStartup = Promise.resolve(
+    settingsManager?.whenBackgroundReady?.(),
+  )
+    .catch((error) => {
+      console.error("[YDD] Background startup failed:", error);
+    })
+    .then(() => {
+      const weather = initialize("Weather", () => new Weather());
+      return Promise.resolve(weather?.ready).catch((error) => {
+        console.error("[YDD] Weather startup failed:", error);
+      });
+    })
+    .then(() => {
+      initialize("News Feeds", () => new NewsManager());
+      initialize("Full Settings", () => new FullSettingsModal());
+      initialize("Keyboard", () => new KeyboardManager());
+      initialize("Command Palette", () => new CommandPalette());
+      initialize("Welcome popup", () => manageWelcomePopup());
+    });
+  void continueStartup.catch((error) => {
+    console.error("[YDD] Deferred startup failed:", error);
+  });
 
   // --- VISUAL CONTROLLER ---
   if (state.get("transparencyActive"))

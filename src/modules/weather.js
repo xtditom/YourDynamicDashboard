@@ -7,6 +7,8 @@ import {
 } from "../utils.js";
 import { SettingsManager } from "./settings.js";
 
+const WEATHER_FETCH_TIMEOUT_MS = 12000;
+
 export class Weather {
   constructor() {
     this.els = {
@@ -30,6 +32,7 @@ export class Weather {
     this._searchRequestId = 0;
     this._searchController = null;
     this._refreshTimer = null;
+    this.ready = Promise.resolve();
     this._visibilityHandler = () => this.handleVisibilityChange();
     this.init();
   }
@@ -52,7 +55,7 @@ export class Weather {
     }
 
     document.addEventListener("visibilitychange", this._visibilityHandler);
-    this.fetchData();
+    this.ready = this.fetchData();
     this.syncRefreshTimer();
 
     state.subscribe((key) => {
@@ -63,7 +66,12 @@ export class Weather {
       } else if (key === "locationUpdate") {
         if (!document.hidden) this.fetchData();
       }
-      if (key === "widgetControl") this.syncRefreshTimer();
+      if (key === "widgetControl") {
+        this.syncRefreshTimer();
+        if (!document.hidden && this.isWeatherVisible()) {
+          void this.fetchData();
+        }
+      }
     });
   }
 
@@ -168,7 +176,7 @@ export class Weather {
 
   // --- SECTION: DATA FETCHING ---
   async fetchData(onlyRender = false) {
-    if (document.hidden) return;
+    if (document.hidden || !this.isWeatherVisible()) return;
     const requestId = ++this._weatherRequestId;
     this._weatherController?.abort();
     this._weatherController = null;
@@ -198,11 +206,21 @@ export class Weather {
 
       const controller = new AbortController();
       this._weatherController = controller;
+      const timeoutId = window.setTimeout(
+        () => controller.abort(),
+        WEATHER_FETCH_TIMEOUT_MS,
+      );
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=celsius&timezone=auto`;
 
-      const res = await fetch(url, { signal: controller.signal });
-      if (!res.ok) throw new Error(`Weather request failed (${res.status})`);
-      const data = await res.json();
+      let res;
+      let data;
+      try {
+        res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) throw new Error(`Weather request failed (${res.status})`);
+        data = await res.json();
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
       const current = data?.current;
       const daily = data?.daily;
       const validCurrent =

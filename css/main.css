@@ -128,6 +128,25 @@ body.has-custom-bg.gradient-mode-active.gradient-light #full-settings-modal {
   backdrop-filter: blur(5px) !important;
 }
 
+/* A light gradient remains active behind a custom wallpaper. Give the
+   wallpaper state priority for checked toggles so it cannot leak the
+   gradient's active color into the switch track. The pending selector covers
+   the short IndexedDB loading window before body.has-custom-bg is added. */
+body.has-custom-bg.gradient-mode-active.gradient-light
+  .toggle-switch input:checked + .slider,
+html.ydd-custom-bg-pending body.gradient-mode-active.gradient-light
+  .toggle-switch input:checked + .slider {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+body.has-custom-bg.gradient-mode-active.gradient-light
+  .toggle-switch input:checked + .slider::before,
+html.ydd-custom-bg-pending body.gradient-mode-active.gradient-light
+  .toggle-switch input:checked + .slider::before {
+  background-color: #000000 !important;
+}
+
 /* Dashboard asset images belong to their owning control, not a separate
    browser image resource. Keep normal parent clicks and hover states intact
    while preventing image dragging and image-level new-tab actions. */
