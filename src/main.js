@@ -168,11 +168,11 @@ document.addEventListener("DOMContentLoaded", () => {
 // --- POPUP MANAGER ---
 function manageWelcomePopup() {
   const overlay = document.getElementById("welcome-modal-overlay");
-  const closeBtn = document.getElementById("welcome-modal-close");
+  const dialog = document.getElementById("welcome-modal");
 
-  if (!overlay || !closeBtn) return;
+  if (!overlay || !dialog) return;
 
-  const versionKey = "welcomeShown_v2.0_widescreen";
+  const versionKey = "welcomeShown_v3.0.0";
   const alreadyShown = localStorage.getItem(versionKey);
   const previousFocus = document.activeElement;
   overlay.inert = true;
@@ -210,10 +210,12 @@ function manageWelcomePopup() {
     overlay.setAttribute("aria-hidden", "false");
     overlay.inert = false;
     document.addEventListener("keydown", onKeyDown);
-    window.setTimeout(() => closeBtn.focus(), 0);
+    window.setTimeout(() => dialog.focus({ preventScroll: true }), 0);
   }
 
-  closeBtn.addEventListener("click", closeWelcome);
+  overlay
+    .querySelectorAll("[data-welcome-dismiss]")
+    .forEach((button) => button.addEventListener("click", closeWelcome));
 }
 
 const yearSpan = document.getElementById("copyright-year");

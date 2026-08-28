@@ -609,267 +609,6 @@ body.transparency-active .ydd-custom-modal-overlay {
   transform: translateX(16px);
 }
 
-/* --- 12. WELCOME MODAL V3.0.0 --- */
-#welcome-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(15px);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.3s ease, visibility 0s linear 0s;
-}
-#welcome-modal-overlay.hidden {
-  opacity: 0;
-  pointer-events: none;
-  display: flex !important;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
-}
-#welcome-modal {
-  background: linear-gradient(145deg, #121212, #0a0a0a);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
-  border-radius: 20px;
-  width: 95%;
-  max-width: 950px;
-  padding: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  color: #f0f0f0;
-  font-family: inherit;
-  opacity: 0;
-  transform: scale(0.96);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-/* Preserve the original Lexend-mode modal typography. */
-html[data-font-family="lexend"] .ydd-custom-modal-overlay {
-  font-family: "Inter", system-ui, sans-serif;
-}
-#welcome-modal-overlay:not(.hidden) #welcome-modal {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.modal-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-.version-badge {
-  background: rgba(199, 255, 0, 0.1);
-  color: #c8ff00;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  border: 1px solid rgba(199, 255, 0, 0.3);
-  text-transform: uppercase;
-}
-.modal-header h1 {
-  font-size: 2.2rem;
-  margin: 1rem 0 0.5rem 0;
-  font-weight: 800;
-  background: linear-gradient(to right, #ffffff, #a0a0a0);
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.modal-header p {
-  color: #888;
-  font-size: 1.05rem;
-  margin: 0;
-}
-
-.section-title {
-  font-size: 0.85rem;
-  color: #60a5fa;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  opacity: 0.9;
-}
-
-.feature-row-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-.feature-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-top: 3px solid #3b82f6; 
-  padding: 1.2rem;
-  border-radius: 12px;
-  transition:
-    transform 0.2s,
-    background 0.2s,
-    box-shadow 0.2s;
-}
-.feature-card.new-glow:hover {
-  background: rgba(255, 255, 255, 0.04);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.1);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 0.5rem;
-}
-.card-header .icon {
-  font-size: 1.5rem;
-}
-.card-header h3 {
-  margin: 0;
-  font-size: 1rem;
-  color: #fff;
-  font-weight: 700;
-}
-.feature-card p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #aaa;
-  line-height: 1.4;
-}
-
-.modal-split-bottom {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 3rem;
-}
-.modern-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.modern-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-.modern-list .list-icon {
-  font-size: 1.2rem;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 6px;
-  border-radius: 8px;
-}
-.modern-list strong {
-  color: #e0e0e0;
-  font-weight: 600;
-  display: block;
-  margin-bottom: 2px;
-}
-.modern-list span {
-  color: #888;
-  font-size: 0.85rem;
-}
-
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.tag {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  color: #ccc;
-}
-.alert-tag {
-  background: rgba(56, 255, 106, 0.1);
-  color: #38ff6a;
-  border-color: rgba(56, 255, 106, 0.3);
-  font-weight: bold;
-}
-.alert-tag-2 {
-  background: rgba(200, 255, 0, 0.1);
-  color: #e5ff00;
-  border-color: rgba(200, 255, 0, 0.3);
-  font-weight: bold;
-}
-
-.modal-footer {
-  margin-top: 2rem;
-  text-align: center;
-}
-#release-notes-btn {
-  display: inline-block;
-  width: 100%;
-  padding: 14px;
-  background: #fff;
-  color: #000;
-  text-decoration: none;
-  font-weight: 800;
-  font-size: 1rem;
-  border-radius: 12px;
-  transition:
-    transform 0.2s,
-    filter 0.2s;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-}
-#release-notes-btn:hover {
-  filter: brightness(0.9);
-  transform: translateY(-1px);
-}
-.arrow {
-  display: inline-block;
-  transition: transform 0.2s;
-}
-#release-notes-btn:hover .arrow {
-  transform: translateX(4px);
-}
-#welcome-modal-close {
-  position: absolute;
-  top: 20px;
-  right: 25px;
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 2rem;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-#welcome-modal-close:hover {
-  color: #fff;
-}
-
-@media (max-width: 800px) {
-  #welcome-modal {
-    width: 95%;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 1.5rem;
-  }
-  .feature-row-3 {
-    grid-template-columns: 1fr;
-    gap: 0.8rem;
-  }
-  .modal-split-bottom {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-  .modal-header h1 {
-    font-size: 1.8rem;
-  }
-}
-
 html.zen-mode-preload .corner-button,
 html.zen-mode-preload #shortcuts-container,
 html.zen-mode-preload #news-feed-container,
@@ -1275,6 +1014,466 @@ html.high-bg-blur body.has-custom-bg .settings-dropdown,
 html.high-bg-blur body.has-custom-bg .dropdown-item {
   backdrop-filter: blur(3px) !important;
   -webkit-backdrop-filter: blur(3px) !important;
+}
+
+/* --- 12. ISOLATED NEW USER WELCOME MODAL --- */
+#welcome-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.86) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.22s ease,
+    visibility 0s linear 0s;
+}
+
+body.transparency-active #welcome-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.86) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+#welcome-modal-overlay.hidden {
+  display: flex !important;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity 0.22s ease,
+    visibility 0s linear 0.22s;
+}
+
+.ydd-welcome-dialog {
+  --ydd-welcome-silver: linear-gradient(
+    112deg,
+    #f7f7f7 0%,
+    #f7f7f7 74%,
+    #afafaf 100%
+  );
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  width: min(100%, 560px);
+  max-height: calc(100vh - 2rem);
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 2rem;
+  border: 1px solid rgba(247, 247, 247, 0.32);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(247, 247, 247, 0.035),
+      rgba(175, 175, 175, 0.012)
+    ),
+    #090a0c;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.78),
+    inset 0 1px 0 rgba(247, 247, 247, 0.05);
+  color: #f7f7f7;
+  font-family: inherit;
+  opacity: 0;
+  transform: translateY(8px) scale(0.985);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+#welcome-modal-overlay:not(.hidden) .ydd-welcome-dialog {
+  animation: ydd-welcome-fade-in 0.58s ease-out both;
+}
+
+.ydd-welcome-dialog:focus {
+  outline: none;
+}
+
+.ydd-welcome-dialog::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ydd-welcome-dialog::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(#f7f7f7, #afafaf);
+}
+
+.ydd-welcome-silver-text {
+  color: #f7f7f7;
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .ydd-welcome-dialog .ydd-welcome-silver-text {
+    background-image: var(--ydd-welcome-silver);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.ydd-welcome-version {
+  display: flex;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.72rem;
+  border: 1px solid rgba(247, 247, 247, 0.42);
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgba(247, 247, 247, 0.12),
+    rgba(175, 175, 175, 0.05)
+  );
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.ydd-welcome-hero {
+  width: 100%;
+  margin: 1.1rem 0 1.25rem;
+  padding: 0;
+  text-align: center;
+}
+
+.ydd-welcome-hero h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.ydd-welcome-hero p {
+  max-width: 30rem;
+  margin: 0.75rem auto 0;
+  padding: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.ydd-welcome-hero p > span,
+.ydd-welcome-about p > span,
+.ydd-welcome-support-copy p > span,
+.ydd-welcome-footer > span {
+  display: block;
+}
+
+.ydd-welcome-about {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(247, 247, 247, 0.12);
+  border-left: 3px solid #f7f7f7;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(247, 247, 247, 0.055),
+    rgba(175, 175, 175, 0.02)
+  );
+  text-align: left;
+}
+
+.ydd-welcome-about h2,
+.ydd-welcome-about p {
+  width: 100%;
+  margin-right: 0;
+  margin-left: 0;
+  padding: 0;
+}
+
+.ydd-welcome-about h2 {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 0.98rem;
+  font-weight: 650;
+  line-height: 1.3;
+  text-align: right;
+}
+
+.ydd-welcome-about p {
+  margin-top: 0.42rem;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.ydd-welcome-about p > span {
+  text-align: left;
+}
+
+.ydd-welcome-support {
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: stretch;
+  margin: 1rem 0 0;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(247, 247, 247, 0.12);
+  border-right: 3px solid #f7f7f7;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(247, 247, 247, 0.055),
+    rgba(175, 175, 175, 0.02)
+  );
+  text-align: left;
+}
+
+.ydd-welcome-support-copy {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  justify-self: stretch;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.ydd-welcome-support-copy h2,
+.ydd-welcome-support-copy p,
+.ydd-welcome-support-copy h2 > span,
+.ydd-welcome-support-copy p > span {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-right: 0;
+  margin-left: 0;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.ydd-welcome-support-copy h2 {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 0.98rem;
+  font-weight: 650;
+  line-height: 1.3;
+  text-align: right;
+}
+
+.ydd-welcome-support-copy p {
+  margin-top: 0.42rem;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.ydd-welcome-support-copy p > span {
+  text-align: left;
+}
+
+.ydd-welcome-store-actions {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+}
+
+.ydd-welcome-action {
+  display: flex;
+  min-width: 0;
+  min-height: 2.35rem;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid rgba(247, 247, 247, 0.32);
+  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(247, 247, 247, 0.09),
+    rgba(175, 175, 175, 0.035)
+  );
+  color: #f7f7f7;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.ydd-welcome-action > span {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.ydd-welcome-action:hover {
+  border-color: #f7f7f7;
+  background: linear-gradient(
+    135deg,
+    rgba(247, 247, 247, 0.18),
+    rgba(247, 247, 247, 0.11) 74%,
+    rgba(175, 175, 175, 0.1)
+  );
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(247, 247, 247, 0.12);
+  transform: translateY(-1px);
+}
+
+.ydd-welcome-action:focus-visible {
+  outline: 2px solid #f7f7f7;
+  outline-offset: 2px;
+}
+
+.ydd-welcome-footer {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin: 1rem 0 0;
+  padding: 0.9rem 0 0;
+  border-top: 1px solid rgba(247, 247, 247, 0.12);
+}
+
+.ydd-welcome-footer > span {
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.ydd-welcome-cta {
+  opacity: 0;
+  transform: translateY(1rem);
+  flex: 0 0 auto;
+  min-height: 2.45rem;
+  border-color: rgba(247, 247, 247, 0.62);
+  background: linear-gradient(
+    135deg,
+    rgba(247, 247, 247, 0.14),
+    rgba(175, 175, 175, 0.06)
+  );
+  white-space: nowrap;
+}
+
+/* Reveal the two content cards from opposite sides after the modal appears. */
+#welcome-modal-overlay:not(.hidden) .ydd-welcome-about {
+  animation: ydd-welcome-slide-in-left 0.56s cubic-bezier(0.22, 0.8, 0.28, 1)
+    0.68s both;
+}
+
+#welcome-modal-overlay:not(.hidden) .ydd-welcome-support {
+  animation: ydd-welcome-slide-in-right 0.56s cubic-bezier(0.22, 0.8, 0.28, 1)
+    0.84s both;
+}
+
+#welcome-modal-overlay:not(.hidden) .ydd-welcome-cta {
+  animation: ydd-welcome-slide-up 0.5s cubic-bezier(0.22, 0.8, 0.28, 1) 1.8s
+    both;
+}
+
+@keyframes ydd-welcome-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ydd-welcome-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-2rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ydd-welcome-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(2rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ydd-welcome-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #welcome-modal-overlay:not(.hidden) .ydd-welcome-dialog,
+  #welcome-modal-overlay:not(.hidden) .ydd-welcome-about,
+  #welcome-modal-overlay:not(.hidden) .ydd-welcome-support,
+  #welcome-modal-overlay:not(.hidden) .ydd-welcome-cta {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .ydd-welcome-dialog {
+    width: 94vw;
+    max-height: calc(100vh - 1.5rem);
+    padding: 1.3rem;
+    border-radius: 15px;
+  }
+
+  .ydd-welcome-store-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .ydd-welcome-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ydd-welcome-footer > span {
+    text-align: left;
+  }
+
+  .ydd-welcome-cta {
+    width: 100%;
+  }
+}
+/* Preserve the existing typography contract for dynamically generated modals. */
+html[data-font-family="lexend"] .ydd-custom-modal-overlay {
+  font-family: "Inter", system-ui, sans-serif;
 }
 
 /* [css/modals.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

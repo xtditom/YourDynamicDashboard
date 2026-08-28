@@ -153,10 +153,16 @@ export const FONT_OPTIONS = Object.freeze([
     stack: '"Roboto", system-ui, sans-serif',
   }),
   Object.freeze({
-    id: "poppins",
-    label: "Poppins",
-    googleFamily: "Poppins:wght@400;500;600;700",
-    stack: '"Poppins", system-ui, sans-serif',
+    id: "manrope",
+    label: "Manrope",
+    googleFamily: "Manrope:wght@400;500;600;700",
+    stack: '"Manrope", system-ui, sans-serif',
+  }),
+  Object.freeze({
+    id: "outfit",
+    label: "Outfit",
+    googleFamily: "Outfit:wght@400;500;600;700",
+    stack: '"Outfit", system-ui, sans-serif',
   }),
   Object.freeze({
     id: "nunito",

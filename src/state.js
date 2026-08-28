@@ -52,7 +52,13 @@ class StateManager {
 
   normalizeValue(key, value) {
     if (key === "fontFamily") {
-      const fontId = String(value || "");
+      const savedFontId = String(value || "");
+      const legacyFontAliases = {
+        poppins: "manrope",
+        "dm-sans": "outfit",
+        montserrat: "outfit",
+      };
+      const fontId = legacyFontAliases[savedFontId] || savedFontId;
       if (!FONT_OPTIONS.some((font) => font.id === fontId)) {
         throw new TypeError("Invalid font family");
       }

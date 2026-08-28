@@ -19,12 +19,13 @@
 
 /* --- LIGHT GRADIENT DASHBOARD SURFACES ---
    Mirrors the legacy dashboard: white transparency over the active gradient,
-   with no glass blur. This is limited to dashboard widgets and search
-   surfaces, so Full Settings and other theme modes retain their own styles. */
+   with no glass blur. This also covers dashboard popup containers, while
+   Full Settings and other theme modes retain their own styles. */
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) .widget-container,
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #search-dropdown,
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #sh-quick-dropdown,
-body.gradient-mode-active.gradient-light:not(.has-custom-bg) .sh-modal {
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) .sh-modal,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) .popup-container {
   --bg-secondary: rgba(255, 255, 255, 0.25) !important;
   --bg-tertiary: rgba(255, 255, 255, 0.35) !important;
   --bg-interactive: rgba(255, 255, 255, 0.5) !important;
@@ -50,8 +51,18 @@ body.gradient-mode-active.gradient-light:not(.has-custom-bg) .sh-modal {
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) .widget-container *,
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #search-dropdown *,
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #sh-quick-dropdown *,
-body.gradient-mode-active.gradient-light:not(.has-custom-bg) .sh-modal * {
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) .sh-modal *,
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) .popup-container * {
   text-shadow: none !important;
+}
+
+/* Match the old dashboard's local glass treatment: only the area inside a
+   popup samples and blurs what is directly behind it. The rest of the
+   dashboard remains untouched and sharp. */
+body.gradient-mode-active.gradient-light:not(.has-custom-bg) .popup-container {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  backdrop-filter: blur(4px) !important;
 }
 
 /* The clock area stays white on light gradients. */
@@ -124,5 +135,169 @@ body.has-custom-bg.gradient-mode-active.gradient-light #full-settings-modal {
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
-  user-drag: none;
+}
+
+/* Give placeholder-bearing fields the requested grey surface in only the
+   three requested light presets. Other presets, gradients, and wallpapers
+   keep their existing control backgrounds. */
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
+  input[placeholder]:not(#search-input):not(#cp-search-input),
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
+  textarea[placeholder],
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  input[placeholder]:not(#search-input):not(#cp-search-input),
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  textarea[placeholder],
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  input[placeholder]:not(#search-input):not(#cp-search-input),
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  textarea[placeholder] {
+  background: #c7c7c7 !important;
+}
+
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
+  .fs-about-row
+  .icon-button,
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
+  #add-shortcut-form
+  button,
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
+  #fs-add-shortcut-form
+  button,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  .fs-about-row
+  .icon-button,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  #add-shortcut-form
+  button,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  #fs-add-shortcut-form
+  button,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  .fs-about-row
+  .icon-button,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  #add-shortcut-form
+  button,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  #fs-add-shortcut-form
+  button {
+  background-color: #c7c7c7 !important;
+}
+
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  input[placeholder]:not(#search-input):not(#cp-search-input),
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  textarea[placeholder],
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  .fs-about-row
+  .icon-button,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  #add-shortcut-form
+  button,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  #fs-add-shortcut-form
+  button {
+  /* 70% #c7c7c7 + 30% Minty Fresh #90c69e. */
+  background: #b7c7bb !important;
+  background: color-mix(in srgb, #c7c7c7 70%, #90c69e 30%) !important;
+}
+
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  input[placeholder]:not(#search-input):not(#cp-search-input),
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  textarea[placeholder],
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  .fs-about-row
+  .icon-button,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  #add-shortcut-form
+  button,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  #fs-add-shortcut-form
+  button {
+  /* 70% #c7c7c7 + 30% Lavender Mist #ded6ff. */
+  background: #ceccd8 !important;
+  background: color-mix(in srgb, #c7c7c7 70%, #ded6ff 30%) !important;
+}
+
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
+  .fs-about-row
+  .icon-button:hover,
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
+  #add-shortcut-form
+  button:hover,
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
+  #fs-add-shortcut-form
+  button:hover,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  .fs-about-row
+  .icon-button:hover,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  #add-shortcut-form
+  button:hover,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  #fs-add-shortcut-form
+  button:hover,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  .fs-about-row
+  .icon-button:hover {
+  background-color: #b8b8b8 !important;
+}
+
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  .fs-about-row
+  .icon-button:hover,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  #add-shortcut-form
+  button:hover,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  #fs-add-shortcut-form
+  button:hover {
+  background: #9ca99f !important;
+  background: color-mix(in srgb, #b7c7bb 85%, #000000 15%) !important;
+}
+
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  .fs-about-row
+  .icon-button:hover,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  #add-shortcut-form
+  button:hover,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  #fs-add-shortcut-form
+  button:hover {
+  background: #afadb8 !important;
+  background: color-mix(in srgb, #ceccd8 85%, #000000 15%) !important;
+}
+
+/* Improve Full Settings contrast only for the three light presets whose
+   default white surface makes their controls difficult to distinguish. */
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
+  #full-settings-modal,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
+  #full-settings-modal,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
+  #full-settings-modal {
+  background-color: #d1d1d1 !important;
+}
+
+/* News selection marks use the same color as their provider/type label in
+   every normal theme, rather than the theme accent color. */
+body[data-theme-id="default-light"] .fs-news-choice-check,
+body[data-theme-id="default-dark"] .fs-news-choice-check,
+body[data-theme-id="theme-1"] .fs-news-choice-check,
+body[data-theme-id="theme-2"] .fs-news-choice-check,
+body[data-theme-id="theme-3"] .fs-news-choice-check,
+body[data-theme-id="theme-4"] .fs-news-choice-check,
+body[data-theme-id="theme-5"] .fs-news-choice-check,
+body[data-theme-id="theme-6"] .fs-news-choice-check,
+body[data-theme-id="theme-7"] .fs-news-choice-check,
+body[data-theme-id="theme-8"] .fs-news-choice-check {
+  color: inherit !important;
+}
+
+/* Gradient presets, especially light gradients, use their label color too. */
+body.gradient-mode-active .fs-news-choice-check {
+  color: inherit !important;
 }

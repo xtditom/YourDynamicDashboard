@@ -17,127 +17,115 @@
   </head>
   <body>
     <div id="bg-blur-overlay"></div>
-    <div id="welcome-modal-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title" aria-hidden="true">
-      <div id="welcome-modal" class="v2-1-modal">
-        <button id="welcome-modal-close" aria-label="Close welcome dialog">&times;</button>
+    <div
+      id="welcome-modal-overlay"
+      class="hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="welcome-modal-title"
+      aria-describedby="welcome-modal-description"
+      aria-hidden="true"
+    >
+      <div id="welcome-modal" class="ydd-welcome-dialog" tabindex="-1">
+        <div class="ydd-welcome-version">
+          <span class="ydd-welcome-silver-text">
+            YourDynamicDashboard v3.0.0
+          </span>
+        </div>
 
-        <div class="modal-header">
-          <div class="badge-container">
-            <span class="version-badge">YourDynamicDashboard v3.0.0</span>
-          </div>
-          <h1 id="welcome-modal-title">The Performance & Scaling Update</h1>
-          <p>
-            Rebuilt mobile engine, smart storage, and a powerful local search
-            history.
+        <header class="ydd-welcome-hero">
+          <h1 id="welcome-modal-title">
+            <span class="ydd-welcome-silver-text">
+              Welcome to your new<br />Dynamic Dashboard
+            </span>
+          </h1>
+          <p id="welcome-modal-description">
+            <span class="ydd-welcome-silver-text">
+              Thanks for choosing YDD. Make every new tab useful, personal, and
+              calm.
+            </span>
           </p>
-        </div>
+        </header>
 
-        <div class="modal-content-v2">
-          <div class="section-title">✨ Key Features</div>
-          <div class="feature-row-3">
-            <div class="feature-card new-glow">
-              <div class="card-header">
-                <span class="icon">🔍</span>
-                <h3>Search History</h3>
-              </div>
-              <p>
-                A native-feeling, privacy-first search history with real-time
-                filtering and auto-delete.
-              </p>
-            </div>
-            <div class="feature-card new-glow">
-              <div class="card-header">
-                <span class="icon">🖼️</span>
-                <h3>Custom Icons</h3>
-              </div>
-              <p>
-                Upload and set your own custom image icons for individual web
-                shortcuts.
-              </p>
-            </div>
-            <div class="feature-card new-glow">
-              <div class="card-header">
-                <span class="icon">💧</span>
-                <h3>BG Blur Control</h3>
-              </div>
-              <p>
-                Adjust the blur intensity of your custom backgrounds for perfect
-                UI readability.
-              </p>
-            </div>
+        <section
+          class="ydd-welcome-about"
+          aria-labelledby="welcome-about-title"
+        >
+          <h2 id="welcome-about-title">
+            <span class="ydd-welcome-silver-text">
+              Everything you need, in one place.
+            </span>
+          </h2>
+          <p>
+            <span class="ydd-welcome-silver-text">
+              YourDynamicDashboard brings your clock, tasks, weather, search,
+              shortcuts, apps, AI tools, news, and personalization together in
+              one privacy-first new tab.
+            </span>
+          </p>
+        </section>
+
+        <section
+          class="ydd-welcome-support"
+          aria-labelledby="welcome-rating-title"
+        >
+          <div class="ydd-welcome-support-copy">
+            <h2 id="welcome-rating-title">
+              <span class="ydd-welcome-silver-text">Help YDD Grow</span>
+            </h2>
+            <p>
+              <span class="ydd-welcome-silver-text">
+                If you enjoy YDD, please leave a rating in your browser store.
+                It helps us grow and reach more people.
+              </span>
+            </p>
           </div>
 
-          <div class="modal-split-bottom">
-            <div class="info-group">
-              <div class="section-title">🚀 More Control</div>
-              <ul class="detail-list modern-list">
-                <li>
-                  <span class="list-icon">📱</span>
-                  <div>
-                    <strong>Mobile Scaling:</strong>
-                    <span
-                      >Master CSS fluid-scaling adapts perfectly to small
-                      screens.</span
-                    >
-                  </div>
-                </li>
-                <li>
-                  <span class="list-icon">↕️</span>
-                  <div>
-                    <strong>Layout Flexibility:</strong>
-                    <span
-                      >Dock your Shortcuts bar to either the Top or Bottom of
-                      the screen.</span
-                    >
-                  </div>
-                </li>
-                <li>
-                  <span class="list-icon">🎛️</span>
-                  <div>
-                    <strong>Widget Expansion:</strong>
-                    <span
-                      >More granular combinations (e.g., Search & Quote, Weather
-                      & Quote).</span
-                    >
-                  </div>
-                </li>
-                <li>
-                  <span class="list-icon">👁️</span>
-                  <div>
-                    <strong>UI Toggles:</strong>
-                    <span
-                      >Hide greetings and editable text instantly via settings
-                      or shortcut keys.</span
-                    >
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            <div class="info-group">
-              <div class="section-title">🔧 Core Fixes</div>
-              <div class="tags-container tight-tags">
-                <span class="tag alert-tag">IndexedDB Storage</span>
-                <span class="tag alert-tag">FOUC Eradicated</span>
-                <span class="tag alert-tag-2">Gradient Clarity</span>
-                <span class="tag alert-tag-2">Animation Polish</span>
-                <span class="tag">Color Logic Fix</span>
-                <span class="tag">Mobile Responsive</span>
-                <span class="tag">Layout Bugs Fixed</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <a
-            id="release-notes-btn"
-            href="https://github.com/xtditom/YourDynamicDashboard/blob/main/releasenotes.md"
-            target="_blank"
+          <nav
+            class="ydd-welcome-store-actions"
+            aria-label="Rate YDD in your browser store"
           >
-            Read Full Release Notes <span class="arrow">→</span>
-          </a>
-        </div>
+            <a
+              class="ydd-welcome-action"
+              href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="ydd-welcome-silver-text">Chrome Web Store</span>
+            </a>
+            <a
+              class="ydd-welcome-action"
+              href="https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="ydd-welcome-silver-text">Edge Add-ons</span>
+            </a>
+            <a
+              class="ydd-welcome-action"
+              href="https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="ydd-welcome-silver-text">Firefox Add-ons</span>
+            </a>
+          </nav>
+        </section>
+
+        <footer class="ydd-welcome-footer">
+          <span class="ydd-welcome-silver-text">
+            No analytics. Your settings stay in your browser.
+          </span>
+          <button
+            type="button"
+            class="ydd-welcome-action ydd-welcome-cta"
+            data-welcome-dismiss
+          >
+            <span class="ydd-welcome-silver-text">
+              Go to my New Dashboard
+            </span>
+          </button>
+        </footer>
       </div>
     </div>
 
@@ -702,7 +690,8 @@
               <option value="lexend">Lexend</option>
               <option value="inter">Inter</option>
               <option value="roboto">Roboto</option>
-              <option value="poppins">Poppins</option>
+              <option value="manrope">Manrope</option>
+              <option value="outfit">Outfit</option>
               <option value="nunito">Nunito</option>
               <option value="merriweather">Merriweather</option>
               <option value="roboto-mono">Roboto Mono</option>
