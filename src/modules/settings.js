@@ -16,6 +16,7 @@ import {
   validateYddStorageEntries,
 } from "../storageKeys.js";
 import {
+  dismissSearchSuggestionBadge,
   requestSearchSuggestionConsent,
   syncSuggestionModeSelect,
 } from "./suggestions.js";
@@ -924,7 +925,10 @@ export class SettingsManager {
       dark: document.getElementById("dark-mode-toggle"),
       autoThemeToggle: document.getElementById("auto-theme-toggle"),
       glowToggle: document.getElementById("glow-effect-toggle"),
+      transparencyToggle: document.getElementById("transparency-toggle"),
+      glassmorphismBadge: document.getElementById("glassmorphism-new-sticker"),
       fontFamily: document.getElementById("font-family-select"),
+      fontFamilyBadge: document.getElementById("font-family-new-sticker"),
       editableTextToggle: document.getElementById("editable-text-toggle"),
       widgetControl: document.getElementById("widget-control-select"),
       colorControls: document.getElementById("advanced-color-controls"),
@@ -1016,6 +1020,9 @@ export class SettingsManager {
       if (key === "newsBadgeDismissed" && this.els.newsBadge) {
         this.els.newsBadge.hidden = value === true;
       }
+      if (key === "glassmorphismUseCount" || key === "fontFamilyUseCount") {
+        this.updateFeatureBadge(key);
+      }
       if (key === "hideGreetings") {
         if (this.els.hideGreetings) {
           this.els.hideGreetings.checked = value === true;
@@ -1048,7 +1055,7 @@ export class SettingsManager {
         this.updateDarkModeControlState();
       }
       if (key === "glowEffect") {
-        const isGlowOn = value !== false;
+        const isGlowOn = value === true;
         if (this.els.glowToggle) this.els.glowToggle.checked = isGlowOn;
         document.body.classList.toggle("no-glow", !isGlowOn);
 
@@ -1074,6 +1081,9 @@ export class SettingsManager {
       if (key === "fontFamily") {
         const fontId = applyFontFamily(value);
         syncFontSelect(this.els.fontFamily, fontId);
+      }
+      if (key === "transparencyActive" && this.els.transparencyToggle) {
+        this.els.transparencyToggle.checked = value === true;
       }
       if (key === "grayscaleActive") {
         this.syncThemeIdentity(document.body.getAttribute("data-theme-id"));
@@ -1129,8 +1139,16 @@ export class SettingsManager {
     if (this.els.newsBadge) {
       this.els.newsBadge.hidden = state.get("newsBadgeDismissed") === true;
     }
+    this.updateFeatureBadge("glassmorphismUseCount");
+    this.updateFeatureBadge("fontFamilyUseCount");
 
-    this.bindSimpleToggle(this.els.glowToggle, "glowEffect", true);
+    this.bindSimpleToggle(this.els.glowToggle, "glowEffect", false);
+    this.bindSimpleToggle(
+      this.els.transparencyToggle,
+      "transparencyActive",
+      false,
+      () => this.recordFeatureBadgeUse("glassmorphismUseCount"),
+    );
     if (this.els.fontFamily) {
       const savedFont = state.get("fontFamily") || "outfit";
       applyFontFamily(savedFont);
@@ -1139,7 +1157,9 @@ export class SettingsManager {
         const previousFont = state.get("fontFamily") || "outfit";
         if (!state.set("fontFamily", this.els.fontFamily.value)) {
           syncFontSelect(this.els.fontFamily, previousFont);
+          return;
         }
+        this.recordFeatureBadgeUse("fontFamilyUseCount");
       });
     }
 
@@ -1239,7 +1259,7 @@ export class SettingsManager {
     this.updateAutoThemeGlowState();
 
     const currentGlow = state.get("glowEffect");
-    const isGlowOn = currentGlow !== false;
+    const isGlowOn = currentGlow === true;
     document.body.classList.toggle("no-glow", !isGlowOn);
     if (this.els.glowToggle) this.els.glowToggle.checked = isGlowOn;
 
@@ -1586,6 +1606,7 @@ export class SettingsManager {
       });
     }
     this.els.configureNews?.addEventListener("click", () => {
+      state.set("newsBadgeDismissed", true);
       window.__fullSettingsModalInstance?.openTab?.("fs-tab-news");
     });
 
@@ -1599,6 +1620,7 @@ export class SettingsManager {
           return;
         }
         state.set("searchSuggestionMode", requestedMode);
+        dismissSearchSuggestionBadge();
         select.value = requestedMode;
         syncSuggestionModeSelect(select);
       });
@@ -1730,6 +1752,7 @@ export class SettingsManager {
 
     if (this.els.randomBgFreeze) {
       this.els.randomBgFreeze.addEventListener("click", () => {
+        this.dismissRandomBackgroundScheduleBadge();
         this.freezeRandomBackground();
       });
     }
@@ -2054,6 +2077,7 @@ export class SettingsManager {
     this.disableAutoTheme();
     if (isGradient) this.applyGradientTheme(theme);
     else this.applyNormalTheme(theme);
+    this.recordThemePresetUse(theme.id);
     completeDefaultTask("dt-5");
     return true;
   }
@@ -2346,7 +2370,7 @@ export class SettingsManager {
 
   updateDarkModeUpdatedBadge() {
     const hidden =
-      (Number(state.get("darkModeToggleUseCount")) || 0) >= 20;
+      (Number(state.get("darkModeToggleUseCount")) || 0) >= 1;
     const miniSticker = document.getElementById("dark-mode-updated-sticker");
     if (miniSticker) miniSticker.hidden = hidden;
     window.__fullSettingsModalInstance?.updateDarkModeUpdatedBadge?.(hidden);
@@ -2354,7 +2378,7 @@ export class SettingsManager {
 
   updateWeatherLocationBadge() {
     const hidden =
-      (Number(state.get("weatherLocationSaveCount")) || 0) >= 2;
+      (Number(state.get("weatherLocationSaveCount")) || 0) >= 1;
     const miniSticker = document.getElementById(
       "weather-location-updated-sticker",
     );
@@ -2363,13 +2387,28 @@ export class SettingsManager {
   }
 
   recordWeatherLocationSaveUse() {
-    const currentCount = Math.max(
-      0,
-      Number(state.get("weatherLocationSaveCount")) || 0,
-    );
-    const nextCount = Math.min(2, currentCount + 1);
-    if (!state.set("weatherLocationSaveCount", nextCount)) return;
+    if ((Number(state.get("weatherLocationSaveCount")) || 0) >= 1) return;
+    if (!state.set("weatherLocationSaveCount", 1)) return;
     this.updateWeatherLocationBadge();
+  }
+
+  updateFeatureBadge(key, hidden = null) {
+    const elements = {
+      glassmorphismUseCount: this.els.glassmorphismBadge,
+      fontFamilyUseCount: this.els.fontFamilyBadge,
+    };
+    const badge = elements[key];
+    const shouldHide =
+      hidden === null ? (Number(state.get(key)) || 0) >= 1 : hidden;
+    if (badge) badge.hidden = shouldHide;
+    window.__fullSettingsModalInstance?.updateFeatureBadge?.(key, shouldHide);
+  }
+
+  recordFeatureBadgeUse(key) {
+    if ((Number(state.get(key)) || 0) >= 1) return true;
+    if (!state.set(key, 1)) return false;
+    this.updateFeatureBadge(key, true);
+    return true;
   }
 
   recordThemePresetUse(themeId) {
@@ -2391,12 +2430,8 @@ export class SettingsManager {
   }
 
   recordDarkModeToggleUse() {
-    const currentCount = Math.max(
-      0,
-      Number(state.get("darkModeToggleUseCount")) || 0,
-    );
-    const nextCount = Math.min(20, currentCount + 1);
-    if (!state.set("darkModeToggleUseCount", nextCount)) return;
+    if ((Number(state.get("darkModeToggleUseCount")) || 0) >= 1) return;
+    if (!state.set("darkModeToggleUseCount", 1)) return;
     this.updateDarkModeUpdatedBadge();
   }
 
@@ -2461,6 +2496,7 @@ export class SettingsManager {
   async searchLocation() {
     const city = this.els.locInput.value.trim();
     if (!city) return;
+    this.recordWeatherLocationSaveUse();
 
     const requestId = ++this._locationRequestId;
     this._locationController?.abort();
@@ -2580,6 +2616,7 @@ export class SettingsManager {
   }
 
   async detectLocation() {
+    this.recordWeatherLocationSaveUse();
     if (!navigator.geolocation) {
       showCustomModal("Geolocation not supported by your browser.");
       return;
@@ -2772,7 +2809,7 @@ export class SettingsManager {
     createBtn(this.els.gradientContainer, THEMES.gradient, true);
   }
 
-  bindSimpleToggle(el, key, trueValue) {
+  bindSimpleToggle(el, key, trueValue, onUse = null) {
     if (!el) return;
     const current = state.get(key);
     if (key === "showDate" || key === "hideGreetings") {
@@ -2806,9 +2843,10 @@ export class SettingsManager {
             : key === "clockFormat"
               ? "12"
               : "digital";
-      if (key === "tempUnit")
-        state.set(key, el.checked ? "imperial" : "metric");
-      else state.set(key, val);
+      const saved = key === "tempUnit"
+        ? state.set(key, el.checked ? "imperial" : "metric")
+        : state.set(key, val);
+      if (saved) onUse?.();
     });
   }
 
@@ -4238,6 +4276,7 @@ export class SettingsManager {
       this._syncBackgroundControls();
       void this._fillRandomBackgroundQueue(operationId, []);
       this._scheduleRandomBackgroundRefresh();
+      if (origin === "user") this.dismissRandomBackgroundScheduleBadge();
       return true;
     } catch (err) {
       if (operationId === this._backgroundOperationId) {
@@ -4307,6 +4346,7 @@ export class SettingsManager {
     const autoThemeDisabled = hasBg;
     const colorControlsDisabled = hasBg;
     const glowDisabled = colorControlsDisabled || animationsDisabled;
+    const glassDisabled = hasBg || isGradient;
 
     if (this.els.blurRow) {
       if (hasBg) {
@@ -4326,6 +4366,12 @@ export class SettingsManager {
       this.els.glowToggle.disabled = glowDisabled;
       const parentRow = this.els.glowToggle.closest(".setting-row");
       if (parentRow) parentRow.style.opacity = glowDisabled ? "0.5" : "1";
+    }
+
+    if (this.els.transparencyToggle) {
+      this.els.transparencyToggle.disabled = glassDisabled;
+      const parentRow = this.els.transparencyToggle.closest(".setting-row");
+      if (parentRow) parentRow.style.opacity = glassDisabled ? "0.5" : "1";
     }
 
     const advancedColorsContainer = document.getElementById(
@@ -4368,7 +4414,7 @@ export class SettingsManager {
     if (hasBg) {
       document.body.classList.add("no-glow");
     } else {
-      const isGlowOn = state.get("glowEffect") !== false;
+      const isGlowOn = state.get("glowEffect") === true;
       document.body.classList.toggle("no-glow", !isGlowOn);
     }
   }

@@ -16,6 +16,29 @@ import { KeyboardManager } from "./modules/keyboard.js";
 import { CommandPalette } from "./modules/palette.js";
 import { ZenModeController } from "./modules/zenMode.js";
 import { initializeDefaultTasks } from "./utils.js";
+import { isYddStorageKey } from "./storageKeys.js";
+
+function initializeGlowDefault() {
+  const migrationKey = "glowDefaultOffMigrated";
+  if (state.get(migrationKey) === true) return;
+
+  try {
+    const hasSavedGlowPreference = localStorage.getItem("glowEffect") !== null;
+    const hasExistingYddData = Object.keys(localStorage).some(
+      (key) => key === "ydd_daily_greeting" || isYddStorageKey(key),
+    );
+
+    // Glow used to default to on without being stored. Preserve that implicit
+    // preference for existing installations, while an empty profile receives
+    // the new off default from CONFIG.
+    if (!hasSavedGlowPreference && hasExistingYddData) {
+      state.set("glowEffect", true);
+    }
+    state.set(migrationKey, true);
+  } catch (error) {
+    console.warn("[YDD] Could not initialize the new glow default.", error);
+  }
+}
 
 // The single built-in dark background lives with the main visual bootstrap.
 // Keeping it here avoids a separate module for a background that has no
@@ -232,6 +255,7 @@ class SampleDarkBackground {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  initializeGlowDefault();
   applyFontFamily(state.get("fontFamily"));
   document.documentElement.classList.toggle(
     "disable-animations",

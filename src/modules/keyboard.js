@@ -158,8 +158,7 @@ export class KeyboardManager {
       action === "miniSettings"
         ? "miniSettingsShortcutUseCount"
         : "settingsShortcutUseCount";
-    const currentCount = Math.max(0, Number(state.get(key)) || 0);
-    state.set(key, Math.min(8, currentCount + 1));
+    if ((Number(state.get(key)) || 0) < 1) state.set(key, 1);
   }
 
   launchShortcut(index) {

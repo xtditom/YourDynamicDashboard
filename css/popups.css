@@ -1025,10 +1025,12 @@ body.gradient-mode-active .settings-dropdown option {
   color: var(--text-secondary);
   border-top: 1px solid var(--bg-tertiary);
 }
-.mini-search-suggestion-label {
+.mini-search-suggestion-label,
+.mini-appearance-label {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  white-space: nowrap;
 }
 .mini-news-label {
   display: inline-flex;

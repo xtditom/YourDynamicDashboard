@@ -71,6 +71,8 @@ export class Search {
 
     if (!this.els.form) return;
 
+    this._dropdownHomeParent = this.els.dropdown?.parentNode || this.els.form;
+    this._dropdownHomeNextSibling = this.els.dropdown?.nextSibling || null;
     this.current = this.getValidProvider(state.get("searchProvider"));
     this.customSearchEditMode = false;
     this.customSearchModal = null;
@@ -93,6 +95,9 @@ export class Search {
     this._typewriterRunId = 0;
     this._resizeHandler = () => {
       if (this._historyDropdownEl) this.renderSuggestionsForCurrentInput();
+      if (this.els.dropdown?.classList.contains("search-dropdown-overlay")) {
+        this._positionProviderDropdownOverlay();
+      }
     };
     this.currentFilteredHistory = [];
     this.suggestions = new SuggestionEngine();
@@ -539,26 +544,7 @@ export class Search {
     }
     this.els.input.setAttribute("aria-expanded", "true");
 
-    if (this._hasGlassSurface()) {
-      if (!document.documentElement.classList.contains("high-bg-blur")) {
-        ul.style.setProperty("backdrop-filter", "blur(40px)", "important");
-        ul.style.setProperty("-webkit-backdrop-filter", "blur(40px)", "important");
-      } else {
-        ul.style.setProperty("backdrop-filter", "blur(3px)", "important");
-        ul.style.setProperty("-webkit-backdrop-filter", "blur(3px)", "important");
-      }
-      const isDark = document.body.getAttribute("data-theme") === "dark";
-      ul.style.setProperty("background-color", "var(--widget-bg)", "important");
-      ul.style.setProperty("color", isDark ? "#ffffff" : "#000000", "important");
-      if (isNew) this._hideQuoteForOverlay();
-    } else {
-      ul.style.removeProperty("backdrop-filter");
-      ul.style.removeProperty("-webkit-backdrop-filter");
-      ul.style.removeProperty("background-color");
-      ul.style.removeProperty("color");
-      ul.style.backgroundColor = "var(--bg-secondary)";
-      ul.style.color = "var(--text-primary)";
-    }
+    this._syncGlassSurface(ul, { hideQuote: isNew });
 
     let itemIndex = 0;
     sections.forEach(([title, items]) => {
@@ -748,6 +734,30 @@ export class Search {
           body.classList.contains("gradient-mode-active") ||
           body.classList.contains("transparency-active")),
     );
+  }
+
+  _syncGlassSurface(element, { hideQuote = false } = {}) {
+    if (!element) return;
+
+    if (!this._hasGlassSurface()) {
+      element.classList.remove("search-glass-surface");
+      element.style.removeProperty("backdrop-filter");
+      element.style.removeProperty("-webkit-backdrop-filter");
+      element.style.removeProperty("background-color");
+      element.style.removeProperty("color");
+      return;
+    }
+
+    const blur = document.documentElement.classList.contains("high-bg-blur")
+      ? "3px"
+      : "40px";
+    const isDark = document.body.getAttribute("data-theme") === "dark";
+    element.classList.add("search-glass-surface");
+    element.style.setProperty("backdrop-filter", `blur(${blur})`, "important");
+    element.style.setProperty("-webkit-backdrop-filter", `blur(${blur})`, "important");
+    element.style.setProperty("background-color", "var(--widget-bg)", "important");
+    element.style.setProperty("color", isDark ? "#ffffff" : "#000000", "important");
+    if (hideQuote) this._hideQuoteForOverlay();
   }
 
   _hideQuoteForOverlay() {
@@ -1782,6 +1792,7 @@ export class Search {
       this.els.platformList.appendChild(createItem(p, "platforms")),
     );
     this.updateGoogleAiBadge();
+    this._syncGlassSurface(this.els.dropdown);
   }
 
   createCustomSearchEngineId() {
@@ -2420,36 +2431,56 @@ export class Search {
     }
   }
 
+  _mountProviderDropdownOverlay() {
+    const dropdown = this.els.dropdown;
+    if (!dropdown) return;
+
+    if (dropdown.parentNode !== document.body) {
+      document.body.appendChild(dropdown);
+    }
+    dropdown.classList.add("search-dropdown-overlay");
+    this._positionProviderDropdownOverlay();
+  }
+
+  _positionProviderDropdownOverlay() {
+    const dropdown = this.els.dropdown;
+    if (!dropdown?.classList.contains("search-dropdown-overlay")) return;
+
+    const formRect = this.els.form.getBoundingClientRect();
+    dropdown.style.top = `${Math.round(formRect.bottom + 3)}px`;
+    dropdown.style.left = `${Math.round(formRect.left + 15)}px`;
+  }
+
+  _unmountProviderDropdownOverlay() {
+    const dropdown = this.els.dropdown;
+    if (!dropdown?.classList.contains("search-dropdown-overlay")) return;
+
+    dropdown.classList.remove("search-dropdown-overlay");
+    dropdown.style.removeProperty("top");
+    dropdown.style.removeProperty("left");
+
+    const parent = this._dropdownHomeParent;
+    const nextSibling = this._dropdownHomeNextSibling;
+    if (!parent) return;
+    if (nextSibling?.parentNode === parent) {
+      parent.insertBefore(dropdown, nextSibling);
+    } else {
+      parent.appendChild(dropdown);
+    }
+  }
+
   openDropdown() {
     clearTimeout(this._dropdownCloseTimer);
     this._dropdownCloseTimer = null;
     this.renderProviderDropdown();
+    this._mountProviderDropdownOverlay();
     this.els.dropdown.classList.remove("closing");
     this.els.dropdown.classList.remove("hidden");
     this.els.dropdown.setAttribute("aria-hidden", "false");
     this.els.providerBtn.classList.add("is-open");
     this.els.providerBtn.setAttribute("aria-expanded", "true");
 
-    const body = document.body;
-    if (this._hasGlassSurface()) {
-      if (!document.documentElement.classList.contains("high-bg-blur")) {
-        this.els.dropdown.style.setProperty("backdrop-filter", "blur(40px)", "important");
-        this.els.dropdown.style.setProperty("-webkit-backdrop-filter", "blur(40px)", "important");
-      } else {
-        this.els.dropdown.style.setProperty("backdrop-filter", "blur(3px)", "important");
-        this.els.dropdown.style.setProperty("-webkit-backdrop-filter", "blur(3px)", "important");
-      }
-      const isDark = body.getAttribute("data-theme") === "dark";
-      this.els.dropdown.style.setProperty("background-color", "var(--widget-bg)", "important");
-      this.els.dropdown.style.setProperty("color", isDark ? "#ffffff" : "#000000", "important");
-      
-      this._hideQuoteForOverlay();
-    } else {
-      this.els.dropdown.style.removeProperty("backdrop-filter");
-      this.els.dropdown.style.removeProperty("-webkit-backdrop-filter");
-      this.els.dropdown.style.removeProperty("background-color");
-      this.els.dropdown.style.removeProperty("color");
-    }
+    this._syncGlassSurface(this.els.dropdown, { hideQuote: true });
 
     this.showGoogleAiHint();
 
@@ -2537,6 +2568,7 @@ export class Search {
       this.els.dropdown.style.removeProperty("-webkit-backdrop-filter");
       this.els.dropdown.style.removeProperty("background-color");
       this.els.dropdown.style.removeProperty("color");
+      this._unmountProviderDropdownOverlay();
       this._restoreQuotes();
       return;
     }
@@ -2554,7 +2586,8 @@ export class Search {
       this.els.dropdown.style.removeProperty("-webkit-backdrop-filter");
       this.els.dropdown.style.removeProperty("background-color");
       this.els.dropdown.style.removeProperty("color");
-      
+
+      this._unmountProviderDropdownOverlay();
       this._restoreQuotes();
     }, 180);
   }

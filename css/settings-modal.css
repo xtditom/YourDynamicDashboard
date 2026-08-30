@@ -332,7 +332,8 @@
 
 /* High-contrast update marker for the recently changed Dark Mode control. */
 .setting-row .label .fs-dark-mode-label,
-.setting-row .label .fs-disable-animations-label {
+.setting-row .label .fs-disable-animations-label,
+.setting-row .label .fs-feature-label {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -346,6 +347,12 @@
   flex: 0 0 auto;
   line-height: 0;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.38));
+}
+
+/* Mini settings use the compact version of the same sticker. */
+.fs-new-sticker.mini-new-sticker {
+  width: 3.2rem;
+  height: 1.25rem;
 }
 
 .setting-row .label .mini-random-bg-label,

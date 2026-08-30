@@ -25,6 +25,7 @@ import {
   MAX_SHORTCUTS,
 } from "../validators.js";
 import {
+  dismissSearchSuggestionBadge,
   requestSearchSuggestionConsent,
   syncSuggestionModeSelect,
   validateCustomSuggestionRelay,
@@ -521,7 +522,7 @@ export class FullSettingsModal {
     );
     if (disableAnimationsLabel) {
       disableAnimationsLabel.classList.add("fs-disable-animations-label");
-      if ((Number(state.get("disableAnimationsToggleCount")) || 0) < 10) {
+      if ((Number(state.get("disableAnimationsToggleCount")) || 0) < 1) {
         const newSticker = this._el("span", {
           className: "fs-new-sticker",
           innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
@@ -593,7 +594,7 @@ export class FullSettingsModal {
       className: "fs-weather-location-label",
     }, [this._el("span", { textContent: "Weather Location" })]);
     this.els.fsWeatherLocationUpdatedSticker = null;
-    if ((Number(state.get("weatherLocationSaveCount")) || 0) < 2) {
+    if ((Number(state.get("weatherLocationSaveCount")) || 0) < 1) {
       const updatedSticker = this._el("span", {
         className: "fs-updated-sticker",
         innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
@@ -707,7 +708,7 @@ export class FullSettingsModal {
     this.els.fsDarkUpdatedSticker = null;
     if (darkModeLabel) {
       darkModeLabel.classList.add("fs-dark-mode-label");
-      if ((Number(state.get("darkModeToggleUseCount")) || 0) < 20) {
+      if ((Number(state.get("darkModeToggleUseCount")) || 0) < 1) {
         const updatedSticker = this._el("span", {
           className: "fs-updated-sticker",
           innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
@@ -733,8 +734,16 @@ export class FullSettingsModal {
       "Toggle clock glow & pulsing.",
       glowToggle.wrapper,
     );
+    const glassSticker = this._newSticker();
+    glassSticker.hidden =
+      (Number(state.get("glassmorphismUseCount")) || 0) >= 1;
+    this.els.fsGlassNewSticker = glassSticker;
+    const glassLabel = this._el("span", { className: "fs-feature-label" }, [
+      this._el("span", { textContent: "Glassmorphism effect" }),
+      glassSticker,
+    ]);
     const glassRow = this._row(
-      "Glassmorphism effect",
+      glassLabel,
       "Add a transparent glass effect to dashboard surfaces.",
       glassToggle.wrapper,
     );
@@ -744,8 +753,15 @@ export class FullSettingsModal {
     );
     fontSelect.setAttribute("aria-label", "Choose dashboard font");
     this.els.fsFontFamily = fontSelect;
+    const fontSticker = this._newSticker();
+    fontSticker.hidden = (Number(state.get("fontFamilyUseCount")) || 0) >= 1;
+    this.els.fsFontFamilyNewSticker = fontSticker;
+    const fontLabel = this._el("span", { className: "fs-feature-label" }, [
+      this._el("span", { textContent: "Font Style" }),
+      fontSticker,
+    ]);
     const fontRow = this._row(
-      "Font Style",
+      fontLabel,
       "Choose the dashboard font.",
       fontSelect,
     );
@@ -1260,6 +1276,7 @@ export class FullSettingsModal {
         return;
       }
       state.set("searchSuggestionMode", requestedMode);
+      dismissSearchSuggestionBadge();
       syncSuggestionModeSelect(event.target);
       this._searchSuggestionRelayValidationPending = requestedMode === "history-custom";
       this._updateSearchSuggestionRelayAvailability();
@@ -1315,13 +1332,17 @@ export class FullSettingsModal {
     });
     this.els.fsGlass.addEventListener("change", () => {
       if (this.els.fsGlass.disabled) return;
-      state.set("transparencyActive", this.els.fsGlass.checked);
+      if (state.set("transparencyActive", this.els.fsGlass.checked)) {
+        this._sm()?.recordFeatureBadgeUse?.("glassmorphismUseCount");
+      }
     });
     this.els.fsFontFamily.addEventListener("change", () => {
       const previousFont = state.get("fontFamily") || "outfit";
       if (!state.set("fontFamily", this.els.fsFontFamily.value)) {
         syncFontSelect(this.els.fsFontFamily, previousFont);
+        return;
       }
+      this._sm()?.recordFeatureBadgeUse?.("fontFamilyUseCount");
     });
 
     // BG upload
@@ -1367,6 +1388,7 @@ export class FullSettingsModal {
     this.els.fsFreezeBtn.addEventListener("click", async () => {
       const sm = this._sm();
       if (sm && typeof sm.freezeRandomBackground === "function") {
+        sm.dismissRandomBackgroundScheduleBadge?.();
         await sm.freezeRandomBackground();
         this._updateBgState();
       }
@@ -1536,14 +1558,8 @@ export class FullSettingsModal {
   }
 
   _recordDisableAnimationsToggle() {
-    const currentCount = Math.max(
-      0,
-      Number(state.get("disableAnimationsToggleCount")) || 0,
-    );
-    const nextCount = Math.min(10, currentCount + 1);
-    if (!state.set("disableAnimationsToggleCount", nextCount)) return;
-
-    if (nextCount >= 10) {
+    if ((Number(state.get("disableAnimationsToggleCount")) || 0) >= 1) return;
+    if (state.set("disableAnimationsToggleCount", 1)) {
       this.els.fsDisableAnimationsNewSticker?.remove();
       this.els.fsDisableAnimationsNewSticker = null;
     }
@@ -1552,7 +1568,7 @@ export class FullSettingsModal {
   updateDarkModeUpdatedBadge(hidden = null) {
     const shouldHide =
       hidden === null
-        ? (Number(state.get("darkModeToggleUseCount")) || 0) >= 20
+        ? (Number(state.get("darkModeToggleUseCount")) || 0) >= 1
         : hidden;
     if (this.els.fsDarkUpdatedSticker) {
       this.els.fsDarkUpdatedSticker.hidden = shouldHide;
@@ -1562,7 +1578,7 @@ export class FullSettingsModal {
   updateWeatherLocationBadge(hidden = null) {
     const shouldHide =
       hidden === null
-        ? (Number(state.get("weatherLocationSaveCount")) || 0) >= 2
+        ? (Number(state.get("weatherLocationSaveCount")) || 0) >= 1
         : hidden;
     if (this.els.fsWeatherLocationUpdatedSticker) {
       this.els.fsWeatherLocationUpdatedSticker.hidden = shouldHide;
@@ -1642,9 +1658,36 @@ export class FullSettingsModal {
       if (key === "newsBadgeDismissed" && this.els.fsNewsNewSticker) {
         this.els.fsNewsNewSticker.hidden = value === true;
       }
+      if (
+        key === "searchSuggestionBadgeDismissed" &&
+        this.els.fsSearchSuggestionNewSticker
+      ) {
+        this.els.fsSearchSuggestionNewSticker.hidden = value === true;
+      }
+      if (key === "glassmorphismUseCount" || key === "fontFamilyUseCount") {
+        this.updateFeatureBadge(key);
+      }
+      if (key === "disableAnimationsToggleCount") {
+        if (this.els.fsDisableAnimationsNewSticker) {
+          this.els.fsDisableAnimationsNewSticker.hidden =
+            (Number(value) || 0) >= 1;
+        }
+      }
+      if (key === "darkModeToggleUseCount") {
+        this.updateDarkModeUpdatedBadge();
+      }
+      if (key === "weatherLocationSaveCount") {
+        this.updateWeatherLocationBadge();
+      }
       if (!this.isOpen) return;
       this._syncToggle(key, value);
       if (key === "keyMap") {
+        this._renderKeyEditor();
+      }
+      if (
+        key === "settingsShortcutUseCount" ||
+        key === "miniSettingsShortcutUseCount"
+      ) {
         this._renderKeyEditor();
       }
       if (key === "shortcutsDisplayMode" && this.els.fsShortcutsDisplayMode) {
@@ -1654,9 +1697,6 @@ export class FullSettingsModal {
         this.els.fsSearchSuggestionMode.value = value || "history-only";
         syncSuggestionModeSelect(this.els.fsSearchSuggestionMode);
         this._updateSearchSuggestionRelayAvailability();
-      }
-      if (key === "searchSuggestionBadgeDismissed" && this.els.fsSearchSuggestionNewSticker) {
-        this.els.fsSearchSuggestionNewSticker.hidden = value === true;
       }
       if (key === "userSavedThemes") {
         this._renderSavedThemes();
@@ -1718,7 +1758,7 @@ export class FullSettingsModal {
         check: this.isDefaultThemeModeAvailable() && value === true,
       },
       autoTheme: { el: this.els.fsAutoTheme, check: value === true },
-      glowEffect: { el: this.els.fsGlow, check: value !== false },
+      glowEffect: { el: this.els.fsGlow, check: value === true },
       transparencyActive: { el: this.els.fsGlass, check: value === true },
       showTodo: { el: this.els.fsTodoToggle, check: value === false },
       showApps: { el: this.els.fsAppsToggle, check: value === false },
@@ -1765,7 +1805,7 @@ export class FullSettingsModal {
     this.els.fsTempDisplay.checked = state.get("tempDisplayMode") === true;
     this.els.fsDark.checked = state.get("darkMode") === true;
     this.els.fsAutoTheme.checked = state.get("autoTheme") === true;
-    this.els.fsGlow.checked = state.get("glowEffect") !== false;
+    this.els.fsGlow.checked = state.get("glowEffect") === true;
     this.els.fsGlass.checked = state.get("transparencyActive") === true;
     syncFontSelect(this.els.fsFontFamily, state.get("fontFamily") || "outfit");
     this.els.fsTodoToggle.checked = state.get("showTodo") === false;
@@ -2313,6 +2353,7 @@ export class FullSettingsModal {
   async _searchLocation() {
     const city = this.els.fsLocInput.value.trim();
     if (!city) return;
+    this._sm()?.recordWeatherLocationSaveUse?.();
     const requestId = ++this._locationRequestId;
     this._locationController?.abort();
     const controller = new AbortController();
@@ -2449,6 +2490,17 @@ export class FullSettingsModal {
         true,
       );
     }
+  }
+
+  updateFeatureBadge(key, hidden = null) {
+    const elements = {
+      glassmorphismUseCount: this.els.fsGlassNewSticker,
+      fontFamilyUseCount: this.els.fsFontFamilyNewSticker,
+    };
+    const badge = elements[key];
+    const shouldHide =
+      hidden === null ? (Number(state.get(key)) || 0) >= 1 : hidden;
+    if (badge) badge.hidden = shouldHide;
   }
 
   _renderSavedThemes() {
@@ -3022,7 +3074,7 @@ export class FullSettingsModal {
           : action === "miniSettings"
             ? "miniSettingsShortcutUseCount"
             : null;
-      if (usageCountKey && (Number(state.get(usageCountKey)) || 0) < 8) {
+      if (usageCountKey && (Number(state.get(usageCountKey)) || 0) < 1) {
         const updatedSticker = this._el("span", {
           className: "fs-shortcut-updated-sticker",
           innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">

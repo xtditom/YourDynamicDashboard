@@ -104,7 +104,10 @@ export class CommandPalette {
         name: "Toggle Disable Animations",
         icon: "🎞️",
         shortcut: "",
-        action: () => this.toggleBooleanState("disableAnimations", false)
+        action: () => {
+          this.toggleBooleanState("disableAnimations", false);
+          state.set("disableAnimationsToggleCount", 1);
+        }
       },
       {
         id: "glow-effect",
@@ -113,7 +116,7 @@ export class CommandPalette {
         shortcut: "",
         action: () => {
           if (state.get("disableAnimations") === true) return;
-          this.toggleBooleanState("glowEffect", true);
+          this.toggleBooleanState("glowEffect", false);
         }
       },
       {
@@ -241,6 +244,7 @@ export class CommandPalette {
         shortcut: "",
         action: () => {
           state.set("transparencyActive", !state.get("transparencyActive"));
+          state.set("glassmorphismUseCount", 1);
         }
       },
       {

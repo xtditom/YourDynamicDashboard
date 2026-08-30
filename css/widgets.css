@@ -189,9 +189,9 @@ html[data-font-family="lexend"] #current-temp {
     transform 0.85s ease-out;
   position: relative;
   align-items: center;
-  /* Keep every search overlay above the news stacking context. The dropdowns
-     have their own z-index, but cannot escape this parent stacking context. */
-  z-index: 200;
+  /* Keep search and its dropdowns above news (80), but below dashboard
+     popups (99) so opening settings always covers the complete search widget. */
+  z-index: 90;
 }
 body:not(.loaded) #search-form {
   opacity: 0;
@@ -318,6 +318,15 @@ html[data-font-family="lexend"] #search-input::placeholder {
   border: 1px solid var(--border-color);
   overflow: hidden;
   transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* The search form is itself a glass surface. Mounting the open provider
+   dropdown at the page level prevents that ancestor from becoming the
+   dropdown's backdrop root, so browser backdrop blur can sample the news and
+   wallpaper behind it just like the online-suggestions panel does. */
+#search-dropdown.search-dropdown-overlay {
+  position: fixed;
+  z-index: 90;
 }
 
 #search-dropdown:not(.hidden) {
@@ -619,7 +628,9 @@ html.disable-animations #search-dropdown.closing {
 
 #sh-quick-dropdown {
   position: fixed;
-  z-index: 9999;
+  /* This panel is appended to body, so explicitly mirror the search layer:
+     above news (80), below dashboard popups (99). */
+  z-index: 90;
   list-style: none;
   margin: 24px 0 0;
   padding: 6px 0;
