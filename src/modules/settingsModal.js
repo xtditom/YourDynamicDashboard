@@ -2,6 +2,7 @@ import { state } from "../state.js";
 import { syncFontSelect } from "./fontLoader.js";
 import {
   chooseGeocodingResult,
+  createHoverPauseTimer,
   getGeocodingResults,
   getIconUrl,
   makeKeyboardInteractive,
@@ -86,11 +87,149 @@ const FULL_GRADIENT_THEME_ORDER = Object.freeze([
   "forest",
 ]);
 
+const DARK_THEME_ID = "default-dark";
+const DARK_THEME_BUTTON_SELECTOR =
+  `.theme-preset-button[data-theme-preset-id="${DARK_THEME_ID}"]` +
+  '[data-theme-preset-kind="normal"]';
+const DARK_SIGNAL_HINT_DELAY = 500;
+const DARK_SIGNAL_HINT_DURATION = 7000;
+const DARK_SIGNAL_HINT_MAX_COUNT = 3;
+
+/**
+ * Isolated observer for the optional Dark signal background. The settings
+ * modal owns normal theme clicks; this class only observes a completed native
+ * double-click on a labelled Dark preset.
+ */
+class DarkSignalThemeGesture {
+  constructor() {
+    this.hintDelayTimer = null;
+    this.notice = null;
+    this.noticeTimer = null;
+
+    this.onClick = (event) => this.handleClick(event);
+    this.onDoubleClick = (event) => this.handleDoubleClick(event);
+    document.addEventListener("click", this.onClick);
+    document.addEventListener("dblclick", this.onDoubleClick);
+  }
+
+  getDarkThemeButton(event) {
+    const target = event.target;
+    if (!(target instanceof Element)) return null;
+    return target.closest(DARK_THEME_BUTTON_SELECTOR);
+  }
+
+  handleClick(event) {
+    if (!this.getDarkThemeButton(event)) return;
+    if (state.get("darkSignalBackgroundEverActivated") === true) return;
+
+    this.cancelHintDelay();
+    this.hintDelayTimer = window.setTimeout(() => {
+      this.hintDelayTimer = null;
+      this.showHint();
+    }, DARK_SIGNAL_HINT_DELAY);
+  }
+
+  handleDoubleClick(event) {
+    if (!this.getDarkThemeButton(event)) return;
+
+    this.cancelHintDelay();
+    // Allow the ordinary second-click theme handler to finish first. This
+    // controller does not delay, cancel, or replace that handler.
+    window.setTimeout(() => this.activateSignalBackground(), 0);
+  }
+
+  canActivateSignalBackground() {
+    return Boolean(
+      state.get("normalThemeId") === DARK_THEME_ID &&
+        state.get("gradientModeActive") !== true &&
+        !document.body.classList.contains("has-custom-bg") &&
+        !document.body.classList.contains("gradient-mode-active"),
+    );
+  }
+
+  activateSignalBackground() {
+    if (!this.canActivateSignalBackground()) return;
+    if (!state.set("darkSignalBackgroundActive", true)) return;
+
+    state.set("darkSignalBackgroundEverActivated", true);
+    this.cancelHintDelay();
+    this.hideHint();
+  }
+
+  cancelHintDelay() {
+    if (this.hintDelayTimer === null) return;
+    window.clearTimeout(this.hintDelayTimer);
+    this.hintDelayTimer = null;
+  }
+
+  showHint() {
+    if (state.get("darkSignalBackgroundEverActivated") === true) return;
+
+    const shownCount = Math.max(
+      0,
+      Number(state.get("darkSignalBackgroundHintCount")) || 0,
+    );
+    if (shownCount >= DARK_SIGNAL_HINT_MAX_COUNT) return;
+    if (!state.set("darkSignalBackgroundHintCount", shownCount + 1)) return;
+
+    this.hideHint();
+
+    const notice = document.createElement("div");
+    notice.className = "mini-settings-hint dark-signal-background-hint";
+    notice.setAttribute("role", "status");
+    notice.setAttribute("aria-live", "polite");
+    notice.textContent =
+      "Double-click the Dark theme to turn on its dynamic signal background.";
+
+    const timerBar = document.createElement("div");
+    timerBar.className = "zen-notice-timer";
+    timerBar.setAttribute("aria-hidden", "true");
+    notice.style.setProperty(
+      "--zen-notice-duration",
+      `${DARK_SIGNAL_HINT_DURATION}ms`,
+    );
+    notice.appendChild(timerBar);
+    document.body.appendChild(notice);
+    this.notice = notice;
+
+    window.requestAnimationFrame(() => notice.classList.add("visible"));
+    this.noticeTimer = createHoverPauseTimer(
+      notice,
+      DARK_SIGNAL_HINT_DURATION,
+      () => this.expireHint(notice),
+      ".zen-notice-timer",
+    );
+  }
+
+  expireHint(notice) {
+    if (this.notice === notice) {
+      this.notice = null;
+      this.noticeTimer = null;
+    }
+    notice.classList.remove("visible");
+    window.setTimeout(() => notice.remove(), 300);
+  }
+
+  hideHint() {
+    this.noticeTimer?.cancel?.();
+    this.noticeTimer = null;
+
+    const notice = this.notice;
+    this.notice = null;
+    if (!notice) return;
+
+    notice.classList.remove("visible");
+    window.setTimeout(() => notice.remove(), 300);
+  }
+}
+
 /**
  * FullSettingsModal — A comprehensive, draggable settings window.
  * Dynamically builds its entire DOM and delegates theme/shortcut/backup
  * operations to the existing SettingsManager singleton.
  */
+export { DarkSignalThemeGesture };
+
 export class FullSettingsModal {
   constructor() {
     this.overlay = null;
@@ -118,7 +257,6 @@ export class FullSettingsModal {
     this._newsDraftDirty = false;
     this._newsDisplayDraftDirty = false;
     this._newsRefreshBusy = false;
-
     window.__fullSettingsModalInstance = this;
 
     // Bound handlers for cleanup
@@ -554,9 +692,11 @@ export class FullSettingsModal {
     const darkToggle = this._toggle("fs-dark-mode-toggle");
     const autoToggle = this._toggle("fs-auto-theme-toggle");
     const glowToggle = this._toggle("fs-glow-toggle");
+    const glassToggle = this._toggle("fs-glassmorphism-toggle");
     this.els.fsDark = darkToggle.input;
     this.els.fsAutoTheme = autoToggle.input;
     this.els.fsGlow = glowToggle.input;
+    this.els.fsGlass = glassToggle.input;
 
     const darkRow = this._row(
       "Dark Mode",
@@ -593,6 +733,11 @@ export class FullSettingsModal {
       "Toggle clock glow & pulsing.",
       glowToggle.wrapper,
     );
+    const glassRow = this._row(
+      "Glassmorphism effect",
+      "Add a transparent glass effect to dashboard surfaces.",
+      glassToggle.wrapper,
+    );
     const fontSelect = this._dropdown(
       "fs-font-family-select",
       FONT_OPTIONS.map((font) => [font.id, font.label]),
@@ -607,12 +752,14 @@ export class FullSettingsModal {
     this.els.fsFontFamilyRow = fontRow;
     this.els.fsAutoThemeRow = autoThemeRow;
     this.els.fsGlowRow = glowRow;
+    this.els.fsGlassRow = glassRow;
 
     pane.appendChild(
       this._section("Theme", [
         darkRow,
         autoThemeRow,
         glowRow,
+        glassRow,
         fontRow,
       ]),
     );
@@ -1166,8 +1313,12 @@ export class FullSettingsModal {
       state.set("glowEffect", this.els.fsGlow.checked);
       document.body.classList.toggle("no-glow", !this.els.fsGlow.checked);
     });
+    this.els.fsGlass.addEventListener("change", () => {
+      if (this.els.fsGlass.disabled) return;
+      state.set("transparencyActive", this.els.fsGlass.checked);
+    });
     this.els.fsFontFamily.addEventListener("change", () => {
-      const previousFont = state.get("fontFamily") || "lexend";
+      const previousFont = state.get("fontFamily") || "outfit";
       if (!state.set("fontFamily", this.els.fsFontFamily.value)) {
         syncFontSelect(this.els.fsFontFamily, previousFont);
       }
@@ -1542,7 +1693,8 @@ export class FullSettingsModal {
         key === "yd_city" ||
         key === "yd_lat" ||
         key === "yd_lon" ||
-        key === "glowEffect"
+        key === "glowEffect" ||
+        key === "transparencyActive"
       ) {
         this._syncColorPickers();
         this._updateColorControlsState();
@@ -1567,6 +1719,7 @@ export class FullSettingsModal {
       },
       autoTheme: { el: this.els.fsAutoTheme, check: value === true },
       glowEffect: { el: this.els.fsGlow, check: value !== false },
+      transparencyActive: { el: this.els.fsGlass, check: value === true },
       showTodo: { el: this.els.fsTodoToggle, check: value === false },
       showApps: { el: this.els.fsAppsToggle, check: value === false },
       showAiTools: { el: this.els.fsAiToggle, check: value === false },
@@ -1613,7 +1766,8 @@ export class FullSettingsModal {
     this.els.fsDark.checked = state.get("darkMode") === true;
     this.els.fsAutoTheme.checked = state.get("autoTheme") === true;
     this.els.fsGlow.checked = state.get("glowEffect") !== false;
-    syncFontSelect(this.els.fsFontFamily, state.get("fontFamily") || "lexend");
+    this.els.fsGlass.checked = state.get("transparencyActive") === true;
+    syncFontSelect(this.els.fsFontFamily, state.get("fontFamily") || "outfit");
     this.els.fsTodoToggle.checked = state.get("showTodo") === false;
     this.els.fsAppsToggle.checked = state.get("showApps") === false;
     this.els.fsAiToggle.checked = state.get("showAiTools") === false;
@@ -1774,7 +1928,7 @@ export class FullSettingsModal {
       return input;
     });
     const providersSection = this._section("Providers", [
-      this._el("p", { className: "fs-news-help", textContent: "Select one or more privacy-first direct RSS sources." }),
+      this._el("p", { className: "fs-news-help", textContent: "Select one or more privacy-first direct publisher sources." }),
       providerGrid,
     ]);
     providersSection.classList.add("fs-news-provider-section");
@@ -1851,7 +2005,7 @@ export class FullSettingsModal {
 
     pane.appendChild(this._el("p", {
       className: "fs-news-privacy fs-news-footer",
-      textContent: "YDD fetches RSS directly from selected publishers and stores only feed metadata locally. Story images load from publisher servers. No relay, account, tracking profile, or custom feed is used.",
+      textContent: "YDD fetches news directly from selected publishers and stores only feed metadata locally. Story images load from publisher servers. No relay, account, tracking profile, or custom feed is used.",
     }));
 
     const applyNewsDraft = async (
@@ -2227,6 +2381,8 @@ export class FullSettingsModal {
       themes.forEach((theme) => {
         const btn = document.createElement("button");
         btn.className = `theme-preset-button ${isGradient ? "gradient" : ""}`;
+        btn.dataset.themePresetId = theme.id;
+        btn.dataset.themePresetKind = isGradient ? "gradient" : "normal";
         btn.textContent = theme.name;
         const badgeKey =
           theme.id === "theme-8"
@@ -2449,6 +2605,7 @@ export class FullSettingsModal {
       hasBg ||
       isGradient ||
       state.get("disableAnimations") === true;
+    const glassDisabled = hasBg || isGradient;
 
     const setDisabled = (input, row, disabled) => {
       if (input) input.disabled = disabled;
@@ -2460,6 +2617,7 @@ export class FullSettingsModal {
       autoThemeDisabled,
     );
     setDisabled(this.els.fsGlow, this.els.fsGlowRow, glowDisabled);
+    setDisabled(this.els.fsGlass, this.els.fsGlassRow, glassDisabled);
 
     const darkModeAvailable = this.isDefaultThemeModeAvailable();
     setDisabled(this.els.fsDark, this.els.fsDarkRow, !darkModeAvailable);

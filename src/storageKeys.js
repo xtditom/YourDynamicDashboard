@@ -62,6 +62,8 @@ const RAW_STORAGE_KEYS = new Set([
   "lowResBg",
 ]);
 
+const INTERNAL_STORAGE_KEYS = new Set(["ydd_daily_greeting"]);
+
 export function isYddStorageKey(key) {
   return (
     YDD_STORAGE_KEYS.has(key) ||
@@ -80,9 +82,11 @@ export function getYddStorageEntries() {
 }
 
 export function clearYddLocalStorage() {
-  Object.keys(getYddStorageEntries()).forEach((key) =>
-    localStorage.removeItem(key),
-  );
+  const keys = new Set([
+    ...Object.keys(getYddStorageEntries()),
+    ...INTERNAL_STORAGE_KEYS,
+  ]);
+  keys.forEach((key) => localStorage.removeItem(key));
 }
 
 export function validateYddStorageEntries(entries) {

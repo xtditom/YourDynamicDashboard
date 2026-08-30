@@ -11,11 +11,225 @@ import { AiTools } from "./modules/aitools.js";
 import { Shortcuts } from "./modules/shortcuts.js";
 import { NewsManager } from "./modules/news.js";
 import { SettingsManager } from "./modules/settings.js";
-import { FullSettingsModal } from "./modules/settingsModal.js";
+import { DarkSignalThemeGesture, FullSettingsModal } from "./modules/settingsModal.js";
 import { KeyboardManager } from "./modules/keyboard.js";
 import { CommandPalette } from "./modules/palette.js";
 import { ZenModeController } from "./modules/zenMode.js";
 import { initializeDefaultTasks } from "./utils.js";
+
+// The single built-in dark background lives with the main visual bootstrap.
+// Keeping it here avoids a separate module for a background that has no
+// settings or public API of its own.
+class SampleDarkBackground {
+  constructor() {
+    this.container = document.getElementById("sample-dark-background");
+    this.canvas = document.getElementById("sample-dark-signal-canvas");
+    this.context = this.canvas?.getContext("2d") || null;
+    this.width = 0;
+    this.height = 0;
+    this.dpr = 1;
+    this.particles = [];
+    this.frameId = 0;
+    this.isAnimating = false;
+    this.pointer = { x: -1000, y: -1000, active: false };
+    this.reduceMotion = Boolean(
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches,
+    );
+
+    if (!this.container || !this.canvas || !this.context) return;
+
+    this._onResize = () => {
+      if (this.isActive()) this.resize();
+    };
+    this._onPointerMove = (event) => {
+      if (!this.isActive()) return;
+      this.pointer.x = event.clientX;
+      this.pointer.y = event.clientY;
+      this.pointer.active = true;
+    };
+    this._onPointerLeave = () => {
+      this.pointer.active = false;
+    };
+    this._onMotionChange = (event) => {
+      this.reduceMotion = event.matches;
+      this.sync();
+    };
+
+    window.addEventListener("resize", this._onResize, { passive: true });
+    window.addEventListener("pointermove", this._onPointerMove, {
+      passive: true,
+    });
+    window.addEventListener("blur", this._onPointerLeave, { passive: true });
+    document.addEventListener("mouseleave", this._onPointerLeave, {
+      passive: true,
+    });
+
+    const motionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (motionQuery?.addEventListener) {
+      motionQuery.addEventListener("change", this._onMotionChange);
+    } else {
+      motionQuery?.addListener?.(this._onMotionChange);
+    }
+    this.motionQuery = motionQuery;
+
+    this.observer = new MutationObserver(() => this.sync());
+    this.observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme", "data-theme-id"],
+    });
+    this.observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme", "data-theme-id"],
+    });
+
+    state.subscribe((key) => {
+      if (key === "darkSignalBackgroundActive") this.sync();
+    });
+
+    this.sync();
+  }
+
+  isActive() {
+    const body = document.body;
+    return Boolean(
+      body &&
+        body.getAttribute("data-theme") === "dark" &&
+        body.getAttribute("data-theme-id") === "default-dark" &&
+        state.get("darkSignalBackgroundActive") === true &&
+        !body.classList.contains("has-custom-bg") &&
+        !body.classList.contains("gradient-mode-active"),
+    );
+  }
+
+  shouldAnimate() {
+    return (
+      !this.reduceMotion &&
+      !document.documentElement.classList.contains("disable-animations")
+    );
+  }
+
+  sync() {
+    if (!this.container || !this.context) return;
+
+    const active = this.isActive();
+    this.container.classList.toggle("is-active", active);
+    this.stop();
+
+    if (!active) {
+      this.clear();
+      return;
+    }
+
+    this.resize();
+    if (this.shouldAnimate()) this.start();
+    else this.drawFrame(false);
+  }
+
+  makeParticle() {
+    return {
+      x: Math.random() * this.width,
+      y: Math.random() * this.height,
+      vx: (Math.random() - 0.5) * 0.22,
+      vy: (Math.random() - 0.5) * 0.22,
+      size: Math.random() * 1.4 + 0.5,
+    };
+  }
+
+  resize() {
+    const bounds = this.canvas.getBoundingClientRect();
+    this.width = bounds.width || window.innerWidth;
+    this.height = bounds.height || window.innerHeight;
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.canvas.width = Math.round(this.width * this.dpr);
+    this.canvas.height = Math.round(this.height * this.dpr);
+    this.context.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+
+    const count =
+      this.width < 760 ? 32 : Math.min(72, Math.floor(this.width / 20));
+    this.particles = Array.from({ length: count }, () => this.makeParticle());
+  }
+
+  start() {
+    if (this.isAnimating) return;
+    this.isAnimating = true;
+    this.frameId = window.requestAnimationFrame(() => this.draw());
+  }
+
+  stop() {
+    this.isAnimating = false;
+    if (this.frameId) window.cancelAnimationFrame(this.frameId);
+    this.frameId = 0;
+  }
+
+  clear() {
+    if (!this.context) return;
+    this.context.clearRect(0, 0, this.width, this.height);
+    this.pointer.active = false;
+  }
+
+  draw() {
+    if (!this.isAnimating || !this.isActive()) {
+      this.stop();
+      return;
+    }
+
+    this.drawFrame(true);
+    this.frameId = window.requestAnimationFrame(() => this.draw());
+  }
+
+  drawFrame(advanceParticles = true) {
+    this.context.clearRect(0, 0, this.width, this.height);
+    this.particles.forEach((particle, index) => {
+      if (advanceParticles && this.pointer.active) {
+        const dx = particle.x - this.pointer.x;
+        const dy = particle.y - this.pointer.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance < 145 && distance > 0) {
+          const force = (145 - distance) / 145;
+          particle.vx += (dx / distance) * force * 0.018;
+          particle.vy += (dy / distance) * force * 0.018;
+        }
+      }
+
+      if (advanceParticles) {
+        particle.vx *= 0.992;
+        particle.vy *= 0.992;
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        if (particle.x < -10) particle.x = this.width + 10;
+        if (particle.x > this.width + 10) particle.x = -10;
+        if (particle.y < -10) particle.y = this.height + 10;
+        if (particle.y > this.height + 10) particle.y = -10;
+      }
+
+      this.context.beginPath();
+      this.context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      this.context.fillStyle =
+        index % 11 === 0 ? "#b4ff5f" : "#f1efe8";
+      this.context.fill();
+
+      for (
+        let nextIndex = index + 1;
+        nextIndex < this.particles.length;
+        nextIndex += 1
+      ) {
+        const next = this.particles[nextIndex];
+        const distance = Math.hypot(
+          particle.x - next.x,
+          particle.y - next.y,
+        );
+        if (distance > 105) continue;
+        this.context.beginPath();
+        this.context.moveTo(particle.x, particle.y);
+        this.context.lineTo(next.x, next.y);
+        this.context.strokeStyle = "rgba(241, 239, 232, 0.14)";
+        this.context.lineWidth = Math.max(0.25, 1 - distance / 105);
+        this.context.stroke();
+      }
+    });
+
+  }
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   applyFontFamily(state.get("fontFamily"));
@@ -88,6 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(() => {
       initialize("News Feeds", () => new NewsManager());
       initialize("Full Settings", () => new FullSettingsModal());
+      initialize("Dark signal theme gesture", () => new DarkSignalThemeGesture());
       initialize("Keyboard", () => new KeyboardManager());
       initialize("Command Palette", () => new CommandPalette());
       initialize("Welcome popup", () => manageWelcomePopup());
@@ -151,6 +366,8 @@ document.addEventListener("DOMContentLoaded", () => {
       document.documentElement.setAttribute("data-theme-id", themeId);
     }
   });
+
+  initialize("Sample dark background", () => new SampleDarkBackground());
 
   // --- WELCOME TEXT ---
   const welcomeEl = document.getElementById("welcome-text");

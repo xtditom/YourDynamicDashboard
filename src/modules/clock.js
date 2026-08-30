@@ -1,6 +1,122 @@
 import { state } from "../state.js";
 import { formatTime, showCustomPrompt } from "../utils.js";
 
+const WEEKDAYS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+const DAILY_GREETING_STORAGE_KEY = "ydd_daily_greeting";
+const MAX_USER_NAME_LENGTH = 12;
+
+const GREETING_VARIANTS = Object.freeze({
+  earlyMorning: [
+    "Do you get up early?",
+    "Up before the sun?",
+    "Early start today?",
+    "Morning, early bird!",
+    "Quiet start, huh?",
+    "Ready for a fresh start?",
+  ],
+  morning: [
+    "Good morning",
+    "G' morning!",
+    "Happy {day}!",
+    "How's your day?",
+    "Ready for today?",
+    "Morning going okay?",
+  ],
+  afternoon: [
+    "Good afternoon",
+    "How's your day going?",
+    "Happy {day}!",
+    "Midday check-in?",
+    "Still going strong?",
+    "Need a quick reset?",
+  ],
+  evening: [
+    "Good evening",
+    "How was your day?",
+    "Evening check-in?",
+    "Made it through okay?",
+    "What feels good tonight?",
+    "Take it easy tonight.",
+  ],
+  night: [
+    "Good night",
+    "Sleep well",
+    "Rest easy tonight.",
+    "Time to unwind?",
+    "Tomorrow can wait.",
+    "Ready for some rest?",
+  ],
+  lateNight: [
+    "Are you still awake?",
+    "Didn't you go to bed?",
+    "Still up?",
+    "One last thought?",
+    "Night owl again?",
+    "Time for sleep?",
+  ],
+});
+
+function getLocalDateKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function getDateFallbackGreetingIndex(date, period, variantCount) {
+  const dateKey = `${getLocalDateKey(date)}:${period}`;
+  let hash = 0;
+
+  for (let index = 0; index < dateKey.length; index++) {
+    hash = (hash * 31 + dateKey.charCodeAt(index)) | 0;
+  }
+
+  return (hash >>> 0) % variantCount;
+}
+
+function getDailyGreetingIndex(date, period, variantCount) {
+  const dateKey = getLocalDateKey(date);
+
+  try {
+    const stored = JSON.parse(
+      localStorage.getItem(DAILY_GREETING_STORAGE_KEY) || "null",
+    );
+    const selections =
+      stored?.date === dateKey &&
+      stored.selections &&
+      typeof stored.selections === "object" &&
+      !Array.isArray(stored.selections)
+        ? { ...stored.selections }
+        : {};
+    const storedIndex = selections[period];
+
+    if (
+      Number.isInteger(storedIndex) &&
+      storedIndex >= 0
+    ) {
+      return storedIndex % variantCount;
+    }
+
+    // Pick once for this date and time period, then keep it through every refresh.
+    const selectedIndex = Math.floor(Math.random() * variantCount);
+    selections[period] = selectedIndex;
+    localStorage.setItem(
+      DAILY_GREETING_STORAGE_KEY,
+      JSON.stringify({ date: dateKey, selections }),
+    );
+    return selectedIndex;
+  } catch {
+    // Keep the greeting stable even if browser storage is unavailable.
+    return getDateFallbackGreetingIndex(date, period, variantCount);
+  }
+}
+
 export class Clock {
   constructor() {
     this.els = {
@@ -113,13 +229,23 @@ export class Clock {
   }
 
   async setUserName() {
-    const currentName = state.get("userName") || "";
+    const currentName = String(state.get("userName") || "")
+      .trim()
+      .slice(0, MAX_USER_NAME_LENGTH);
     const newName = await showCustomPrompt(
       "What should I call you?",
       currentName,
+      {
+        maxLength: MAX_USER_NAME_LENGTH,
+        autoFocus: true,
+        selectAll: currentName.length > 0,
+      },
     );
     if (newName !== null) {
-      state.set("userName", newName.trim().substring(0, 35));
+      state.set(
+        "userName",
+        String(newName).trim().slice(0, MAX_USER_NAME_LENGTH),
+      );
       import("../utils.js").then((utils) => {
         utils.completeDefaultTask("dt-3");
       });
@@ -253,23 +379,33 @@ export class Clock {
   }
 
   getGreetingText() {
-    const hour = new Date().getHours();
-    let greeting;
+    const now = new Date();
+    const hour = now.getHours();
+    let period;
 
-    if (hour >= 5 && hour < 6) greeting = "Do you get up early?";
-    else if (hour >= 6 && hour < 12) greeting = "Good morning";
-    else if (hour >= 12 && hour < 18) greeting = "Good afternoon";
-    else if (hour >= 18 && hour < 20) greeting = "Good evening";
-    else if (hour >= 20 && hour < 24) greeting = "Good night";
-    else greeting = "Are you still awake?";
+    if (hour >= 5 && hour < 6) period = "earlyMorning";
+    else if (hour >= 6 && hour < 12) period = "morning";
+    else if (hour >= 12 && hour < 18) period = "afternoon";
+    else if (hour >= 18 && hour < 20) period = "evening";
+    else if (hour >= 20 && hour < 24) period = "night";
+    else period = "lateNight";
+
+    const variants = GREETING_VARIANTS[period];
+    const selectedGreeting =
+      variants[getDailyGreetingIndex(now, period, variants.length)];
+    const dayName = WEEKDAYS[now.getDay()];
+    let greeting = selectedGreeting.replace("{day}", dayName);
 
     // --- NAME INTEGRATION ---
-    const userName = state.get("userName");
-    if (userName) {
-      const cleanName = userName.charAt(0).toUpperCase() + userName.slice(1);
-      if (!greeting.includes("?")) {
-        greeting = `${greeting}, ${cleanName}`;
-      }
+    const cleanName = String(state.get("userName") || "")
+      .trim()
+      .slice(0, MAX_USER_NAME_LENGTH);
+    if (cleanName) {
+      const formattedName =
+        cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+      const ending = greeting.match(/[.!?]$/)?.[0] || "";
+      const body = ending ? greeting.slice(0, -1) : greeting;
+      greeting = `${body}, ${formattedName}${ending}`;
     }
     return greeting;
   }

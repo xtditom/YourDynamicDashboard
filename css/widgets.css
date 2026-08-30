@@ -189,7 +189,9 @@ html[data-font-family="lexend"] #current-temp {
     transform 0.85s ease-out;
   position: relative;
   align-items: center;
-  z-index: 50;
+  /* Keep every search overlay above the news stacking context. The dropdowns
+     have their own z-index, but cannot escape this parent stacking context. */
+  z-index: 200;
 }
 body:not(.loaded) #search-form {
   opacity: 0;

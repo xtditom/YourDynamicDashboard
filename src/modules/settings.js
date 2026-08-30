@@ -3,6 +3,7 @@ import { applyFontFamily, syncFontSelect } from "./fontLoader.js";
 import {
   chooseGeocodingResult,
   completeDefaultTask,
+  createHoverPauseTimer,
   getGeocodingResults,
   getIconUrl,
   makeKeyboardInteractive,
@@ -29,6 +30,10 @@ import {
 const RANDOM_BG_QUEUE_TARGET = 2;
 const RANDOM_BG_PREVIEW_WIDTH = 480;
 const RANDOM_BG_FETCH_TIMEOUT_MS = 12000;
+const RANDOM_BG_MIN_WIDTH = 800;
+const RANDOM_BG_MIN_HEIGHT = 600;
+const RANDOM_BG_MAX_WIDTH = 1920;
+const RANDOM_BG_MAX_HEIGHT = 1080;
 const RANDOM_BG_SCHEDULES = Object.freeze({
   refresh: { label: "Every refresh", interval: null },
   "30s": { label: "Every 30 seconds", interval: 30_000 },
@@ -1070,6 +1075,9 @@ export class SettingsManager {
         const fontId = applyFontFamily(value);
         syncFontSelect(this.els.fontFamily, fontId);
       }
+      if (key === "grayscaleActive") {
+        this.syncThemeIdentity(document.body.getAttribute("data-theme-id"));
+      }
     });
   }
 
@@ -1124,11 +1132,11 @@ export class SettingsManager {
 
     this.bindSimpleToggle(this.els.glowToggle, "glowEffect", true);
     if (this.els.fontFamily) {
-      const savedFont = state.get("fontFamily") || "lexend";
+      const savedFont = state.get("fontFamily") || "outfit";
       applyFontFamily(savedFont);
       syncFontSelect(this.els.fontFamily, savedFont);
       this.els.fontFamily.addEventListener("change", () => {
-        const previousFont = state.get("fontFamily") || "lexend";
+        const previousFont = state.get("fontFamily") || "outfit";
         if (!state.set("fontFamily", this.els.fontFamily.value)) {
           syncFontSelect(this.els.fontFamily, previousFont);
         }
@@ -1207,11 +1215,16 @@ export class SettingsManager {
       document.body.classList.remove("has-custom-bg");
     }
 
+    if (this.hasCustomBackground()) {
+      this.resetGrayscaleForCurrentContext();
+    }
+
     const storedBackgroundReady = secondStorage
       .getImage()
       .then((blob) => {
         if (blob) {
           document.body.classList.add("has-custom-bg");
+          this.resetGrayscaleForCurrentContext();
           if (this.els.removeBg) this.els.removeBg.classList.remove("hidden");
           this.updateAutoThemeGlowState();
         }
@@ -1243,6 +1256,7 @@ export class SettingsManager {
         const theme =
           THEMES.gradient.find((t) => t.id === themeId) || THEMES.gradient[0];
         this.applyGradientTheme(theme, false);
+        this.resetGrayscaleForCurrentContext();
       } else {
         const savedId = state.get("normalThemeId");
 
@@ -1257,7 +1271,7 @@ export class SettingsManager {
           const themeToApply = this.isDarkModeAvailableForTheme(theme)
             ? this.getDarkModeTheme(theme, state.get("darkMode") === true)
             : theme;
-          this.applyNormalTheme(themeToApply);
+          this.applyNormalTheme(themeToApply, true, true);
         } else {
           this.applyCustomColors();
         }
@@ -1767,10 +1781,15 @@ export class SettingsManager {
     document.body.appendChild(hint);
 
     window.requestAnimationFrame(() => hint.classList.add("visible"));
-    window.setTimeout(() => {
-      hint.classList.remove("visible");
-      window.setTimeout(() => hint.remove(), 300);
-    }, 7000);
+    createHoverPauseTimer(
+      hint,
+      7000,
+      () => {
+        hint.classList.remove("visible");
+        window.setTimeout(() => hint.remove(), 300);
+      },
+      ".zen-notice-timer",
+    );
   }
 
   showMiniSettingsHint() {
@@ -1790,10 +1809,15 @@ export class SettingsManager {
     document.body.appendChild(hint);
 
     window.requestAnimationFrame(() => hint.classList.add("visible"));
-    window.setTimeout(() => {
-      hint.classList.remove("visible");
-      window.setTimeout(() => hint.remove(), 300);
-    }, 7000);
+    createHoverPauseTimer(
+      hint,
+      7000,
+      () => {
+        hint.classList.remove("visible");
+        window.setTimeout(() => hint.remove(), 300);
+      },
+      ".zen-notice-timer",
+    );
   }
 
   openInfoModal() {
@@ -2034,7 +2058,11 @@ export class SettingsManager {
     return true;
   }
 
-  applyNormalTheme(theme) {
+  applyNormalTheme(
+    theme,
+    preserveTransparency = false,
+    preserveDarkSignalBackground = false,
+  ) {
     [
       "--bg-interactive",
       "--bg-interactive-hover",
@@ -2055,11 +2083,21 @@ export class SettingsManager {
     ].forEach((property) => document.body.style.removeProperty(property));
 
     state.set("gradientModeActive", false);
-    state.set("transparencyActive", false);
     document.body.classList.remove("gradient-mode-active");
     document.body.classList.remove("gradient-dark");
     document.body.classList.remove("gradient-light");
-    document.body.classList.remove("transparency-active");
+    if (preserveTransparency) {
+      document.body.classList.toggle(
+        "transparency-active",
+        state.get("transparencyActive") === true,
+      );
+    } else {
+      state.set("transparencyActive", false);
+      document.body.classList.remove("transparency-active");
+    }
+    if (!preserveDarkSignalBackground) {
+      state.set("darkSignalBackgroundActive", false);
+    }
 
     if (theme.id) {
       state.set("normalThemeId", theme.id);
@@ -2087,6 +2125,7 @@ export class SettingsManager {
     if (this.els.dark) this.els.dark.checked = isDarkType;
     document.body.setAttribute("data-theme", isDarkType ? "dark" : "light");
     this.syncThemeIdentity(theme.id || "custom");
+    this.resetGrayscaleForCurrentContext();
     if (theme.colors["--bg-tertiary"]) {
       this.updateIconInversion(theme.colors["--bg-tertiary"]);
     }
@@ -2189,7 +2228,7 @@ export class SettingsManager {
     if (save) {
       state.set("gradientModeActive", true);
       state.set("gradientThemeId", theme.id);
-      state.set("transparencyActive", true);
+      state.set("transparencyActive", false);
       state.set("gradientColorThemeId", theme.id);
       state.set("gradientColor1", gradientColors[0]);
       state.set("gradientColor2", gradientColors[1]);
@@ -2226,7 +2265,10 @@ export class SettingsManager {
     }
 
     document.body.classList.add("gradient-mode-active");
-    document.body.classList.add("transparency-active");
+    document.body.classList.toggle(
+      "transparency-active",
+      state.get("transparencyActive") === true,
+    );
 
     document.body.classList.remove("gradient-dark", "gradient-light");
     if (isDarkType) {
@@ -2253,6 +2295,7 @@ export class SettingsManager {
       document.body.style.setProperty(key, val);
     });
     this.syncThemeIdentity(`gradient-${theme.id || "gradient"}`);
+    if (save) this.resetGrayscaleForCurrentContext();
 
     this.updateWarningText();
     this.updateAutoThemeGlowState();
@@ -2387,21 +2430,32 @@ export class SettingsManager {
     });
     this.applyCustomThemeUI(colors);
     this.syncColorPickers(colors);
-    document.body.style.setProperty("--icon-filter", "grayscale(0%)");
-    document.body.style.setProperty("--icon-opacity", "1");
     this.syncThemeIdentity("custom");
+    this.resetGrayscaleForCurrentContext();
+  }
+
+  resetGrayscaleForCurrentContext() {
+    const themeId = document.body.getAttribute("data-theme-id");
+    const shouldUseGrayscale =
+      themeId === "default-dark" &&
+      state.get("gradientModeActive") !== true &&
+      !this.hasCustomBackground();
+
+    if (state.get("grayscaleActive") !== shouldUseGrayscale) {
+      state.set("grayscaleActive", shouldUseGrayscale);
+    }
   }
 
   syncThemeIdentity(themeId) {
     const id = themeId || "custom";
     document.body.setAttribute("data-theme-id", id);
     document.documentElement.setAttribute("data-theme-id", id);
-    const isDefaultDark = id === "default-dark" && !state.get("gradientModeActive");
+    const useGrayscale = state.get("grayscaleActive") !== false;
     document.body.style.setProperty(
       "--icon-filter",
-      isDefaultDark ? "grayscale(100%) brightness(1)" : "grayscale(0%)",
+      useGrayscale ? "grayscale(100%) brightness(1)" : "grayscale(0%)",
     );
-    document.body.style.setProperty("--icon-opacity", isDefaultDark ? "0.8" : "1");
+    document.body.style.setProperty("--icon-opacity", useGrayscale ? "0.8" : "1");
   }
 
   async searchLocation() {
@@ -2839,6 +2893,7 @@ export class SettingsManager {
 
   _applyBackgroundUrl(url) {
     document.body.classList.add("has-custom-bg");
+    this.resetGrayscaleForCurrentContext();
     document.body.style.setProperty(
       "background-image",
       `url("${String(url).replaceAll('"', "%22")}")`,
@@ -2896,7 +2951,68 @@ export class SettingsManager {
 
   _getRandomBackgroundCurrentUrls() {
     return [state.get("savedBgUrl"), state.get("backgroundImage")].filter(
-      (url) => typeof url === "string" && url,
+      (url) =>
+        typeof url === "string" &&
+        url &&
+        this._isCompatibleRandomBackgroundUrl(url),
+    );
+  }
+
+  _getRandomWallpaperDimensions() {
+    const viewportWidth = Number(window.innerWidth);
+    const viewportHeight = Number(window.innerHeight);
+    const screenWidth = Number(window.screen?.width);
+    const screenHeight = Number(window.screen?.height);
+    const baseWidth = Number.isFinite(screenWidth) && screenWidth > 0
+      ? screenWidth
+      : viewportWidth;
+    const baseHeight = Number.isFinite(screenHeight) && screenHeight > 0
+      ? screenHeight
+      : viewportHeight;
+    const deviceScale = Number(window.devicePixelRatio);
+    const dpr = Number.isFinite(deviceScale) && deviceScale > 0
+      ? deviceScale
+      : 1;
+    const physicalWidth = Math.round(baseWidth * dpr);
+    const physicalHeight = Math.round(baseHeight * dpr);
+
+    return {
+      width: Math.min(
+        RANDOM_BG_MAX_WIDTH,
+        Math.max(RANDOM_BG_MIN_WIDTH, physicalWidth || RANDOM_BG_MAX_WIDTH),
+      ),
+      height: Math.min(
+        RANDOM_BG_MAX_HEIGHT,
+        Math.max(RANDOM_BG_MIN_HEIGHT, physicalHeight || RANDOM_BG_MAX_HEIGHT),
+      ),
+    };
+  }
+
+  _getPicsumImageDimensions(url) {
+    let parsed;
+    try {
+      parsed = new URL(url);
+    } catch (error) {
+      return null;
+    }
+    if (!/(^|\.)picsum\.photos$/i.test(parsed.hostname)) return null;
+
+    const segments = parsed.pathname.split("/").filter(Boolean);
+    if (segments.length < 2) return null;
+    const width = Number(segments.at(-2));
+    const height = Number(segments.at(-1).replace(/\.[a-z\d]+$/i, ""));
+    if (!Number.isInteger(width) || !Number.isInteger(height)) return null;
+    return { width, height };
+  }
+
+  _isCompatibleRandomBackgroundUrl(url) {
+    const dimensions = this._getPicsumImageDimensions(url);
+    return (
+      !dimensions ||
+      (dimensions.width > 0 &&
+        dimensions.height > 0 &&
+        dimensions.width <= RANDOM_BG_MAX_WIDTH &&
+        dimensions.height <= RANDOM_BG_MAX_HEIGHT)
     );
   }
 
@@ -2915,21 +3031,11 @@ export class SettingsManager {
 
   _getRandomBackgroundFallbackCurrent() {
     const url = state.get("savedBgUrl") || state.get("backgroundImage");
-    if (typeof url !== "string" || !url.trim()) return null;
-
-    try {
-      const parsed = new URL(url);
-      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-        return null;
-      }
-      return {
-        url: parsed.href,
-        blob: null,
-        preview: this._getRandomBackgroundCurrentPreview(),
-      };
-    } catch (error) {
-      return null;
-    }
+    const normalized = this._normalizeRandomBackgroundEntry({
+      url,
+      preview: this._getRandomBackgroundCurrentPreview(),
+    });
+    return normalized ? { ...normalized, blob: null } : null;
   }
 
   async _getStoredRandomBackgroundCurrent() {
@@ -3076,6 +3182,7 @@ export class SettingsManager {
     try {
       const url = new URL(value);
       if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+      if (!this._isCompatibleRandomBackgroundUrl(url.href)) return null;
       return url.href;
     } catch (error) {
       return null;
@@ -3105,6 +3212,7 @@ export class SettingsManager {
     try {
       url = new URL(entry.url);
       if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+      if (!this._isCompatibleRandomBackgroundUrl(url.href)) return null;
     } catch (error) {
       return null;
     }
@@ -3243,7 +3351,13 @@ export class SettingsManager {
   async _getStoredRandomBackgroundQueue() {
     try {
       const storedQueue = await secondStorage.getRandomBackgroundQueue();
-      return storedQueue.map((entry) => this._normalizeRandomBackgroundEntry(entry)).filter(Boolean);
+      const normalizedQueue = storedQueue
+        .map((entry) => this._normalizeRandomBackgroundEntry(entry))
+        .filter(Boolean);
+      if (normalizedQueue.length !== storedQueue.length) {
+        await this._persistRandomBackgroundQueue(normalizedQueue);
+      }
+      return normalizedQueue;
     } catch (error) {
       console.warn("Random background queue could not be read:", error);
       return [];
@@ -3287,8 +3401,7 @@ export class SettingsManager {
   }
 
   async _fetchRandomWallpaper(excludedUrls = [], { priority = "high" } = {}) {
-    const width = Math.max(800, Math.min(1920, Math.round(window.innerWidth)));
-    const height = Math.max(600, Math.min(1080, Math.round(window.innerHeight)));
+    const { width, height } = this._getRandomWallpaperDimensions();
     const excluded = new Set(
       (Array.isArray(excludedUrls) ? excludedUrls : []).filter(
         (url) => typeof url === "string" && url,
@@ -3583,6 +3696,7 @@ export class SettingsManager {
       document.body.style.removeProperty("background-image");
       document.body.style.removeProperty("background-size");
       document.body.style.removeProperty("background-position");
+      this.resetGrayscaleForCurrentContext();
       this._syncBackgroundControls();
       return true;
     } catch (error) {

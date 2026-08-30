@@ -67,7 +67,17 @@ class StateManager {
     if (key === "newsProviderIds") {
       if (!Array.isArray(value)) throw new TypeError("Invalid news providers");
       const allowed = new Set(NEWS_PROVIDERS.map((provider) => provider.id));
-      return [...new Set(value.filter((id) => typeof id === "string" && allowed.has(id)))];
+      const normalized = [
+        ...new Set(value.filter((id) => typeof id === "string" && allowed.has(id))),
+      ];
+      const legacyDefault = ["bbc", "guardian", "voa", "npr"];
+      if (
+        value.length === legacyDefault.length &&
+        legacyDefault.every((id) => value.includes(id))
+      ) {
+        return [...CONFIG.defaults.newsProviderIds];
+      }
+      return normalized;
     }
     if (key === "newsCategoryIds") {
       if (!Array.isArray(value)) throw new TypeError("Invalid news categories");

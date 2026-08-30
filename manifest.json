@@ -13,7 +13,7 @@
     "https://www.theguardian.com/*",
     "https://rss.dw.com/*",
     "https://www.euronews.com/*",
-    "https://www.voanews.com/*",
+    "https://search.prod.di.api.cnn.io/*",
     "https://feeds.npr.org/*"
   ],
   "chrome_url_overrides": {

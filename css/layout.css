@@ -1,6 +1,6 @@
 /* --- 3. LAYOUT & COLUMNS --- */
 body {
-  font-family: var(--ydd-font-family, "Lexend", system-ui, sans-serif);
+  font-family: var(--ydd-font-family, "Outfit", system-ui, sans-serif);
   background-color: var(--bg-primary);
   color: var(--text-primary);
   height: 100vh;

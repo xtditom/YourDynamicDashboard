@@ -56,6 +56,8 @@ export class KeyboardManager {
 
     if (isEnabled("search")) {
       e.preventDefault();
+      this.focusSearchInput();
+      return;
     } else if (isEnabled("todo")) this.clickButton("todo-toggle-button");
     else if (isEnabled("ai")) this.clickButton("ai-tools-toggle-button");
     else if (isEnabled("apps")) this.clickButton("apps-toggle-button");
@@ -113,6 +115,14 @@ export class KeyboardManager {
       "commandPaletteShortcutUseCount",
       Math.min(current + 1, COMMAND_PALETTE_SHORTCUT_USE_LIMIT),
     );
+  }
+
+  focusSearchInput() {
+    const input =
+      window.YD_Search?.els?.input || document.getElementById("search-input");
+    if (!input || input.disabled) return false;
+    input.focus({ preventScroll: true });
+    return true;
   }
 
   clickButton(id) {

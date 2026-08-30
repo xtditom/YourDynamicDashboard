@@ -2,6 +2,103 @@ export function formatTime(number) {
   return String(number).padStart(2, "0");
 }
 
+/**
+ * Schedule a non-Zen popup dismissal that pauses while the popup is hovered.
+ * The optional timer element is paused alongside the JavaScript timeout so
+ * the visible countdown always matches the remaining dismissal time.
+ */
+export function createHoverPauseTimer(
+  element,
+  duration,
+  onExpire,
+  timerSelector = "",
+) {
+  if (!element || typeof onExpire !== "function") {
+    return { cancel() {} };
+  }
+
+  const totalDuration = Math.max(0, Number(duration) || 0);
+  const timerElement = timerSelector
+    ? element.querySelector(timerSelector)
+    : null;
+  const getNow = () =>
+    typeof performance !== "undefined" && typeof performance.now === "function"
+      ? performance.now()
+      : Date.now();
+  const originalPlayState =
+    timerElement?.style.getPropertyValue("animation-play-state") || "";
+  const originalPlayStatePriority =
+    timerElement?.style.getPropertyPriority("animation-play-state") || "";
+
+  let remaining = totalDuration;
+  let startedAt = getNow();
+  let timeoutId = null;
+  let isPaused = false;
+  let isSettled = false;
+
+  const clearScheduledTimeout = () => {
+    if (timeoutId === null) return;
+    window.clearTimeout(timeoutId);
+    timeoutId = null;
+  };
+
+  const restoreTimerPlayState = () => {
+    if (!timerElement) return;
+    if (originalPlayState) {
+      timerElement.style.setProperty(
+        "animation-play-state",
+        originalPlayState,
+        originalPlayStatePriority,
+      );
+    } else {
+      timerElement.style.removeProperty("animation-play-state");
+    }
+  };
+
+  function cleanup() {
+    if (isSettled) return;
+    isSettled = true;
+    clearScheduledTimeout();
+    element.removeEventListener("pointerenter", pause);
+    element.removeEventListener("pointerleave", resume);
+    restoreTimerPlayState();
+  }
+
+  function expire() {
+    if (isSettled) return;
+    cleanup();
+    onExpire();
+  }
+
+  function pause() {
+    if (isSettled || isPaused) return;
+    isPaused = true;
+    remaining = Math.max(0, remaining - (getNow() - startedAt));
+    clearScheduledTimeout();
+    timerElement?.style.setProperty("animation-play-state", "paused");
+  }
+
+  function resume() {
+    if (isSettled || !isPaused) return;
+    isPaused = false;
+    timerElement?.style.setProperty("animation-play-state", "running");
+    if (remaining <= 0) {
+      expire();
+      return;
+    }
+    startedAt = getNow();
+    timeoutId = window.setTimeout(expire, remaining);
+  }
+
+  element.addEventListener("pointerenter", pause);
+  element.addEventListener("pointerleave", resume);
+  timeoutId = window.setTimeout(expire, remaining);
+
+  return {
+    cancel: cleanup,
+  };
+}
+
 export function getIconUrl(url) {
   try {
     const urlObject = new URL(url);
@@ -258,7 +355,7 @@ export function showCustomModal(
   });
 }
 
-export function showCustomPrompt(message, defaultValue = "") {
+export function showCustomPrompt(message, defaultValue = "", options = {}) {
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
     overlay.className = "hidden ydd-custom-modal-overlay";
@@ -292,7 +389,11 @@ export function showCustomPrompt(message, defaultValue = "") {
 
     const input = document.createElement("input");
     input.type = "text";
-    input.value = defaultValue;
+    const maxLength = Number.isInteger(options.maxLength) && options.maxLength > 0
+      ? options.maxLength
+      : null;
+    input.value = maxLength ? String(defaultValue).slice(0, maxLength) : defaultValue;
+    if (maxLength) input.maxLength = maxLength;
     input.setAttribute("aria-label", "Your answer");
     input.style.cssText =
       "width: 100%; box-sizing: border-box; margin-bottom: 1.5rem; padding: 10px; border-radius: 8px; border: 1px solid var(--bg-interactive); background: var(--bg-secondary); color: var(--text-primary); outline: none; transition: border-color 0.3s;";
@@ -373,6 +474,19 @@ export function showCustomPrompt(message, defaultValue = "") {
       }
     };
     document.addEventListener("keydown", promptKeyHandler);
+
+    if (options.autoFocus === true) {
+      const focusInput = () => {
+        if (!document.body.contains(input)) return;
+        input.focus({ preventScroll: true });
+        if (options.selectAll === true && input.value) input.select();
+      };
+      if (typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(focusInput);
+      } else {
+        setTimeout(focusInput, 0);
+      }
+    }
   });
 }
 

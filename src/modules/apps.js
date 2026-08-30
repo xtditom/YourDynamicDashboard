@@ -1,6 +1,10 @@
 import { CONFIG, GOOGLE_APPS } from "../config.js";
 import { state } from "../state.js";
-import { makeKeyboardInteractive, showCustomModal } from "../utils.js";
+import {
+  createHoverPauseTimer,
+  makeKeyboardInteractive,
+  showCustomModal,
+} from "../utils.js";
 import {
   MAX_CUSTOM_APPS,
   MAX_CUSTOM_APP_NAME_LENGTH,
@@ -261,7 +265,8 @@ export class AppGrid {
     if (count >= APP_EDIT_HINT_LIMIT) return;
     state.set("appsEditHintCount", count + 1);
 
-    clearTimeout(this._hintTimer);
+    this._hintTimer?.cancel();
+    this._hintTimer = null;
     const timer = document.createElement("div");
     timer.className = "apps-edit-hint-timer";
     timer.setAttribute("aria-hidden", "true");
@@ -277,16 +282,21 @@ export class AppGrid {
     );
     this.els.hint.classList.remove("hidden");
     window.requestAnimationFrame(() => this.els.hint.classList.add("is-visible"));
-    this._hintTimer = window.setTimeout(
-      () => this.hideEditHint(),
+    this._hintTimer = createHoverPauseTimer(
+      this.els.hint,
       APP_EDIT_HINT_DURATION,
+      () => {
+        this._hintTimer = null;
+        this.hideEditHint();
+      },
+      ".apps-edit-hint-timer",
     );
   }
 
   hideEditHint(immediate = false) {
-    if (!this.els.hint) return;
-    clearTimeout(this._hintTimer);
+    this._hintTimer?.cancel();
     this._hintTimer = null;
+    if (!this.els.hint) return;
     this.els.hint.classList.remove("is-visible");
     const finish = () => this.els.hint?.classList.add("hidden");
     if (immediate) finish();

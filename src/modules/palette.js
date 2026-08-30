@@ -244,6 +244,13 @@ export class CommandPalette {
         }
       },
       {
+        id: "grayscale",
+        name: "Toggle Grayscale",
+        icon: "◐",
+        shortcut: "",
+        action: () => this.toggleBooleanState("grayscaleActive", true)
+      },
+      {
         id: "shortcuts-pos",
         name: "Toggle Shortcuts Bar Position (Top / Bottom)",
         icon: "↕️",
@@ -643,6 +650,10 @@ export class CommandPalette {
     this.currentMenu = "main";
     this.activeIndex = 0;
     this.filter("");
+    this.focusInput();
+    window.requestAnimationFrame(() => {
+      if (this.isOpen) this.focusInput();
+    });
   }
 
   close() {
@@ -669,6 +680,11 @@ export class CommandPalette {
     this.els.input.placeholder = placeholders[targetMenu];
     
     this.filter("");
+    this.focusInput();
+  }
+
+  focusInput() {
+    this.els?.input?.focus?.({ preventScroll: true });
   }
 
   getCommandUsage() {

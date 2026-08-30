@@ -283,13 +283,13 @@ html.disable-animations #news-feed-container .news-card {
   opacity: 1 !important;
   transform: none !important;
 }
-/* The regular Dark preset is the only theme with monochrome news imagery. */
-body[data-theme-id="default-dark"][data-theme="dark"]:not(.gradient-mode-active):not(.has-custom-bg) .news-card-visual img {
-  filter: grayscale(100%);
+/* Follow the command-palette grayscale preference in every theme/background. */
+.news-card-visual img {
+  filter: var(--icon-filter);
   transition: filter 0.25s ease, transform 0.25s ease;
 }
 
-body[data-theme-id="default-dark"][data-theme="dark"]:not(.gradient-mode-active):not(.has-custom-bg) .news-card:hover .news-card-visual img,
-body[data-theme-id="default-dark"][data-theme="dark"]:not(.gradient-mode-active):not(.has-custom-bg) .news-card:focus-visible .news-card-visual img {
+.news-card:hover .news-card-visual img,
+.news-card:focus-visible .news-card-visual img {
   filter: grayscale(0%);
 }

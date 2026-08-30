@@ -89,6 +89,8 @@ try {
   var randomBgNext = localStorage.getItem("randomBgNextUrl");
   var bgTime = localStorage.getItem("randomBgTime");
   var imgUrl = null;
+  var RANDOM_BG_MAX_WIDTH = 1920;
+  var RANDOM_BG_MAX_HEIGHT = 1080;
 
   var readStoredUrl = function(value) {
     if (!value || value === "null" || value === '"null"') return null;
@@ -108,7 +110,41 @@ try {
     }
   };
 
-  var randomBgNextUrl = readStoredUrl(randomBgNext);
+  var isCompatiblePicsumUrl = function(value) {
+    var parsed;
+    try {
+      parsed = new URL(value);
+    } catch (error) {
+      return true;
+    }
+    if (!/(^|\.)picsum\.photos$/i.test(parsed.hostname)) return true;
+
+    var segments = parsed.pathname.split("/").filter(Boolean);
+    if (segments.length < 2) return true;
+    var width = Number(segments[segments.length - 2]);
+    var height = Number(
+      segments[segments.length - 1].replace(/\.[a-z\d]+$/i, ""),
+    );
+    if (!Number.isInteger(width) || !Number.isInteger(height)) return true;
+    return (
+      width > 0 &&
+      height > 0 &&
+      width <= RANDOM_BG_MAX_WIDTH &&
+      height <= RANDOM_BG_MAX_HEIGHT
+    );
+  };
+
+  var readStoredRandomUrl = function(value) {
+    var url = readStoredUrl(value);
+    return url && isCompatiblePicsumUrl(url) ? url : null;
+  };
+
+  var isSafeStoredRandomEntryUrl = function(value) {
+    if (typeof value !== "string" || !value) return false;
+    return isCompatiblePicsumUrl(value);
+  };
+
+  var randomBgNextUrl = readStoredRandomUrl(randomBgNext);
   var readStoredString = function(value, fallback) {
     if (!value || value === "null" || value === '"null"') return fallback;
     var parsed = value;
@@ -195,15 +231,15 @@ try {
 
   if (bgMode === '"freeze"') {
     if (bgTime === "null" || bgTime === '"-1"' || Date.now() - parseInt(bgTime) <= 259200000) {
-      imgUrl = (savedBg && savedBg !== '"null"') ? savedBg : ((bg && bg !== '"null"') ? bg : null);
+      imgUrl = readStoredRandomUrl(savedBg) || readStoredRandomUrl(bg);
     }
   } else if (bgMode === '"random"') {
     if (parsedRandomBgSchedule === "refresh") {
       imgUrl =
         randomBgNextPreviewUrl ||
         randomBgNextUrl ||
-        readStoredUrl(savedBg) ||
-        readStoredUrl(bg);
+        readStoredRandomUrl(savedBg) ||
+        readStoredRandomUrl(bg);
     } else {
       var queuedTimedPreview = randomBgTimedChangeDue
         ? randomBgNextPreviewUrl || randomBgNextUrl
@@ -211,8 +247,8 @@ try {
       imgUrl =
         queuedTimedPreview ||
         randomBgCurrentPreviewUrl ||
-        readStoredUrl(savedBg) ||
-        readStoredUrl(bg) ||
+        readStoredRandomUrl(savedBg) ||
+        readStoredRandomUrl(bg) ||
         randomBgNextPreviewUrl ||
         randomBgNextUrl;
     }
@@ -274,6 +310,7 @@ try {
         var storedBackground = e.target.result;
         var storedRandomBlob =
           randomUsesCurrentRecord && storedBackground?.blob instanceof Blob
+            && isSafeStoredRandomEntryUrl(storedBackground?.url)
             ? storedBackground.blob
             : null;
         var usableBackground = storedRandomBlob || storedBackground;

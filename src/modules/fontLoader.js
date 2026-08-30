@@ -1,6 +1,6 @@
 import { FONT_OPTIONS } from "../config.js";
 
-const DEFAULT_FONT_ID = "lexend";
+const DEFAULT_FONT_ID = "outfit";
 const LEGACY_DISPLAY_FONT_ID = "inter";
 const FONT_BY_ID = new Map(FONT_OPTIONS.map((font) => [font.id, font]));
 const FONT_LINKS = new Map();
@@ -55,8 +55,8 @@ export function applyFontFamily(value) {
     document.documentElement.style.setProperty("--ydd-font-family", font.stack);
     document.documentElement.dataset.fontFamily = font.id;
     ensureFontLoaded(font.id);
-    // Lexend was previously paired with Inter for the clock and temperature display.
-    if (font.id === DEFAULT_FONT_ID) ensureFontLoaded(LEGACY_DISPLAY_FONT_ID);
+    // Lexend keeps its legacy Inter display pairing when explicitly selected.
+    if (font.id === "lexend") ensureFontLoaded(LEGACY_DISPLAY_FONT_ID);
   }
   return font.id;
 }

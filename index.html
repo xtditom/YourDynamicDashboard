@@ -17,6 +17,9 @@
   </head>
   <body>
     <div id="bg-blur-overlay"></div>
+    <div id="sample-dark-background" aria-hidden="true">
+      <canvas id="sample-dark-signal-canvas"></canvas>
+    </div>
     <div
       id="welcome-modal-overlay"
       class="hidden"
@@ -687,11 +690,11 @@
               <span>Font Style</span><small>Choose the dashboard font.</small>
             </div>
             <select id="font-family-select" class="settings-dropdown" aria-label="Choose dashboard font" style="padding: 5px; border-radius: 5px; background: var(--bg-interactive); color: var(--text-primary); border: none;">
+              <option value="outfit">Outfit</option>
               <option value="lexend">Lexend</option>
               <option value="inter">Inter</option>
               <option value="roboto">Roboto</option>
               <option value="manrope">Manrope</option>
-              <option value="outfit">Outfit</option>
               <option value="nunito">Nunito</option>
               <option value="merriweather">Merriweather</option>
               <option value="roboto-mono">Roboto Mono</option>

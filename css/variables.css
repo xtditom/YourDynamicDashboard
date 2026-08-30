@@ -34,7 +34,7 @@ textarea {
   --form-control-border: #aeb6c0;
   --icon-filter: grayscale(0%);
   --icon-opacity: 1;
-  --ydd-font-family: "Lexend", system-ui, sans-serif;
+  --ydd-font-family: "Outfit", system-ui, sans-serif;
   --glow-color: rgba(0, 0, 0, 0.8);
 
   --gradient-color-1: #89f7fe;
@@ -67,7 +67,8 @@ html[data-theme="dark"] body {
   --glow-color: rgba(255, 255, 255, 0.7);
 }
 
-/* Only the built-in default Dark theme uses monochrome icon treatment. */
+/* SettingsManager applies the persisted command-palette grayscale preference
+   after the active theme and background have been restored. */
 body[data-theme="dark"][data-theme-id]:not([data-theme-id="default-dark"]),
 html[data-theme="dark"][data-theme-id]:not([data-theme-id="default-dark"]) body {
   --icon-filter: grayscale(0%);

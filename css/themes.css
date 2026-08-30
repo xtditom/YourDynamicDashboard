@@ -1,4 +1,93 @@
 /* --- 4. TRANSPARENCY MODES & THEMES --- */
+
+/* --- DEFAULT DARK BACKGROUND ---
+   Sample-inspired paper surface, construction grid, fine grain, and a quiet
+   signal network for the built-in dark theme. */
+#sample-dark-background {
+  --sample-dark-surface: #121210;
+  --sample-dark-ink: #f1efe8;
+  --sample-dark-accent: #b4ff5f;
+  --sample-dark-line: rgba(241, 239, 232, 0.14);
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+  background-color: var(--sample-dark-surface);
+  opacity: 0;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+#sample-dark-background::before,
+#sample-dark-background::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+}
+
+/* Keep the sample’s large construction grid understated behind the UI. */
+#sample-dark-background::before {
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--sample-dark-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--sample-dark-line) 1px, transparent 1px);
+  background-size: clamp(3rem, 7vw, 8rem) clamp(3rem, 7vw, 8rem);
+  opacity: 0.24;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
+}
+
+/* Fine grain echoes the sample’s paper texture without obscuring controls. */
+#sample-dark-background::after {
+  z-index: 2;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='ydd-sample-dark-noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23ydd-sample-dark-noise)' opacity='.8'/%3E%3C/svg%3E");
+}
+
+#sample-dark-signal-canvas {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.72;
+}
+
+#sample-dark-background.is-active {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* User wallpapers and gradients always own the viewport. */
+body.has-custom-bg #sample-dark-background,
+body.gradient-mode-active #sample-dark-background {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+html.ydd-custom-bg-pending #sample-dark-background {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+html.disable-animations #sample-dark-background {
+  transition: none;
+}
+
 body.transparency-active .widget-container,
 body.transparency-active .popup-container,
 body.transparency-active .corner-button,
@@ -580,7 +669,7 @@ body.gradient-dark .ai-tool-item:hover .ai-tool-icon img[src*="grok.png"] {
   opacity: 1 !important;
 }
 
-/* The built-in Dark theme is the only theme that keeps monochrome icons. */
+/* The built-in Dark theme is the only theme that can keep monochrome icons. */
 body[data-theme="dark"][data-theme-id="default-dark"]
   .app-icon[src*="notebooklm.png"],
 body[data-theme="dark"][data-theme-id="default-dark"]
@@ -589,8 +678,8 @@ html[data-theme="dark"][data-theme-id="default-dark"] body
   .app-icon[src*="notebooklm.png"],
 html[data-theme="dark"][data-theme-id="default-dark"] body
   .app-icon[src*="notebooklm.png"]:hover {
-  filter: grayscale(100%) brightness(1) !important;
-  opacity: 0.8 !important;
+  filter: var(--icon-filter) !important;
+  opacity: var(--icon-opacity) !important;
 }
 
 body[data-theme="dark"][data-theme-id="default-dark"]

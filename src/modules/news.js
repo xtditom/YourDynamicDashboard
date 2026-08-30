@@ -17,30 +17,18 @@ const FETCH_TIMEOUT_MS = 12000;
 const LOCK_KEY = "ydd_news_fetch_lock";
 const LOCK_TTL_MS = 30000;
 const PAGE_START_TIME = globalThis.performance?.now?.() ?? Date.now();
-
-const api = globalThis.browser || globalThis.chrome;
-
-function callApi(method, context, argument) {
-  if (!method) return Promise.resolve(false);
-  if (globalThis.browser) {
-    try {
-      return Promise.resolve(method.call(context, argument));
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
-  try {
-    return new Promise((resolve, reject) => {
-      method.call(context, argument, (value) => {
-        const error = globalThis.chrome?.runtime?.lastError;
-        if (error) reject(new Error(error.message));
-        else resolve(value);
-      });
-    });
-  } catch (error) {
-    return Promise.reject(error);
-  }
-}
+const CNN_SEARCH_ENDPOINT = "https://search.prod.di.api.cnn.io/content";
+const CNN_CATEGORY_PATHS = Object.freeze({
+  world: /\/(?:world|middleeast|europe|asia|china|africa|americas)\//,
+  politics: /\/politics\//,
+  business: /\/(?:business|economy|markets|money)\//,
+  technology: /\/(?:tech|technology)\//,
+  science: /\/science\//,
+  health: /\/health\//,
+  sports: /\/(?:sport|sports)\//,
+  entertainment: /\/(?:entertainment|style|culture)\//,
+  travel: /\/travel\//,
+});
 
 function safeUrl(value, baseUrl = "") {
   const rawValue = String(value || "").trim();
@@ -309,6 +297,44 @@ function parseFeed(xmlText, source) {
   })).filter((item) => item.title && item.url && isFreshStory(item));
 }
 
+function parseCnnSearch(payload, source) {
+  const results = Array.isArray(payload?.result) ? payload.result : [];
+  const categoryMatcher = CNN_CATEGORY_PATHS[source.categoryId];
+  return results
+    .filter((item) => item?.type === "NewsArticle")
+    .filter((item) => {
+      if (source.categoryId === "top") return true;
+      const articleUrl = safeUrl(item.url || item.path);
+      if (!articleUrl || !categoryMatcher) return false;
+      try {
+        return categoryMatcher.test(new URL(articleUrl).pathname.toLowerCase());
+      } catch {
+        return false;
+      }
+    })
+    .map((item, index) => {
+      const articleUrl = safeUrl(item.url || item.path);
+      const title = String(item.headline || "")
+        .replace(/\s*\|\s*CNN\s*$/i, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 300);
+      const imageUrl = safeUrl(item.thumbnail);
+      const publishedAt = Date.parse(item.lastModifiedDate || "");
+      return {
+        id: String(item.stellarID || articleUrl || `cnn-${index}`).slice(0, 500),
+        title,
+        url: articleUrl,
+        imageCandidates: imageUrl ? [imageUrl] : [],
+        imageUrl,
+        providerId: source.provider.id,
+        providerName: source.provider.name,
+        publishedAt: Number.isFinite(publishedAt) ? publishedAt : 0,
+      };
+    })
+    .filter((item) => item.title && item.url && isFreshStory(item));
+}
+
 function storyKeys(item) {
   const normalizedTitle = String(item.title || "")
     .toLowerCase()
@@ -380,7 +406,7 @@ function filterFreshStories(items, now = Date.now()) {
 async function requestNewsConsent() {
   if (state.get("newsConsentRemembered") === true) return true;
   const result = await showCustomModal(
-    "News Feeds connects directly to the RSS feeds of publishers you select. It retrieves headlines, publication times, and available images; YDD uses no relay, account, tracking profile, or custom server. Feed metadata is stored locally, while images load from publisher servers. Automatic updates follow your selected 15, 30, 60, or 180-minute interval. Your browser may ask for access to selected publishers.\n\nSelect Remember choice to skip this notice next time.",
+    "News Feeds connects directly to the news endpoints of publishers you select. It retrieves headlines, publication times, and available images; YDD uses no relay, account, tracking profile, or custom server. Feed metadata is stored locally, while images load from publisher servers. Automatic updates follow your selected 15, 30, 60, or 180-minute interval. Your browser may ask for access to selected publishers.\n\nSelect Remember choice to skip this notice next time.",
     false,
     false,
     [
@@ -416,6 +442,7 @@ export class NewsManager {
     this.ageTimer = null;
     this.lastRenderedCacheKey = "";
     this.fetching = false;
+    this.cnnSearchPromise = null;
     this.ownerId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     window.__newsFeedInstance = this;
     if (!this.container) return;
@@ -491,6 +518,7 @@ export class NewsManager {
       });
     });
     const selectionKey = JSON.stringify({
+      sourceVersion: 3,
       providers: providers.map((provider) => provider.id).sort(),
       categories: [...categoryIds].sort(),
     });
@@ -605,30 +633,6 @@ export class NewsManager {
     }));
   }
 
-  async requestPermissions(providers) {
-    const permissions = [...new Set(providers.map((provider) => provider.permission))];
-    if (!permissions.length || !api?.permissions) return false;
-    try {
-      const request = { origins: permissions };
-      const manifest = api.runtime?.getManifest?.();
-      const requiredHosts = Array.isArray(manifest?.host_permissions)
-        ? manifest.host_permissions
-        : [];
-      if (permissions.every((permission) => requiredHosts.includes(permission))) {
-        // Required host permissions are granted by the browser during
-        // installation/reload and must not be passed to permissions.request.
-        return true;
-      }
-      if (api.permissions.contains && await callApi(api.permissions.contains, api.permissions, request)) {
-        return true;
-      }
-      return await callApi(api.permissions.request, api.permissions, request);
-    } catch (error) {
-      console.warn("[YDD] News feed permission request failed.", error);
-      return false;
-    }
-  }
-
   async applyConfiguration({
     enabled,
     providerIds,
@@ -668,10 +672,6 @@ export class NewsManager {
       return false;
     }
     if (enabled && !wasEnabled && !(await requestNewsConsent())) return false;
-    if (enabled && !(await this.requestPermissions(providers))) {
-      await showCustomModal("News permission was not granted. News Feeds remains off.");
-      return false;
-    }
     const previousKey = this.getSelection().selectionKey;
     state.set("newsProviderIds", requestedProviderIds);
     state.set("newsCategoryIds", normalizedCategoryIds);
@@ -728,7 +728,44 @@ export class NewsManager {
     }
   }
 
+  async fetchCnnSearch() {
+    if (this.cnnSearchPromise) return this.cnnSearchPromise;
+    this.cnnSearchPromise = (async () => {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      try {
+        const requestId = globalThis.crypto?.randomUUID?.() ||
+          `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const url = new URL(CNN_SEARCH_ENDPOINT);
+        url.searchParams.set("q", "");
+        url.searchParams.set("size", "100");
+        url.searchParams.set("from", "0");
+        url.searchParams.set("sort", "newest");
+        url.searchParams.set("types", "article");
+        url.searchParams.set("request_id", `ydd-news-${requestId}`);
+        url.searchParams.set("site", "cnn");
+        const response = await fetch(url, {
+          signal: controller.signal,
+          credentials: "omit",
+          cache: "no-cache",
+          referrerPolicy: "no-referrer",
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        if (!Array.isArray(payload?.result)) throw new Error("Invalid CNN response");
+        return payload;
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    })();
+    return this.cnnSearchPromise;
+  }
+
   async fetchSource(source) {
+    if (source.provider.format === "cnn-search-json") {
+      return parseCnnSearch(await this.fetchCnnSearch(), source);
+    }
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     try {
@@ -766,6 +803,7 @@ export class NewsManager {
     this.fetching = true;
     this.emitStatus("Updating news…");
     const attemptAt = Date.now();
+    this.cnnSearchPromise = null;
     try {
       const results = await Promise.allSettled(selection.sources.map((source) => this.fetchSource(source)));
       const items = [];
@@ -818,6 +856,7 @@ export class NewsManager {
       this.emitStatus("Could not update news; showing saved stories.");
       return false;
     } finally {
+      this.cnnSearchPromise = null;
       this.fetching = false;
       this.releaseLock();
       this.render();

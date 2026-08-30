@@ -5,7 +5,11 @@ import {
   SEARCH_SUGGESTIONS,
   SEARCH_SUGGESTION_MODES,
 } from "../config.js";
-import { makeKeyboardInteractive, showCustomModal } from "../utils.js";
+import {
+  createHoverPauseTimer,
+  makeKeyboardInteractive,
+  showCustomModal,
+} from "../utils.js";
 import { BANG_MAP } from "./palette.js";
 import {
   MAX_QUERY_LENGTH,
@@ -535,10 +539,7 @@ export class Search {
     }
     this.els.input.setAttribute("aria-expanded", "true");
 
-    if (
-      document.body.classList.contains("has-custom-bg") ||
-      document.body.classList.contains("gradient-mode-active")
-    ) {
+    if (this._hasGlassSurface()) {
       if (!document.documentElement.classList.contains("high-bg-blur")) {
         ul.style.setProperty("backdrop-filter", "blur(40px)", "important");
         ul.style.setProperty("-webkit-backdrop-filter", "blur(40px)", "important");
@@ -739,11 +740,19 @@ export class Search {
     return mainDropdownOpen || historyDropdownOpen;
   }
 
+  _hasGlassSurface() {
+    const body = document.body;
+    return Boolean(
+      body &&
+        (body.classList.contains("has-custom-bg") ||
+          body.classList.contains("gradient-mode-active") ||
+          body.classList.contains("transparency-active")),
+    );
+  }
+
   _hideQuoteForOverlay() {
     const quoteWidget = document.getElementById("quote-widget");
-    const hasOverlaySurface =
-      document.body.classList.contains("has-custom-bg") ||
-      document.body.classList.contains("gradient-mode-active");
+    const hasOverlaySurface = this._hasGlassSurface();
     if (
       !quoteWidget ||
       quoteWidget.classList.contains("hidden") ||
@@ -2422,7 +2431,7 @@ export class Search {
     this.els.providerBtn.setAttribute("aria-expanded", "true");
 
     const body = document.body;
-    if (body.classList.contains("has-custom-bg") || body.classList.contains("gradient-mode-active")) {
+    if (this._hasGlassSurface()) {
       if (!document.documentElement.classList.contains("high-bg-blur")) {
         this.els.dropdown.style.setProperty("backdrop-filter", "blur(40px)", "important");
         this.els.dropdown.style.setProperty("-webkit-backdrop-filter", "blur(40px)", "important");
@@ -2481,14 +2490,19 @@ export class Search {
     this._googleAiHintElement = hint;
 
     window.requestAnimationFrame(() => hint.classList.add("is-visible"));
-    this._googleAiHintTimer = window.setTimeout(
-      () => this.hideGoogleAiHint(),
+    this._googleAiHintTimer = createHoverPauseTimer(
+      hint,
       GOOGLE_AI_HINT_DURATION_MS,
+      () => {
+        this._googleAiHintTimer = null;
+        this.hideGoogleAiHint();
+      },
+      ".google-ai-search-hint-timer",
     );
   }
 
   hideGoogleAiHint(immediate = false) {
-    clearTimeout(this._googleAiHintTimer);
+    this._googleAiHintTimer?.cancel();
     this._googleAiHintTimer = null;
     const hint = this._googleAiHintElement;
     if (!hint) return;
