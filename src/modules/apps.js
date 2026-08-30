@@ -2,7 +2,9 @@ import { CONFIG, GOOGLE_APPS } from "../config.js";
 import { state } from "../state.js";
 import {
   createHoverPauseTimer,
+  getIconUrl,
   makeKeyboardInteractive,
+  playNotificationSound,
   showCustomModal,
 } from "../utils.js";
 import {
@@ -182,11 +184,31 @@ export class AppGrid {
       seen.add(id);
       normalized.push(id);
     });
-    apps.forEach((app) => {
+    // Add newly registered built-in apps at their configured default
+    // positions. Existing user ordering is preserved for apps already saved.
+    apps.forEach((app, appIndex) => {
       if (seen.has(app.id)) return;
+
+      const nextExistingApp = apps
+        .slice(appIndex + 1)
+        .find((candidate) => normalized.includes(candidate.id));
+      const insertIndex = nextExistingApp
+        ? normalized.indexOf(nextExistingApp.id)
+        : normalized.length;
+
+      normalized.splice(insertIndex, 0, app.id);
       seen.add(app.id);
-      normalized.push(app.id);
     });
+
+    // Keep the built-in divider above the Chat / News / Contacts group even
+    // for users who already have an older saved Google Apps order.
+    const dividerIndex = normalized.indexOf(APP_DIVIDER_ID);
+    const chatId = getDefaultAppId("Chat");
+    const chatIndex = normalized.indexOf(chatId);
+    if (dividerIndex >= 0 && chatIndex >= 0 && dividerIndex !== chatIndex - 1) {
+      normalized.splice(dividerIndex, 1);
+      normalized.splice(normalized.indexOf(chatId), 0, APP_DIVIDER_ID);
+    }
 
     if (
       !Array.isArray(rawOrder) ||
@@ -281,6 +303,7 @@ export class AppGrid {
       `${APP_EDIT_HINT_DURATION}ms`,
     );
     this.els.hint.classList.remove("hidden");
+    playNotificationSound();
     window.requestAnimationFrame(() => this.els.hint.classList.add("is-visible"));
     this._hintTimer = createHoverPauseTimer(
       this.els.hint,
@@ -692,17 +715,23 @@ export class AppGrid {
     const iconLabel = document.createElement("label");
     iconLabel.className = "ydd-tool-icon-picker";
     iconLabel.tabIndex = 0;
-    iconLabel.setAttribute("aria-label", "Choose an app icon image");
+    iconLabel.setAttribute(
+      "aria-label",
+      "Choose an optional app icon image, or leave blank to use the website icon",
+    );
     const iconPreview = document.createElement("span");
     iconPreview.className = "ydd-tool-icon-preview";
     const iconHint = document.createElement("span");
     iconHint.className = "ydd-tool-icon-hint";
-    iconHint.textContent = isEditing ? "Change icon" : "Choose icon";
+    iconHint.textContent = isEditing ? "Change icon" : "Optional icon";
     const iconInput = document.createElement("input");
     iconInput.type = "file";
     iconInput.accept = "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml";
     iconInput.className = "visually-hidden";
-    iconInput.setAttribute("aria-label", "Choose an app icon image");
+    iconInput.setAttribute(
+      "aria-label",
+      "Choose an optional app icon image, or leave blank to use the website icon",
+    );
     iconLabel.append(iconPreview, iconHint, iconInput);
 
     if (isEditing) {
@@ -847,14 +876,6 @@ export class AppGrid {
         }
       }
 
-      if (!isEditing && !iconData) {
-        iconLabel.classList.add("is-invalid");
-        formError.textContent = "Choose an icon image.";
-        valid = false;
-      } else {
-        iconLabel.classList.remove("is-invalid");
-        if (formError.textContent === "Choose an icon image.") formError.textContent = "";
-      }
       return valid;
     };
 
@@ -954,11 +975,12 @@ export class AppGrid {
             formError.textContent = `You can add up to ${MAX_CUSTOM_APPS} custom apps.`;
             return;
           }
+          const cleanUrl = this.normalizeAppUrl(urlField.input.value);
           const newApp = {
             id: this.createCustomAppId(),
             name,
-            url: this.normalizeAppUrl(urlField.input.value),
-            icon: iconData,
+            url: cleanUrl,
+            icon: iconData || getIconUrl(cleanUrl),
           };
           if (!state.set("customApps", [...current, newApp])) {
             formError.textContent = "The app could not be saved. Check browser storage.";
@@ -966,13 +988,18 @@ export class AppGrid {
           }
         } else if (app.isCustom) {
           const current = state.get("customApps") || [];
+          const cleanUrl = this.normalizeAppUrl(urlField.input.value);
           const updated = current.map((item) =>
             item.id === app.id
               ? {
                   ...item,
                   name,
-                  url: this.normalizeAppUrl(urlField.input.value),
-                  icon: iconChanged ? iconData : item.icon,
+                  url: cleanUrl,
+                  icon: iconChanged
+                    ? iconData
+                    : item.icon?.startsWith("data:image/")
+                      ? item.icon
+                      : getIconUrl(cleanUrl),
                 }
               : item,
           );
@@ -1058,11 +1085,15 @@ export class AppGrid {
     const order = [...(state.get("googleAppsOrder") || [])];
     const sourceIndex = order.indexOf(sourceId);
     const targetIndex = order.indexOf(targetId);
-    if (sourceIndex < 0 || targetIndex < 0) return;
-    [order[sourceIndex], order[targetIndex]] = [
-      order[targetIndex],
-      order[sourceIndex],
-    ];
+    if (sourceIndex < 0 || targetIndex < 0 || sourceId === targetId) return;
+
+    const [movedApp] = order.splice(sourceIndex, 1);
+    const targetPosition = order.indexOf(targetId);
+    if (targetPosition < 0) return;
+    // Keep the drop target before the dragged app. This makes dropping onto
+    // the final app place the dragged app in the final square and shifts the
+    // former final app one position back.
+    order.splice(targetPosition + 1, 0, movedApp);
     state.set("googleAppsOrder", order);
   }
 

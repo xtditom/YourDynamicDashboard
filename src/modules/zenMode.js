@@ -1,4 +1,5 @@
 import { state } from "../state.js";
+import { playNotificationSound } from "../utils.js";
 
 const ACKNOWLEDGE_DELAY = 5000;
 const MANUAL_CLOSE_DELAY = 7000;
@@ -109,6 +110,7 @@ export class ZenModeController {
     document.body.appendChild(notice);
     this.notice = notice;
 
+    playNotificationSound();
     this.timers.push(
       window.setTimeout(() => {
         if (this.notice === notice) {

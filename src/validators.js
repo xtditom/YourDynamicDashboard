@@ -41,6 +41,31 @@ export function normalizeHttpUrl(value, maxLength = MAX_SHORTCUT_URL_LENGTH) {
   return parsed.href;
 }
 
+export function isValidStoredIcon(value) {
+  if (typeof value !== "string") return false;
+  if (value.startsWith("data:image/")) {
+    return value.length <= MAX_CUSTOM_TOOL_ICON_LENGTH;
+  }
+  if (value.length > MAX_SHORTCUT_URL_LENGTH) return false;
+
+  try {
+    const parsed = new URL(value);
+    const keys = [...parsed.searchParams.keys()];
+    return (
+      parsed.protocol === "https:" &&
+      parsed.hostname === "www.google.com" &&
+      parsed.pathname === "/s2/favicons" &&
+      parsed.searchParams.get("sz") === "64" &&
+      Boolean(parsed.searchParams.get("domain")) &&
+      keys.length === 2 &&
+      keys.includes("sz") &&
+      keys.includes("domain")
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function sanitizeCustomTools(value, type) {
   if (!Array.isArray(value)) return [];
   const expectedPrefix = type === "social" ? "custom-social-" : "custom-ai-";
@@ -68,13 +93,7 @@ export function sanitizeCustomTools(value, type) {
       continue;
     }
 
-    if (
-      typeof item.icon !== "string" ||
-      !item.icon.startsWith("data:image/") ||
-      item.icon.length > MAX_CUSTOM_TOOL_ICON_LENGTH
-    ) {
-      continue;
-    }
+    if (!isValidStoredIcon(item.icon)) continue;
 
     seenIds.add(id);
     sanitized.push({ id, name, url, icon: item.icon });
@@ -125,11 +144,7 @@ export function sanitizeCustomSearchEngines(value) {
     )].slice(0, MAX_CUSTOM_SEARCH_QUERY_PARAMS);
     if (!queryParams.length) continue;
 
-    if (
-      typeof item.icon !== "string" ||
-      !item.icon.startsWith("data:image/") ||
-      item.icon.length > MAX_CUSTOM_TOOL_ICON_LENGTH
-    ) continue;
+    if (!isValidStoredIcon(item.icon)) continue;
 
     seenIds.add(id);
     sanitized.push({
@@ -176,11 +191,7 @@ export function sanitizeCustomApps(value) {
       continue;
     }
 
-    if (
-      typeof item.icon !== "string" ||
-      !item.icon.startsWith("data:image/") ||
-      item.icon.length > MAX_CUSTOM_TOOL_ICON_LENGTH
-    ) continue;
+    if (!isValidStoredIcon(item.icon)) continue;
 
     seenIds.add(id);
     sanitized.push({ id, name, url, icon: item.icon });

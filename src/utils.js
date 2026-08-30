@@ -1,3 +1,26 @@
+const NOTIFICATION_SOUND_URL = new URL("../assets/sounds/ding.mp3", import.meta.url).href;
+let notificationAudio = null;
+
+export function playNotificationSound() {
+  if (typeof Audio !== "function") return;
+
+  try {
+    if (!notificationAudio) {
+      notificationAudio = new Audio(NOTIFICATION_SOUND_URL);
+      notificationAudio.preload = "auto";
+      notificationAudio.volume = 0.45;
+    }
+
+    notificationAudio.pause();
+    notificationAudio.currentTime = 0;
+    const playback = notificationAudio.play();
+    playback?.catch?.(() => {});
+  } catch {
+    // Browser autoplay restrictions or an unavailable audio device must not
+    // prevent a notification from being displayed.
+  }
+}
+
 export function formatTime(number) {
   return String(number).padStart(2, "0");
 }
@@ -323,6 +346,7 @@ export function showCustomModal(
     box.appendChild(btnContainer);
     overlay.appendChild(box);
     document.body.appendChild(overlay);
+    playNotificationSound();
 
     overlay.classList.remove("hidden");
     overlay.style.display = "flex";
@@ -426,6 +450,7 @@ export function showCustomPrompt(message, defaultValue = "", options = {}) {
     box.appendChild(btnContainer);
     overlay.appendChild(box);
     document.body.appendChild(overlay);
+    playNotificationSound();
 
     overlay.classList.remove("hidden");
     overlay.style.display = "flex";

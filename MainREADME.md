@@ -312,7 +312,7 @@ Feel free to check the [issues page](https://github.com/xtditom/YourDynamicDashb
 ## ❤️ Acknowledgments
 
 * **Inspiration:** A huge thanks to **XengShi** for their project, **[MaterialYouNewTab](https://github.com/prem-k-r/MaterialYouNewTab)**, which served as a major inspiration. (Currently maintained by _Prem Kumar_ & _Itz-RJ_)
-* **AI Assistance:** Developed with help from **Google's Gemini Pro**.
+* **AI Assistance:** Developed with help from **Google's Gemini & OpenAI's ChatGPT**.
 
 ---
 

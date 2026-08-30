@@ -480,6 +480,20 @@ html.disable-animations #search-dropdown.closing {
 .custom-search-provider-item {
   position: relative;
 }
+.custom-search-provider-item[draggable="true"] {
+  cursor: grab;
+}
+.custom-search-provider-item[draggable="true"]:active {
+  cursor: grabbing;
+}
+.custom-search-provider-item.dragging {
+  opacity: 0.5;
+  border: 1px dashed var(--accent-color);
+  background-color: var(--bg-interactive);
+}
+.custom-search-provider-item.drag-over {
+  border-top: 2px solid var(--accent-color);
+}
 .custom-search-provider-name {
   min-width: 0;
   overflow: hidden;

@@ -1,6 +1,6 @@
 import { CONFIG, AI_TOOLS, SOCIAL_LINKS } from "../config.js";
 import { state } from "../state.js";
-import { makeKeyboardInteractive, showCustomModal } from "../utils.js";
+import { getIconUrl, makeKeyboardInteractive, showCustomModal } from "../utils.js";
 import {
   MAX_CUSTOM_TOOLS,
   MAX_CUSTOM_TOOL_NAME_LENGTH,
@@ -635,18 +635,24 @@ export class AiTools {
     const iconLabel = document.createElement("label");
     iconLabel.className = "ydd-tool-icon-picker";
     iconLabel.tabIndex = 0;
-    iconLabel.setAttribute("aria-label", "Choose an icon image");
+    iconLabel.setAttribute(
+      "aria-label",
+      "Choose an optional icon image, or leave blank to use the website icon",
+    );
     const iconPreview = document.createElement("span");
     iconPreview.className = "ydd-tool-icon-preview";
     iconPreview.textContent = "+";
     const iconHint = document.createElement("span");
     iconHint.className = "ydd-tool-icon-hint";
-    iconHint.textContent = "Choose icon";
+    iconHint.textContent = "Optional icon";
     const iconInput = document.createElement("input");
     iconInput.type = "file";
     iconInput.accept = "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml";
     iconInput.className = "visually-hidden";
-    iconInput.setAttribute("aria-label", "Choose an icon image");
+    iconInput.setAttribute(
+      "aria-label",
+      "Choose an optional icon image, or leave blank to use the website icon",
+    );
     iconLabel.append(iconPreview, iconHint, iconInput);
 
     const createField = (labelText, inputType, placeholder, limit) => {
@@ -759,14 +765,6 @@ export class AiTools {
         }
       }
 
-      if (!iconData) {
-        iconLabel.classList.add("is-invalid");
-        formError.textContent = "Choose an icon image.";
-        valid = false;
-      } else {
-        iconLabel.classList.remove("is-invalid");
-        if (formError.textContent === "Choose an icon image.") formError.textContent = "";
-      }
       return valid;
     };
 
@@ -917,7 +915,7 @@ export class AiTools {
           id: this.createCustomToolId(type),
           name: cleanName,
           url: cleanUrl,
-          icon: iconData,
+          icon: iconData || getIconUrl(cleanUrl),
         };
         if (!state.set(toolsKey, [...current, tool])) {
           formError.textContent = "The tool could not be saved. Check browser storage.";

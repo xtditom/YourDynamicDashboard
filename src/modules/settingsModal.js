@@ -6,6 +6,7 @@ import {
   getGeocodingResults,
   getIconUrl,
   makeKeyboardInteractive,
+  playNotificationSound,
   showCustomModal,
 } from "../utils.js";
 import {
@@ -193,6 +194,7 @@ class DarkSignalThemeGesture {
     document.body.appendChild(notice);
     this.notice = notice;
 
+    playNotificationSound();
     window.requestAnimationFrame(() => notice.classList.add("visible"));
     this.noticeTimer = createHoverPauseTimer(
       notice,

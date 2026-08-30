@@ -147,6 +147,7 @@
   color: var(--text-secondary);
   font-size: 0.76rem;
   line-height: 1.45;
+  white-space: pre-line;
 }
 .ydd-tool-icon-picker {
   display: flex;

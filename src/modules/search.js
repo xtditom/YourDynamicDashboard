@@ -7,7 +7,9 @@ import {
 } from "../config.js";
 import {
   createHoverPauseTimer,
+  getIconUrl,
   makeKeyboardInteractive,
+  playNotificationSound,
   showCustomModal,
 } from "../utils.js";
 import { BANG_MAP } from "./palette.js";
@@ -75,6 +77,8 @@ export class Search {
     this._dropdownHomeNextSibling = this.els.dropdown?.nextSibling || null;
     this.current = this.getValidProvider(state.get("searchProvider"));
     this.customSearchEditMode = false;
+    this._customSearchDragSourceId = null;
+    this._customSearchDragOccurred = false;
     this.customSearchModal = null;
     this._customSearchConfirmOpen = false;
     this._historyDropdownEl = null;
@@ -1635,6 +1639,7 @@ export class Search {
       const div = document.createElement("div");
       div.className = `dropdown-item ${p.id === this.current.id ? "active" : ""}`;
       const selectProvider = () => {
+        if (this._customSearchDragOccurred) return;
         this.setProvider(p.id, type);
         if (p.id === "perplexity") this.recordPerplexityUse();
         this.closeDropdown();
@@ -1676,6 +1681,60 @@ export class Search {
         div.classList.add("custom-search-provider-item");
         if (this.customSearchEditMode) {
           div.classList.add("is-reordering");
+          div.setAttribute("draggable", "true");
+          div.addEventListener("dragstart", (event) => {
+            if (event.target?.closest?.("button")) {
+              event.preventDefault();
+              return;
+            }
+            this._customSearchDragSourceId = p.id;
+            this._customSearchDragOccurred = true;
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", p.id);
+            event.dataTransfer.setData(
+              "application/x-ydd-custom-search-engine",
+              "true",
+            );
+            div.classList.add("dragging");
+          });
+          div.addEventListener("dragend", () => {
+            div.classList.remove("dragging");
+            this.els.customEngineList
+              ?.querySelectorAll(".custom-search-provider-item")
+              .forEach((item) => item.classList.remove("drag-over"));
+            this._customSearchDragSourceId = null;
+            window.setTimeout(() => {
+              this._customSearchDragOccurred = false;
+            }, 180);
+          });
+          div.addEventListener("dragover", (event) => {
+            if (
+              !this._customSearchDragSourceId ||
+              this._customSearchDragSourceId === p.id
+            ) {
+              return;
+            }
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+            div.classList.add("drag-over");
+          });
+          div.addEventListener("dragleave", () => {
+            div.classList.remove("drag-over");
+          });
+          div.addEventListener("drop", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            div.classList.remove("drag-over");
+            const sourceId = event.dataTransfer.getData("text/plain");
+            if (
+              !sourceId ||
+              sourceId === p.id ||
+              sourceId !== this._customSearchDragSourceId
+            ) {
+              return;
+            }
+            this.reorderCustomSearchEngines(sourceId, p.id);
+          });
         }
         const actionGroup = document.createElement("span");
         actionGroup.className = "custom-search-actions";
@@ -1896,6 +1955,18 @@ export class Search {
     return true;
   }
 
+  reorderCustomSearchEngines(sourceId, targetId) {
+    if (!sourceId || !targetId || sourceId === targetId) return false;
+    const current = [...(state.get("customSearchEngines") || [])];
+    const sourceIndex = current.findIndex((provider) => provider.id === sourceId);
+    const targetIndex = current.findIndex((provider) => provider.id === targetId);
+    if (sourceIndex < 0 || targetIndex < 0) return false;
+
+    const [moved] = current.splice(sourceIndex, 1);
+    current.splice(targetIndex, 0, moved);
+    return state.set("customSearchEngines", current);
+  }
+
   openCustomSearchEngineModal(editProvider = null) {
     if (this.customSearchModal) return;
 
@@ -1924,7 +1995,8 @@ export class Search {
 
     const note = document.createElement("p");
     note.className = "ydd-search-engine-note";
-    note.textContent = "NOTE: Be careful when adding a search engine. This is not like adding a shortcut, AI tool, or Google app. The URL and query parameter must be correct for searches to work.";
+    note.textContent =
+      "NOTE: Be careful when adding a search engine. This is not like adding a shortcut, AI tool, or Google app. The URL and query parameter must be correct for searches to work.\n\nIf you do not know the correct query parameter, search online for that search engine's query parameter before adding it.";
 
     const form = document.createElement("form");
     form.noValidate = true;
@@ -1932,18 +2004,24 @@ export class Search {
     const iconLabel = document.createElement("label");
     iconLabel.className = "ydd-tool-icon-picker";
     iconLabel.tabIndex = 0;
-    iconLabel.setAttribute("aria-label", "Choose an icon image");
+    iconLabel.setAttribute(
+      "aria-label",
+      "Choose an optional icon image, or leave blank to use the website icon",
+    );
     const iconPreview = document.createElement("span");
     iconPreview.className = "ydd-tool-icon-preview";
     iconPreview.textContent = "+";
     const iconHint = document.createElement("span");
     iconHint.className = "ydd-tool-icon-hint";
-    iconHint.textContent = "Choose icon";
+    iconHint.textContent = "Optional icon";
     const iconInput = document.createElement("input");
     iconInput.type = "file";
     iconInput.accept = "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml";
     iconInput.className = "visually-hidden";
-    iconInput.setAttribute("aria-label", "Choose an icon image");
+    iconInput.setAttribute(
+      "aria-label",
+      "Choose an optional icon image, or leave blank to use the website icon",
+    );
     iconLabel.append(iconPreview, iconHint, iconInput);
 
     const createField = (labelText, inputType, placeholder, limit) => {
@@ -2047,6 +2125,7 @@ export class Search {
     document.body.appendChild(overlay);
 
     let iconData = editProvider?.icon || null;
+    let iconChanged = false;
     let closing = false;
     let isSubmitting = false;
     const setFieldError = (field, message = "") => {
@@ -2167,14 +2246,6 @@ export class Search {
         ? ""
         : "Select at least one query parameter.";
       if (!selectedParams.length) valid = false;
-      if (!iconData) {
-        iconLabel.classList.add("is-invalid");
-        formError.textContent = "Choose an icon image.";
-        valid = false;
-      } else {
-        iconLabel.classList.remove("is-invalid");
-        if (formError.textContent === "Choose an icon image.") formError.textContent = "";
-      }
       return valid;
     };
     const closeModal = (immediate = false) => {
@@ -2259,6 +2330,7 @@ export class Search {
       iconInput.disabled = true;
       try {
         iconData = await this.createScaledSearchIconData(file);
+        iconChanged = true;
         const preview = document.createElement("img");
         preview.src = iconData;
         preview.alt = "Selected icon preview";
@@ -2323,11 +2395,16 @@ export class Search {
           if (confirmation !== "add-anyway") return;
         }
 
+        const providerIcon = iconChanged
+          ? iconData
+          : editProvider?.icon?.startsWith("data:image/")
+            ? editProvider.icon
+            : getIconUrl(cleanUrl);
         const provider = {
           id: isEditing ? editProvider.id : this.createCustomSearchEngineId(),
           name: nameField.input.value.trim(),
           url: cleanUrl,
-          icon: iconData,
+          icon: providerIcon,
           queryParams,
           queryParam: queryParams[0],
         };
@@ -2520,6 +2597,7 @@ export class Search {
     document.body.appendChild(hint);
     this._googleAiHintElement = hint;
 
+    playNotificationSound();
     window.requestAnimationFrame(() => hint.classList.add("is-visible"));
     this._googleAiHintTimer = createHoverPauseTimer(
       hint,

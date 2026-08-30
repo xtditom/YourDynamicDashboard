@@ -7,6 +7,7 @@ import {
   getGeocodingResults,
   getIconUrl,
   makeKeyboardInteractive,
+  playNotificationSound,
   showCustomModal,
 } from "../utils.js";
 import { secondStorage } from "../secondStorage.js";
@@ -1803,6 +1804,7 @@ export class SettingsManager {
     hint.appendChild(timer);
     document.body.appendChild(hint);
 
+    playNotificationSound();
     window.requestAnimationFrame(() => hint.classList.add("visible"));
     createHoverPauseTimer(
       hint,
@@ -1831,6 +1833,7 @@ export class SettingsManager {
     hint.appendChild(timer);
     document.body.appendChild(hint);
 
+    playNotificationSound();
     window.requestAnimationFrame(() => hint.classList.add("visible"));
     createHoverPauseTimer(
       hint,

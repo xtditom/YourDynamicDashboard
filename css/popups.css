@@ -540,6 +540,8 @@ body.has-custom-bg .tool-edit-button {
 #apps-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  /* Let the next available app backfill holes created before/after the divider. */
+  grid-auto-flow: row dense;
   gap: 6px;
   padding: 0;
 }
