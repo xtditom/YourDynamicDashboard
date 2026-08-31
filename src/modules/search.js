@@ -1355,22 +1355,25 @@ export class Search {
       throw error;
     }
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-      },
-      video: false,
-    });
-    stream.getTracks().forEach((track) => track.stop());
-  }
+    let stream = null;
+    try {
+      // Calling getUserMedia directly from the user's click is what makes
+      // Chromium show its microphone permission prompt for this extension.
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
 
-  isExtensionContext() {
-    return Boolean(
-      window.chrome?.runtime?.id ||
-        window.browser?.runtime?.id ||
-        /^(chrome|edge|moz)-extension:$/.test(window.location.protocol),
-    );
+      if (stream.getAudioTracks().length === 0) {
+        const error = new Error("No microphone audio track was provided.");
+        error.name = "NotFoundError";
+        throw error;
+      }
+    } finally {
+      // SpeechRecognition opens its own audio input. Release the short-lived
+      // permission-check stream first so the two consumers never compete.
+      stream?.getTracks().forEach((track) => track.stop());
+    }
   }
 
   async startVoiceSearch() {
@@ -1382,22 +1385,40 @@ export class Search {
     this._voiceStartPending = true;
     this._voicePlaceholderBeforeStart = this.els.input.placeholder;
     this.els.voiceBtn.classList.add("listening");
+    this.els.voiceBtn.setAttribute("aria-label", "Cancel voice search");
+    this.els.voiceBtn.setAttribute("aria-pressed", "true");
+    this.els.voiceBtn.title = "Cancel Voice Search";
     this.els.input.placeholder = "Requesting microphone...";
 
     let recognition = null;
     try {
-      // Extension new-tab pages have a browser-managed origin. In Edge,
-      // getUserMedia() can reject in that override context even though
-      // SpeechRecognition itself is allowed to request and use the mic.
-      if (!this.isExtensionContext()) {
-        await this.requestMicrophoneAccess();
-      }
+      await this.requestMicrophoneAccess();
       if (startId !== this._voiceStartId) return;
 
       recognition = new SpeechRecognition();
       recognition.lang = "en-US";
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        if (
+          startId !== this._voiceStartId ||
+          this.recognition !== recognition
+        ) {
+          try {
+            recognition.abort();
+          } catch {
+            // The browser may already have cancelled this stale request.
+          }
+          return;
+        }
+
+        this._voiceStartPending = false;
+        this.isListening = true;
+        this.els.voiceBtn.setAttribute("aria-label", "Stop voice search");
+        this.els.voiceBtn.title = "Stop Voice Search";
+        this.els.input.placeholder = "Listening...";
+      };
 
       recognition.onresult = (event) => {
         if (this.recognition !== recognition) return;
@@ -1431,6 +1452,11 @@ export class Search {
         }
       };
 
+      recognition.onnomatch = () => {
+        if (this.recognition !== recognition) return;
+        this.els.input.placeholder = "Could not understand. Try again.";
+      };
+
       recognition.onerror = (event) => {
         if (this.recognition !== recognition) return;
         this.finishVoiceSearch(recognition);
@@ -1445,9 +1471,7 @@ export class Search {
       };
 
       this.recognition = recognition;
-      this._voiceStartPending = false;
-      this.isListening = true;
-      this.els.input.placeholder = "Listening...";
+      this.els.input.placeholder = "Starting voice search...";
       recognition.start();
     } catch (error) {
       if (startId !== this._voiceStartId) return;
@@ -1479,10 +1503,14 @@ export class Search {
     this._voiceStartPending = false;
     this.isListening = false;
     this.els.voiceBtn.classList.remove("listening");
+    this.els.voiceBtn.setAttribute("aria-label", "Start voice search");
+    this.els.voiceBtn.setAttribute("aria-pressed", "false");
+    this.els.voiceBtn.title = "Voice Search";
     if (
       [
         "Listening...",
         "Requesting microphone...",
+        "Starting voice search...",
         "Processing speech...",
       ].includes(
         this.els.input.placeholder,
@@ -1502,28 +1530,43 @@ export class Search {
       return;
     }
 
+    const isBrave = await this.isBraveBrowser();
     let message;
     if (
       [
         "not-allowed",
-        "service-not-allowed",
         "NotAllowedError",
         "SecurityError",
       ].includes(code)
     ) {
       message =
-        "Microphone access is blocked for this Edge extension. Allow microphone access in Edge and Windows privacy settings, then choose Try again.";
+        "Microphone access is blocked. Allow microphone access for this extension in your browser and operating-system privacy settings, then choose Try again.";
     } else if (["audio-capture", "NotFoundError"].includes(code)) {
       message =
         "No available microphone was found. Connect or enable a microphone, then choose Try again.";
     } else if (["NotReadableError", "AbortError"].includes(code)) {
       message =
-        "Edge could not use the microphone. Another app may be using it, or Windows privacy settings may be blocking it.";
+        "The browser could not use the microphone. Another app may be using it, or operating-system privacy settings may be blocking it.";
+    } else if (
+      isBrave &&
+      ["network", "service-not-allowed"].includes(code)
+    ) {
+      message =
+        "Microphone access succeeded, but Brave's built-in speech-recognition service is unavailable in this browser version. Update Brave and try again, or use Voice Search in Chrome or Edge.";
+    } else if (code === "service-not-allowed") {
+      message =
+        "Microphone access succeeded, but the browser's speech-recognition service is disabled or unavailable. Check the browser's speech settings, then try again.";
     } else if (code === "network") {
       message =
-        "Edge accessed the microphone, but its online speech-recognition service could not be reached. Check your connection and online speech-recognition settings, then try again.";
+        "Microphone access succeeded, but the browser's speech-recognition service could not be reached. Check your connection and online speech-recognition settings, then try again.";
+    } else if (
+      ["language-not-supported", "language-unavailable"].includes(code)
+    ) {
+      message =
+        "English speech recognition is unavailable in this browser. Install or enable the browser's English speech-recognition support, then try again.";
     } else if (code === "NotSupportedError") {
-      message = "This Edge version cannot request microphone access here.";
+      message =
+        "This browser cannot request microphone access from the extension page. Update the browser and try again.";
     } else {
       message = "Voice Search could not start. Check microphone access and try again.";
     }
@@ -1541,8 +1584,18 @@ export class Search {
 
     if (result === "hide") {
       state.set("hideVoiceSearch", true);
-    } else if (result === "retry" && this.isVoiceButtonAvailable()) {
-      void this.startVoiceSearch();
+    }
+    // The retry action only dismisses this modal. The next microphone-button
+    // click is the fresh user gesture that starts a new permission request.
+  }
+
+  async isBraveBrowser() {
+    if (!navigator.brave) return false;
+    if (typeof navigator.brave.isBrave !== "function") return true;
+    try {
+      return Boolean(await navigator.brave.isBrave());
+    } catch {
+      return true;
     }
   }
 

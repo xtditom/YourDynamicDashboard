@@ -588,8 +588,6 @@
   pointer-events: none;
 }
 
-.fs-news-pane.is-disabled .fs-news-provider-section,
-.fs-news-pane.is-disabled .fs-news-types-section,
 .fs-news-pane.is-disabled .fs-news-display-section,
 .fs-news-pane.is-disabled .fs-news-updates-section,
 .fs-news-refresh-row:has(.fs-news-refresh-button:disabled) {

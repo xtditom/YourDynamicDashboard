@@ -2621,34 +2621,34 @@ export class SettingsManager {
   async detectLocation() {
     this.recordWeatherLocationSaveUse();
     if (!navigator.geolocation) {
-      showCustomModal("Geolocation not supported by your browser.");
+      showCustomModal("Geolocation is not supported by your browser.");
       return;
     }
 
-    // If user previously opted out of our consent modal, go straight
-    // to the browser's native location prompt
     if (localStorage.getItem("hideGpsConsent") === "true") {
       this._requestBrowserLocation();
       return;
     }
 
-    // Show our own privacy-info consent modal first
     const result = await showCustomModal(
       "Your coordinates are used strictly to fetch local weather data. " +
         "When you proceed, your browser will securely ping Open-Meteo " +
         "(for weather) and BigDataCloud (for the city name).\n\n" +
         "This data is saved locally on your device. We do not track you " +
         "in the background, and we have no server to store your location data.\n\n" +
-        "Select Remember choice to skip this notice next time. Your browser still controls location permission.",
+        "Select Remember choice to skip this notice next time. YDD only reads your coordinates after you click a location button.",
       false,
       false,
       [
         {
           text: "I Agree",
-          value: ({ checkboxChecked }) => ({
-            action: "agree",
-            remember: checkboxChecked,
-          }),
+          value: ({ checkboxChecked }) => {
+            this._requestBrowserLocation();
+            return {
+              action: "agree",
+              remember: checkboxChecked,
+            };
+          },
           width: "130px",
         },
         {
@@ -2666,7 +2666,7 @@ export class SettingsManager {
           label: "Remember choice",
         },
         italicText:
-          "Select Remember choice to skip this notice next time. Your browser still controls location permission.",
+          "Select Remember choice to skip this notice next time. YDD only reads your coordinates after you click a location button.",
       },
     );
 
@@ -2675,18 +2675,15 @@ export class SettingsManager {
     if (result.remember) {
       localStorage.setItem("hideGpsConsent", "true");
     }
-
-    // This triggers the browser's native "Allow location?" prompt
-    this._requestBrowserLocation();
   }
 
-  /** Calls the standard Web Geolocation API — the browser handles the permission prompt. */
+  /** Requests the current position after the user explicitly enables it. */
   _requestBrowserLocation() {
     const requestId = ++this._gpsRequestId;
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        const gpsLat = pos.coords.latitude;
-        const gpsLon = pos.coords.longitude;
+        const gpsLat = Number(pos?.coords?.latitude);
+        const gpsLon = Number(pos?.coords?.longitude);
         if (
           requestId !== this._gpsRequestId ||
           !Number.isFinite(gpsLat) ||
@@ -2695,7 +2692,10 @@ export class SettingsManager {
           gpsLat > 90 ||
           gpsLon < -180 ||
           gpsLon > 180
-        ) return;
+        ) {
+          return;
+        }
+
         const gpsCity = await this.reverseGeocode(gpsLat, gpsLon);
         if (requestId !== this._gpsRequestId) return;
         state.set("yd_city", gpsCity);
@@ -2710,12 +2710,19 @@ export class SettingsManager {
           window.__fullSettingsModalInstance.els.fsLocInput.value = gpsCity;
         }
       },
-      (err) =>
+      (err) => {
+        if (requestId !== this._gpsRequestId) return;
+        const reason = err?.message?.trim() || "Location was not shared";
         showCustomModal(
-          "Geolocation error: " +
-            err.message +
-            ". Please enable location services.",
-        ),
+          `${reason}. Please enable location services or enter your city manually.`,
+          false,
+          false,
+          null,
+          false,
+          { title: "Location unavailable" },
+        );
+      },
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 },
     );
   }
 
@@ -3766,6 +3773,7 @@ export class SettingsManager {
       } catch (e) {
         console.error("Failed to wipe IndexedDB:", e);
       }
+      await window.__newsFeedInstance?.revokeAllPublisherAccess?.();
       clearYddLocalStorage();
       location.reload();
     }
@@ -4185,6 +4193,7 @@ export class SettingsManager {
       await secondStorage.deleteRandomBackgroundQueue();
       await secondStorage.deleteRandomBackgroundCurrent();
 
+      await window.__newsFeedInstance?.revokeAllPublisherAccess?.();
       location.reload();
     } catch (error) {
       console.error("Restore failed:", error);

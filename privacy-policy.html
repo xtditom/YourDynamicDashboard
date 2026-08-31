@@ -337,7 +337,10 @@
                 News Feeds is off by default. If enabled, YDD connects directly
                 to the selected publishers (BBC News, CNN, DW, Euronews, The
                 Guardian, and/or NPR) to download feed metadata from RSS or a
-                publisher-operated API.
+                publisher-operated API. Before connecting, YDD asks the browser
+                for optional host access only to the publishers selected by the
+                user. The browser controls the grant or denial. Deselecting a
+                publisher or disabling News removes that optional host access.
                 Headline, link, source, date, and image URL metadata is cached
                 locally in the browser. Story images are requested directly
                 from publisher servers when displayed. YDD uses no news relay,
@@ -432,10 +435,14 @@
               <p>
                 <strong>Strictly Opt-In.</strong> This extension does not track
                 your location in the background. If you manually click "Detect
-                Location", it triggers your browser's native, one-time
-                permission prompt. Your coordinates are sent directly to the
-                weather provider and saved locally. We do not store or monitor
-                this data.
+                Location", YDD asks for confirmation before reading your
+                coordinates. YDD declares geolocation as an extension permission
+                because browsers require it for location access from extension
+                pages. YDD only requests your current position after you click a
+                location button and confirm the privacy notice. If allowed, your
+                coordinates are sent directly to the weather providers and
+                saved locally. We do not store or monitor this data on a YDD
+                server.
               </p>
             </div>
             <div class="info-card full-width">

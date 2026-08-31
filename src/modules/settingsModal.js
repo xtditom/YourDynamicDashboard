@@ -1970,7 +1970,10 @@ export class FullSettingsModal {
       return input;
     });
     const providersSection = this._section("Providers", [
-      this._el("p", { className: "fs-news-help", textContent: "Select one or more privacy-first direct publisher sources." }),
+      this._el("p", {
+        className: "fs-news-help",
+        textContent: "Choose providers before enabling News. Your browser requests access only to these publisher hosts.",
+      }),
       providerGrid,
     ]);
     providersSection.classList.add("fs-news-provider-section");
@@ -2047,7 +2050,7 @@ export class FullSettingsModal {
 
     pane.appendChild(this._el("p", {
       className: "fs-news-privacy fs-news-footer",
-      textContent: "YDD fetches news directly from selected publishers and stores only feed metadata locally. Story images load from publisher servers. No relay, account, tracking profile, or custom feed is used.",
+      textContent: "Publisher access is optional and browser-controlled. YDD requests only selected hosts, removes access when a provider is deselected or News is disabled, and stores only feed metadata locally. No relay, account, or tracking profile is used.",
     }));
 
     const applyNewsDraft = async (
@@ -2123,7 +2126,6 @@ export class FullSettingsModal {
 
   _updateNewsCategoryAvailability(providerChanged = false) {
     if (!this.els.fsNewsProviders || !this.els.fsNewsCategories) return;
-    const enabled = state.get("newsEnabled") === true;
     const selectedProviderIds = new Set(
       this.els.fsNewsProviders
         .filter((input) => input.checked)
@@ -2141,11 +2143,11 @@ export class FullSettingsModal {
     this.els.fsNewsCategories.forEach((input) => {
       const supported = supportedCategoryIds.has(input.value);
       if (!supported) input.checked = false;
-      input.disabled = !enabled || !supported;
-      input.closest(".fs-news-choice")?.classList.toggle("is-unavailable", enabled && !supported);
+      input.disabled = !supported;
+      input.closest(".fs-news-choice")?.classList.toggle("is-unavailable", !supported);
     });
 
-    if (enabled && providerChanged && hadSelectedCategory && !this.els.fsNewsCategories.some((input) => input.checked)) {
+    if (providerChanged && hadSelectedCategory && !this.els.fsNewsCategories.some((input) => input.checked)) {
       const firstSupported = this.els.fsNewsCategories.find((input) => supportedCategoryIds.has(input.value));
       if (firstSupported) firstSupported.checked = true;
     }
@@ -2197,8 +2199,6 @@ export class FullSettingsModal {
     this.els.fsNewsProviders.forEach((input) => { input.checked = providerIds.includes(input.value); });
     this.els.fsNewsCategories.forEach((input) => { input.checked = categoryIds.includes(input.value); });
     [
-      ...this.els.fsNewsProviders,
-      ...this.els.fsNewsCategories,
       this.els.fsNewsShowHeadlines,
       this.els.fsNewsHeadlineOpacity,
       this.els.fsNewsTotalCards,

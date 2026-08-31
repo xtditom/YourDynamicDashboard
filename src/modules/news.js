@@ -16,6 +16,7 @@ const MAX_NEWS_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 12000;
 const LOCK_KEY = "ydd_news_fetch_lock";
 const LOCK_TTL_MS = 30000;
+const NEWS_PERMISSION_MODEL_VERSION = 1;
 const PAGE_START_TIME = globalThis.performance?.now?.() ?? Date.now();
 const CNN_SEARCH_ENDPOINT = "https://search.prod.di.api.cnn.io/content";
 const CNN_CATEGORY_PATHS = Object.freeze({
@@ -29,6 +30,104 @@ const CNN_CATEGORY_PATHS = Object.freeze({
   entertainment: /\/(?:entertainment|style|culture)\//,
   travel: /\/travel\//,
 });
+const NEWS_PERMISSION_ORIGINS = Object.freeze([
+  ...new Set(NEWS_PROVIDERS.map((provider) => provider.permission).filter(Boolean)),
+]);
+
+function getExtensionPermissionApi() {
+  if (globalThis.browser?.permissions?.request) {
+    return { api: globalThis.browser, promiseBased: true };
+  }
+  if (globalThis.chrome?.permissions?.request) {
+    return { api: globalThis.chrome, promiseBased: false };
+  }
+  return null;
+}
+
+function callPermissionApi(methodName, details) {
+  const extension = getExtensionPermissionApi();
+  const method = extension?.api?.permissions?.[methodName];
+  if (typeof method !== "function") return Promise.resolve(false);
+
+  if (extension.promiseBased) {
+    try {
+      return Promise.resolve(method.call(extension.api.permissions, details));
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    try {
+      method.call(extension.api.permissions, details, (value) => {
+        const runtimeError = extension.api.runtime?.lastError;
+        if (runtimeError) reject(new Error(runtimeError.message));
+        else resolve(value);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+function permissionOriginsForProviders(providers) {
+  return [
+    ...new Set(
+      (Array.isArray(providers) ? providers : [])
+        .map((provider) => provider?.permission)
+        .filter(Boolean),
+    ),
+  ];
+}
+
+async function hasNewsHostAccess(providers) {
+  const origins = permissionOriginsForProviders(providers);
+  if (!origins.length || !getExtensionPermissionApi()) return false;
+  try {
+    return Boolean(await callPermissionApi("contains", { origins }));
+  } catch (error) {
+    console.warn("[YDD] Could not check News publisher access.", error);
+    return false;
+  }
+}
+
+async function requestNewsHostAccess(providers) {
+  const origins = permissionOriginsForProviders(providers);
+  if (!origins.length || !getExtensionPermissionApi()) return false;
+  try {
+    // Do not await permissions.contains() first. Calling request() immediately
+    // preserves the browser-required user gesture; already-granted origins are
+    // returned without another prompt by the browser.
+    return Boolean(await callPermissionApi("request", { origins }));
+  } catch (error) {
+    console.warn("[YDD] News publisher permission request failed.", error);
+    return false;
+  }
+}
+
+async function removeNewsHostAccess(origins) {
+  const uniqueOrigins = [...new Set((origins || []).filter(Boolean))];
+  if (!uniqueOrigins.length) return true;
+  if (!getExtensionPermissionApi()) return false;
+
+  let completed = true;
+  for (const origin of uniqueOrigins) {
+    try {
+      const details = { origins: [origin] };
+      const isGranted = Boolean(await callPermissionApi("contains", details));
+      if (!isGranted) continue;
+      const removed = Boolean(await callPermissionApi("remove", details));
+      if (!removed) {
+        completed = false;
+        console.warn(`[YDD] Browser retained News access for ${origin}`);
+      }
+    } catch (error) {
+      completed = false;
+      console.warn(`[YDD] Could not remove News access for ${origin}`, error);
+    }
+  }
+  return completed;
+}
 
 function safeUrl(value, baseUrl = "") {
   const rawValue = String(value || "").trim();
@@ -403,16 +502,25 @@ function filterFreshStories(items, now = Date.now()) {
     : [];
 }
 
-async function requestNewsConsent() {
-  if (state.get("newsConsentRemembered") === true) return true;
+async function requestNewsConsent(providers) {
+  if (state.get("newsConsentRemembered") === true) {
+    return requestNewsHostAccess(providers);
+  }
   const result = await showCustomModal(
-    "News Feeds connects directly to the news endpoints of publishers you select. It retrieves headlines, publication times, and available images; YDD uses no relay, account, tracking profile, or custom server. Feed metadata is stored locally, while images load from publisher servers. Automatic updates follow your selected 15, 30, 60, or 180-minute interval. Your browser may ask for access to selected publishers.\n\nSelect Remember choice to skip this notice next time.",
+    "News Feeds connects directly to the news endpoints of publishers you select. It retrieves headlines, publication times, and available images; YDD uses no relay, account, tracking profile, or custom server. Feed metadata is stored locally, while images load from publisher servers. Your browser will ask for access only to the selected publisher hosts. Denying the browser prompt keeps News off; disabling News or deselecting a publisher removes that host access.\n\nSelect Remember choice to skip this notice next time.",
     false,
     false,
     [
       {
         text: "I Agree",
-        value: ({ checkboxChecked }) => ({ action: "agree", remember: checkboxChecked }),
+        value: ({ checkboxChecked }) => ({
+          action: "agree",
+          remember: checkboxChecked,
+          // Start the native request in this exact button click. The shared
+          // modal resolves after its close animation, which is too late to
+          // retain a permission-request user gesture in Chromium or Firefox.
+          permissionRequest: requestNewsHostAccess(providers),
+        }),
         width: "130px",
       },
       {
@@ -431,7 +539,7 @@ async function requestNewsConsent() {
   );
   if (!result || result === "cancel" || result.action !== "agree") return false;
   if (result.remember) state.set("newsConsentRemembered", true);
-  return true;
+  return Boolean(await result.permissionRequest);
 }
 
 export class NewsManager {
@@ -494,9 +602,15 @@ export class NewsManager {
         else this.scheduleAutoRefresh();
       }
     });
+    const permissionEvents = getExtensionPermissionApi()?.api?.permissions;
+    permissionEvents?.onRemoved?.addListener?.((permissions) => {
+      this.handleNewsPermissionRemoval(permissions);
+    });
     this.updatePlacement();
     this.render();
-    this.handlePageVisit();
+    void this.initializeNewsPermissions().catch((error) => {
+      console.error("[YDD] Could not initialize News publisher access.", error);
+    });
   }
 
   getSelection() {
@@ -633,6 +747,56 @@ export class NewsManager {
     }));
   }
 
+  async initializeNewsPermissions() {
+    const savedPermissionModel = Number(
+      state.get("newsPermissionModelVersion"),
+    ) || 0;
+    if (savedPermissionModel < NEWS_PERMISSION_MODEL_VERSION) {
+      const wasEnabled = state.get("newsEnabled") === true;
+      if (wasEnabled) state.set("newsEnabled", false);
+      await removeNewsHostAccess(NEWS_PERMISSION_ORIGINS);
+      state.set("newsPermissionModelVersion", NEWS_PERMISSION_MODEL_VERSION);
+      if (wasEnabled) {
+        this.emitStatus(
+          "News was turned off so you can approve the new browser-controlled publisher permissions.",
+        );
+      }
+      return;
+    }
+    if (state.get("newsEnabled") !== true) return;
+    const { providers } = this.getSelection();
+    if (providers.length && await hasNewsHostAccess(providers)) {
+      await this.handlePageVisit();
+      return;
+    }
+    await this.disableNewsForMissingPermissions(
+      "News was turned off because publisher access is not granted. Enable News again to choose in the browser prompt.",
+    );
+  }
+
+  async disableNewsForMissingPermissions(message) {
+    const wasEnabled = state.get("newsEnabled") === true;
+    if (wasEnabled) state.set("newsEnabled", false);
+    await removeNewsHostAccess(NEWS_PERMISSION_ORIGINS);
+    if (wasEnabled) this.emitStatus(message);
+  }
+
+  async revokeAllPublisherAccess() {
+    return removeNewsHostAccess(NEWS_PERMISSION_ORIGINS);
+  }
+
+  handleNewsPermissionRemoval(permissions) {
+    if (state.get("newsEnabled") !== true) return;
+    const removedOrigins = new Set(permissions?.origins || []);
+    const selectedOrigins = permissionOriginsForProviders(
+      this.getSelection().providers,
+    );
+    if (!selectedOrigins.some((origin) => removedOrigins.has(origin))) return;
+    void this.disableNewsForMissingPermissions(
+      "News was turned off because publisher access was removed in the browser.",
+    );
+  }
+
   async applyConfiguration({
     enabled,
     providerIds,
@@ -671,7 +835,15 @@ export class NewsManager {
       await showCustomModal("The selected providers do not publish any of the selected news types. Choose another provider or type.");
       return false;
     }
-    if (enabled && !wasEnabled && !(await requestNewsConsent())) return false;
+    if (enabled && !wasEnabled && !(await requestNewsConsent(providers))) {
+      return false;
+    }
+    if (enabled && wasEnabled && !(await requestNewsHostAccess(providers))) {
+      await showCustomModal(
+        "Browser access was not granted for the selected publishers. Your existing News settings were kept.",
+      );
+      return false;
+    }
     const previousKey = this.getSelection().selectionKey;
     state.set("newsProviderIds", requestedProviderIds);
     state.set("newsCategoryIds", normalizedCategoryIds);
@@ -682,6 +854,17 @@ export class NewsManager {
     state.set("newsPosition", position);
     state.set("newsEnabled", enabled === true);
     if (enabled === true) state.set("newsBadgeDismissed", true);
+    const retainedOrigins = new Set(
+      enabled ? permissionOriginsForProviders(providers) : [],
+    );
+    const unusedAccessRemoved = await removeNewsHostAccess(
+      NEWS_PERMISSION_ORIGINS.filter((origin) => !retainedOrigins.has(origin)),
+    );
+    if (!unusedAccessRemoved) {
+      await showCustomModal(
+        "News settings were saved, but the browser retained access to one or more unselected publishers. Remove that site access from the extension's browser settings.",
+      );
+    }
     const changed = previousKey !== this.getSelection().selectionKey;
     if (enabled && refreshOnChange && (changed || forceRefresh)) {
       await this.refresh({ reason: refreshReason });
@@ -788,6 +971,12 @@ export class NewsManager {
     if (!selection.sources.length) {
       this.emitStatus("Choose at least one provider and news type in News Settings.");
       this.render();
+      return false;
+    }
+    if (!(await hasNewsHostAccess(selection.providers))) {
+      await this.disableNewsForMissingPermissions(
+        "News was turned off because the browser no longer grants access to every selected publisher.",
+      );
       return false;
     }
     const cache = state.get("newsCache") || CONFIG.defaults.newsCache;

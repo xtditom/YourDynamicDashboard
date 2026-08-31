@@ -662,32 +662,4 @@ body.gradient-dark .ai-tool-item:hover .ai-tool-icon img[src*="grok.png"] {
   filter: brightness(0) invert(1) !important;
 }
 
-/* NotebookLM keeps its original artwork in every theme and background mode. */
-.app-icon[src*="notebooklm.png"],
-.app-icon[src*="notebooklm.png"]:hover {
-  filter: none !important;
-  opacity: 1 !important;
-}
-
-/* The built-in Dark theme is the only theme that can keep monochrome icons. */
-body[data-theme="dark"][data-theme-id="default-dark"]
-  .app-icon[src*="notebooklm.png"],
-body[data-theme="dark"][data-theme-id="default-dark"]
-  .app-icon[src*="notebooklm.png"]:hover,
-html[data-theme="dark"][data-theme-id="default-dark"] body
-  .app-icon[src*="notebooklm.png"],
-html[data-theme="dark"][data-theme-id="default-dark"] body
-  .app-icon[src*="notebooklm.png"]:hover {
-  filter: var(--icon-filter) !important;
-  opacity: var(--icon-opacity) !important;
-}
-
-body[data-theme="dark"][data-theme-id="default-dark"]
-  .app-icon[src*="notebooklm.png"]:hover,
-html[data-theme="dark"][data-theme-id="default-dark"] body
-  .app-icon[src*="notebooklm.png"]:hover {
-  filter: none !important;
-  opacity: 1 !important;
-}
-
 /* [css/themes.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

@@ -10,6 +10,7 @@ export const CONFIG = {
     shortcutsDisplayMode: "shortcuts",
     fontFamily: "outfit",
     newsEnabled: false,
+    newsPermissionModelVersion: 0,
     newsBadgeDismissed: false,
     newsProviderIds: ["bbc", "guardian", "cnn"],
     newsCategoryIds: ["top", "world"],
