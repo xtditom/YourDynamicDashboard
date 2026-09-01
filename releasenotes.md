@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.0.0] - 2026-09-01 (THE BIGGEST UPDATE EVER)
+
+YourDynamicDashboard 3.0.0 turns the new-tab dashboard into a faster,
+more capable command center while keeping customization and privacy controls
+at the center of the experience.
+
+### New Features
+
+- **Command Palette:** Press `Ctrl+K` or `Cmd+K` to open a keyboard-driven action panel for dashboard controls, settings, tools, themes, and search.
+- **Bang Search Shortcuts:** Route searches instantly with shortcuts such as `!g`, `!yt`, `!sp`, and `/w` across supported engines and platforms.
+- **Separated Settings:** Use Mini Settings for common controls and Full Settings for the complete configuration experience.
+- **Expanded Search:** Added Perplexity Search, Google AI Search, optional online suggestions, and support for user-defined search engines.
+- **Custom Integrations:** Add custom AI tools, social links, search engines, and apps to the dashboard and Command Palette.
+- **News Feeds:** Added an optional News widget with selectable publishers, news categories, refresh intervals, card counts, headline controls, and direct RSS/RDF or publisher API retrieval.
+- **Theme Generator:** Generate custom themes with advanced color controls and gradient support; also added the Lavender Mist and Dawn Bloom presets.
+- **Enhanced Backup & Restore:** Backups now include the active background data alongside the rest of the local dashboard configuration.
+- **Optional Most-Visited Shortcuts:** Use the browser’s most-visited sites as shortcut entries when the optional browser permission is granted.
+
+### Improvements
+
+- **Performance:** Reduced unnecessary CPU and memory work, improved startup behavior, and moved active/random background handling into serialized IndexedDB storage for faster, safer loading.
+- **Theme System:** Expanded the dark-mode theme flow, improved gradient and custom-background contrast, and refined theme-dependent control states.
+- **Location Selection:** Manual location search now provides matching city choices to make weather setup clearer and more accurate.
+- **Settings & Navigation:** Added more controls to the popup settings, improved Tab-key navigation and focus behavior, and introduced clearer contextual guidance messages.
+- **Dashboard Experience:** Refined Zen Mode feedback, greeting presentation, modal in/out animations, and NEW/UPDATED feature badges.
+- **Integrated Services:** Added Mistral and TikTok, expanded the Google Apps collection, and refreshed service icon presentation.
+- **Motion Controls:** Added an option to disable animations and transitions for a calmer or more accessible interface.
+
+### Fixes
+
+- **Shortcut Handling:** Corrected modifier-key event handling so configurable shortcuts do not interfere with browser commands, while `Ctrl+K`/`Cmd+K` remains dedicated to the Command Palette.
+- **Theme Readability:** Resolved color conflicts that could make controls or text difficult to read across dark, light, gradient, and custom-background states.
+- **Background and Reset Cleanup:** Improved background state cleanup and ensured Reset All also clears the online suggestion cache.
+- **Backup Import Hardening:** Strengthened validation for imported background URLs, theme values, icon fields, and other stored values before applying them; invalid imports are rejected without silently accepting unsafe local state.
+
+---
+
 ## [2.2.0] - 2026-03-08 (PERFORMANCE & SCALING UPDATE)
 
 The **Performance & Scaling Update** is here. We rebuilt the mobile-responsive engine, integrated a proper database for heavy storage, and introduced a highly requested, privacy-focused Search History system.
