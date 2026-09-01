@@ -69,9 +69,10 @@ try {
     document.documentElement.setAttribute("data-theme-id", thId);
     if (thId === "custom") {
       var rawBgp = localStorage.getItem("custom---bg-primary");
-      if (rawBgp) {
-        document.documentElement.style.setProperty("--bg-primary", rawBgp.replace(/^"|"$/g, ""));
-        document.documentElement.style.backgroundColor = rawBgp.replace(/^"|"$/g, "");
+      var customBgp = readStoredColor(rawBgp);
+      if (customBgp) {
+        document.documentElement.style.setProperty("--bg-primary", customBgp);
+        document.documentElement.style.backgroundColor = customBgp;
       }
     } else {
       var color = THEME_LIGHT_COLORS[thId] || THEME_COLORS[thId] || "#c3c3c3";
@@ -108,6 +109,56 @@ try {
     } catch (error) {
       return null;
     }
+  };
+
+  var isSafeThemeColor = function(value) {
+    var color = typeof value === "string" ? value.trim() : "";
+    var number = "[-+]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)%?";
+    var alpha = "[-+]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)%?";
+    var hue = "[-+]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:deg|grad|rad|turn)?";
+    return (
+      color.length > 0 &&
+      color.length <= 128 &&
+      (color === "transparent" ||
+        /^#[\da-f]{3,4}$/i.test(color) ||
+        /^#[\da-f]{6}(?:[\da-f]{2})?$/i.test(color) ||
+        new RegExp(
+          "^rgba?\\(\\s*" +
+            number +
+            "\\s*,\\s*" +
+            number +
+            "\\s*,\\s*" +
+            number +
+            "(?:\\s*,\\s*" +
+            alpha +
+            ")?\\s*\\)$",
+          "i",
+        ).test(color) ||
+        new RegExp(
+          "^hsla?\\(\\s*" +
+            hue +
+            "\\s*,\\s*" +
+            number +
+            "\\s*,\\s*" +
+            number +
+            "(?:\\s*,\\s*" +
+            alpha +
+            ")?\\s*\\)$",
+          "i",
+        ).test(color))
+    );
+  };
+
+  var readStoredColor = function(value) {
+    if (!value || value === "null" || value === '"null"') return null;
+    var parsed = value;
+    try {
+      parsed = JSON.parse(value);
+    } catch (error) {
+      // Support older or manually-entered values.
+    }
+    var color = typeof parsed === "string" ? parsed.trim() : "";
+    return isSafeThemeColor(color) ? color : null;
   };
 
   var isCompatiblePicsumUrl = function(value) {
@@ -253,7 +304,7 @@ try {
         randomBgNextUrl;
     }
   } else if (bg && bg !== '"null"' && bgMode !== '"random"') {
-    imgUrl = bg;
+    imgUrl = readStoredUrl(bg);
   }
 
   if (imgUrl && imgUrl !== "null" && imgUrl !== '"null"') {

@@ -51,6 +51,18 @@ function persistCache() {
   }
 }
 
+export function clearSuggestionCache() {
+  onlineCache.clear();
+  if (cacheCleanupTimer !== null) clearTimeout(cacheCleanupTimer);
+  cacheCleanupTimer = null;
+  try {
+    localStorage.removeItem(CACHE_STORAGE_KEY);
+    LEGACY_CACHE_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+  } catch {
+    // Reset still clears the in-memory cache when storage is unavailable.
+  }
+}
+
 function getEndpoint() {
   const mode = state.get("searchSuggestionMode");
   const relay = state.get("searchSuggestionProxyUrl");
@@ -222,11 +234,7 @@ export class SuggestionEngine {
   }
 
   clearCache() {
-    onlineCache.clear();
-    if (cacheCleanupTimer !== null) clearTimeout(cacheCleanupTimer);
-    cacheCleanupTimer = null;
-    localStorage.removeItem(CACHE_STORAGE_KEY);
-    LEGACY_CACHE_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+    clearSuggestionCache();
   }
 }
 

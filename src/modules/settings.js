@@ -17,11 +17,14 @@ import {
   validateYddStorageEntries,
 } from "../storageKeys.js";
 import {
+  clearSuggestionCache,
   dismissSearchSuggestionBadge,
   requestSearchSuggestionConsent,
   syncSuggestionModeSelect,
 } from "./suggestions.js";
 import {
+  isValidImageDataUrl,
+  isValidThemeColor,
   MIN_SHORTCUTS,
   MAX_SHORTCUTS,
   MAX_SHORTCUT_NAME_LENGTH,
@@ -520,16 +523,6 @@ function createGeneratedTheme(mode, recipe, generationIndex) {
   }
 
   return createRecipeGeneratedTheme(mode, recipe);
-}
-
-function isUsableThemeColor(value) {
-  const color = String(value || "").trim();
-  return (
-    color === "transparent" ||
-    /^#[\da-f]{3,4}$/i.test(color) ||
-    /^#[\da-f]{6}(?:[\da-f]{2})?$/i.test(color) ||
-    /^(?:rgb|hsl)a?\([^)]*\)$/i.test(color)
-  );
 }
 
 export function getThemeRightColor(theme) {
@@ -1387,7 +1380,7 @@ export class SettingsManager {
         theme.colors &&
         typeof theme.colors === "object" &&
         GENERATED_THEME_COLOR_KEYS.every(
-          (key) => isUsableThemeColor(theme.colors[key]),
+          (key) => isValidThemeColor(theme.colors[key]),
         ),
     );
   }
@@ -3773,6 +3766,7 @@ export class SettingsManager {
       } catch (e) {
         console.error("Failed to wipe IndexedDB:", e);
       }
+      clearSuggestionCache();
       await window.__newsFeedInstance?.revokeAllPublisherAccess?.();
       clearYddLocalStorage();
       location.reload();
@@ -4162,10 +4156,7 @@ export class SettingsManager {
 
       let restoredBackground = null;
       if (isCurrentFormat && data.backgroundImage !== null) {
-        if (
-          typeof data.backgroundImage !== "string" ||
-          !data.backgroundImage.startsWith("data:image/")
-        ) {
+        if (!isValidImageDataUrl(data.backgroundImage, 20 * 1024 * 1024)) {
           throw new TypeError("Invalid background image in backup.");
         }
         restoredBackground = await this.dataUrlToBlob(data.backgroundImage);

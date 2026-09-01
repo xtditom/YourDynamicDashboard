@@ -15,6 +15,50 @@ export const MAX_CUSTOM_APPS = 20;
 export const MAX_CUSTOM_APP_NAME_LENGTH = 35;
 export const MAX_CUSTOM_APP_URL_LENGTH = 2048;
 
+export const THEME_COLOR_KEYS = Object.freeze([
+  "--bg-primary",
+  "--bg-secondary",
+  "--bg-tertiary",
+  "--accent-color",
+  "--text-primary",
+  "--text-secondary",
+  "--text-placeholder",
+  "--glow-color",
+]);
+
+const MAX_STORED_BACKGROUND_URL_LENGTH = MAX_SHORTCUT_URL_LENGTH;
+const MAX_STORED_PREVIEW_LENGTH = 2_000_000;
+const MAX_SAVED_THEME_NAME_LENGTH = 35;
+const IMAGE_DATA_URL_PATTERN =
+  /^data:image\/(?:avif|gif|jpe?g|png|webp);base64,[a-z\d+/]+={0,2}$/i;
+const COLOR_NUMBER = "[-+]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)%?";
+const COLOR_ALPHA = "[-+]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)%?";
+const COLOR_HUE = "[-+]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:deg|grad|rad|turn)?";
+const RGB_COLOR_PATTERN = new RegExp(
+  "^rgba?\\(\\s*" +
+    COLOR_NUMBER +
+    "\\s*,\\s*" +
+    COLOR_NUMBER +
+    "\\s*,\\s*" +
+    COLOR_NUMBER +
+    "(?:\\s*,\\s*" +
+    COLOR_ALPHA +
+    ")?\\s*\\)$",
+  "i",
+);
+const HSL_COLOR_PATTERN = new RegExp(
+  "^hsla?\\(\\s*" +
+    COLOR_HUE +
+    "\\s*,\\s*" +
+    COLOR_NUMBER +
+    "\\s*,\\s*" +
+    COLOR_NUMBER +
+    "(?:\\s*,\\s*" +
+    COLOR_ALPHA +
+    ")?\\s*\\)$",
+  "i",
+);
+
 export function normalizeHttpUrl(value, maxLength = MAX_SHORTCUT_URL_LENGTH) {
   let input = String(value || "").trim();
   if (!input) throw new TypeError("Enter a URL.");
@@ -41,11 +85,72 @@ export function normalizeHttpUrl(value, maxLength = MAX_SHORTCUT_URL_LENGTH) {
   return parsed.href;
 }
 
-export function isValidStoredIcon(value) {
+export function isValidImageDataUrl(value, maxLength = MAX_CUSTOM_TOOL_ICON_LENGTH) {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= maxLength &&
+    IMAGE_DATA_URL_PATTERN.test(value)
+  );
+}
+
+export function isValidThemeColor(value) {
   if (typeof value !== "string") return false;
-  if (value.startsWith("data:image/")) {
-    return value.length <= MAX_CUSTOM_TOOL_ICON_LENGTH;
+  const color = value.trim();
+  return (
+    color.length > 0 &&
+    color.length <= 128 &&
+    (color === "transparent" ||
+      /^#[\da-f]{3,4}$/i.test(color) ||
+      /^#[\da-f]{6}(?:[\da-f]{2})?$/i.test(color) ||
+      RGB_COLOR_PATTERN.test(color) ||
+      HSL_COLOR_PATTERN.test(color))
+  );
+}
+
+export function normalizeThemeColor(value) {
+  const color = typeof value === "string" ? value.trim() : "";
+  if (!isValidThemeColor(color)) {
+    throw new TypeError("Invalid theme color.");
   }
+  return color;
+}
+
+export function normalizeStoredBackgroundUrl(value) {
+  if (value === null || value === "") return value;
+  if (typeof value !== "string" || !/^https?:\/\//i.test(value.trim())) {
+    throw new TypeError("Stored background URL must use HTTP or HTTPS.");
+  }
+  return normalizeHttpUrl(value, MAX_STORED_BACKGROUND_URL_LENGTH);
+}
+
+export function normalizeStoredImageDataUrl(
+  value,
+  maxLength = MAX_STORED_PREVIEW_LENGTH,
+) {
+  if (value === null || value === "") return value;
+  if (!isValidImageDataUrl(value, maxLength)) {
+    throw new TypeError("Invalid stored image data.");
+  }
+  return value;
+}
+
+export function normalizeStoredThemeColor(key, value) {
+  const cssVariable = key.startsWith("custom-")
+    ? key.slice("custom-".length)
+    : "";
+  if (!THEME_COLOR_KEYS.includes(cssVariable)) {
+    throw new TypeError("Invalid custom theme property.");
+  }
+  return normalizeThemeColor(value);
+}
+
+export function isValidStoredIcon(
+  value,
+  maxDataLength = MAX_CUSTOM_TOOL_ICON_LENGTH,
+) {
+  if (typeof value !== "string") return false;
+  if (value.startsWith("data:image/")) return isValidImageDataUrl(value, maxDataLength);
   if (value.length > MAX_SHORTCUT_URL_LENGTH) return false;
 
   try {
@@ -211,11 +316,7 @@ export function sanitizeGoogleAppOverrides(value) {
     const next = {};
     const name = String(override.name || "").trim();
     if (name && name.length <= MAX_CUSTOM_APP_NAME_LENGTH) next.name = name;
-    if (
-      typeof override.icon === "string" &&
-      override.icon.startsWith("data:image/") &&
-      override.icon.length <= MAX_CUSTOM_TOOL_ICON_LENGTH
-    ) {
+    if (isValidImageDataUrl(override.icon)) {
       next.icon = override.icon;
     }
     if (Object.keys(next).length) sanitized[id] = next;
@@ -238,6 +339,47 @@ export function sanitizeHiddenApps(value) {
   return sanitized;
 }
 
+export function sanitizeSavedThemes(value) {
+  if (!Array.isArray(value)) return [];
+  const sanitized = [];
+  const seenIds = new Set();
+  const allowedTypes = new Set(["dark", "light", "default-dark", "default-light"]);
+
+  for (const item of value) {
+    if (sanitized.length >= 5) break;
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+
+    const id = typeof item.id === "string" ? item.id.trim() : "";
+    const name = typeof item.name === "string" ? item.name.trim() : "";
+    if (
+      !id ||
+      id.length > 160 ||
+      !/^[a-z0-9][a-z0-9_-]*$/i.test(id) ||
+      seenIds.has(id) ||
+      !name ||
+      name.length > MAX_SAVED_THEME_NAME_LENGTH ||
+      /[\u0000-\u001f\u007f]/.test(name) ||
+      !item.colors ||
+      typeof item.colors !== "object" ||
+      Array.isArray(item.colors)
+    ) continue;
+
+    if (!THEME_COLOR_KEYS.every((key) => isValidThemeColor(item.colors[key]))) {
+      continue;
+    }
+
+    const colors = Object.fromEntries(
+      THEME_COLOR_KEYS.map((key) => [key, item.colors[key].trim()]),
+    );
+    const theme = { id, name, colors };
+    if (allowedTypes.has(item.type)) theme.type = item.type;
+    sanitized.push(theme);
+    seenIds.add(id);
+  }
+
+  return sanitized;
+}
+
 export function sanitizeShortcuts(value) {
   if (!Array.isArray(value)) return [];
   const sanitized = [];
@@ -249,13 +391,11 @@ export function sanitizeShortcuts(value) {
     try {
       const url = normalizeHttpUrl(item.url);
       const shortcut = { name, url };
-      if (typeof item.icon === "string" && item.icon.length <= MAX_SHORTCUT_URL_LENGTH) {
+      if (isValidStoredIcon(item.icon)) {
         shortcut.icon = item.icon;
       }
       if (
-        typeof item.customIcon === "string" &&
-        item.customIcon.startsWith("data:image/") &&
-        item.customIcon.length <= 3_000_000
+        isValidImageDataUrl(item.customIcon, 3_000_000)
       ) {
         shortcut.customIcon = item.customIcon;
       }

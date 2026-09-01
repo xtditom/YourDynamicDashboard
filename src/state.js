@@ -17,6 +17,10 @@ import {
   sanitizeHiddenApps,
   sanitizeCustomTools,
   sanitizeShortcuts,
+  sanitizeSavedThemes,
+  normalizeStoredBackgroundUrl,
+  normalizeStoredImageDataUrl,
+  normalizeStoredThemeColor,
 } from "./validators.js";
 
 const STATE_SCHEMA_VERSION = 1;
@@ -173,6 +177,16 @@ class StateManager {
       const url = new URL(value);
       if (url.protocol !== "https:") throw new TypeError("Suggestion proxy must use HTTPS");
       return url.toString();
+    }
+    if (["backgroundImage", "savedBgUrl", "randomBgNextUrl"].includes(key)) {
+      return normalizeStoredBackgroundUrl(value);
+    }
+    if (["randomBgCurrentPreview", "randomBgNextPreview"].includes(key)) {
+      return normalizeStoredImageDataUrl(value);
+    }
+    if (key === "userSavedThemes") return sanitizeSavedThemes(value);
+    if (key.startsWith("custom---")) {
+      return normalizeStoredThemeColor(key, value);
     }
     if (key === "userShortcuts") return sanitizeShortcuts(value);
     if (key === "customAiTools") return sanitizeCustomTools(value, "ai");

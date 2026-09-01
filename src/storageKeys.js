@@ -1,4 +1,15 @@
 import { CONFIG } from "./config.js";
+import {
+  normalizeStoredBackgroundUrl,
+  normalizeStoredImageDataUrl,
+  normalizeStoredThemeColor,
+  sanitizeCustomApps,
+  sanitizeCustomSearchEngines,
+  sanitizeCustomTools,
+  sanitizeGoogleAppOverrides,
+  sanitizeSavedThemes,
+  sanitizeShortcuts,
+} from "./validators.js";
 
 const EXTRA_STORAGE_KEYS = [
   "activeToolTab",
@@ -63,6 +74,61 @@ const RAW_STORAGE_KEYS = new Set([
 ]);
 
 const INTERNAL_STORAGE_KEYS = new Set(["ydd_daily_greeting"]);
+const BACKGROUND_URL_KEYS = new Set([
+  "backgroundImage",
+  "savedBgUrl",
+  "randomBgNextUrl",
+]);
+const BACKGROUND_PREVIEW_KEYS = new Set([
+  "randomBgCurrentPreview",
+  "randomBgNextPreview",
+]);
+const IMPORT_VALUE_NORMALIZERS = new Map([
+  ["userShortcuts", (value) => requireArray(value, "shortcuts") && sanitizeShortcuts(value)],
+  ["customAiTools", (value) => requireArray(value, "custom AI tools") && sanitizeCustomTools(value, "ai")],
+  ["customSocialLinks", (value) => requireArray(value, "custom social links") && sanitizeCustomTools(value, "social")],
+  ["customApps", (value) => requireArray(value, "custom apps") && sanitizeCustomApps(value)],
+  ["customSearchEngines", (value) => requireArray(value, "custom search engines") && sanitizeCustomSearchEngines(value)],
+  ["googleAppOverrides", (value) => requireObject(value, "Google app overrides") && sanitizeGoogleAppOverrides(value)],
+  ["userSavedThemes", normalizeImportedSavedThemes],
+]);
+
+function requireArray(value, label) {
+  if (!Array.isArray(value)) throw new TypeError("Invalid " + label + ".");
+  return true;
+}
+
+function requireObject(value, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError("Invalid " + label + ".");
+  }
+  return true;
+}
+
+function normalizeImportedSavedThemes(value) {
+  if (!Array.isArray(value)) throw new TypeError("Invalid saved themes.");
+  const normalized = sanitizeSavedThemes(value);
+  if (normalized.length !== value.length) {
+    throw new TypeError("Invalid saved theme.");
+  }
+  return normalized;
+}
+
+function normalizeImportedJsonValue(key, value) {
+  if (BACKGROUND_URL_KEYS.has(key)) return normalizeStoredBackgroundUrl(value);
+  if (BACKGROUND_PREVIEW_KEYS.has(key)) return normalizeStoredImageDataUrl(value);
+  if (key.startsWith("custom---")) return normalizeStoredThemeColor(key, value);
+  return IMPORT_VALUE_NORMALIZERS.get(key)?.(value) ?? value;
+}
+
+function shouldNormalizeImportedValue(key) {
+  return (
+    BACKGROUND_URL_KEYS.has(key) ||
+    BACKGROUND_PREVIEW_KEYS.has(key) ||
+    key.startsWith("custom---") ||
+    IMPORT_VALUE_NORMALIZERS.has(key)
+  );
+}
 
 export function isYddStorageKey(key) {
   return (
@@ -111,7 +177,11 @@ export function validateYddStorageEntries(entries) {
       throw new TypeError(`Invalid stored flag for ${key}.`);
     }
     if (!RAW_STORAGE_KEYS.has(key) && !key.startsWith("welcomeShown_")) {
-      JSON.parse(rawValue);
+      const parsedValue = JSON.parse(rawValue);
+      if (shouldNormalizeImportedValue(key)) {
+        filtered[key] = JSON.stringify(normalizeImportedJsonValue(key, parsedValue));
+        return;
+      }
     }
     filtered[key] = rawValue;
   });
