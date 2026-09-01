@@ -51,17 +51,240 @@ const KEY_LABELS = Object.freeze({
   voice: "Key for Voice Search",
 });
 
+// Safe SVG builders
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+
+function createSvgNode(tagName, attributes = {}, children = []) {
+  const node = document.createElementNS(SVG_NAMESPACE, tagName);
+  Object.entries(attributes).forEach(([name, value]) => {
+    node.setAttribute(name, value);
+  });
+  children.forEach((child) => node.appendChild(child));
+  return node;
+}
+
+function createSvgIcon(attributes, children = []) {
+  return createSvgNode(
+    "svg",
+    { xmlns: SVG_NAMESPACE, ...attributes },
+    children,
+  );
+}
+
+const FEATURE_BADGES = Object.freeze({
+  new: Object.freeze({
+    viewBox: "0 0 78 36",
+    ariaLabel: "New",
+    text: "NEW",
+    textX: "39",
+    pathWidth: "58",
+    fontSize: "14",
+    letterSpacing: "1",
+  }),
+  updated: Object.freeze({
+    viewBox: "0 0 108 36",
+    ariaLabel: "Updated",
+    text: "UPDATED",
+    textX: "54",
+    pathWidth: "88",
+    fontSize: "13",
+    letterSpacing: "1.1",
+  }),
+});
+
+function createFeatureBadge(type) {
+  const badge = FEATURE_BADGES[type];
+  if (!badge) return null;
+
+  return createSvgIcon(
+    {
+      viewBox: badge.viewBox,
+      role: "img",
+      "aria-label": badge.ariaLabel,
+    },
+    [
+      createSvgNode("title", {}, [document.createTextNode(badge.ariaLabel)]),
+      createSvgNode("path", {
+        d: `M10 3h${badge.pathWidth}l7 7v16l-7 7H10l-7-7V10z`,
+        fill: "#ffe05b",
+        stroke: "#141414",
+        "stroke-width": "2.5",
+        "stroke-linejoin": "round",
+      }),
+      createSvgNode("path", {
+        d: `M13 8h${type === "new" ? "11" : "12"}`,
+        stroke: "#ffffff",
+        "stroke-width": "2",
+        "stroke-linecap": "round",
+        opacity: ".9",
+      }),
+      createSvgNode("text", {
+        x: badge.textX,
+        y: "24",
+        fill: "#141414",
+        "font-family": "Arial, sans-serif",
+        "font-size": badge.fontSize,
+        "font-weight": "800",
+        "letter-spacing": badge.letterSpacing,
+        "text-anchor": "middle",
+      }, [document.createTextNode(badge.text)]),
+    ],
+  );
+}
+
+function createMiniSettingsIcon() {
+  return createSvgIcon(
+    {
+      width: "24",
+      height: "24",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      "stroke-width": "2",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      "aria-hidden": "true",
+    },
+    [
+      createSvgNode("polyline", { points: "4 14 10 14 10 20" }),
+      createSvgNode("polyline", { points: "20 10 14 10 14 4" }),
+      createSvgNode("line", { x1: "14", y1: "10", x2: "21", y2: "3" }),
+      createSvgNode("line", { x1: "3", y1: "21", x2: "10", y2: "14" }),
+    ],
+  );
+}
+
+function createLocationIcon() {
+  return createSvgIcon({ width: "18", height: "18" }, [
+    createSvgNode("g", { fill: "none", "fill-rule": "evenodd" }, [
+      createSvgNode("path", { d: "M18 0v18H0V0z" }),
+      createSvgNode("path", {
+        fill: "currentColor",
+        "fill-rule": "nonzero",
+        d: "M5.04 12.48a.75.75 0 0 1 .42 1.44c-.375.11-.645.225-.818.33.178.107.46.227.852.339C6.36 14.836 7.6 15 9 15s2.64-.164 3.506-.411c.392-.112.674-.232.852-.339-.173-.105-.443-.22-.818-.33a.75.75 0 0 1 .42-1.44c.501.146.96.334 1.313.575.326.224.727.615.727 1.195 0 .587-.411.98-.743 1.205-.358.241-.827.43-1.34.576C11.884 16.327 10.5 16.5 9 16.5s-2.885-.173-3.918-.469c-.512-.146-.981-.335-1.34-.576C3.332 15.23 2.92 14.836 2.92 14.25c0-.58.401-.971.727-1.195.353-.241.812-.428 1.313-.575M9 1.5a5.625 5.625 0 0 1 5.625 5.625c0 1.926-1.05 3.492-2.137 4.605A12.3 12.3 0 0 1 11.098 12.94c-.446.335-1.464.962-1.464.962a1.283 1.283 0 0 1-1.268 0s-1.018-.627-1.464-.962a12.217 12.217 0 0 1-1.39-1.21C4.425 10.617 3.375 9.051 3.375 7.125A5.625 5.625 0 0 1 9 1.5m0 4.125a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3",
+      }),
+    ]),
+  ]);
+}
+
+function createUpdatesIcon() {
+  return createSvgIcon(
+    {
+      stroke: "currentColor",
+      fill: "currentColor",
+      height: "24",
+      width: "24",
+      viewBox: "0 0 24 24",
+    },
+    [
+      createSvgNode("path", {
+        d: "M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z",
+      }),
+    ],
+  );
+}
+
+function createGithubIcon() {
+  return createSvgIcon(
+    {
+      width: "20",
+      height: "20",
+      viewBox: "0 0 24 24",
+      fill: "currentColor",
+    },
+    [
+      createSvgNode("path", {
+        d: "M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z",
+      }),
+    ],
+  );
+}
+
+function createPrivacyIcon() {
+  return createSvgIcon(
+    {
+      width: "24",
+      height: "24",
+      viewBox: "0 0 24 24",
+      fill: "none",
+    },
+    [
+      createSvgNode("path", {
+        d: "M20.25 5C17.5866 5 14.992 4.05652 12.45 2.15C12.1833 1.95 11.8167 1.95 11.55 2.15C9.00797 4.05652 6.41341 5 3.75 5C3.33579 5 3 5.33579 3 5.75V11C3 16.0012 5.95756 19.6757 11.7251 21.9478C11.9018 22.0174 12.0982 22.0174 12.2749 21.9478C18.0424 19.6757 21 16.0012 21 11V5.75C21 5.33579 20.6642 5 20.25 5ZM16.7568 9.30287L10.7568 14.8029C10.4608 15.0742 10.0036 15.0643 9.71967 14.7803L7.21967 12.2803C6.92678 11.9874 6.92678 11.5126 7.21967 11.2197C7.51256 10.9268 7.98744 10.9268 8.28033 11.2197L10.2726 13.2119L15.7432 8.19714C16.0485 7.91724 16.523 7.93787 16.8029 8.24321C17.0828 8.54855 17.0621 9.02297 16.7568 9.30287Z",
+        fill: "currentColor",
+      }),
+    ],
+  );
+}
+
+function createResetIcon() {
+  return createSvgIcon(
+    {
+      width: "16",
+      height: "16",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      "stroke-width": "2",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      "aria-hidden": "true",
+    },
+    [
+      createSvgNode("path", {
+        d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",
+      }),
+      createSvgNode("path", { d: "M3 3v5h5" }),
+    ],
+  );
+}
+
+function createDeleteIcon() {
+  return createSvgIcon(
+    {
+      width: "16",
+      height: "16",
+      viewBox: "0 0 24 24",
+      fill: "none",
+    },
+    [
+      createSvgNode("path", {
+        d: "M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9",
+        fill: "#EF4444",
+      }),
+      createSvgNode("path", {
+        d: "M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z",
+        stroke: "#EF4444",
+        "stroke-width": "1.5",
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round",
+      }),
+      createSvgNode("path", {
+        d: "M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375",
+        stroke: "#EF4444",
+        "stroke-width": "1.5",
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round",
+      }),
+    ],
+  );
+}
+
 function createNewsCheckmark() {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", "fs-news-choice-check");
-  svg.setAttribute("viewBox", "0 0 20 20");
-  svg.setAttribute("aria-hidden", "true");
-  svg.setAttribute("focusable", "false");
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("class", "fs-news-choice-check-mark");
-  path.setAttribute("d", "M3.5 10.5 8 15 16.5 5.5");
-  svg.appendChild(path);
-  return svg;
+  return createSvgIcon(
+    {
+      class: "fs-news-choice-check",
+      viewBox: "0 0 20 20",
+      "aria-hidden": "true",
+      focusable: "false",
+    },
+    [
+      createSvgNode("path", {
+        class: "fs-news-choice-check-mark",
+        d: "M3.5 10.5 8 15 16.5 5.5",
+      }),
+    ],
+  );
 }
 
 const FULL_NORMAL_THEME_ORDER = Object.freeze([
@@ -267,7 +490,6 @@ export class FullSettingsModal {
     Object.entries(attrs).forEach(([k, v]) => {
       if (k === "className") el.className = v;
       else if (k === "textContent") el.textContent = v;
-      else if (k === "innerHTML") el.innerHTML = v;
       else if (k.startsWith("on")) {
         el.addEventListener(k.slice(2).toLowerCase(), v);
       } else if (k === "style" && typeof v === "object") {
@@ -282,16 +504,7 @@ export class FullSettingsModal {
   }
 
   _newSticker(className = "fs-new-sticker") {
-    return this._el("span", {
-      className,
-      innerHTML:
-        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
-        <title>New</title>
-        <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-        <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-        <text x="39" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">NEW</text>
-      </svg>`,
-    });
+    return this._el("span", { className }, [createFeatureBadge("new")]);
   }
 
   _dismissNewsBadge() {
@@ -388,9 +601,7 @@ export class FullSettingsModal {
       id: "open-mini-settings-btn",
       className: "fs-nav-btn",
       title: "Switch to Mini Settings",
-      innerHTML:
-        `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
-    });
+    }, [createMiniSettingsIcon()]);
     this.els.miniBtn = miniBtn;
 
     const titleH2 = this._el("h2", { id: "full-settings-title" }, [
@@ -447,11 +658,20 @@ export class FullSettingsModal {
       },
     );
 
-    const footer = this._el("div", { className: "fs-footer" });
-    footer.innerHTML =
-      `<p>&copy; Ditom Baroi Antu <span class="fs-copyright-year">2025</span></p>
-<p><strong>YourDynamicDashboard</strong> V3.0.0</p>`;
-    const yearSpan = footer.querySelector(".fs-copyright-year");
+    const yearSpan = this._el("span", {
+      className: "fs-copyright-year",
+      textContent: "2025",
+    });
+    const footer = this._el("div", { className: "fs-footer" }, [
+      this._el("p", {}, [
+        document.createTextNode("© Ditom Baroi Antu "),
+        yearSpan,
+      ]),
+      this._el("p", {}, [
+        this._el("strong", { textContent: "YourDynamicDashboard" }),
+        document.createTextNode(" V3.0.0"),
+      ]),
+    ]);
     const year = new Date().getFullYear();
     if (year > 2025) yearSpan.textContent = `2025 - ${year}`;
     this.els.footer = footer;
@@ -512,16 +732,9 @@ export class FullSettingsModal {
     if (disableAnimationsLabel) {
       disableAnimationsLabel.classList.add("fs-disable-animations-label");
       if ((Number(state.get("disableAnimationsToggleCount")) || 0) < 1) {
-        const newSticker = this._el("span", {
-          className: "fs-new-sticker",
-          innerHTML:
-            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
-            <title>New</title>
-            <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-            <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-            <text x="39" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">NEW</text>
-          </svg>`,
-        });
+        const newSticker = this._el("span", { className: "fs-new-sticker" }, [
+          createFeatureBadge("new"),
+        ]);
         disableAnimationsLabel.appendChild(newSticker);
         this.els.fsDisableAnimationsNewSticker = newSticker;
       }
@@ -565,15 +778,13 @@ export class FullSettingsModal {
     const locGps = this._el("button", {
       className: "settings-button fs-location-action",
       title: "Detect My Location",
-      innerHTML:
-        `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><g fill="none" fill-rule="evenodd"><path d="M18 0v18H0V0z"/><path fill="currentColor" fill-rule="nonzero" d="M5.04 12.48a.75.75 0 0 1 .42 1.44c-.375.11-.645.225-.818.33.178.107.46.227.852.339C6.36 14.836 7.6 15 9 15s2.64-.164 3.506-.411c.392-.112.674-.232.852-.339-.173-.105-.443-.22-.818-.33a.75.75 0 0 1 .42-1.44c.501.146.96.334 1.313.575.326.224.727.615.727 1.195 0 .587-.411.98-.743 1.205-.358.241-.827.43-1.34.576C11.884 16.327 10.5 16.5 9 16.5s-2.885-.173-3.918-.469c-.512-.146-.981-.335-1.34-.576C3.332 15.23 2.92 14.836 2.92 14.25c0-.58.401-.971.727-1.195.353-.241.812-.428 1.313-.575M9 1.5a5.625 5.625 0 0 1 5.625 5.625c0 1.926-1.05 3.492-2.137 4.605A12.3 12.3 0 0 1 11.098 12.94c-.446.335-1.464.962-1.464.962a1.283 1.283 0 0 1-1.268 0s-1.018-.627-1.464-.962a12.217 12.217 0 0 1-1.39-1.21C4.425 10.617 3.375 9.051 3.375 7.125A5.625 5.625 0 0 1 9 1.5m0 4.125a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/></g></svg>`,
       style: {
         padding: "0 12px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
       },
-    });
+    }, [createLocationIcon()]);
 
     this.els.fsLocInput = locInput;
     this.els.fsLocSave = locSave;
@@ -585,16 +796,11 @@ export class FullSettingsModal {
     }, [this._el("span", { textContent: "Weather Location" })]);
     this.els.fsWeatherLocationUpdatedSticker = null;
     if ((Number(state.get("weatherLocationSaveCount")) || 0) < 1) {
-      const updatedSticker = this._el("span", {
-        className: "fs-updated-sticker",
-        innerHTML:
-          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
-          <title>Updated</title>
-          <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-          <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-          <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
-        </svg>`,
-      });
+      const updatedSticker = this._el(
+        "span",
+        { className: "fs-updated-sticker" },
+        [createFeatureBadge("updated")],
+      );
       weatherLocationLabel.appendChild(updatedSticker);
       this.els.fsWeatherLocationUpdatedSticker = updatedSticker;
     }
@@ -714,16 +920,11 @@ export class FullSettingsModal {
     if (darkModeLabel) {
       darkModeLabel.classList.add("fs-dark-mode-label");
       if ((Number(state.get("darkModeToggleUseCount")) || 0) < 1) {
-        const updatedSticker = this._el("span", {
-          className: "fs-updated-sticker",
-          innerHTML:
-            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
-            <title>Updated</title>
-            <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-            <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-            <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
-          </svg>`,
-        });
+        const updatedSticker = this._el(
+          "span",
+          { className: "fs-updated-sticker" },
+          [createFeatureBadge("updated")],
+        );
         darkModeLabel.appendChild(updatedSticker);
         this.els.fsDarkUpdatedSticker = updatedSticker;
       }
@@ -824,16 +1025,11 @@ export class FullSettingsModal {
     }, [this._el("span", { textContent: "Random BG" })]);
     this.els.fsRandomBgUpdatedSticker = null;
     if (state.get("randomBgScheduleBadgeDismissed") !== true) {
-      const updatedSticker = this._el("span", {
-        className: "fs-updated-sticker",
-        innerHTML:
-          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
-          <title>Updated</title>
-          <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-          <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-          <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
-        </svg>`,
-      });
+      const updatedSticker = this._el(
+        "span",
+        { className: "fs-updated-sticker" },
+        [createFeatureBadge("updated")],
+      );
       randomBgLabel.appendChild(updatedSticker);
       this.els.fsRandomBgUpdatedSticker = updatedSticker;
     }
@@ -1161,21 +1357,24 @@ export class FullSettingsModal {
 
     const updateBtn = this._el("button", {
       className: "icon-button",
-      innerHTML:
-        `<svg stroke="currentColor" fill="currentColor" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z"/></svg><span>Check for Updates</span>`,
-    });
+    }, [
+      createUpdatesIcon(),
+      this._el("span", { textContent: "Check for Updates" }),
+    ]);
     const ghBtn = this._el("button", {
       className: "icon-button",
-      innerHTML:
-        `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg><span>GitHub</span>`,
-    });
+    }, [
+      createGithubIcon(),
+      this._el("span", { textContent: "GitHub" }),
+    ]);
     const ppLink = this._el("a", {
       href: "privacy-policy.html",
       className: "icon-button",
       rel: "noopener noreferrer",
-      innerHTML:
-        `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.25 5C17.5866 5 14.992 4.05652 12.45 2.15C12.1833 1.95 11.8167 1.95 11.55 2.15C9.00797 4.05652 6.41341 5 3.75 5C3.33579 5 3 5.33579 3 5.75V11C3 16.0012 5.95756 19.6757 11.7251 21.9478C11.9018 22.0174 12.0982 22.0174 12.2749 21.9478C18.0424 19.6757 21 16.0012 21 11V5.75C21 5.33579 20.6642 5 20.25 5ZM16.7568 9.30287L10.7568 14.8029C10.4608 15.0742 10.0036 15.0643 9.71967 14.7803L7.21967 12.2803C6.92678 11.9874 6.92678 11.5126 7.21967 11.2197C7.51256 10.9268 7.98744 10.9268 8.28033 11.2197L10.2726 13.2119L15.7432 8.19714C16.0485 7.91724 16.523 7.93787 16.8029 8.24321C17.0828 8.54855 17.0621 9.02297 16.7568 9.30287Z" fill="currentColor"/></svg><span>Privacy Policy</span>`,
-    });
+    }, [
+      createPrivacyIcon(),
+      this._el("span", { textContent: "Privacy Policy" }),
+    ]);
 
     this.els.fsUpdateBtn = updateBtn;
     this.els.fsGhBtn = ghBtn;
@@ -2534,7 +2733,7 @@ export class FullSettingsModal {
     };
 
     const renderGrid = (container, themes, isGradient) => {
-      container.innerHTML = "";
+      container.replaceChildren();
       themes.forEach((theme) => {
         const btn = document.createElement("button");
         btn.className = `theme-preset-button ${isGradient ? "gradient" : ""}`;
@@ -2624,7 +2823,7 @@ export class FullSettingsModal {
   _renderSavedThemes() {
     const container = this.els.fsSavedThemes;
     if (!container) return;
-    container.innerHTML = "";
+    container.replaceChildren();
     const sm = this._sm();
     const savedThemes = state.get("userSavedThemes") || [];
 
@@ -2911,7 +3110,7 @@ export class FullSettingsModal {
   _renderShortcutEditor() {
     const list = this.els.fsShortcutList;
     if (!list) return;
-    list.innerHTML = "";
+    list.replaceChildren();
     const shortcuts = state.get("userShortcuts") || [];
 
     shortcuts.forEach((s, index) => {
@@ -2988,9 +3187,7 @@ export class FullSettingsModal {
         type: "button",
         className: "action-btn reset",
         title: "Reset Custom Icon",
-        innerHTML:
-          '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
-      });
+      }, [createResetIcon()]);
       resetIconBtn.setAttribute("aria-label", `Reset ${s.name} custom icon`);
       resetIconBtn.hidden = !s.customIcon;
       resetIconBtn.addEventListener("click", () => {
@@ -3004,8 +3201,7 @@ export class FullSettingsModal {
         title: "Delete",
         "aria-label": `Delete ${s.name} shortcut`,
       });
-      delBtn.innerHTML =
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      delBtn.appendChild(createDeleteIcon());
       delBtn.addEventListener("click", () => {
         const sm = this._sm();
         if (sm) {
@@ -3091,9 +3287,7 @@ export class FullSettingsModal {
       type: "button",
       className: "action-btn reset",
       title,
-      innerHTML:
-        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
-    });
+    }, [createResetIcon()]);
     button.addEventListener("click", onClick);
     return button;
   }
@@ -3165,8 +3359,10 @@ export class FullSettingsModal {
   _renderKeyEditor() {
     const container = this.els.fsKeyList;
     if (!container) return;
-    container.innerHTML = "";
-    if (this.els.fsKeyNoteContainer) this.els.fsKeyNoteContainer.innerHTML = "";
+    container.replaceChildren();
+    if (this.els.fsKeyNoteContainer) {
+      this.els.fsKeyNoteContainer.replaceChildren();
+    }
 
     if (this._activeKeyCleanup) {
       this._activeKeyCleanup();
@@ -3203,16 +3399,11 @@ export class FullSettingsModal {
         ? "miniSettingsShortcutUseCount"
         : null;
       if (usageCountKey && (Number(state.get(usageCountKey)) || 0) < 1) {
-        const updatedSticker = this._el("span", {
-          className: "fs-shortcut-updated-sticker",
-          innerHTML:
-            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
-            <title>Updated</title>
-            <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-            <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-            <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
-          </svg>`,
-        });
+        const updatedSticker = this._el(
+          "span",
+          { className: "fs-shortcut-updated-sticker" },
+          [createFeatureBadge("updated")],
+        );
         label.appendChild(updatedSticker);
       }
       row.appendChild(label);
@@ -3349,8 +3540,23 @@ export class FullSettingsModal {
       className: "settings-note",
       style: { marginTop: "1rem" },
     });
-    note.innerHTML =
-      "<p>Keys <strong>1-9</strong> are reserved for <strong>Shortcuts</strong><br>Press <strong>Z</strong> for <strong>Zen Mode</strong>, <strong>V</strong> for <strong>Voice Search</strong></p>";
+    note.appendChild(
+      this._el("p", {}, [
+        document.createTextNode("Keys "),
+        this._el("strong", { textContent: "1-9" }),
+        document.createTextNode(" are reserved for "),
+        this._el("strong", { textContent: "Shortcuts" }),
+        this._el("br"),
+        document.createTextNode("Press "),
+        this._el("strong", { textContent: "Z" }),
+        document.createTextNode(" for "),
+        this._el("strong", { textContent: "Zen Mode" }),
+        document.createTextNode(", "),
+        this._el("strong", { textContent: "V" }),
+        document.createTextNode(" for "),
+        this._el("strong", { textContent: "Voice Search" }),
+      ]),
+    );
     if (this.els.fsKeyNoteContainer) {
       this.els.fsKeyNoteContainer.appendChild(note);
     } else container.appendChild(note);
@@ -3360,7 +3566,7 @@ export class FullSettingsModal {
   _renderLinkDirectionEditor() {
     const container = this.els.fsLinkDirList;
     if (!container) return;
-    container.innerHTML = "";
+    container.replaceChildren();
 
     let targets = state.get("linkTargets");
     if (!targets) {
