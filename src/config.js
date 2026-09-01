@@ -1,3 +1,4 @@
+// Core configuration
 export const CONFIG = {
   defaults: {
     clockFormat: "12",
@@ -143,6 +144,7 @@ export const CONFIG = {
   },
 };
 
+// Font options
 export const FONT_OPTIONS = Object.freeze([
   Object.freeze({
     id: "lexend",
@@ -194,6 +196,7 @@ export const FONT_OPTIONS = Object.freeze([
   }),
 ]);
 
+// News configuration
 export const NEWS_REFRESH_INTERVALS = Object.freeze([1, 2, 5, 10]);
 export const NEWS_HEADLINE_OPACITIES = Object.freeze([0, 30, 50, 70]);
 export const NEWS_CARD_COUNTS = Object.freeze([4, 5, 6, 7]);
@@ -220,7 +223,10 @@ export const NEWS_CATEGORIES = Object.freeze([
 
 export const NEWS_PROVIDERS = Object.freeze([
   {
-    id: "bbc", name: "BBC News", shortName: "BBC", color: "#bb1919",
+    id: "bbc",
+    name: "BBC News",
+    shortName: "BBC",
+    color: "#bb1919",
     permission: "https://feeds.bbci.co.uk/*",
     feeds: {
       top: "https://feeds.bbci.co.uk/news/rss.xml",
@@ -231,11 +237,15 @@ export const NEWS_PROVIDERS = Object.freeze([
       science: "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
       health: "https://feeds.bbci.co.uk/news/health/rss.xml",
       sports: "https://feeds.bbci.co.uk/sport/rss.xml",
-      entertainment: "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+      entertainment:
+        "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
     },
   },
   {
-    id: "guardian", name: "The Guardian", shortName: "G", color: "#052962",
+    id: "guardian",
+    name: "The Guardian",
+    shortName: "G",
+    color: "#052962",
     permission: "https://www.theguardian.com/*",
     feeds: {
       top: "https://www.theguardian.com/international/rss",
@@ -257,7 +267,10 @@ export const NEWS_PROVIDERS = Object.freeze([
     },
   },
   {
-    id: "cnn", name: "CNN", shortName: "CNN", color: "#cc0000",
+    id: "cnn",
+    name: "CNN",
+    shortName: "CNN",
+    color: "#cc0000",
     format: "cnn-search-json",
     permission: "https://search.prod.di.api.cnn.io/*",
     feeds: {
@@ -265,26 +278,43 @@ export const NEWS_PROVIDERS = Object.freeze([
       world: "https://search.prod.di.api.cnn.io/content?category=world",
       politics: "https://search.prod.di.api.cnn.io/content?category=politics",
       business: "https://search.prod.di.api.cnn.io/content?category=business",
-      technology: "https://search.prod.di.api.cnn.io/content?category=technology",
+      technology:
+        "https://search.prod.di.api.cnn.io/content?category=technology",
       science: "https://search.prod.di.api.cnn.io/content?category=science",
       health: "https://search.prod.di.api.cnn.io/content?category=health",
       sports: "https://search.prod.di.api.cnn.io/content?category=sports",
-      entertainment: "https://search.prod.di.api.cnn.io/content?category=entertainment",
+      entertainment:
+        "https://search.prod.di.api.cnn.io/content?category=entertainment",
       travel: "https://search.prod.di.api.cnn.io/content?category=travel",
     },
   },
   {
-    id: "npr", name: "NPR", shortName: "NPR", color: "#d62021",
+    id: "npr",
+    name: "NPR",
+    shortName: "NPR",
+    color: "#d62021",
     permission: "https://feeds.npr.org/*",
-    feeds: { top: "https://feeds.npr.org/1001/rss.xml", world: "https://feeds.npr.org/1001/rss.xml" },
+    feeds: {
+      top: "https://feeds.npr.org/1001/rss.xml",
+      world: "https://feeds.npr.org/1001/rss.xml",
+    },
   },
   {
-    id: "dw", name: "DW", shortName: "DW", color: "#0087c9",
+    id: "dw",
+    name: "DW",
+    shortName: "DW",
+    color: "#0087c9",
     permission: "https://rss.dw.com/*",
-    feeds: { top: "https://rss.dw.com/rdf/rss-en-all", world: "https://rss.dw.com/rdf/rss-en-all" },
+    feeds: {
+      top: "https://rss.dw.com/rdf/rss-en-all",
+      world: "https://rss.dw.com/rdf/rss-en-all",
+    },
   },
   {
-    id: "euronews", name: "Euronews", shortName: "EU", color: "#003399",
+    id: "euronews",
+    name: "Euronews",
+    shortName: "EU",
+    color: "#003399",
     permission: "https://www.euronews.com/*",
     feeds: {
       top: "https://www.euronews.com/rss?level=theme&name=news",
@@ -300,6 +330,7 @@ export const NEWS_PROVIDERS = Object.freeze([
 
 export const COMMAND_PALETTE_SHORTCUT_USE_LIMIT = 3;
 
+// Quote content
 export const QUOTES = [
   {
     text: "The only way to do great work is to love what you do.",
@@ -439,7 +470,8 @@ export const QUOTES = [
   },
   { text: "Everything you can imagine is real.", author: "Pablo Picasso" },
   {
-    text: "The future belongs to those who believe in the beauty of their dreams.",
+    text:
+      "The future belongs to those who believe in the beauty of their dreams.",
     author: "Eleanor Roosevelt",
   },
   {
@@ -459,11 +491,13 @@ export const QUOTES = [
     author: "Wayne Gretzky",
   },
   {
-    text: "The only limit to our realization of tomorrow is our doubts of today.",
+    text:
+      "The only limit to our realization of tomorrow is our doubts of today.",
     author: "Franklin D. Roosevelt",
   },
 ];
 
+// Google app definitions
 export const GOOGLE_APPS = [
   {
     name: "Account",
@@ -614,6 +648,7 @@ export const GOOGLE_APPS = [
   },
 ];
 
+// AI tool definitions
 export const AI_TOOLS = [
   {
     name: "Claude",
@@ -672,6 +707,7 @@ export const AI_TOOLS = [
   },
 ];
 
+// Social link definitions
 export const SOCIAL_LINKS = [
   {
     name: "Facebook",
@@ -735,6 +771,7 @@ export const SOCIAL_LINKS = [
   },
 ];
 
+// Search provider definitions
 export const SEARCH_PROVIDERS = {
   engines: [
     {
@@ -827,6 +864,7 @@ export const SEARCH_PROVIDERS = {
   ],
 };
 
+// Search suggestion definitions
 export const SEARCH_SUGGESTIONS = [
   "How to learn a new language",
   "Easy dinner recipes for tonight",
@@ -1006,13 +1044,14 @@ export const SEARCH_SUGGESTIONS = [
   "What to watch",
 ];
 
-
+// Search suggestion modes
 export const SEARCH_SUGGESTION_MODES = Object.freeze({
   HISTORY_ONLY: "history-only",
   HISTORY_ONLINE: "history-online",
   HISTORY_CUSTOM: "history-custom",
 });
 
+// Keyboard defaults
 export const DEFAULT_KEY_MAP = {
   todo: { key: "t", enabled: true },
   ai: { key: "a", enabled: true },

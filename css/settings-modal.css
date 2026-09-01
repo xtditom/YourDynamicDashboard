@@ -1,6 +1,6 @@
-/* ===== FULL SETTINGS MODAL ===== */
+/* Full settings modal */
 
-/* --- Overlay --- */
+/* Overlay */
 #full-settings-overlay {
   position: fixed;
   top: 0;
@@ -24,7 +24,7 @@
   transition: opacity 0.3s ease, visibility 0s linear 0.3s;
 }
 
-/* --- Modal Window --- */
+/* Modal window */
 #full-settings-modal {
   --drag-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M11 14V7a2 2 0 0 1 4 0v5V5a2 2 0 0 1 4 0v7V7a2 2 0 0 1 4 0v8l1-2a2 2 0 0 1 3.5 1.9l-2.3 5.2A7 7 0 0 1 18.8 25H16a7 7 0 0 1-5.7-2.9l-3-4.2a2 2 0 0 1 3.2-2.4L11 17v-3Z' fill='%23111827' stroke='%23ffffff' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 8 8;
   background-color: var(--bg-secondary);
@@ -49,12 +49,10 @@
 #full-settings-modal.is-dragging {
   user-select: none;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-  /* Keep a small, deliberate impact without bringing back the long sticky
-     easing used by the modal open/close animation. */
   transition: transform 0.12s ease-out, box-shadow 0.2s ease;
 }
 
-/* --- Titlebar (drag handle) --- */
+/* Titlebar (drag handle) */
 .fs-titlebar {
   position: relative;
   display: flex;
@@ -139,7 +137,7 @@
   color: var(--text-primary);
 }
 
-/* --- Tabs --- */
+/* Tabs */
 .fs-tabs {
   display: flex;
   border-bottom: 1px solid var(--border-color);
@@ -170,7 +168,7 @@
   border-bottom-color: var(--accent-color);
 }
 
-/* --- Content Area --- */
+/* Content area */
 .fs-content {
   flex: 1;
   overflow-y: auto;
@@ -190,7 +188,7 @@
   background-color: var(--accent-color);
 }
 
-/* --- Panes --- */
+/* Panes */
 .fs-pane {
   display: none;
   flex-direction: column;
@@ -200,7 +198,7 @@
   display: flex;
 }
 
-/* --- Sections --- */
+/* Sections */
 .fs-section {
   display: flex;
   flex-direction: column;
@@ -217,7 +215,7 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-/* --- Theme grid inside full modal --- */
+/* Theme grid inside full modal */
 .fs-themes-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -239,21 +237,21 @@
   opacity: 0.45;
 }
 
-/* --- Color picker grid --- */
+/* Color picker grid */
 .fs-color-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
 }
 
-/* --- Shortcut editor in full modal --- */
+/* Shortcut editor in full modal */
 .fs-shortcuts-list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-/* --- Key editor & link direction in full modal --- */
+/* Key editor & link direction in full modal */
 .fs-key-grid {
   display: flex;
   flex-direction: column;
@@ -330,7 +328,7 @@
   vertical-align: middle;
 }
 
-/* High-contrast update marker for the recently changed Dark Mode control. */
+/* New-feature labels */
 .setting-row .label .fs-dark-mode-label,
 .setting-row .label .fs-disable-animations-label,
 .setting-row .label .fs-feature-label {
@@ -349,7 +347,7 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.38));
 }
 
-/* Mini settings use the compact version of the same sticker. */
+/* Mini settings labels */
 .fs-new-sticker.mini-new-sticker {
   width: 3.2rem;
   height: 1.25rem;
@@ -409,20 +407,20 @@
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
 }
 
-/* --- Backup controls in full modal --- */
+/* Backup controls in full modal */
 .fs-backup-controls {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
 
-/* --- About section --- */
+/* About section */
 .fs-about-row {
   display: flex;
   gap: 0.5rem;
 }
 
-/* --- Footer --- */
+/* Footer */
 .fs-footer {
   color: var(--text-secondary);
   border-top: 1px solid var(--bg-interactive);
@@ -447,7 +445,7 @@
   color: inherit;
 }
 
-/* --- Open Full Settings & Info buttons in mini popup --- */
+/* Open full settings & info buttons in mini popup */
 #open-full-settings-btn,
 #info-btn {
   background: none;
@@ -469,7 +467,7 @@
   transform: scale(1.1);
 }
 
-/* --- Responsive --- */
+/* Responsive */
 @media (max-width: 700px) {
   #full-settings-modal {
     width: 96%;
@@ -503,7 +501,7 @@
   }
 }
 
-/* [css/settings-modal.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */
+/* News settings */
 .fs-news-choice-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
@@ -654,7 +652,10 @@
   cursor: not-allowed;
   opacity: 0.35;
 }
-/* Slightly stronger Full Settings surface for light gradients. */
+
+/* Light gradient settings surface */
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #full-settings-modal {
   background-color: rgba(248, 248, 248, 0.65) !important;
 }
+
+/* [css/settings-modal.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

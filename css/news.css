@@ -1,3 +1,4 @@
+/* News feed */
 #news-feed-container {
   position: absolute;
   left: 50%;
@@ -8,8 +9,12 @@
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-#news-feed-container.position-top { top: 1.25rem; }
-#news-feed-container.position-bottom { bottom: 1.25rem; }
+#news-feed-container.position-top {
+  top: 1.25rem;
+}
+#news-feed-container.position-bottom {
+  bottom: 1.25rem;
+}
 
 .news-feed-header {
   display: flex;
@@ -28,9 +33,14 @@
   opacity: 0;
 }
 
+/* News status animation */
 @keyframes news-status-intro {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 #news-feed-container.news-intro-ready .news-feed-header span {
@@ -44,6 +54,7 @@
   padding: 0.1rem 0.1rem 0.35rem;
 }
 
+/* Desktop news grid */
 @media (min-width: 1101px) {
   #news-feed-container[data-total-cards="4"] .news-feed-list {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -77,6 +88,7 @@
   }
 }
 
+/* News card layout */
 .news-card {
   position: relative;
   display: block;
@@ -94,6 +106,7 @@
   transition: transform 0.25s ease, border-color 0.2s ease;
 }
 
+/* News card animations */
 @keyframes news-card-intro-up {
   from {
     opacity: 0;
@@ -144,7 +157,8 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: linear-gradient(145deg, var(--news-provider-color), rgba(0, 0, 0, 0.7));
+  background: linear-gradient(145deg, var(--news-provider-color), rgba(0, 0, 0,
+    0.7));
 }
 
 .news-card-visual::after {
@@ -254,19 +268,37 @@
   transform: translateY(-1px);
 }
 
+/* Tablet news grid */
 @media (max-width: 1100px) and (min-width: 701px) {
-  .news-feed-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .news-feed-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
+/* Responsive news grid */
 @media (max-width: 700px) {
-  #news-feed-container { width: 94vw; }
-  #news-feed-container.position-top { top: 4.6rem; }
-  #news-feed-container.position-bottom { bottom: 4.6rem; }
-  .news-feed-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem; }
-  .news-card { height: 135px; }
-  .news-card-headline { font-size: 0.8rem; }
+  #news-feed-container {
+    width: 94vw;
+  }
+  #news-feed-container.position-top {
+    top: 4.6rem;
+  }
+  #news-feed-container.position-bottom {
+    bottom: 4.6rem;
+  }
+  .news-feed-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+  .news-card {
+    height: 135px;
+  }
+  .news-card-headline {
+    font-size: 0.8rem;
+  }
 }
 
+/* Reduced-motion overrides */
 html.disable-animations #news-feed-container,
 html.disable-animations .news-card,
 html.disable-animations .news-card-visual img,
@@ -283,7 +315,8 @@ html.disable-animations #news-feed-container .news-card {
   opacity: 1 !important;
   transform: none !important;
 }
-/* Follow the command-palette grayscale preference in every theme/background. */
+
+/* Grayscale preference */
 .news-card-visual img {
   filter: var(--icon-filter);
   transition: filter 0.25s ease, transform 0.25s ease;
@@ -293,3 +326,5 @@ html.disable-animations #news-feed-container .news-card {
 .news-card:focus-visible .news-card-visual img {
   filter: grayscale(0%);
 }
+
+/* [css/news.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

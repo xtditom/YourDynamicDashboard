@@ -1,4 +1,4 @@
-/* --- 11. MODALS & KEYS --- */
+/* Modals and shortcut keys */
 #info-modal-overlay,
 #night-mode-modal-overlay {
   position: fixed;
@@ -226,7 +226,8 @@
   color: var(--form-control-text, var(--text-primary)) !important;
   caret-color: var(--accent-color, #ffffff);
   font: inherit;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color
+    0.2s ease;
 }
 .ydd-add-tool-field input:focus {
   border-color: var(--accent-color);
@@ -366,8 +367,7 @@
   outline-offset: 2px;
 }
 
-/* Gradient widgets keep the add modal transparent; only its controls use
-   darker glass surfaces so text remains readable over any wallpaper. */
+/* Add-tool modal gradient surface */
 body.gradient-mode-active .ydd-add-tool-modal {
   background: transparent !important;
   border-color: rgba(255, 255, 255, 0.62) !important;
@@ -420,7 +420,7 @@ body.gradient-mode-active.gradient-light .ydd-add-tool-modal .ydd-add-tool-form-
   transform: scale(1);
 }
 
-/* Keep the glass surface readable while leaving the surrounding dashboard visible. */
+/* Modal transparency surfaces */
 body.transparency-active .modal-box,
 body.transparency-active .sh-modal,
 body.transparency-active #full-settings-modal,
@@ -626,6 +626,7 @@ body.zen-mode .text-container {
   transition: opacity 0.5s ease-in-out;
 }
 
+/* Search history modal */
 #sh-modal-overlay {
   position: fixed;
   inset: 0;
@@ -939,7 +940,7 @@ body.zen-mode .text-container {
   row-gap: 8px;
 }
 
-/* --- SUBTLE DROP SHADOW FOR DARK GRADIENT THEMES --- */
+/* Subtle drop shadow for dark gradient themes */
 body.gradient-dark .widget-container,
 body.gradient-dark .popup-container,
 body.gradient-dark .corner-button,
@@ -948,7 +949,7 @@ body.gradient-dark #search-dropdown {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
-/* --- FORCE BLACK TEXT ON LIGHT GRADIENTS --- */
+/* Force black text on light gradients */
 body.force-white-text:not(.has-custom-bg) #digital-clock-container,
 body.force-white-text:not(.has-custom-bg) #digital-clock-container *,
 body.force-white-text:not(.has-custom-bg) #clock-date-row,
@@ -972,7 +973,7 @@ body.force-white-text:not(.has-custom-bg) .corner-button {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
-/* --- FORCE BLACK TEXT IN POPUPS FOR LIGHT GRADIENTS --- */
+/* Force black text in popups for light gradients */
 body.force-white-text:not(.has-custom-bg) .popup-container,
 body.force-white-text:not(.has-custom-bg) .popup-container h2,
 body.force-white-text:not(.has-custom-bg) .popup-container h3,
@@ -991,7 +992,7 @@ body.force-white-text:not(.has-custom-bg) .sh-auto-delete-select {
   border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
-/* --- FORCE BLACK TEXT IN OVERLAY MODALS FOR LIGHT GRADIENTS --- */
+/* Force black text in overlay modals for light gradients */
 body.force-white-text:not(.has-custom-bg) .modal-box h2,
 body.force-white-text:not(.has-custom-bg) .modal-box p,
 body.force-white-text:not(.has-custom-bg) .modal-box .modal-subtitle,
@@ -1005,7 +1006,7 @@ body.force-white-text:not(.has-custom-bg) .settings-note {
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* --- HIGH BLUR UI OVERRIDES (MAX SPECIFICITY) --- */
+/* High blur UI overrides (max specificity) */
 html.high-bg-blur body.has-custom-bg .widget-container,
 html.high-bg-blur body.has-custom-bg .popup-container,
 html.high-bg-blur body.has-custom-bg .corner-button,
@@ -1017,7 +1018,7 @@ html.high-bg-blur body.has-custom-bg .dropdown-item {
   -webkit-backdrop-filter: blur(3px) !important;
 }
 
-/* --- 12. ISOLATED NEW USER WELCOME MODAL --- */
+/* Welcome modal */
 #welcome-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1071,10 +1072,10 @@ body.transparency-active #welcome-modal-overlay {
   border-radius: 18px;
   background:
     linear-gradient(
-      145deg,
-      rgba(247, 247, 247, 0.035),
-      rgba(175, 175, 175, 0.012)
-    ),
+    145deg,
+    rgba(247, 247, 247, 0.035),
+    rgba(175, 175, 175, 0.012)
+  ),
     #090a0c;
   box-shadow:
     0 24px 70px rgba(0, 0, 0, 0.78),
@@ -1372,7 +1373,7 @@ body.transparency-active #welcome-modal-overlay {
   white-space: nowrap;
 }
 
-/* Reveal the two content cards from opposite sides after the modal appears. */
+/* Welcome modal animations */
 #welcome-modal-overlay:not(.hidden) .ydd-welcome-about {
   animation: ydd-welcome-slide-in-left 0.56s cubic-bezier(0.22, 0.8, 0.28, 1)
     0.68s both;
@@ -1472,7 +1473,8 @@ body.transparency-active #welcome-modal-overlay {
     width: 100%;
   }
 }
-/* Preserve the existing typography contract for dynamically generated modals. */
+
+/* Generated modal typography */
 html[data-font-family="lexend"] .ydd-custom-modal-overlay {
   font-family: "Inter", system-ui, sans-serif;
 }

@@ -1,4 +1,6 @@
-const NOTIFICATION_SOUND_URL = new URL("../assets/sounds/ding.mp3", import.meta.url).href;
+// Notifications
+const NOTIFICATION_SOUND_URL =
+  new URL("../assets/sounds/ding.mp3", import.meta.url).href;
 let notificationAudio = null;
 
 export function playNotificationSound() {
@@ -16,8 +18,6 @@ export function playNotificationSound() {
     const playback = notificationAudio.play();
     playback?.catch?.(() => {});
   } catch {
-    // Browser autoplay restrictions or an unavailable audio device must not
-    // prevent a notification from being displayed.
   }
 }
 
@@ -25,11 +25,7 @@ export function formatTime(number) {
   return String(number).padStart(2, "0");
 }
 
-/**
- * Schedule a non-Zen popup dismissal that pauses while the popup is hovered.
- * The optional timer element is paused alongside the JavaScript timeout so
- * the visible countdown always matches the remaining dismissal time.
- */
+// Timer helpers
 export function createHoverPauseTimer(
   element,
   duration,
@@ -122,6 +118,7 @@ export function createHoverPauseTimer(
   };
 }
 
+// URL and interaction helpers
 export function getIconUrl(url) {
   try {
     const urlObject = new URL(url);
@@ -144,6 +141,7 @@ export function makeKeyboardInteractive(element, handler, label) {
   return element;
 }
 
+// Geocoding helpers
 export function isValidCoordinate(value, min, max) {
   if (
     value === null ||
@@ -197,6 +195,7 @@ export async function chooseGeocodingResult(results, query) {
   return Number.isInteger(choice) ? results[choice] || null : null;
 }
 
+// DOM and modal helpers
 export function createEl(tag, className, text = "") {
   const el = document.createElement(tag);
   if (className) el.className = className;
@@ -239,7 +238,8 @@ export function showCustomModal(
       title.textContent = "🎉 Congratulations 🎊";
       title.style.fontSize = "1.8rem";
     } else {
-      title.textContent = modalOptions?.title || (isConfirm ? "Confirm Action" : "Notice");
+      title.textContent = modalOptions?.title ||
+        (isConfirm ? "Confirm Action" : "Notice");
     }
 
     const text = document.createElement("p");
@@ -278,7 +278,8 @@ export function showCustomModal(
         modalOptions.checkbox.label || "Remember choice",
       );
       const checkboxLabel = document.createElement("span");
-      checkboxLabel.textContent = modalOptions.checkbox.label || "Remember choice";
+      checkboxLabel.textContent = modalOptions.checkbox.label ||
+        "Remember choice";
       checkboxRow.append(checkboxInput, checkboxLabel);
     }
 
@@ -315,7 +316,9 @@ export function showCustomModal(
         btn.onclick = () =>
           cleanup(
             typeof btnData.value === "function"
-              ? btnData.value({ checkboxChecked: checkboxInput?.checked === true })
+              ? btnData.value({
+                checkboxChecked: checkboxInput?.checked === true,
+              })
               : btnData.value,
           );
         btnContainer.appendChild(btn);
@@ -362,7 +365,9 @@ export function showCustomModal(
         return;
       }
       if (event.key === "Tab") {
-        const focusable = box.querySelectorAll("button, input, select, textarea, a[href]");
+        const focusable = box.querySelectorAll(
+          "button, input, select, textarea, a[href]",
+        );
         if (!focusable.length) return;
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
@@ -413,18 +418,21 @@ export function showCustomPrompt(message, defaultValue = "", options = {}) {
 
     const input = document.createElement("input");
     input.type = "text";
-    const maxLength = Number.isInteger(options.maxLength) && options.maxLength > 0
-      ? options.maxLength
-      : null;
-    input.value = maxLength ? String(defaultValue).slice(0, maxLength) : defaultValue;
+    const maxLength =
+      Number.isInteger(options.maxLength) && options.maxLength > 0
+        ? options.maxLength
+        : null;
+    input.value = maxLength
+      ? String(defaultValue).slice(0, maxLength)
+      : defaultValue;
     if (maxLength) input.maxLength = maxLength;
     input.setAttribute("aria-label", "Your answer");
     input.style.cssText =
       "width: 100%; box-sizing: border-box; margin-bottom: 1.5rem; padding: 10px; border-radius: 8px; border: 1px solid var(--bg-interactive); background: var(--bg-secondary); color: var(--text-primary); outline: none; transition: border-color 0.3s;";
-    input.onfocus = () =>
-      (input.style.border = "1px solid var(--accent-color)");
-    input.onblur = () =>
-      (input.style.border = "1px solid var(--bg-interactive)");
+    input.onfocus =
+      () => (input.style.border = "1px solid var(--accent-color)");
+    input.onblur =
+      () => (input.style.border = "1px solid var(--bg-interactive)");
 
     const btnContainer = document.createElement("div");
     btnContainer.style.cssText =
@@ -486,7 +494,9 @@ export function showCustomPrompt(message, defaultValue = "", options = {}) {
         return;
       }
       if (event.key === "Tab") {
-        const focusable = box.querySelectorAll("input, button, a[href], select, textarea");
+        const focusable = box.querySelectorAll(
+          "input, button, a[href], select, textarea",
+        );
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
         if (event.shiftKey && document.activeElement === first) {
@@ -517,6 +527,7 @@ export function showCustomPrompt(message, defaultValue = "", options = {}) {
 
 import { state } from "./state.js";
 
+// Onboarding task helpers
 export function completeDefaultTask(taskIdOrText) {
   if (!state.get("defaultTasksPinned")) return;
 
@@ -541,11 +552,6 @@ export function completeDefaultTask(taskIdOrText) {
   }
 }
 
-/**
- * Completes a welcome task without removing it from the user's To-Do list.
- * The list keeps the completed item for strikethrough/history, while
- * progressDefaultTasks advances the next onboarding item.
- */
 export function markDefaultTaskComplete(taskIdOrText) {
   completeDefaultTask(taskIdOrText);
 }
@@ -561,11 +567,6 @@ export function markDefaultTaskIncomplete(taskIdOrText) {
   progressDefaultTasks();
 }
 
-/**
- * Makes the first two welcome tasks available as soon as the dashboard is
- * initialized. Weather is optional, so onboarding must not depend on a
- * successful network request.
- */
 export function initializeDefaultTasks() {
   if (state.get("defaultTasksPinned")) return;
   const todos = state.get("todos") || [];

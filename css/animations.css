@@ -1,4 +1,4 @@
-/* --- 2. CORE ANIMATIONS --- */
+/* Core animations */
 @keyframes gradient-animation {
   0% {
     background-position: 0% 50%;
@@ -84,6 +84,7 @@
   outline-offset: 3px;
 }
 
+/* Reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -95,8 +96,7 @@
   }
 }
 
-/* User-controlled motion switch. Keep this broad so every component,
-   pseudo-element, keyframe, and transition follows the same preference. */
+/* User-controlled motion */
 html.disable-animations,
 html.disable-animations *,
 html.disable-animations *::before,
@@ -106,13 +106,13 @@ html.disable-animations *::after {
   scroll-behavior: auto !important;
 }
 
-/* Some widgets use an entrance animation to move from opacity 0 to visible.
-   Keep them visible when that animation is intentionally disabled. */
+/* Animation-disabled visibility */
 html.disable-animations #pinned-tasks-widget:not(.hidden) {
   opacity: 1 !important;
   transform: none !important;
 }
 
+/* Feedback animations */
 @keyframes ydd-tremble {
   0%,
   100% {
@@ -138,7 +138,7 @@ html.disable-animations #pinned-tasks-widget:not(.hidden) {
   animation: popup-scale 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
 }
 
-/* Reordering feedback for draggable dashboard items. */
+/* Reordering targets */
 #apps-grid.is-reordering .app-icon,
 #ai-tools-popup.edit-mode .ai-tool-item .ai-tool-icon img,
 #search-dropdown.edit-mode .custom-search-provider-item,
@@ -149,6 +149,8 @@ html.disable-animations #pinned-tasks-widget:not(.hidden) {
   transform-origin: center;
   will-change: transform;
 }
+
+/* Popup animations */
 @keyframes popup-scale {
   0% {
     opacity: 0;
@@ -160,6 +162,7 @@ html.disable-animations #pinned-tasks-widget:not(.hidden) {
   }
 }
 
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

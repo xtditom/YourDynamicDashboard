@@ -1,15 +1,20 @@
-import { CONFIG, AI_TOOLS, SOCIAL_LINKS } from "../config.js";
+import { AI_TOOLS, CONFIG, SOCIAL_LINKS } from "../config.js";
 import { state } from "../state.js";
-import { getIconUrl, makeKeyboardInteractive, showCustomModal } from "../utils.js";
 import {
-  MAX_CUSTOM_TOOLS,
+  getIconUrl,
+  makeKeyboardInteractive,
+  showCustomModal,
+} from "../utils.js";
+import {
   MAX_CUSTOM_TOOL_NAME_LENGTH,
   MAX_CUSTOM_TOOL_URL_LENGTH,
+  MAX_CUSTOM_TOOLS,
   normalizeHttpUrl,
   validateImageBlob,
 } from "../validators.js";
 import { classifyToolUrl } from "../keywords.js";
 
+// Tool configuration
 const CUSTOM_TOOL_ICON_SIZE = 128;
 const CUSTOM_TOOL_ICON_MAX_BYTES = 5 * 1024 * 1024;
 const CUSTOM_TOOL_IMAGE_TYPES = new Set([
@@ -30,6 +35,7 @@ const LEGACY_DEFAULT_HIDDEN_TOOLS = [
 ];
 const MIN_VISIBLE_TOOLS = 2;
 
+// AI and social tools
 export class AiTools {
   constructor() {
     this.els = {
@@ -73,7 +79,6 @@ export class AiTools {
       e.stopPropagation();
       this.toggle();
 
-      // --- ANIMATION FIX ---
       this.els.btn.classList.add("animating");
       setTimeout(() => this.els.btn.classList.remove("animating"), 400);
     });
@@ -150,6 +155,7 @@ export class AiTools {
     syncOrder("socialToolsOrder", this.getAllToolIds("social"));
   }
 
+  // Tool state
   getCustomTools(type) {
     const key = type === "social" ? "customSocialLinks" : "customAiTools";
     return (state.get(key) || []).map((tool) => ({ ...tool, isCustom: true }));
@@ -274,13 +280,11 @@ export class AiTools {
       `Add a new ${tabName === "social" ? "social tool" : "AI tool"}`,
     );
 
-    this.els.tabs.forEach((t) =>
-      {
-        const selected = t.dataset.tab === tabName;
-        t.classList.toggle("active", selected);
-        t.setAttribute("aria-selected", String(selected));
-      },
-    );
+    this.els.tabs.forEach((t) => {
+      const selected = t.dataset.tab === tabName;
+      t.classList.toggle("active", selected);
+      t.setAttribute("aria-selected", String(selected));
+    });
 
     if (tabName === "ai") {
       this.els.aiList.classList.add("active");
@@ -299,12 +303,13 @@ export class AiTools {
     }
   }
 
+  // Tool rendering
   renderAll() {
     const aiTools = this.getAllTools("ai");
     const socialTools = this.getAllTools("social");
     const aiOrder = state.get("aiToolsOrder") || aiTools.map((t) => t.id);
-    const socialOrder =
-      state.get("socialToolsOrder") || socialTools.map((t) => t.id);
+    const socialOrder = state.get("socialToolsOrder") ||
+      socialTools.map((t) => t.id);
 
     this.renderList(
       this.els.aiList,
@@ -349,8 +354,8 @@ export class AiTools {
       if (!this.isEditMode) {
         const openTool = () => {
           this.recordFeatureUse(tool.id);
-          const targets =
-            state.get("linkTargets") || CONFIG.defaults.linkTargets;
+          const targets = state.get("linkTargets") ||
+            CONFIG.defaults.linkTargets;
           window.open(tool.url, targets.ai || "_blank");
         };
         a.onclick = openTool;
@@ -380,7 +385,9 @@ export class AiTools {
 
       if (this.isEditMode) {
         const overlay = document.createElement("div");
-        overlay.className = `edit-overlay${tool.isCustom ? " custom-tool-action" : ""}`;
+        overlay.className = `edit-overlay${
+          tool.isCustom ? " custom-tool-action" : ""
+        }`;
         const protectedTool = this.getProtectedToolIds(type).has(tool.id);
         if (protectedTool) overlay.classList.add("is-protected");
         const action = tool.isCustom
@@ -392,8 +399,8 @@ export class AiTools {
           tool.isCustom
             ? `${isHidden ? "Enable" : "Disable or delete"} ${tool.name}`
             : protectedTool
-              ? `Keep ${tool.name} visible`
-              : `${isHidden ? "Show" : "Hide"} ${tool.name}`,
+            ? `Keep ${tool.name} visible`
+            : `${isHidden ? "Show" : "Hide"} ${tool.name}`,
         );
 
         const actionIcon = document.createElementNS(
@@ -434,12 +441,11 @@ export class AiTools {
       name.textContent = tool.name;
       a.appendChild(name);
 
-      const featureKey =
-        tool.id === "ai-mistral"
-          ? "mistralToolUseCount"
-          : tool.id === "social-tiktok"
-            ? "tiktokToolUseCount"
-            : null;
+      const featureKey = tool.id === "ai-mistral"
+        ? "mistralToolUseCount"
+        : tool.id === "social-tiktok"
+        ? "tiktokToolUseCount"
+        : null;
       if (featureKey && (Number(state.get(featureKey)) || 0) < 1) {
         const badge = document.createElement("span");
         badge.className = "tool-new-badge";
@@ -461,7 +467,9 @@ export class AiTools {
 
     if (isCurrentlyVisible && protectedIds.has(id)) {
       void showCustomModal(
-        `The first ${MIN_VISIBLE_TOOLS} ${normalizedType === "social" ? "social links" : "AI tools"} must remain visible.`,
+        `The first ${MIN_VISIBLE_TOOLS} ${
+          normalizedType === "social" ? "social links" : "AI tools"
+        } must remain visible.`,
       );
       return false;
     }
@@ -472,7 +480,9 @@ export class AiTools {
       ).length;
       if (visibleCount <= MIN_VISIBLE_TOOLS) {
         void showCustomModal(
-          `At least ${MIN_VISIBLE_TOOLS} ${normalizedType === "social" ? "social links" : "AI tools"} must remain visible.`,
+          `At least ${MIN_VISIBLE_TOOLS} ${
+            normalizedType === "social" ? "social links" : "AI tools"
+          } must remain visible.`,
         );
         return false;
       }
@@ -489,10 +499,15 @@ export class AiTools {
     this.renderAll();
   }
 
+  // Custom tool management
   async handleCustomToolAction(tool, type) {
     const isDisabled = this.hiddenTools[tool.id] === true;
     const action = await showCustomModal(
-      `${tool.name} is a custom ${type === "social" ? "social tool" : "AI tool"}. Would you like to ${isDisabled ? "enable" : "disable"} it or delete it?`,
+      `${tool.name} is a custom ${
+        type === "social" ? "social tool" : "AI tool"
+      }. Would you like to ${
+        isDisabled ? "enable" : "disable"
+      } it or delete it?`,
       false,
       false,
       [
@@ -529,13 +544,17 @@ export class AiTools {
     const orderKey = type === "social" ? "socialToolsOrder" : "aiToolsOrder";
     const current = state.get(toolsKey) || [];
     const next = current.filter((tool) => tool.id !== id);
-    if (next.length === current.length || !state.set(toolsKey, next)) return false;
+    if (next.length === current.length || !state.set(toolsKey, next)) {
+      return false;
+    }
 
     const nextHidden = { ...(state.get("hiddenTools") || {}) };
     delete nextHidden[id];
     state.set("hiddenTools", nextHidden);
 
-    const nextOrder = (state.get(orderKey) || []).filter((toolId) => toolId !== id);
+    const nextOrder = (state.get(orderKey) || []).filter((toolId) =>
+      toolId !== id
+    );
     state.set(orderKey, nextOrder);
     return true;
   }
@@ -576,7 +595,8 @@ export class AiTools {
       const image = await new Promise((resolve, reject) => {
         const element = new Image();
         element.onload = () => resolve(element);
-        element.onerror = () => reject(new TypeError("The icon could not be decoded."));
+        element.onerror = () =>
+          reject(new TypeError("The icon could not be decoded."));
         element.src = objectUrl;
       });
       const width = image.naturalWidth;
@@ -607,6 +627,7 @@ export class AiTools {
     }
   }
 
+  // Tool editor
   openAddToolModal(type = this.activeTab) {
     if (this.addToolModal) return;
 
@@ -627,7 +648,9 @@ export class AiTools {
 
     const subtitle = document.createElement("p");
     subtitle.className = "ydd-add-tool-subtitle";
-    subtitle.textContent = `Add a custom ${isSocial ? "social link" : "AI tool"} to your dashboard.`;
+    subtitle.textContent = `Add a custom ${
+      isSocial ? "social link" : "AI tool"
+    } to your dashboard.`;
 
     const form = document.createElement("form");
     form.noValidate = true;
@@ -647,7 +670,8 @@ export class AiTools {
     iconHint.textContent = "Optional icon";
     const iconInput = document.createElement("input");
     iconInput.type = "file";
-    iconInput.accept = "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml";
+    iconInput.accept =
+      "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml";
     iconInput.className = "visually-hidden";
     iconInput.setAttribute(
       "aria-label",
@@ -708,7 +732,13 @@ export class AiTools {
     addButton.textContent = "Add";
     actions.append(cancelButton, addButton);
 
-    form.append(iconLabel, nameField.wrapper, urlField.wrapper, formError, actions);
+    form.append(
+      iconLabel,
+      nameField.wrapper,
+      urlField.wrapper,
+      formError,
+      actions,
+    );
     modal.append(title, subtitle, form);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
@@ -743,7 +773,10 @@ export class AiTools {
         setFieldError(nameField, "Enter a name.");
         valid = false;
       } else if (nameField.input.value.length > MAX_CUSTOM_TOOL_NAME_LENGTH) {
-        setFieldError(nameField, `Name must be ${MAX_CUSTOM_TOOL_NAME_LENGTH} characters or fewer.`);
+        setFieldError(
+          nameField,
+          `Name must be ${MAX_CUSTOM_TOOL_NAME_LENGTH} characters or fewer.`,
+        );
         valid = false;
       } else {
         setFieldError(nameField);
@@ -753,7 +786,10 @@ export class AiTools {
         setFieldError(urlField, "Enter a link.");
         valid = false;
       } else if (urlField.input.value.length > MAX_CUSTOM_TOOL_URL_LENGTH) {
-        setFieldError(urlField, `Link must be ${MAX_CUSTOM_TOOL_URL_LENGTH} characters or fewer.`);
+        setFieldError(
+          urlField,
+          `Link must be ${MAX_CUSTOM_TOOL_URL_LENGTH} characters or fewer.`,
+        );
         valid = false;
       } else {
         try {
@@ -787,7 +823,9 @@ export class AiTools {
         return;
       }
       if (event.key !== "Tab") return;
-      const focusable = modal.querySelectorAll("button, input, [tabindex]:not([tabindex='-1'])");
+      const focusable = modal.querySelectorAll(
+        "button, input, [tabindex]:not([tabindex='-1'])",
+      );
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
@@ -832,12 +870,15 @@ export class AiTools {
         iconPreview.replaceChildren(preview);
         iconHint.textContent = "Change icon";
         iconLabel.classList.remove("is-invalid");
-        if (formError.textContent === "Choose an icon image.") formError.textContent = "";
+        if (formError.textContent === "Choose an icon image.") {
+          formError.textContent = "";
+        }
       } catch (error) {
         iconData = null;
         iconPreview.textContent = "+";
         iconLabel.classList.add("is-invalid");
-        formError.textContent = error.message || "The icon could not be processed.";
+        formError.textContent = error.message ||
+          "The icon could not be processed.";
       } finally {
         iconInput.disabled = false;
       }
@@ -866,14 +907,18 @@ export class AiTools {
         const orderKey = isSocial ? "socialToolsOrder" : "aiToolsOrder";
         const current = state.get(toolsKey) || [];
         if (current.length >= MAX_CUSTOM_TOOLS) {
-          formError.textContent = `You can add up to ${MAX_CUSTOM_TOOLS} custom tools in this tab.`;
+          formError.textContent =
+            `You can add up to ${MAX_CUSTOM_TOOLS} custom tools in this tab.`;
           return;
         }
 
         const cleanName = nameField.input.value.trim();
         let cleanUrl;
         try {
-          cleanUrl = normalizeHttpUrl(urlField.input.value, MAX_CUSTOM_TOOL_URL_LENGTH);
+          cleanUrl = normalizeHttpUrl(
+            urlField.input.value,
+            MAX_CUSTOM_TOOL_URL_LENGTH,
+          );
         } catch (error) {
           setFieldError(urlField, error.message);
           return;
@@ -887,7 +932,9 @@ export class AiTools {
           let confirmation;
           try {
             confirmation = await showCustomModal(
-              `No known ${isSocial ? "social-platform or social-tool" : "AI-tool"} keyword was found in this link. This does not prove the link is invalid.\n\nDo you still want to add it? Only continue if you trust this website.`,
+              `No known ${
+                isSocial ? "social-platform or social-tool" : "AI-tool"
+              } keyword was found in this link. This does not prove the link is invalid.\n\nDo you still want to add it? Only continue if you trust this website.`,
               false,
               false,
               [
@@ -918,10 +965,13 @@ export class AiTools {
           icon: iconData || getIconUrl(cleanUrl),
         };
         if (!state.set(toolsKey, [...current, tool])) {
-          formError.textContent = "The tool could not be saved. Check browser storage.";
+          formError.textContent =
+            "The tool could not be saved. Check browser storage.";
           return;
         }
-        const nextOrder = [...(state.get(orderKey) || [])].filter((id) => id !== tool.id);
+        const nextOrder = [...(state.get(orderKey) || [])].filter((id) =>
+          id !== tool.id
+        );
         nextOrder.push(tool.id);
         if (!state.set(orderKey, nextOrder)) {
           state.set(toolsKey, current);
@@ -950,8 +1000,7 @@ export class AiTools {
     this.els.btn.classList.toggle("hidden", !show);
   }
 
-  // --- Drag & Drop Logic ---
-
+  // Tool drag and drop
   enableDragAndDrop() {
     if (!this.isEditMode) return;
 
@@ -1000,8 +1049,9 @@ export class AiTools {
   }
 
   reorderItems(sourceId, targetId) {
-    const orderKey =
-      this.activeTab === "ai" ? "aiToolsOrder" : "socialToolsOrder";
+    const orderKey = this.activeTab === "ai"
+      ? "aiToolsOrder"
+      : "socialToolsOrder";
     const currentOrder = [...(state.get(orderKey) || [])];
 
     const removeIndex = currentOrder.indexOf(sourceId);
@@ -1015,19 +1065,20 @@ export class AiTools {
   }
 
   recordFeatureUse(toolId) {
-    const key =
-      toolId === "ai-mistral"
-        ? "mistralToolUseCount"
-        : toolId === "social-tiktok"
-          ? "tiktokToolUseCount"
-          : null;
+    const key = toolId === "ai-mistral"
+      ? "mistralToolUseCount"
+      : toolId === "social-tiktok"
+      ? "tiktokToolUseCount"
+      : null;
     if (!key || (Number(state.get(key)) || 0) >= 1) return;
     if (!state.set(key, 1)) return;
     this.renderAll();
   }
 
   moveItem(id, delta) {
-    const orderKey = this.activeTab === "ai" ? "aiToolsOrder" : "socialToolsOrder";
+    const orderKey = this.activeTab === "ai"
+      ? "aiToolsOrder"
+      : "socialToolsOrder";
     const order = [...(state.get(orderKey) || [])];
     const index = order.indexOf(id);
     const target = index + delta;

@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { formatTime, showCustomPrompt } from "../utils.js";
 
+// Clock content
 const WEEKDAYS = [
   "Sunday",
   "Monday",
@@ -65,8 +66,11 @@ const GREETING_VARIANTS = Object.freeze({
   ],
 });
 
+// Greeting selection
 function getLocalDateKey(date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  return `${date.getFullYear()}-${
+    String(date.getMonth() + 1).padStart(2, "0")
+  }-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function getDateFallbackGreetingIndex(date, period, variantCount) {
@@ -87,13 +91,12 @@ function getDailyGreetingIndex(date, period, variantCount) {
     const stored = JSON.parse(
       localStorage.getItem(DAILY_GREETING_STORAGE_KEY) || "null",
     );
-    const selections =
-      stored?.date === dateKey &&
-      stored.selections &&
-      typeof stored.selections === "object" &&
-      !Array.isArray(stored.selections)
-        ? { ...stored.selections }
-        : {};
+    const selections = stored?.date === dateKey &&
+        stored.selections &&
+        typeof stored.selections === "object" &&
+        !Array.isArray(stored.selections)
+      ? { ...stored.selections }
+      : {};
     const storedIndex = selections[period];
 
     if (
@@ -103,7 +106,6 @@ function getDailyGreetingIndex(date, period, variantCount) {
       return storedIndex % variantCount;
     }
 
-    // Pick once for this date and time period, then keep it through every refresh.
     const selectedIndex = Math.floor(Math.random() * variantCount);
     selections[period] = selectedIndex;
     localStorage.setItem(
@@ -112,11 +114,11 @@ function getDailyGreetingIndex(date, period, variantCount) {
     );
     return selectedIndex;
   } catch {
-    // Keep the greeting stable even if browser storage is unavailable.
     return getDateFallbackGreetingIndex(date, period, variantCount);
   }
 }
 
+// Clock widget
 export class Clock {
   constructor() {
     this.els = {
@@ -156,7 +158,6 @@ export class Clock {
     this.toggleDateRow(state.get("showDate") === true);
     this.toggleGreetings(state.get("hideGreetings") === true);
 
-    // --- NEW: Click Greeting to Set Name ---
     if (this.els.greeting) {
       this.els.greeting.style.cursor = "pointer";
       this.els.greeting.title = "Double-click to set your name";
@@ -193,8 +194,7 @@ export class Clock {
   }
 
   syncAnalogLoop() {
-    const shouldAnimate =
-      !document.hidden &&
+    const shouldAnimate = !document.hidden &&
       state.get("clockType") === "analog";
     if (!shouldAnimate) {
       if (this._animationFrame !== null) {
@@ -266,6 +266,7 @@ export class Clock {
     }
   }
 
+  // Clock display
   update() {
     const now = new Date();
     const type = state.get("clockType");
@@ -334,15 +335,13 @@ export class Clock {
     const secondsWithMs = now.getSeconds() + now.getMilliseconds() / 1000;
     const motionDisabled = state.get("disableAnimations") === true;
 
-    // Keep the clock live while making motion-disabled updates discrete:
-    // hands jump only when their displayed hour/minute changes, and the
-    // second marker jumps once per second instead of sweeping.
-    const hourDegrees =
-      ((hours % 12) + (motionDisabled ? 0 : minutes / 60)) * 30;
+    const hourDegrees = ((hours % 12) + (motionDisabled ? 0 : minutes / 60)) *
+      30;
     const minuteDegrees =
       (minutes + (motionDisabled ? 0 : secondsWithMs / 60)) * 6;
 
-    const secondAngle = (motionDisabled ? now.getSeconds() : secondsWithMs) * 6 - 90;
+    const secondAngle =
+      (motionDisabled ? now.getSeconds() : secondsWithMs) * 6 - 90;
     const radius = 85;
     const radian = secondAngle * (Math.PI / 180);
     const cx = 100 + radius * Math.cos(radian);
@@ -354,6 +353,7 @@ export class Clock {
     this.els.secondDot.setAttribute("cy", cy);
   }
 
+  // Greeting display
   updateGreeting() {
     if (!this.els.greeting) return;
 
@@ -396,13 +396,12 @@ export class Clock {
     const dayName = WEEKDAYS[now.getDay()];
     let greeting = selectedGreeting.replace("{day}", dayName);
 
-    // --- NAME INTEGRATION ---
     const cleanName = String(state.get("userName") || "")
       .trim()
       .slice(0, MAX_USER_NAME_LENGTH);
     if (cleanName) {
-      const formattedName =
-        cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+      const formattedName = cleanName.charAt(0).toUpperCase() +
+        cleanName.slice(1);
       const ending = greeting.match(/[.!?]$/)?.[0] || "";
       const body = ending ? greeting.slice(0, -1) : greeting;
       greeting = `${body}, ${formattedName}${ending}`;

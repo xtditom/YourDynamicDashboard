@@ -1,7 +1,9 @@
-/* --- MASTER LEVEL MOBILE & SMALL SCREEN SCALING --- */
+/* Responsive layout */
+
+/* Compact desktop layout */
 @media (max-width: 900px) {
   html {
-    font-size: 14px; 
+    font-size: 14px;
   }
   .layout-container {
     padding: 1.5rem;
@@ -9,6 +11,7 @@
   }
 }
 
+/* Mobile layout */
 @media (max-width: 600px) {
   html {
     font-size: 12px;
@@ -81,7 +84,7 @@
     width: calc(100vw - 2rem) !important;
     max-width: 360px !important;
     padding: 1rem !important;
-    max-height: 60vh !important; 
+    max-height: 60vh !important;
     overflow-y: auto !important;
   }
 
@@ -234,6 +237,7 @@
   }
 }
 
+/* Narrow mobile layout */
 @media (max-width: 380px) {
   html {
     font-size: 10px;
@@ -266,6 +270,7 @@
   }
 }
 
+/* Short viewport layout */
 @media (max-height: 600px) {
   .layout-container {
     gap: 0.5rem;
@@ -283,10 +288,10 @@
   }
   #quote-widget {
     display: none !important;
-  } 
+  }
   .corner-button {
     transform: scale(0.85);
-  } 
+  }
   .popup-container,
   .modal-box,
   .sh-modal,

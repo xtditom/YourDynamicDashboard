@@ -4,6 +4,7 @@ import {
   markDefaultTaskIncomplete,
 } from "../utils.js";
 
+// To-do widget
 export class TodoManager {
   constructor() {
     this.els = {
@@ -23,6 +24,7 @@ export class TodoManager {
     this.init();
   }
 
+  // To-do initialization
   init() {
     this.render();
 
@@ -110,6 +112,7 @@ export class TodoManager {
     state.set("todos", todos);
   }
 
+  // Task editing
   startNativeEdit(index, textElement, itemElement) {
     const todos = this.getNormalizedTodos();
     const currentText = todos[index].text;
@@ -158,6 +161,7 @@ export class TodoManager {
     itemElement.replaceChild(input, textElement);
   }
 
+  // Task state
   toggleStatus(index) {
     const todos = this.getNormalizedTodos();
     if (!Number.isInteger(index) || !todos[index]) return;
@@ -219,6 +223,7 @@ export class TodoManager {
     }));
   }
 
+  // Task rendering
   render() {
     if (this.els.list) {
       this.els.list.innerHTML = "";
@@ -267,7 +272,10 @@ export class TodoManager {
         const pinSvgString = todo.pinned
           ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11.2V5h1V3H7v2h1v6.2l-2 3v2h5v6l1 1 1-1v-6h5v-2z"/></svg>'
           : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11.2V5h1V3H7v2h1v6.2l-2 3v2h5v6l1 1 1-1v-6h5v-2z"/></svg>';
-        const pinParsedSvg = new DOMParser().parseFromString(pinSvgString, 'image/svg+xml');
+        const pinParsedSvg = new DOMParser().parseFromString(
+          pinSvgString,
+          "image/svg+xml",
+        );
         pinBtn.appendChild(pinParsedSvg.documentElement);
         pinBtn.title = "Pin to Dashboard";
         pinBtn.onclick = (e) => {
@@ -279,7 +287,10 @@ export class TodoManager {
         delBtn.className = "action-btn delete-btn";
         const delSvgString =
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        const delParsedSvg = new DOMParser().parseFromString(delSvgString, 'image/svg+xml');
+        const delParsedSvg = new DOMParser().parseFromString(
+          delSvgString,
+          "image/svg+xml",
+        );
         delBtn.appendChild(delParsedSvg.documentElement);
         delBtn.title = "Delete Task";
         delBtn.onclick = (e) => {
@@ -348,6 +359,7 @@ export class TodoManager {
     this.renderPinned();
   }
 
+  // Pinned task rendering
   renderPinned() {
     if (!this.els.pinnedWidget || !this.els.pinnedList) return;
 

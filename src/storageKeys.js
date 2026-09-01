@@ -11,6 +11,7 @@ import {
   sanitizeShortcuts,
 } from "./validators.js";
 
+// Storage key registry
 const EXTRA_STORAGE_KEYS = [
   "activeToolTab",
   "aiToolsOrder",
@@ -66,6 +67,7 @@ const YDD_STORAGE_KEYS = new Set([
   ...EXTRA_STORAGE_KEYS,
 ]);
 
+// Storage key categories
 const RAW_STORAGE_KEYS = new Set([
   "activeToolTab",
   "has_idb_bg",
@@ -83,13 +85,40 @@ const BACKGROUND_PREVIEW_KEYS = new Set([
   "randomBgCurrentPreview",
   "randomBgNextPreview",
 ]);
+// Import validation
 const IMPORT_VALUE_NORMALIZERS = new Map([
-  ["userShortcuts", (value) => requireArray(value, "shortcuts") && sanitizeShortcuts(value)],
-  ["customAiTools", (value) => requireArray(value, "custom AI tools") && sanitizeCustomTools(value, "ai")],
-  ["customSocialLinks", (value) => requireArray(value, "custom social links") && sanitizeCustomTools(value, "social")],
-  ["customApps", (value) => requireArray(value, "custom apps") && sanitizeCustomApps(value)],
-  ["customSearchEngines", (value) => requireArray(value, "custom search engines") && sanitizeCustomSearchEngines(value)],
-  ["googleAppOverrides", (value) => requireObject(value, "Google app overrides") && sanitizeGoogleAppOverrides(value)],
+  [
+    "userShortcuts",
+    (value) => requireArray(value, "shortcuts") && sanitizeShortcuts(value),
+  ],
+  [
+    "customAiTools",
+    (value) =>
+      requireArray(value, "custom AI tools") &&
+      sanitizeCustomTools(value, "ai"),
+  ],
+  [
+    "customSocialLinks",
+    (value) =>
+      requireArray(value, "custom social links") &&
+      sanitizeCustomTools(value, "social"),
+  ],
+  [
+    "customApps",
+    (value) => requireArray(value, "custom apps") && sanitizeCustomApps(value),
+  ],
+  [
+    "customSearchEngines",
+    (value) =>
+      requireArray(value, "custom search engines") &&
+      sanitizeCustomSearchEngines(value),
+  ],
+  [
+    "googleAppOverrides",
+    (value) =>
+      requireObject(value, "Google app overrides") &&
+      sanitizeGoogleAppOverrides(value),
+  ],
   ["userSavedThemes", normalizeImportedSavedThemes],
 ]);
 
@@ -114,9 +143,12 @@ function normalizeImportedSavedThemes(value) {
   return normalized;
 }
 
+// Imported value normalization
 function normalizeImportedJsonValue(key, value) {
   if (BACKGROUND_URL_KEYS.has(key)) return normalizeStoredBackgroundUrl(value);
-  if (BACKGROUND_PREVIEW_KEYS.has(key)) return normalizeStoredImageDataUrl(value);
+  if (BACKGROUND_PREVIEW_KEYS.has(key)) {
+    return normalizeStoredImageDataUrl(value);
+  }
   if (key.startsWith("custom---")) return normalizeStoredThemeColor(key, value);
   return IMPORT_VALUE_NORMALIZERS.get(key)?.(value) ?? value;
 }
@@ -130,6 +162,7 @@ function shouldNormalizeImportedValue(key) {
   );
 }
 
+// Storage key API
 export function isYddStorageKey(key) {
   return (
     YDD_STORAGE_KEYS.has(key) ||
@@ -147,6 +180,7 @@ export function getYddStorageEntries() {
   return entries;
 }
 
+// Storage cleanup
 export function clearYddLocalStorage() {
   const keys = new Set([
     ...Object.keys(getYddStorageEntries()),
@@ -155,6 +189,7 @@ export function clearYddLocalStorage() {
   keys.forEach((key) => localStorage.removeItem(key));
 }
 
+// Backup validation
 export function validateYddStorageEntries(entries) {
   if (!entries || typeof entries !== "object" || Array.isArray(entries)) {
     throw new TypeError("Backup settings must be an object.");
@@ -179,7 +214,9 @@ export function validateYddStorageEntries(entries) {
     if (!RAW_STORAGE_KEYS.has(key) && !key.startsWith("welcomeShown_")) {
       const parsedValue = JSON.parse(rawValue);
       if (shouldNormalizeImportedValue(key)) {
-        filtered[key] = JSON.stringify(normalizeImportedJsonValue(key, parsedValue));
+        filtered[key] = JSON.stringify(
+          normalizeImportedJsonValue(key, parsedValue),
+        );
         return;
       }
     }
@@ -192,5 +229,4 @@ export function validateYddStorageEntries(entries) {
 
   return filtered;
 }
-
-// [src/storageKeys.js] YourDynamicDashboard V3.0.0
+// [src/storageKeys.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

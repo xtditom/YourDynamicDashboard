@@ -9,6 +9,7 @@ import {
 import { state } from "../state.js";
 import { showCustomModal } from "../utils.js";
 
+// News configuration
 const MAX_ITEMS = Math.max(...NEWS_CARD_COUNTS);
 const IMAGE_PARSER_VERSION = 6;
 const IMAGE_TARGET_WIDTH = 960;
@@ -31,9 +32,12 @@ const CNN_CATEGORY_PATHS = Object.freeze({
   travel: /\/travel\//,
 });
 const NEWS_PERMISSION_ORIGINS = Object.freeze([
-  ...new Set(NEWS_PROVIDERS.map((provider) => provider.permission).filter(Boolean)),
+  ...new Set(
+    NEWS_PROVIDERS.map((provider) => provider.permission).filter(Boolean),
+  ),
 ]);
 
+// Permission helpers
 function getExtensionPermissionApi() {
   if (globalThis.browser?.permissions?.request) {
     return { api: globalThis.browser, promiseBased: true };
@@ -95,9 +99,6 @@ async function requestNewsHostAccess(providers) {
   const origins = permissionOriginsForProviders(providers);
   if (!origins.length || !getExtensionPermissionApi()) return false;
   try {
-    // Do not await permissions.contains() first. Calling request() immediately
-    // preserves the browser-required user gesture; already-granted origins are
-    // returned without another prompt by the browser.
     return Boolean(await callPermissionApi("request", { origins }));
   } catch (error) {
     console.warn("[YDD] News publisher permission request failed.", error);
@@ -129,6 +130,7 @@ async function removeNewsHostAccess(origins) {
   return completed;
 }
 
+// Feed parsing helpers
 function safeUrl(value, baseUrl = "") {
   const rawValue = String(value || "").trim();
   if (!rawValue) return "";
@@ -144,8 +146,8 @@ function firstText(node, selectors) {
   for (const selector of selectors) {
     const value = selector.includes(":")
       ? [...node.getElementsByTagName("*")].find(
-          (element) => element.localName === selector.split(":").pop(),
-        )?.textContent?.trim()
+        (element) => element.localName === selector.split(":").pop(),
+      )?.textContent?.trim()
       : node.querySelector(selector)?.textContent?.trim();
     if (value) return value;
   }
@@ -175,7 +177,11 @@ function isUsableImageUrl(url, type = "", medium = "") {
     looksLikeImageUrl(url);
 }
 
-function elementUrls(element, baseUrl = "", attributes = ["url", "href", "src"]) {
+function elementUrls(
+  element,
+  baseUrl = "",
+  attributes = ["url", "href", "src"],
+) {
   const urls = [];
   const srcSet = bestSrcSetUrl(
     element.getAttribute("srcset") || element.getAttribute("data-srcset"),
@@ -207,7 +213,8 @@ function compareImageResolution(left, right) {
   const rightBucket = bucket(rightWidth);
   if (leftBucket !== rightBucket) return leftBucket - rightBucket;
   if (leftBucket === 0) {
-    return Math.abs(leftWidth - IMAGE_TARGET_WIDTH) - Math.abs(rightWidth - IMAGE_TARGET_WIDTH);
+    return Math.abs(leftWidth - IMAGE_TARGET_WIDTH) -
+      Math.abs(rightWidth - IMAGE_TARGET_WIDTH);
   }
   if (leftBucket === 1) return leftWidth - rightWidth;
   if (leftBucket === 2) return rightWidth - leftWidth;
@@ -222,14 +229,20 @@ function imageCandidatesFromHtml(html, baseUrl = "") {
     if (isUsableImageUrl(url, type, medium)) candidates.push(url);
   };
   documentNode.querySelectorAll("img").forEach((image) => {
-    elementUrls(image, baseUrl, ["src", "data-src", "data-original"]).forEach((url) => add(url, "image/*"));
+    elementUrls(image, baseUrl, ["src", "data-src", "data-original"]).forEach((
+      url,
+    ) => add(url, "image/*"));
   });
   documentNode.querySelectorAll("source").forEach((source) => {
     const type = source.getAttribute("type") || "";
-    elementUrls(source, baseUrl, ["src", "data-src"]).forEach((url) => add(url, type));
+    elementUrls(source, baseUrl, ["src", "data-src"]).forEach((url) =>
+      add(url, type)
+    );
   });
   documentNode.querySelectorAll("video").forEach((video) => {
-    elementUrls(video, baseUrl, ["poster"]).forEach((url) => add(url, "image/*"));
+    elementUrls(video, baseUrl, ["poster"]).forEach((url) =>
+      add(url, "image/*")
+    );
   });
   return uniqueUrls(candidates);
 }
@@ -240,14 +253,20 @@ function bestSrcSetUrl(srcSet, baseUrl = "") {
     const parts = candidate.trim().split(/\s+/);
     const url = safeUrl(parts[0], baseUrl);
     const descriptor = parts[1] || "";
-    const width = descriptor.endsWith("w") ? Number.parseInt(descriptor, 10) : 0;
-    const density = descriptor.endsWith("x") ? Number.parseFloat(descriptor) : 0;
+    const width = descriptor.endsWith("w")
+      ? Number.parseInt(descriptor, 10)
+      : 0;
+    const density = descriptor.endsWith("x")
+      ? Number.parseFloat(descriptor)
+      : 0;
     return { url, width, density };
   }).filter((candidate) => candidate.url);
   if (!candidates.length) return "";
-  candidates.sort((left, right) => (left.width || left.density * 640) - (right.width || right.density * 640));
+  candidates.sort((left, right) =>
+    (left.width || left.density * 640) - (right.width || right.density * 640)
+  );
   const target = candidates.find((candidate) =>
-    (candidate.width || candidate.density * 640) >= IMAGE_TARGET_WIDTH,
+    (candidate.width || candidate.density * 640) >= IMAGE_TARGET_WIDTH
   );
   return (target || candidates[candidates.length - 1]).url;
 }
@@ -283,15 +302,21 @@ function itemImageCandidates(item, baseUrl = "") {
     .forEach((element) => {
       const type = element.getAttribute("type") || "";
       const medium = element.getAttribute("medium") || "";
-      const video = medium.toLowerCase() === "video" || type.toLowerCase().startsWith("video/");
+      const video = medium.toLowerCase() === "video" ||
+        type.toLowerCase().startsWith("video/");
       ["poster", "thumbnail", "thumbnailUrl"].forEach((attribute) => {
         const url = safeUrl(element.getAttribute(attribute), baseUrl);
         if (url && !looksLikeVideoUrl(url)) posterCandidates.push(url);
       });
       if (video) return;
-      if (type.toLowerCase().startsWith("image/") || medium.toLowerCase() === "image") {
+      if (
+        type.toLowerCase().startsWith("image/") ||
+        medium.toLowerCase() === "image"
+      ) {
         elementUrls(element, baseUrl).forEach((url) => {
-          if (isUsableImageUrl(url, type, medium)) mediaImageCandidates.push(url);
+          if (isUsableImageUrl(url, type, medium)) {
+            mediaImageCandidates.push(url);
+          }
         });
       }
     });
@@ -309,14 +334,21 @@ function itemImageCandidates(item, baseUrl = "") {
     .forEach((enclosure) => {
       const type = enclosure.getAttribute("type") || "";
       elementUrls(enclosure, baseUrl, ["url", "href"]).forEach((url) => {
-        if (type.toLowerCase().startsWith("image/") || !type && isUsableImageUrl(url)) {
+        if (
+          type.toLowerCase().startsWith("image/") ||
+          !type && isUsableImageUrl(url)
+        ) {
           enclosureCandidates.push(url);
         }
       });
     });
 
   const richContent = elements
-    .filter((element) => ["encoded", "description", "summary", "content"].includes(element.localName))
+    .filter((element) =>
+      ["encoded", "description", "summary", "content"].includes(
+        element.localName,
+      )
+    )
     .map((element) => element.textContent || element.innerHTML || "");
   for (const content of richContent) {
     richContentCandidates.push(...imageCandidatesFromHtml(content, baseUrl));
@@ -331,66 +363,111 @@ function itemImageCandidates(item, baseUrl = "") {
   ]);
 }
 
-// Guardian's RSS feed has historically exposed its media URL through a
-// broader media:content shape. Keep this compatibility path Guardian-only so
-// the other providers retain the stricter image/video classification.
 function guardianLegacyImageCandidates(item, baseUrl = "") {
   const elements = [...item.getElementsByTagName("*")];
   const mediaCandidates = [];
   const thumbnailCandidates = [];
   const candidates = [];
   const add = (url, type = "", medium = "", target = candidates) => {
-    if (!url || String(type).toLowerCase().startsWith("video/") || String(medium).toLowerCase() === "video") return;
+    if (
+      !url || String(type).toLowerCase().startsWith("video/") ||
+      String(medium).toLowerCase() === "video"
+    ) return;
     if (!looksLikeVideoUrl(url)) target.push(url);
   };
 
-  elements.filter((element) => ["thumbnail", "image"].includes(element.localName) || element.localName === "content")
+  elements.filter((element) =>
+    ["thumbnail", "image"].includes(element.localName) ||
+    element.localName === "content"
+  )
     .sort(compareImageResolution)
     .forEach((element) => {
       const type = element.getAttribute("type") || "";
       const medium = element.getAttribute("medium") || "";
-      const target = element.localName === "content" ? mediaCandidates : thumbnailCandidates;
-      elementUrls(element, baseUrl, ["url", "href", "src"]).forEach((url) => add(url, type, medium, target));
+      const target = element.localName === "content"
+        ? mediaCandidates
+        : thumbnailCandidates;
+      elementUrls(element, baseUrl, ["url", "href", "src"]).forEach((url) =>
+        add(url, type, medium, target)
+      );
     });
 
-  elements.filter((element) => element.localName === "enclosure").forEach((element) => {
-    const type = element.getAttribute("type") || "";
-    if (type.toLowerCase().startsWith("image/") || !type) {
-      elementUrls(element, baseUrl, ["url", "href"]).forEach((url) => add(url, type, "", candidates));
-    }
-  });
+  elements.filter((element) => element.localName === "enclosure").forEach(
+    (element) => {
+      const type = element.getAttribute("type") || "";
+      if (type.toLowerCase().startsWith("image/") || !type) {
+        elementUrls(element, baseUrl, ["url", "href"]).forEach((url) =>
+          add(url, type, "", candidates)
+        );
+      }
+    },
+  );
 
   elements
-    .filter((element) => ["encoded", "description", "summary", "content"].includes(element.localName))
+    .filter((element) =>
+      ["encoded", "description", "summary", "content"].includes(
+        element.localName,
+      )
+    )
     .map((element) => element.textContent || element.innerHTML || "")
-    .forEach((content) => candidates.push(...imageCandidatesFromHtml(content, baseUrl)));
+    .forEach((content) =>
+      candidates.push(...imageCandidatesFromHtml(content, baseUrl))
+    );
 
-  return uniqueUrls([...mediaCandidates, ...thumbnailCandidates, ...candidates]);
+  return uniqueUrls([
+    ...mediaCandidates,
+    ...thumbnailCandidates,
+    ...candidates,
+  ]);
 }
 
+// Feed parsers
 function parseFeed(xmlText, source) {
-  const documentNode = new DOMParser().parseFromString(xmlText, "application/xml");
-  if (documentNode.querySelector("parsererror")) throw new Error("Invalid RSS or Atom XML");
-  return [...documentNode.querySelectorAll("item, entry")].map((item, index) => {
-    const linkNode = item.querySelector("link");
-    const link = safeUrl(linkNode?.getAttribute("href") || linkNode?.textContent, source.url);
-    const title = firstText(item, ["title"]).replace(/\s+/g, " ").slice(0, 300);
-    const published = firstText(item, ["pubDate", "published", "updated", "dc\\:date"]);
-    const guid = firstText(item, ["guid", "id"]);
-    const imageCandidates = itemImageCandidates(item, source.url);
-    const compatibilityCandidates = source.provider.id === "guardian"
-      ? guardianLegacyImageCandidates(item, source.url)
-      : [];
-    return {
-      id: (guid || link || `${source.provider.id}-${index}`).slice(0, 500),
-      title,
-      url: link,
-      imageCandidates: uniqueUrls([...imageCandidates, ...compatibilityCandidates]),
-      providerId: source.provider.id,
-      providerName: source.provider.name,
-      publishedAt: Number.isFinite(Date.parse(published)) ? Date.parse(published) : 0,
-    };
-  }).map((item) => ({
+  const documentNode = new DOMParser().parseFromString(
+    xmlText,
+    "application/xml",
+  );
+  if (documentNode.querySelector("parsererror")) {
+    throw new Error("Invalid RSS or Atom XML");
+  }
+  return [...documentNode.querySelectorAll("item, entry")].map(
+    (item, index) => {
+      const linkNode = item.querySelector("link");
+      const link = safeUrl(
+        linkNode?.getAttribute("href") || linkNode?.textContent,
+        source.url,
+      );
+      const title = firstText(item, ["title"]).replace(/\s+/g, " ").slice(
+        0,
+        300,
+      );
+      const published = firstText(item, [
+        "pubDate",
+        "published",
+        "updated",
+        "dc\\:date",
+      ]);
+      const guid = firstText(item, ["guid", "id"]);
+      const imageCandidates = itemImageCandidates(item, source.url);
+      const compatibilityCandidates = source.provider.id === "guardian"
+        ? guardianLegacyImageCandidates(item, source.url)
+        : [];
+      return {
+        id: (guid || link || `${source.provider.id}-${index}`).slice(0, 500),
+        title,
+        url: link,
+        imageCandidates: uniqueUrls([
+          ...imageCandidates,
+          ...compatibilityCandidates,
+        ]),
+        providerId: source.provider.id,
+        providerName: source.provider.name,
+        publishedAt: Number.isFinite(Date.parse(published))
+          ? Date.parse(published)
+          : 0,
+      };
+    },
+  ).map((item) => ({
     ...item,
     imageUrl: item.imageCandidates[0] || "",
   })).filter((item) => item.title && item.url && isFreshStory(item));
@@ -421,7 +498,10 @@ function parseCnnSearch(payload, source) {
       const imageUrl = safeUrl(item.thumbnail);
       const publishedAt = Date.parse(item.lastModifiedDate || "");
       return {
-        id: String(item.stellarID || articleUrl || `cnn-${index}`).slice(0, 500),
+        id: String(item.stellarID || articleUrl || `cnn-${index}`).slice(
+          0,
+          500,
+        ),
         title,
         url: articleUrl,
         imageCandidates: imageUrl ? [imageUrl] : [],
@@ -434,6 +514,7 @@ function parseCnnSearch(payload, source) {
     .filter((item) => item.title && item.url && isFreshStory(item));
 }
 
+// Story selection and freshness
 function storyKeys(item) {
   const normalizedTitle = String(item.title || "")
     .toLowerCase()
@@ -490,7 +571,7 @@ function getAgeMinutes(timestamp) {
 }
 function isFreshStory(item, now = Date.now()) {
   const publishedAt = Number(item?.publishedAt);
-  // A missing date cannot be compared safely; dated stories are capped at seven days.
+
   return !Number.isFinite(publishedAt) ||
     publishedAt <= 0 ||
     now - publishedAt < MAX_NEWS_AGE_MS;
@@ -502,6 +583,7 @@ function filterFreshStories(items, now = Date.now()) {
     : [];
 }
 
+// News consent
 async function requestNewsConsent(providers) {
   if (state.get("newsConsentRemembered") === true) {
     return requestNewsHostAccess(providers);
@@ -516,9 +598,7 @@ async function requestNewsConsent(providers) {
         value: ({ checkboxChecked }) => ({
           action: "agree",
           remember: checkboxChecked,
-          // Start the native request in this exact button click. The shared
-          // modal resolves after its close animation, which is too late to
-          // retain a permission-request user gesture in Chromium or Firefox.
+
           permissionRequest: requestNewsHostAccess(providers),
         }),
         width: "130px",
@@ -542,6 +622,7 @@ async function requestNewsConsent(providers) {
   return Boolean(await result.permissionRequest);
 }
 
+// News manager
 export class NewsManager {
   constructor() {
     this.container = document.getElementById("news-feed-container");
@@ -559,21 +640,24 @@ export class NewsManager {
       if (["newsEnabled", "newsPosition", "shortcutsPosition"].includes(key)) {
         this.updatePlacement();
       }
-      if ([
-        "newsEnabled",
-        "newsProviderIds",
-        "newsCategoryIds",
-        "newsShowHeadlines",
-        "newsHeadlineOpacity",
-        "newsTotalCards",
-        "newsRefreshIntervalMinutes",
-      ].includes(key)) {
+      if (
+        [
+          "newsEnabled",
+          "newsProviderIds",
+          "newsCategoryIds",
+          "newsShowHeadlines",
+          "newsHeadlineOpacity",
+          "newsTotalCards",
+          "newsRefreshIntervalMinutes",
+        ].includes(key)
+      ) {
         this.render();
         this.scheduleAutoRefresh();
       }
       if (key === "newsCache") {
-        if (this.lastRenderedCacheKey === this.getRenderCacheKey(value)) this.updateLiveAge();
-        else this.render();
+        if (this.lastRenderedCacheKey === this.getRenderCacheKey(value)) {
+          this.updateLiveAge();
+        } else this.render();
       }
       if (key === "linkTargets") this.render();
     });
@@ -582,7 +666,10 @@ export class NewsManager {
         const previousCacheKey = this.lastRenderedCacheKey;
         state.clearCache?.("newsCache");
         const cache = state.get("newsCache") || CONFIG.defaults.newsCache;
-        if (event.key === "newsCache" && previousCacheKey === this.getRenderCacheKey(cache)) {
+        if (
+          event.key === "newsCache" &&
+          previousCacheKey === this.getRenderCacheKey(cache)
+        ) {
           this.updateLiveAge();
         } else {
           this.render();
@@ -616,10 +703,14 @@ export class NewsManager {
   getSelection() {
     const providerIds = state.get("newsProviderIds") || [];
     const requestedCategoryIds = state.get("newsCategoryIds") || [];
-    const providers = NEWS_PROVIDERS.filter((provider) => providerIds.includes(provider.id));
+    const providers = NEWS_PROVIDERS.filter((provider) =>
+      providerIds.includes(provider.id)
+    );
     const categoryIds = NEWS_CATEGORIES
       .filter((category) => requestedCategoryIds.includes(category.id))
-      .filter((category) => providers.some((provider) => provider.feeds[category.id]))
+      .filter((category) =>
+        providers.some((provider) => provider.feeds[category.id])
+      )
       .map((category) => category.id);
     const sources = [];
     const seen = new Set();
@@ -701,10 +792,13 @@ export class NewsManager {
         ? `Updated ${formatRelativeAge(cache.fetchedAt)} ago`
         : "Waiting for first update";
     }
-    this.container.querySelectorAll(".news-card-source[data-published-at]").forEach((source) => {
-      const publishedAt = Number(source.dataset.publishedAt) || 0;
-      source.textContent = `${source.dataset.providerName || ""}${publishedAt ? ` · ${formatRelativeAge(publishedAt)}` : ""}`;
-    });
+    this.container.querySelectorAll(".news-card-source[data-published-at]")
+      .forEach((source) => {
+        const publishedAt = Number(source.dataset.publishedAt) || 0;
+        source.textContent = `${source.dataset.providerName || ""}${
+          publishedAt ? ` · ${formatRelativeAge(publishedAt)}` : ""
+        }`;
+      });
     if (persist && cache.fetchedAt) {
       const ageMinutes = getAgeMinutes(cache.fetchedAt);
       if (cache.ageMinutes !== ageMinutes) {
@@ -720,8 +814,12 @@ export class NewsManager {
     if (!cache.fetchedAt) return;
     const timestamps = [
       cache.fetchedAt,
-      ...(Array.isArray(cache.items) ? cache.items.map((item) => item.publishedAt) : []),
-    ].filter((timestamp) => Number.isFinite(Number(timestamp)) && Number(timestamp) > 0);
+      ...(Array.isArray(cache.items)
+        ? cache.items.map((item) => item.publishedAt)
+        : []),
+    ].filter((timestamp) =>
+      Number.isFinite(Number(timestamp)) && Number(timestamp) > 0
+    );
     const now = Date.now();
     const delay = Math.min(...timestamps.map((timestamp) => {
       const numericTimestamp = Number(timestamp);
@@ -737,16 +835,19 @@ export class NewsManager {
 
   emitStatus(message = "") {
     const cache = state.get("newsCache") || CONFIG.defaults.newsCache;
-    window.dispatchEvent(new CustomEvent("ydd-news-status", {
-      detail: {
-        fetching: this.fetching,
-        message,
-        fetchedAt: cache.fetchedAt,
-        cooldownRemaining: this.getCooldownRemaining(),
-      },
-    }));
+    window.dispatchEvent(
+      new CustomEvent("ydd-news-status", {
+        detail: {
+          fetching: this.fetching,
+          message,
+          fetchedAt: cache.fetchedAt,
+          cooldownRemaining: this.getCooldownRemaining(),
+        },
+      }),
+    );
   }
 
+  // Permission lifecycle
   async initializeNewsPermissions() {
     const savedPermissionModel = Number(
       state.get("newsPermissionModelVersion"),
@@ -812,14 +913,24 @@ export class NewsManager {
   }) {
     const wasEnabled = state.get("newsEnabled") === true;
     const requestedProviderIds = Array.isArray(providerIds) ? providerIds : [];
-    const providers = NEWS_PROVIDERS.filter((provider) => requestedProviderIds.includes(provider.id));
+    const providers = NEWS_PROVIDERS.filter((provider) =>
+      requestedProviderIds.includes(provider.id)
+    );
     const supportedCategoryIds = new Set(
       NEWS_CATEGORIES
-        .filter((category) => providers.some((provider) => provider.feeds[category.id]))
+        .filter((category) =>
+          providers.some((provider) => provider.feeds[category.id])
+        )
         .map((category) => category.id),
     );
     const requestedCategoryIds = Array.isArray(categoryIds) ? categoryIds : [];
-    const normalizedCategoryIds = [...new Set(requestedCategoryIds.filter((categoryId) => supportedCategoryIds.has(categoryId)))];
+    const normalizedCategoryIds = [
+      ...new Set(
+        requestedCategoryIds.filter((categoryId) =>
+          supportedCategoryIds.has(categoryId)
+        ),
+      ),
+    ];
     if (enabled && !providers.length) {
       await showCustomModal("Choose at least one news provider.");
       return false;
@@ -832,7 +943,9 @@ export class NewsManager {
       enabled &&
       !normalizedCategoryIds.length
     ) {
-      await showCustomModal("The selected providers do not publish any of the selected news types. Choose another provider or type.");
+      await showCustomModal(
+        "The selected providers do not publish any of the selected news types. Choose another provider or type.",
+      );
       return false;
     }
     if (enabled && !wasEnabled && !(await requestNewsConsent(providers))) {
@@ -894,9 +1007,18 @@ export class NewsManager {
   acquireLock() {
     try {
       const existing = JSON.parse(localStorage.getItem(LOCK_KEY) || "null");
-      if (existing?.expiresAt > Date.now() && existing.ownerId !== this.ownerId) return false;
-      localStorage.setItem(LOCK_KEY, JSON.stringify({ ownerId: this.ownerId, expiresAt: Date.now() + LOCK_TTL_MS }));
-      return JSON.parse(localStorage.getItem(LOCK_KEY) || "null")?.ownerId === this.ownerId;
+      if (
+        existing?.expiresAt > Date.now() && existing.ownerId !== this.ownerId
+      ) return false;
+      localStorage.setItem(
+        LOCK_KEY,
+        JSON.stringify({
+          ownerId: this.ownerId,
+          expiresAt: Date.now() + LOCK_TTL_MS,
+        }),
+      );
+      return JSON.parse(localStorage.getItem(LOCK_KEY) || "null")?.ownerId ===
+        this.ownerId;
     } catch {
       return true;
     }
@@ -907,15 +1029,18 @@ export class NewsManager {
       const lock = JSON.parse(localStorage.getItem(LOCK_KEY) || "null");
       if (lock?.ownerId === this.ownerId) localStorage.removeItem(LOCK_KEY);
     } catch {
-      // A failed lock cleanup expires automatically.
     }
   }
 
+  // Feed retrieval
   async fetchCnnSearch() {
     if (this.cnnSearchPromise) return this.cnnSearchPromise;
     this.cnnSearchPromise = (async () => {
       const controller = new AbortController();
-      const timeout = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      const timeout = window.setTimeout(
+        () => controller.abort(),
+        FETCH_TIMEOUT_MS,
+      );
       try {
         const requestId = globalThis.crypto?.randomUUID?.() ||
           `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -936,7 +1061,9 @@ export class NewsManager {
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const payload = await response.json();
-        if (!Array.isArray(payload?.result)) throw new Error("Invalid CNN response");
+        if (!Array.isArray(payload?.result)) {
+          throw new Error("Invalid CNN response");
+        }
         return payload;
       } finally {
         window.clearTimeout(timeout);
@@ -950,7 +1077,10 @@ export class NewsManager {
       return parseCnnSearch(await this.fetchCnnSearch(), source);
     }
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    const timeout = window.setTimeout(
+      () => controller.abort(),
+      FETCH_TIMEOUT_MS,
+    );
     try {
       const response = await fetch(source.url, {
         signal: controller.signal,
@@ -965,11 +1095,14 @@ export class NewsManager {
     }
   }
 
+  // Refresh cycle
   async refresh({ reason = "manual" } = {}) {
     if (state.get("newsEnabled") !== true || this.fetching) return false;
     const selection = this.getSelection();
     if (!selection.sources.length) {
-      this.emitStatus("Choose at least one provider and news type in News Settings.");
+      this.emitStatus(
+        "Choose at least one provider and news type in News Settings.",
+      );
       this.render();
       return false;
     }
@@ -981,7 +1114,9 @@ export class NewsManager {
     }
     const cache = state.get("newsCache") || CONFIG.defaults.newsCache;
     if (reason !== "manual" && this.getCooldownRemaining() > 0) {
-      this.emitStatus("News was fetched recently. Waiting for the selected interval.");
+      this.emitStatus(
+        "News was fetched recently. Waiting for the selected interval.",
+      );
       return false;
     }
     if (!this.acquireLock()) {
@@ -994,15 +1129,21 @@ export class NewsManager {
     const attemptAt = Date.now();
     this.cnnSearchPromise = null;
     try {
-      const results = await Promise.allSettled(selection.sources.map((source) => this.fetchSource(source)));
+      const results = await Promise.allSettled(
+        selection.sources.map((source) => this.fetchSource(source)),
+      );
       const items = [];
       const failures = [];
       results.forEach((result, index) => {
         if (result.status === "fulfilled") items.push(...result.value);
-        else failures.push(`${selection.sources[index].provider.name}: ${result.reason?.message || "Fetch failed"}`);
+        else {failures.push(
+            `${selection.sources[index].provider.name}: ${
+              result.reason?.message || "Fetch failed"
+            }`,
+          );}
       });
       const eligibleProviders = selection.providers.filter((provider) =>
-        selection.sources.some((source) => source.provider.id === provider.id),
+        selection.sources.some((source) => source.provider.id === provider.id)
       );
       const deduped = filterFreshStories(
         selectBalancedStories(items, eligibleProviders, MAX_ITEMS),
@@ -1014,8 +1155,8 @@ export class NewsManager {
       const fetchedAt = deduped.length
         ? Date.now()
         : itemsForSelection.length
-          ? cache.fetchedAt
-          : 0;
+        ? cache.fetchedAt
+        : 0;
       state.set("newsCache", {
         version: 2,
         imageParserVersion: IMAGE_PARSER_VERSION,
@@ -1026,7 +1167,11 @@ export class NewsManager {
         items: deduped.length ? deduped : itemsForSelection,
         failures,
       });
-      this.emitStatus(deduped.length ? `Updated ${deduped.length} stories.` : "Could not update news; showing saved stories.");
+      this.emitStatus(
+        deduped.length
+          ? `Updated ${deduped.length} stories.`
+          : "Could not update news; showing saved stories.",
+      );
       return deduped.length > 0;
     } catch (error) {
       const fallbackItems = cache.selectionKey === selection.selectionKey
@@ -1070,11 +1215,20 @@ export class NewsManager {
       };
       state.set("newsCache", cache);
     }
-    if (cache.items.length && cache.imageParserVersion !== IMAGE_PARSER_VERSION) {
-      cache = { ...cache, imageParserVersion: IMAGE_PARSER_VERSION, lastAttemptAt: 0 };
+    if (
+      cache.items.length && cache.imageParserVersion !== IMAGE_PARSER_VERSION
+    ) {
+      cache = {
+        ...cache,
+        imageParserVersion: IMAGE_PARSER_VERSION,
+        lastAttemptAt: 0,
+      };
       state.set("newsCache", cache);
     }
-    if (cache.selectionKey !== selection.selectionKey || Date.now() - cache.lastAttemptAt >= this.getRefreshIntervalMs()) {
+    if (
+      cache.selectionKey !== selection.selectionKey ||
+      Date.now() - cache.lastAttemptAt >= this.getRefreshIntervalMs()
+    ) {
       await this.refresh({ reason: "page-visit" });
     } else {
       this.scheduleAutoRefresh();
@@ -1096,6 +1250,7 @@ export class NewsManager {
     }, Math.min(delay, 2147483647));
   }
 
+  // News rendering
   render() {
     if (!this.container) return;
     this.clearAgeTicker();
@@ -1140,7 +1295,9 @@ export class NewsManager {
       empty.className = "news-feed-empty";
       if (selection.sources.length) {
         const message = document.createElement("span");
-        message.textContent = this.fetching ? "Updating news…" : "No saved stories yet";
+        message.textContent = this.fetching
+          ? "Updating news…"
+          : "No saved stories yet";
         empty.appendChild(message);
         if (!this.fetching) {
           const refreshButton = document.createElement("button");
@@ -1160,11 +1317,12 @@ export class NewsManager {
     }
     const target = state.get("linkTargets")?.news || "_blank";
     items.forEach((item, index) => {
-      const provider = NEWS_PROVIDERS.find((entry) => entry.id === item.providerId);
+      const provider = NEWS_PROVIDERS.find((entry) =>
+        entry.id === item.providerId
+      );
       const card = document.createElement("a");
       card.className = "news-card";
-      const animationsDisabled =
-        state.get("disableAnimations") === true ||
+      const animationsDisabled = state.get("disableAnimations") === true ||
         document.documentElement.classList.contains("disable-animations");
       if (!animationsDisabled) {
         card.classList.add("news-card-entering");
@@ -1187,11 +1345,16 @@ export class NewsManager {
 
       const visual = document.createElement("div");
       visual.className = "news-card-visual";
-      visual.style.setProperty("--news-provider-color", provider?.color || "var(--accent-color)");
-      const imageCandidates = [...new Set([
-        item.imageUrl,
-        ...(Array.isArray(item.imageCandidates) ? item.imageCandidates : []),
-      ].filter(Boolean))];
+      visual.style.setProperty(
+        "--news-provider-color",
+        provider?.color || "var(--accent-color)",
+      );
+      const imageCandidates = [
+        ...new Set([
+          item.imageUrl,
+          ...(Array.isArray(item.imageCandidates) ? item.imageCandidates : []),
+        ].filter(Boolean)),
+      ];
       if (imageCandidates.length) {
         const image = document.createElement("img");
         image.alt = "";
@@ -1216,12 +1379,17 @@ export class NewsManager {
       source.className = "news-card-source";
       source.dataset.providerName = item.providerName;
       source.dataset.publishedAt = String(item.publishedAt || 0);
-      source.textContent = `${item.providerName}${item.publishedAt ? ` · ${formatRelativeAge(item.publishedAt)}` : ""}`;
+      source.textContent = `${item.providerName}${
+        item.publishedAt ? ` · ${formatRelativeAge(item.publishedAt)}` : ""
+      }`;
       const headline = document.createElement("span");
       content.appendChild(source);
       if (showHeadlines) {
         headline.className = "news-card-headline";
-        headline.style.setProperty("--news-headline-opacity", String(headlineOpacity));
+        headline.style.setProperty(
+          "--news-headline-opacity",
+          String(headlineOpacity),
+        );
         headline.textContent = item.title;
         content.appendChild(headline);
       }
@@ -1237,3 +1405,4 @@ export class NewsManager {
     });
   }
 }
+// [src/modules/news.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

@@ -1,17 +1,20 @@
 import { FONT_OPTIONS } from "../config.js";
 
+// Font configuration
 const DEFAULT_FONT_ID = "outfit";
 const LEGACY_DISPLAY_FONT_ID = "inter";
 const FONT_BY_ID = new Map(FONT_OPTIONS.map((font) => [font.id, font]));
 const FONT_LINKS = new Map();
 
+// Font resolution
 function resolveFontId(value) {
   const candidate = String(value || "");
   return FONT_BY_ID.has(candidate) ? candidate : DEFAULT_FONT_ID;
 }
 
 export function getFontOption(value) {
-  return FONT_BY_ID.get(resolveFontId(value)) || FONT_BY_ID.get(DEFAULT_FONT_ID);
+  return FONT_BY_ID.get(resolveFontId(value)) ||
+    FONT_BY_ID.get(DEFAULT_FONT_ID);
 }
 
 function getGoogleFontUrl(font) {
@@ -21,6 +24,7 @@ function getGoogleFontUrl(font) {
   return url.toString();
 }
 
+// Font loading
 export function ensureFontLoaded(value) {
   if (typeof document === "undefined") return null;
   const font = getFontOption(value);
@@ -42,25 +46,29 @@ export function ensureFontLoaded(value) {
   }, { once: true });
   link.addEventListener("error", () => {
     link.dataset.loadState = "failed";
-    console.warn(`[YDD] Could not load ${font.label}; using the system fallback.`);
+    console.warn(
+      `[YDD] Could not load ${font.label}; using the system fallback.`,
+    );
   }, { once: true });
   document.head.appendChild(link);
   FONT_LINKS.set(font.id, link);
   return link;
 }
 
+// Font application
 export function applyFontFamily(value) {
   const font = getFontOption(value);
   if (typeof document !== "undefined") {
     document.documentElement.style.setProperty("--ydd-font-family", font.stack);
     document.documentElement.dataset.fontFamily = font.id;
     ensureFontLoaded(font.id);
-    // Lexend keeps its legacy Inter display pairing when explicitly selected.
+
     if (font.id === "lexend") ensureFontLoaded(LEGACY_DISPLAY_FONT_ID);
   }
   return font.id;
 }
 
+// Font control synchronization
 export function syncFontSelect(select, value) {
   if (!select) return;
   const fontId = resolveFontId(value);
@@ -68,3 +76,4 @@ export function syncFontSelect(select, value) {
     select.value = fontId;
   }
 }
+// [src/modules/fontLoader.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

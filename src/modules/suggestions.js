@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { showCustomModal } from "../utils.js";
 
+// Suggestion service configuration
 const ONLINE_SUGGESTION_ENDPOINT =
   "https://ydd-search-suggestions.yddbyxtditom.workers.dev/suggest";
 const ONLINE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -12,6 +13,7 @@ const LEGACY_CACHE_STORAGE_KEYS = ["ydd_search_suggestion_cache_v1"];
 const onlineCache = new Map();
 let cacheCleanupTimer = null;
 
+// Suggestion cache
 function scheduleCacheCleanup() {
   if (cacheCleanupTimer !== null) clearTimeout(cacheCleanupTimer);
   const now = Date.now();
@@ -19,12 +21,17 @@ function scheduleCacheCleanup() {
     if (Number(entry.expiresAtMs) <= now) onlineCache.delete(key);
   }
   persistCache();
-  const expirations = [...onlineCache.values()].map((entry) => Number(entry.expiresAtMs));
+  const expirations = [...onlineCache.values()].map((entry) =>
+    Number(entry.expiresAtMs)
+  );
   if (!expirations.length) {
     cacheCleanupTimer = null;
     return;
   }
-  cacheCleanupTimer = setTimeout(scheduleCacheCleanup, Math.max(0, Math.min(...expirations) - now));
+  cacheCleanupTimer = setTimeout(
+    scheduleCacheCleanup,
+    Math.max(0, Math.min(...expirations) - now),
+  );
 }
 
 function loadCache() {
@@ -33,7 +40,9 @@ function loadCache() {
     const saved = JSON.parse(localStorage.getItem(CACHE_STORAGE_KEY) || "{}");
     const now = Date.now();
     Object.entries(saved).forEach(([key, entry]) => {
-      if (entry && Number(entry.expiresAtMs) > now && Array.isArray(entry.items)) {
+      if (
+        entry && Number(entry.expiresAtMs) > now && Array.isArray(entry.items)
+      ) {
         onlineCache.set(key, entry);
       }
     });
@@ -45,9 +54,11 @@ function loadCache() {
 
 function persistCache() {
   try {
-    localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify(Object.fromEntries(onlineCache)));
+    localStorage.setItem(
+      CACHE_STORAGE_KEY,
+      JSON.stringify(Object.fromEntries(onlineCache)),
+    );
   } catch {
-    // Suggestions still work when storage is unavailable.
   }
 }
 
@@ -59,7 +70,6 @@ export function clearSuggestionCache() {
     localStorage.removeItem(CACHE_STORAGE_KEY);
     LEGACY_CACHE_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
   } catch {
-    // Reset still clears the in-memory cache when storage is unavailable.
   }
 }
 
@@ -70,19 +80,38 @@ function getEndpoint() {
   return ONLINE_SUGGESTION_ENDPOINT;
 }
 
+// Suggestion consent
 export async function requestSearchSuggestionConsent(endpointOverride = "") {
   if (state.get("searchSuggestionConsentRemembered") === true) return true;
   const endpoint = endpointOverride || getEndpoint();
   const result = await showCustomModal(
-    "Online search suggestions send only what you are currently typing to the selected suggestion relay, which requests suggestions from its provider. Submitted search history is not sent.\n\nSuggestions are cached in this browser with exact creation and expiry times and are automatically deleted after 24 hours.\n\nCurrent relay: " + endpoint,
+    "Online search suggestions send only what you are currently typing to the selected suggestion relay, which requests suggestions from its provider. Submitted search history is not sent.\n\nSuggestions are cached in this browser with exact creation and expiry times and are automatically deleted after 24 hours.\n\nCurrent relay: " +
+      endpoint,
     false,
     false,
     [
-      { text: "I Agree", value: ({ checkboxChecked }) => ({ action: "agree", remember: checkboxChecked }), width: "130px" },
-      { text: "Cancel", value: "cancel", width: "130px", style: "background: var(--bg-interactive); color: var(--text-primary);" },
+      {
+        text: "I Agree",
+        value: ({ checkboxChecked }) => ({
+          action: "agree",
+          remember: checkboxChecked,
+        }),
+        width: "130px",
+      },
+      {
+        text: "Cancel",
+        value: "cancel",
+        width: "130px",
+        style: "background: var(--bg-interactive); color: var(--text-primary);",
+      },
     ],
     false,
-    { title: "Please Read", checkbox: { label: "Remember choice" }, italicText: "You can disable online suggestions or change the relay at any time." },
+    {
+      title: "Please Read",
+      checkbox: { label: "Remember choice" },
+      italicText:
+        "You can disable online suggestions or change the relay at any time.",
+    },
   );
   if (!result || result === "cancel" || result.action !== "agree") return false;
   if (result.remember) state.set("searchSuggestionConsentRemembered", true);
@@ -92,8 +121,9 @@ export async function requestSearchSuggestionConsent(endpointOverride = "") {
 loadCache();
 
 export function isOnlineSuggestionMode(mode) {
-  // The legacy value keeps existing online-enabled profiles working.
-  if (mode === "history-custom") return Boolean(state.get("searchSuggestionProxyUrl"));
+  if (mode === "history-custom") {
+    return Boolean(state.get("searchSuggestionProxyUrl"));
+  }
   return mode === "history-online" || mode === "history-local-online";
 }
 
@@ -114,10 +144,13 @@ export function syncSuggestionModeSelect(select, forMenu = false) {
   if (customOption) customOption.textContent = "History + Custom";
   if (select.id === "search-suggestion-mode-select") {
     const mode = state.get("searchSuggestionMode");
-    select.value = mode === "history-custom" ? "history-online" : mode || "history-only";
+    select.value = mode === "history-custom"
+      ? "history-online"
+      : mode || "history-only";
   }
 }
 
+// Relay validation
 export async function validateCustomSuggestionRelay(rawEndpoint) {
   let endpoint;
   try {
@@ -129,7 +162,10 @@ export async function validateCustomSuggestionRelay(rawEndpoint) {
 
   for (const testQuery of ["test", "hello", "today"]) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), ONLINE_REQUEST_TIMEOUT_MS);
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      ONLINE_REQUEST_TIMEOUT_MS,
+    );
     try {
       const url = new URL(endpoint.href);
       url.searchParams.set("q", testQuery);
@@ -147,7 +183,6 @@ export async function validateCustomSuggestionRelay(rawEndpoint) {
         payload.suggestions.every((item) => typeof item === "string")
       ) return true;
     } catch {
-      // Try the next validation query.
     } finally {
       clearTimeout(timeoutId);
     }
@@ -168,6 +203,7 @@ function uniqueQueries(values, typedQuery = "") {
   });
 }
 
+// Suggestion engine
 export class SuggestionEngine {
   async fetchOnlineSuggestions(rawQuery, signal) {
     const query = String(rawQuery || "").trim().slice(0, MAX_QUERY_LENGTH);
@@ -244,3 +280,4 @@ export {
   ONLINE_REQUEST_TIMEOUT_MS,
   ONLINE_SUGGESTION_ENDPOINT,
 };
+// [src/modules/suggestions.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

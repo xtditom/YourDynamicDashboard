@@ -3,11 +3,13 @@ import { getIconUrl, showCustomModal } from "../utils.js";
 import { CONFIG } from "../config.js";
 import { MIN_SHORTCUTS } from "../validators.js";
 
+// Browser capability detection
 function isMicrosoftEdgeBrowser() {
   const userAgent = String(globalThis.navigator?.userAgent || "");
   return /(?:^|[\s;(])(?:Edg|EdgA|EdgiOS|Edge)\/\d/i.test(userAgent);
 }
 
+// Shortcut widget
 export class Shortcuts {
   constructor() {
     this.container = document.getElementById("shortcuts-container");
@@ -27,6 +29,7 @@ export class Shortcuts {
     this.init();
   }
 
+  // Shortcut initialization
   init() {
     const current = state.get("userShortcuts");
 
@@ -49,7 +52,9 @@ export class Shortcuts {
       if (key === "shortcutsDisplayMode") {
         this.render();
       }
-      if (key === "shortcutsPosition" || key === "showShortcuts") this.updateVisibility();
+      if (key === "shortcutsPosition" || key === "showShortcuts") {
+        this.updateVisibility();
+      }
       if (key === "linkTargets") this.render();
     });
 
@@ -99,6 +104,7 @@ export class Shortcuts {
     }
   }
 
+  // Display mode access
   async setDisplayMode(mode) {
     const validModes = ["shortcuts", "most-visited", "both"];
     if (!validModes.includes(mode)) return false;
@@ -211,8 +217,8 @@ export class Shortcuts {
 
       const img = document.createElement("img");
       img.className = "ydd-asset-image";
-      img.src =
-        shortcut.customIcon || shortcut.icon || getIconUrl(shortcut.url);
+      img.src = shortcut.customIcon || shortcut.icon ||
+        getIconUrl(shortcut.url);
       img.alt = shortcut.name;
       img.onerror = () => {
         img.style.display = "none";
@@ -233,6 +239,7 @@ export class Shortcuts {
     });
   }
 
+  // Shortcut rendering
   async render() {
     if (!this.container) return;
     const renderId = ++this._renderId;
@@ -240,12 +247,16 @@ export class Shortcuts {
     const mode = state.get("shortcutsDisplayMode") || "shortcuts";
     const topSites = mode === "shortcuts" ? [] : await this._getTopSites();
     if (renderId !== this._renderId) return;
-    this._renderItems(this._getDisplayItems(shortcuts, topSites, mode), renderId);
+    this._renderItems(
+      this._getDisplayItems(shortcuts, topSites, mode),
+      renderId,
+    );
   }
 
+  // Shortcut visibility
   updateVisibility() {
     if (!this.container) return;
-    
+
     let position = state.get("shortcutsPosition");
     if (!position) {
       const showLegacy = state.get("showShortcuts");

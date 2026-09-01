@@ -1,8 +1,6 @@
-/* --- 4. TRANSPARENCY MODES & THEMES --- */
+/* Transparency modes and themes */
 
-/* --- DEFAULT DARK BACKGROUND ---
-   Sample-inspired paper surface, construction grid, fine grain, and a quiet
-   signal network for the built-in dark theme. */
+/* Default dark background */
 #sample-dark-background {
   --sample-dark-surface: #121210;
   --sample-dark-ink: #f1efe8;
@@ -27,7 +25,7 @@
   content: "";
 }
 
-/* Keep the sample’s large construction grid understated behind the UI. */
+/* Dark background grid */
 #sample-dark-background::before {
   z-index: 0;
   background-image:
@@ -51,7 +49,7 @@
   );
 }
 
-/* Fine grain echoes the sample’s paper texture without obscuring controls. */
+/* Dark background texture */
 #sample-dark-background::after {
   z-index: 2;
   opacity: 0.025;
@@ -72,7 +70,7 @@
   opacity: 1;
 }
 
-/* User wallpapers and gradients always own the viewport. */
+/* Background ownership */
 body.has-custom-bg #sample-dark-background,
 body.gradient-mode-active #sample-dark-background {
   visibility: hidden !important;
@@ -148,7 +146,7 @@ body.gradient-mode-active.transparency-active #search-dropdown {
   border: 1px solid var(--widget-border);
 }
 
-/* Light gradient glass needs a darker track so an off switch remains obvious. */
+/* Light gradient controls */
 body.gradient-mode-active.gradient-light .toggle-switch .slider {
   background-color: var(--switch-bg) !important;
   border-color: var(--switch-border) !important;
@@ -160,13 +158,11 @@ body.gradient-mode-active.gradient-light .toggle-switch .slider:before {
   box-shadow: 0 1px 3px rgba(48, 38, 78, 0.35);
 }
 
-body.gradient-mode-active.gradient-light
-  .toggle-switch input:checked + .slider {
+body.gradient-mode-active.gradient-light .toggle-switch input:checked + .slider {
   background-color: var(--switch-active-bg) !important;
 }
 
-/* Theme-specific control colors: keep switches and editable fields distinct
-   without changing the primary palette used throughout each theme. */
+/* Theme control colors */
 body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) {
   --bg-interactive: #e1e5e9;
   --bg-interactive-hover: #d1d7dd;
@@ -293,7 +289,7 @@ body[data-theme-id="theme-7"][data-theme="light"]:not(.has-custom-bg) {
   --form-control-border: #789458;
 }
 
-/* Dark variants also receive distinct editable fields and switch tracks. */
+/* Dark theme control colors */
 body[data-theme-id="theme-1"][data-theme="dark"]:not(.has-custom-bg) {
   --bg-interactive: #300d0d;
   --bg-interactive-hover: #4a1515;
@@ -394,11 +390,12 @@ body[data-theme-id="theme-8"][data-theme="dark"]:not(.has-custom-bg) {
   --form-control-border: #c6b9ff;
 }
 
-/* The default Dark theme uses a black checked track for maximum contrast. */
+/* Default dark control contrast */
 body[data-theme-id="default-dark"][data-theme="dark"]:not(.has-custom-bg) {
   --switch-active-bg: #000000;
 }
 
+/* Gradient surface overrides */
 body.gradient-mode-active .widget-container {
   background-color: var(--widget-bg);
   border: 1px solid var(--widget-border);
@@ -415,7 +412,7 @@ body.gradient-mode-active #quote-author {
   animation: none !important;
 }
 
-/* --- THEME PRESETS & SAVED THEMES --- */
+/* Theme presets and saved themes */
 #normal-themes-container,
 #gradient-themes-container {
   display: grid;
@@ -496,7 +493,7 @@ body.gradient-mode-active #quote-author {
   opacity: 1;
 }
 
-/* --- X. CUSTOM BG / RANDOM BG OVERRIDES --- */
+/* Custom background overrides */
 body.has-custom-bg::before {
   content: "";
   position: fixed;
@@ -535,7 +532,7 @@ body.has-custom-bg {
   --form-control-border: rgba(255, 255, 255, 0.74) !important;
 }
 
-/* The background image can arrive from IndexedDB after the controls render. */
+/* Background loading state */
 html.ydd-custom-bg-pending .toggle-switch input:checked + .slider {
   background-color: #ffffff !important;
   border-color: #ffffff !important;
@@ -554,7 +551,7 @@ html.ydd-custom-bg-pending .fs-news-choice-check {
   color: #ffffff !important;
 }
 
-/* Keep editable controls legible on both light and dark wallpaper areas. */
+/* Wallpaper control contrast */
 body.has-custom-bg .settings-button,
 body.has-custom-bg #add-shortcut-form button,
 body.has-custom-bg #fs-add-shortcut-form button {
@@ -576,7 +573,8 @@ body.gradient-dark .theme-preset-button,
 body.gradient-dark .mini-theme-swatch,
 body.gradient-dark .saved-preset-button {
   border: 2px solid #ffffff !important;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease
+    !important;
 }
 
 body.has-custom-bg .theme-preset-button:hover,
@@ -627,7 +625,7 @@ body.has-custom-bg #analog-clock-svg {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7)) !important;
 }
 
-/* --- Smart Icon Inversion for Dark Backgrounds --- */
+/* Smart icon inversion for dark backgrounds */
 body.dark-popups:not(.gradient-mode-active) img[src$="/x.png"],
 body.dark-popups:not(.gradient-mode-active) img[src*="chatgpt.png"],
 body.dark-popups:not(.gradient-mode-active) img[src*="grok.png"],
@@ -640,19 +638,10 @@ body.gradient-dark img[src*="grok.png"] {
   filter: brightness(0) invert(1) !important;
 }
 
-/* --- Keep Smart Icons Inverted on Hover --- */
-body.dark-popups:not(.gradient-mode-active)
-  .ai-tool-item:hover
-  .ai-tool-icon
-  img[src$="/x.png"],
-body.dark-popups:not(.gradient-mode-active)
-  .ai-tool-item:hover
-  .ai-tool-icon
-  img[src*="chatgpt.png"],
-body.dark-popups:not(.gradient-mode-active)
-  .ai-tool-item:hover
-  .ai-tool-icon
-  img[src*="grok.png"],
+/* Keep smart icons inverted on hover */
+body.dark-popups:not(.gradient-mode-active) .ai-tool-item:hover .ai-tool-icon img[src$="/x.png"],
+body.dark-popups:not(.gradient-mode-active) .ai-tool-item:hover .ai-tool-icon img[src*="chatgpt.png"],
+body.dark-popups:not(.gradient-mode-active) .ai-tool-item:hover .ai-tool-icon img[src*="grok.png"],
 body.has-custom-bg .ai-tool-item:hover .ai-tool-icon img[src$="/x.png"],
 body.has-custom-bg .ai-tool-item:hover .ai-tool-icon img[src*="chatgpt.png"],
 body.has-custom-bg .ai-tool-item:hover .ai-tool-icon img[src*="grok.png"],

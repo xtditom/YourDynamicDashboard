@@ -11,13 +11,17 @@ import { AiTools } from "./modules/aitools.js";
 import { Shortcuts } from "./modules/shortcuts.js";
 import { NewsManager } from "./modules/news.js";
 import { SettingsManager } from "./modules/settings.js";
-import { DarkSignalThemeGesture, FullSettingsModal } from "./modules/settingsModal.js";
+import {
+  DarkSignalThemeGesture,
+  FullSettingsModal,
+} from "./modules/settingsModal.js";
 import { KeyboardManager } from "./modules/keyboard.js";
 import { CommandPalette } from "./modules/palette.js";
 import { ZenModeController } from "./modules/zenMode.js";
 import { initializeDefaultTasks } from "./utils.js";
 import { isYddStorageKey } from "./storageKeys.js";
 
+// Startup migration
 function initializeGlowDefault() {
   const migrationKey = "glowDefaultOffMigrated";
   if (state.get(migrationKey) === true) return;
@@ -28,9 +32,6 @@ function initializeGlowDefault() {
       (key) => key === "ydd_daily_greeting" || isYddStorageKey(key),
     );
 
-    // Glow used to default to on without being stored. Preserve that implicit
-    // preference for existing installations, while an empty profile receives
-    // the new off default from CONFIG.
     if (!hasSavedGlowPreference && hasExistingYddData) {
       state.set("glowEffect", true);
     }
@@ -40,9 +41,7 @@ function initializeGlowDefault() {
   }
 }
 
-// The single built-in dark background lives with the main visual bootstrap.
-// Keeping it here avoids a separate module for a background that has no
-// settings or public API of its own.
+// Dark background visual
 class SampleDarkBackground {
   constructor() {
     this.container = document.getElementById("sample-dark-background");
@@ -167,8 +166,9 @@ class SampleDarkBackground {
     this.canvas.height = Math.round(this.height * this.dpr);
     this.context.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
 
-    const count =
-      this.width < 760 ? 32 : Math.min(72, Math.floor(this.width / 20));
+    const count = this.width < 760
+      ? 32
+      : Math.min(72, Math.floor(this.width / 20));
     this.particles = Array.from({ length: count }, () => this.makeParticle());
   }
 
@@ -227,8 +227,7 @@ class SampleDarkBackground {
 
       this.context.beginPath();
       this.context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-      this.context.fillStyle =
-        index % 11 === 0 ? "#b4ff5f" : "#f1efe8";
+      this.context.fillStyle = index % 11 === 0 ? "#b4ff5f" : "#f1efe8";
       this.context.fill();
 
       for (
@@ -250,10 +249,10 @@ class SampleDarkBackground {
         this.context.stroke();
       }
     });
-
   }
 }
 
+// Application startup
 document.addEventListener("DOMContentLoaded", () => {
   initializeGlowDefault();
   applyFontFamily(state.get("fontFamily"));
@@ -271,13 +270,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Core module startup
   initialize("Interaction Policy", () => installInteractionPolicy(document));
   initialize("Zen Mode", () => new ZenModeController());
   initialize("Clock", () => new Clock());
   initialize("Search", () => new Search());
   initialize("Quote", () => new QuoteWidget());
 
-  // --- Data Migration: v2.0.2 to v2.1.0 (To-Do List) ---
+  // Data migration
   initialize("To-Do migration", () => {
     const oldTodosJson = localStorage.getItem("todos");
     if (oldTodosJson) {
@@ -308,9 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initialize("Shortcuts", () => new Shortcuts());
   const settingsManager = initialize("Settings", () => new SettingsManager());
 
-  // Keep startup phases ordered. Local/visible UI is initialized first;
-  // SettingsManager starts the optional background phase; network-backed
-  // weather and RSS work begin only after that phase has settled.
+  // Deferred module startup
   const continueStartup = Promise.resolve(
     settingsManager?.whenBackgroundReady?.(),
   )
@@ -326,7 +324,10 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(() => {
       initialize("News Feeds", () => new NewsManager());
       initialize("Full Settings", () => new FullSettingsModal());
-      initialize("Dark signal theme gesture", () => new DarkSignalThemeGesture());
+      initialize(
+        "Dark signal theme gesture",
+        () => new DarkSignalThemeGesture(),
+      );
       initialize("Keyboard", () => new KeyboardManager());
       initialize("Command Palette", () => new CommandPalette());
       initialize("Welcome popup", () => manageWelcomePopup());
@@ -335,15 +336,19 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("[YDD] Deferred startup failed:", error);
   });
 
-  // --- VISUAL CONTROLLER ---
-  if (state.get("transparencyActive"))
+  // Visual state
+  if (state.get("transparencyActive")) {
     document.body.classList.add("transparency-active");
+  }
 
   if (state.get("gradientModeActive")) {
     document.body.classList.add("gradient-mode-active");
     const gradientId = state.get("gradientThemeId") || "gradient";
     document.body.setAttribute("data-theme-id", `gradient-${gradientId}`);
-    document.documentElement.setAttribute("data-theme-id", `gradient-${gradientId}`);
+    document.documentElement.setAttribute(
+      "data-theme-id",
+      `gradient-${gradientId}`,
+    );
   } else {
     const normalThemeId = state.get("normalThemeId") || "default-dark";
     document.body.setAttribute("data-theme-id", normalThemeId);
@@ -380,7 +385,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (welcomeEl) welcomeEl.classList.toggle("hidden", value === false);
     }
     if (key === "disableAnimations") {
-      document.documentElement.classList.toggle("disable-animations", value === true);
+      document.documentElement.classList.toggle(
+        "disable-animations",
+        value === true,
+      );
     }
     if (key === "normalThemeId" || key === "gradientThemeId") {
       const themeId = state.get("gradientModeActive")
@@ -393,12 +401,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initialize("Sample dark background", () => new SampleDarkBackground());
 
-  // --- WELCOME TEXT ---
+  // Welcome text
   const welcomeEl = document.getElementById("welcome-text");
   if (welcomeEl) {
     welcomeEl.textContent = state.get("welcomeText") || "";
-    welcomeEl.classList.toggle("hidden", state.get("showEditableText") === false);
-    
+    welcomeEl.classList.toggle(
+      "hidden",
+      state.get("showEditableText") === false,
+    );
+
     welcomeEl.addEventListener("blur", () => {
       if (welcomeEl.textContent.trim() === "") welcomeEl.innerHTML = "";
       state.set("welcomeText", welcomeEl.textContent);
@@ -426,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => document.body.classList.add("loaded"), 100);
 });
 
-// --- POPUP MANAGER ---
+// Welcome popup
 function manageWelcomePopup() {
   const overlay = document.getElementById("welcome-modal-overlay");
 
@@ -449,7 +460,9 @@ function manageWelcomePopup() {
       return;
     }
     if (event.key === "Tab") {
-      const focusable = overlay.querySelectorAll("button, a[href], input, select, textarea");
+      const focusable = overlay.querySelectorAll(
+        "button, a[href], input, select, textarea",
+      );
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
@@ -475,6 +488,7 @@ function manageWelcomePopup() {
     .forEach((button) => button.addEventListener("click", closeWelcome));
 }
 
+// Footer metadata
 const yearSpan = document.getElementById("copyright-year");
 const currentYear = new Date().getFullYear();
 if (currentYear > 2025) {

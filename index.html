@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en" data-ydd-ui-lock="true">
+  <!-- Document head -->
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,14 +13,14 @@
     <script src="src/theme-init.js"></script>
     <link rel="icon" type="image/png" href="assets/icons/icon32.png" />
     <link rel="stylesheet" href="css/main.css" />
-
-
   </head>
+  <!-- Dashboard interface -->
   <body>
     <div id="bg-blur-overlay"></div>
     <div id="sample-dark-background" aria-hidden="true">
       <canvas id="sample-dark-signal-canvas"></canvas>
     </div>
+    <!-- Welcome modal -->
     <div
       id="welcome-modal-overlay"
       class="hidden"
@@ -132,7 +133,10 @@
       </div>
     </div>
 
-    <button id="todo-toggle-button" class="corner-button top-left" aria-label="Open To-Do list" aria-controls="todo-popup" aria-expanded="false">
+    <!-- Corner controls -->
+    <button id="todo-toggle-button" class="corner-button top-left"
+      aria-label="Open To-Do list" aria-controls="todo-popup"
+      aria-expanded="false">
       <span class="icon-list">
         <svg
           fill="currentColor"
@@ -164,7 +168,9 @@
       </span>
     </button>
 
-    <button id="ai-tools-toggle-button" class="corner-button bottom-left" aria-label="Open AI tools and social links" aria-controls="ai-tools-popup" aria-expanded="false">
+    <button id="ai-tools-toggle-button" class="corner-button bottom-left"
+      aria-label="Open AI tools and social links" aria-controls="ai-tools-popup"
+      aria-expanded="false">
       <svg
         class="tool-icon ai-icon"
         width="24"
@@ -200,7 +206,9 @@
       </svg>
     </button>
 
-    <button id="apps-toggle-button" class="corner-button top-right" aria-label="Open Google Apps" aria-controls="apps-popup" aria-expanded="false">
+    <button id="apps-toggle-button" class="corner-button top-right"
+      aria-label="Open Google Apps" aria-controls="apps-popup"
+      aria-expanded="false">
       <span class="icon-grid">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -233,7 +241,9 @@
       </span>
     </button>
 
-    <button id="settings-toggle-button" class="corner-button bottom-right" aria-label="Open settings" aria-controls="settings-popup" aria-expanded="false">
+    <button id="settings-toggle-button" class="corner-button bottom-right"
+      aria-label="Open settings" aria-controls="settings-popup"
+      aria-expanded="false">
       <svg
         stroke="currentColor"
         width="24"
@@ -262,7 +272,9 @@
       </svg>
     </button>
 
-    <div id="todo-popup" class="popup-container" role="dialog" aria-labelledby="todo-popup-title" aria-hidden="true">
+    <!-- Popup panels -->
+    <div id="todo-popup" class="popup-container" role="dialog"
+      aria-labelledby="todo-popup-title" aria-hidden="true">
       <h2 id="todo-popup-title">To-Do List</h2>
       <div id="todo-list"></div>
       <form id="todo-add-form">
@@ -277,16 +289,20 @@
       </form>
     </div>
 
-    <div id="ai-tools-popup" class="popup-container" role="dialog" aria-labelledby="ai-tools-popup-title" aria-hidden="true">
+    <div id="ai-tools-popup" class="popup-container" role="dialog"
+      aria-labelledby="ai-tools-popup-title" aria-hidden="true">
       <div class="tools-header">
         <div class="tool-tabs-container">
-          <button class="tool-tab-button active" data-tab="ai" role="tab" aria-selected="true" aria-controls="ai-tools-list">AI Tools</button>
+          <button class="tool-tab-button active" data-tab="ai" role="tab"
+            aria-selected="true" aria-controls="ai-tools-list">AI Tools</button>
           <div class="tab-divider"></div>
-          <button class="tool-tab-button" data-tab="social" role="tab" aria-selected="false" aria-controls="social-tools-list">
+          <button class="tool-tab-button" data-tab="social" role="tab"
+            aria-selected="false" aria-controls="social-tools-list">
             Social Media
           </button>
         </div>
-        <button id="tool-edit-button" class="tool-edit-button" aria-label="Edit AI and social tools" aria-pressed="false">
+        <button id="tool-edit-button" class="tool-edit-button"
+          aria-label="Edit AI and social tools" aria-pressed="false">
           <svg
             class="icon-pencil"
             width="24"
@@ -296,9 +312,18 @@
             xmlns="http://www.w3.org/2000/svg"
             stroke="currentColor"
           >
-            <path opacity="0.4" d="M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M16.0399 3.01976L8.15988 10.8998C7.85988 11.1998 7.55988 11.7898 7.49988 12.2198L7.06988 15.2298C6.90988 16.3198 7.67988 17.0798 8.76988 16.9299L11.7799 16.4998C12.1999 16.4398 12.7899 16.1398 13.0999 15.8398L20.9799 7.95976C22.3399 6.59976 22.9799 5.01976 20.9799 3.01976C18.9799 1.01976 17.3999 1.65976 16.0399 3.01976Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-            <path opacity="0.4" d="M14.9102 4.1499C15.5802 6.5399 17.4502 8.4099 19.8502 9.0899" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+            <path opacity="0.4"
+              d="M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path
+              d="M16.0399 3.01976L8.15988 10.8998C7.85988 11.1998 7.55988 11.7898 7.49988 12.2198L7.06988 15.2298C6.90988 16.3198 7.67988 17.0798 8.76988 16.9299L11.7799 16.4998C12.1999 16.4398 12.7899 16.1398 13.0999 15.8398L20.9799 7.95976C22.3399 6.59976 22.9799 5.01976 20.9799 3.01976C18.9799 1.01976 17.3999 1.65976 16.0399 3.01976Z"
+              stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"
+              stroke-linecap="round" stroke-linejoin="round" />
+            <path opacity="0.4"
+              d="M14.9102 4.1499C15.5802 6.5399 17.4502 8.4099 19.8502 9.0899"
+              stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"
+              stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <svg
             class="icon-check hidden"
@@ -316,7 +341,9 @@
             <polyline points="7.5 12.2 10.5 15 16.5 9"></polyline>
           </svg>
         </button>
-        <button id="tool-add-button" class="tool-edit-button tool-add-button hidden" type="button" aria-label="Add a new AI tool" title="Add a new tool">
+        <button id="tool-add-button"
+          class="tool-edit-button tool-add-button hidden" type="button"
+          aria-label="Add a new AI tool" title="Add a new tool">
           <svg
             class="icon-add"
             width="28"
@@ -326,56 +353,102 @@
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
           >
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8" opacity="0.55"/>
-            <path d="M12 7V17M7 12H17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="10" stroke="currentColor"
+              stroke-width="1.8" opacity="0.55" />
+            <path d="M12 7V17M7 12H17" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" />
           </svg>
         </button>
       </div>
-      <h2 id="ai-tools-popup-title" class="visually-hidden">AI Tools and Social Links</h2>
-      <div id="ai-tools-list" class="tool-list active" role="tabpanel" aria-label="AI tools"></div>
-      <div id="social-tools-list" class="tool-list" role="tabpanel" aria-label="Social links"></div>
+      <h2 id="ai-tools-popup-title"
+        class="visually-hidden">AI Tools and Social Links</h2>
+      <div id="ai-tools-list" class="tool-list active" role="tabpanel"
+        aria-label="AI tools"></div>
+      <div id="social-tools-list" class="tool-list" role="tabpanel"
+        aria-label="Social links"></div>
     </div>
 
-    <div id="apps-popup" class="popup-container" role="dialog" aria-labelledby="apps-popup-title" aria-hidden="true">
+    <div id="apps-popup" class="popup-container" role="dialog"
+      aria-labelledby="apps-popup-title" aria-hidden="true">
       <h2 id="apps-popup-title" class="visually-hidden">Google Apps</h2>
       <div id="apps-grid"></div>
       <div class="apps-footer">
-        <button id="apps-edit-button" class="tool-edit-button apps-footer-action" type="button" aria-label="Edit apps" aria-pressed="false">
-          <svg class="icon-pencil" stroke="currentColor" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path opacity="0.4" d="M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M16.0399 3.01976L8.15988 10.8998C7.85988 11.1998 7.55988 11.7898 7.49988 12.2198L7.06988 15.2298C6.90988 16.3198 7.67988 17.0798 8.76988 16.9299L11.7799 16.4998C12.1999 16.4398 12.7899 16.1398 13.0999 15.8398L20.9799 7.95976C22.3399 6.59976 22.9799 5.01976 20.9799 3.01976C18.9799 1.01976 17.3999 1.65976 16.0399 3.01976Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-            <path opacity="0.4" d="M14.9102 4.1499C15.5802 6.5399 17.4502 8.4099 19.8502 9.0899" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <button id="apps-edit-button"
+          class="tool-edit-button apps-footer-action" type="button"
+          aria-label="Edit apps" aria-pressed="false">
+          <svg class="icon-pencil" stroke="currentColor" width="24" height="24"
+            viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true">
+            <path opacity="0.4"
+              d="M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path
+              d="M16.0399 3.01976L8.15988 10.8998C7.85988 11.1998 7.55988 11.7898 7.49988 12.2198L7.06988 15.2298C6.90988 16.3198 7.67988 17.0798 8.76988 16.9299L11.7799 16.4998C12.1999 16.4398 12.7899 16.1398 13.0999 15.8398L20.9799 7.95976C22.3399 6.59976 22.9799 5.01976 20.9799 3.01976C18.9799 1.01976 17.3999 1.65976 16.0399 3.01976Z"
+              stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"
+              stroke-linecap="round" stroke-linejoin="round" />
+            <path opacity="0.4"
+              d="M14.9102 4.1499C15.5802 6.5399 17.4502 8.4099 19.8502 9.0899"
+              stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"
+              stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          <svg class="icon-check hidden" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg class="icon-check hidden" width="28" height="28"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+            aria-hidden="true">
             <circle cx="12" cy="12" r="10" opacity="0.55"></circle>
             <polyline points="7.5 12.2 10.5 15 16.5 9"></polyline>
           </svg>
         </button>
         <span class="apps-footer-label">Drag and drop to rearrange apps</span>
         <div class="apps-footer-actions">
-          <button id="apps-more-button" class="tool-edit-button apps-footer-action hidden" type="button" aria-label="Actions for selected apps">
-            <svg stroke="currentColor" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <button id="apps-more-button"
+            class="tool-edit-button apps-footer-action hidden" type="button"
+            aria-label="Actions for selected apps">
+            <svg stroke="currentColor" width="24" height="24"
+              viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true">
               <g clip-path="url(#apps-more-clip)">
-                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <rect x="12.01" y="12" width="0.01" height="0.01" transform="rotate(90 12.01 12)" stroke="currentColor" stroke-width="2.25" stroke-linejoin="round"/>
-                <rect x="16.51" y="12" width="0.01" height="0.01" transform="rotate(90 16.51 12)" stroke="currentColor" stroke-width="2.25" stroke-linejoin="round"/>
-                <rect x="7.51001" y="12" width="0.01" height="0.01" transform="rotate(90 7.51001 12)" stroke="currentColor" stroke-width="2.25" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="9" stroke="currentColor"
+                  stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <rect x="12.01" y="12" width="0.01" height="0.01"
+                  transform="rotate(90 12.01 12)" stroke="currentColor"
+                  stroke-width="2.25" stroke-linejoin="round" />
+                <rect x="16.51" y="12" width="0.01" height="0.01"
+                  transform="rotate(90 16.51 12)" stroke="currentColor"
+                  stroke-width="2.25" stroke-linejoin="round" />
+                <rect x="7.51001" y="12" width="0.01" height="0.01"
+                  transform="rotate(90 7.51001 12)" stroke="currentColor"
+                  stroke-width="2.25" stroke-linejoin="round" />
               </g>
-              <defs><clipPath id="apps-more-clip"><rect width="24" height="24" fill="currentColor"/></clipPath></defs>
+              <defs>
+                <clipPath id="apps-more-clip">
+                  <rect width="24" height="24" fill="currentColor" />
+                </clipPath>
+              </defs>
             </svg>
           </button>
-          <button id="apps-add-button" class="tool-edit-button apps-footer-action hidden" type="button" aria-label="Add a new app">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8" opacity="0.55"/>
-              <path d="M12 7V17M7 12H17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <button id="apps-add-button"
+            class="tool-edit-button apps-footer-action hidden" type="button"
+            aria-label="Add a new app">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+              xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor"
+                stroke-width="1.8" opacity="0.55" />
+              <path d="M12 7V17M7 12H17" stroke="currentColor"
+                stroke-width="1.8" stroke-linecap="round" />
             </svg>
           </button>
         </div>
       </div>
     </div>
-    <div id="apps-edit-hint" class="apps-edit-hint hidden" role="status" aria-live="polite"></div>
+    <div id="apps-edit-hint" class="apps-edit-hint hidden" role="status"
+      aria-live="polite"></div>
 
-    <div id="settings-popup" class="popup-container" role="dialog" aria-labelledby="settings-popup-title" aria-hidden="true">
+    <!-- Mini settings -->
+    <div id="settings-popup" class="popup-container" role="dialog"
+      aria-labelledby="settings-popup-title" aria-hidden="true">
       <div style="position: relative; text-align: center; margin-bottom: 1rem">
         <button
           id="info-btn"
@@ -395,7 +468,8 @@
             />
           </svg>
         </button>
-        <h2 id="settings-popup-title" style="margin: 0; display: inline-block">Mini Settings</h2>
+        <h2 id="settings-popup-title"
+          style="margin: 0; display: inline-block">Mini Settings</h2>
         <button
           id="open-full-settings-btn"
           aria-label="Open full settings"
@@ -422,19 +496,22 @@
       </div>
 
       <div class="settings-tabs">
-        <button id="quick-tab" class="settings-tab-button active" role="tab" aria-selected="true" aria-controls="quick-content">Quick</button>
-        <button id="look-tab" class="settings-tab-button" role="tab" aria-selected="false" aria-controls="look-content">Look</button>
+        <button id="quick-tab" class="settings-tab-button active" role="tab"
+          aria-selected="true" aria-controls="quick-content">Quick</button>
+        <button id="look-tab" class="settings-tab-button" role="tab"
+          aria-selected="false" aria-controls="look-content">Look</button>
       </div>
 
       <div class="settings-content">
-        <!-- Quick Tab -->
+        <!-- Quick settings -->
         <div id="quick-content" class="settings-pane active">
           <div class="setting-row">
             <div class="label">
               <span>Analog Clock</span><small>Use the analog clock.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="clock-type-toggle" aria-label="Use analog clock" />
+              <input type="checkbox" id="clock-type-toggle"
+                aria-label="Use analog clock" />
               <span class="slider"></span>
             </label>
           </div>
@@ -443,7 +520,8 @@
               <span>Clock Format</span><small>Toggle for 24-hour format.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="clock-format-toggle" aria-label="Use 24-hour clock format" />
+              <input type="checkbox" id="clock-format-toggle"
+                aria-label="Use 24-hour clock format" />
               <span class="slider"></span>
             </label>
           </div>
@@ -452,7 +530,8 @@
               <span>Temperature Display</span><small>Switch between Min-Max and Feels like.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="temp-display-toggle" aria-label="Show daily minimum and maximum temperatures" />
+              <input type="checkbox" id="temp-display-toggle"
+                aria-label="Show daily minimum and maximum temperatures" />
               <span class="slider"></span>
             </label>
           </div>
@@ -460,12 +539,20 @@
             <div class="label">
               <span class="mini-weather-location-label">
                 <span>Weather Location</span>
-                <span id="weather-location-updated-sticker" class="fs-updated-sticker" aria-label="Updated">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+                <span id="weather-location-updated-sticker"
+                  class="fs-updated-sticker" aria-label="Updated">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36"
+                    role="img" aria-label="Updated">
                     <title>Updated</title>
-                    <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-                    <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
+                    <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b"
+                      stroke="#141414" stroke-width="2.5"
+                      stroke-linejoin="round" />
+                    <path d="M13 8h12" stroke="#ffffff" stroke-width="2"
+                      stroke-linecap="round" opacity=".9" />
+                    <text x="54" y="24" fill="#141414"
+                      font-family="Arial, sans-serif" font-size="13"
+                      font-weight="800" letter-spacing="1.1"
+                      text-anchor="middle">UPDATED</text>
                   </svg>
                 </span>
               </span>
@@ -478,7 +565,8 @@
                 placeholder="Enter city name..."
                 style="flex: 1"
               />
-              <button id="save-location-btn" class="settings-button" aria-label="Save weather location">
+              <button id="save-location-btn" class="settings-button"
+                aria-label="Save weather location">
                 Save
               </button>
               <button
@@ -507,17 +595,28 @@
           </div>
           <div class="setting-row">
             <div class="label">
-              <span class="mini-search-suggestion-label">Search Suggestions</span>
-              <span id="search-suggestion-new-sticker" class="fs-new-sticker mini-new-sticker" aria-label="New">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
-                    <title>New</title>
-                    <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-                    <text x="39" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">NEW</text>
-                  </svg>
+              <span
+                class="mini-search-suggestion-label">Search Suggestions</span>
+              <span id="search-suggestion-new-sticker"
+                class="fs-new-sticker mini-new-sticker" aria-label="New">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36"
+                  role="img" aria-label="New">
+                  <title>New</title>
+                  <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b"
+                    stroke="#141414" stroke-width="2.5"
+                    stroke-linejoin="round" />
+                  <path d="M13 8h11" stroke="#ffffff" stroke-width="2"
+                    stroke-linecap="round" opacity=".9" />
+                  <text x="39" y="24" fill="#141414"
+                    font-family="Arial, sans-serif" font-size="14"
+                    font-weight="800" letter-spacing="1"
+                    text-anchor="middle">NEW</text>
+                </svg>
               </span>
             </div>
-            <select id="search-suggestion-mode-select" aria-label="Search suggestion mode" class="settings-dropdown" style="padding: 5px; border-radius: 5px; background: var(--bg-interactive); color: var(--text-primary); border: none;">
+            <select id="search-suggestion-mode-select"
+              aria-label="Search suggestion mode" class="settings-dropdown"
+              style="padding: 5px; border-radius: 5px; background: var(--bg-interactive); color: var(--text-primary); border: none;">
               <option value="history-only">History Only</option>
               <option value="history-online">History + Online</option>
             </select>
@@ -526,12 +625,20 @@
             <div class="label">
               <span class="mini-news-label">
                 <span>News Feeds</span>
-                <span id="news-feeds-new-sticker" class="fs-new-sticker mini-new-sticker" aria-label="New">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
+                <span id="news-feeds-new-sticker"
+                  class="fs-new-sticker mini-new-sticker" aria-label="New">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36"
+                    role="img" aria-label="New">
                     <title>New</title>
-                    <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-                    <text x="39" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">NEW</text>
+                    <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b"
+                      stroke="#141414" stroke-width="2.5"
+                      stroke-linejoin="round" />
+                    <path d="M13 8h11" stroke="#ffffff" stroke-width="2"
+                      stroke-linecap="round" opacity=".9" />
+                    <text x="39" y="24" fill="#141414"
+                      font-family="Arial, sans-serif" font-size="14"
+                      font-weight="800" letter-spacing="1"
+                      text-anchor="middle">NEW</text>
                   </svg>
                 </span>
               </span>
@@ -539,10 +646,12 @@
             </div>
             <div class="mini-news-controls">
               <label class="toggle-switch" title="Enable news feeds">
-                <input type="checkbox" id="news-enabled-toggle" aria-label="Enable news feeds" />
+                <input type="checkbox" id="news-enabled-toggle"
+                  aria-label="Enable news feeds" />
                 <span class="slider"></span>
               </label>
-              <button id="configure-news-btn" class="settings-button">Configure</button>
+              <button id="configure-news-btn"
+                class="settings-button">Configure</button>
             </div>
           </div>
           <div class="setting-row">
@@ -596,7 +705,8 @@
               <option value="hide">Hide</option>
             </select>
           </div>
-          <div class="setting-row" style="margin-top: 0.5rem; justify-content: center;">
+          <div class="setting-row"
+            style="margin-top: 0.5rem; justify-content: center;">
             <button
               id="check-for-updates-btn"
               class="settings-button"
@@ -625,7 +735,7 @@
           </div>
         </div>
 
-        <!-- Look Tab -->
+        <!-- Appearance settings -->
         <div id="look-content" class="settings-pane">
           <div class="setting-row">
             <div class="label">
@@ -642,7 +752,8 @@
               </span><small>Toggle the selected theme's appearance.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="dark-mode-toggle" aria-label="Toggle selected theme appearance" />
+              <input type="checkbox" id="dark-mode-toggle"
+                aria-label="Toggle selected theme appearance" />
               <span class="slider"></span>
             </label>
           </div>
@@ -651,29 +762,44 @@
               <span>Custom BG</span><small>Upload your custom wallpaper.</small>
             </div>
             <div class="mini-bg-actions mini-custom-bg-actions">
-              <button id="upload-bg-button" class="settings-button" aria-label="Upload custom background">Upload</button>
-              <input type="file" id="bg-file-input" accept="image/*" class="hidden" aria-label="Choose background image" />
-              <button id="remove-bg-button" class="settings-button hidden" aria-label="Remove custom background">Remove</button>
+              <button id="upload-bg-button" class="settings-button"
+                aria-label="Upload custom background">Upload</button>
+              <input type="file" id="bg-file-input" accept="image/*"
+                class="hidden" aria-label="Choose background image" />
+              <button id="remove-bg-button" class="settings-button hidden"
+                aria-label="Remove custom background">Remove</button>
             </div>
           </div>
           <div class="setting-row">
             <div class="label">
               <span class="mini-random-bg-label">
                 <span>Random BG</span>
-                <span id="random-bg-updated-sticker" class="fs-updated-sticker" aria-label="Updated">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+                <span id="random-bg-updated-sticker" class="fs-updated-sticker"
+                  aria-label="Updated">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36"
+                    role="img" aria-label="Updated">
                     <title>Updated</title>
-                    <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-                    <text x="54" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.1" text-anchor="middle">UPDATED</text>
+                    <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b"
+                      stroke="#141414" stroke-width="2.5"
+                      stroke-linejoin="round" />
+                    <path d="M13 8h12" stroke="#ffffff" stroke-width="2"
+                      stroke-linecap="round" opacity=".9" />
+                    <text x="54" y="24" fill="#141414"
+                      font-family="Arial, sans-serif" font-size="13"
+                      font-weight="800" letter-spacing="1.1"
+                      text-anchor="middle">UPDATED</text>
                   </svg>
                 </span>
               </span>
               <small>Picsum wallpaper features.</small>
             </div>
             <div class="mini-bg-actions mini-random-bg-actions">
-              <button id="random-bg-rnd-btn" class="settings-button" title="Get new random wallpaper" aria-label="Get a new random background">New BG</button>
-              <button id="random-bg-freeze-btn" class="settings-button hidden" title="Freeze random background" aria-label="Freeze random background">Freeze</button>
+              <button id="random-bg-rnd-btn" class="settings-button"
+                title="Get new random wallpaper"
+                aria-label="Get a new random background">New BG</button>
+              <button id="random-bg-freeze-btn" class="settings-button hidden"
+                title="Freeze random background"
+                aria-label="Freeze random background">Freeze</button>
             </div>
           </div>
           <div class="setting-row">
@@ -681,7 +807,8 @@
               <span>Glow Effect</span><small>Toggle clock glow &amp; pulsing.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="glow-effect-toggle" aria-label="Enable glow effect" />
+              <input type="checkbox" id="glow-effect-toggle"
+                aria-label="Enable glow effect" />
               <span class="slider"></span>
             </label>
           </div>
@@ -689,19 +816,28 @@
             <div class="label">
               <span class="mini-appearance-label">
                 <span>Glassmorphism effect</span>
-                <span id="glassmorphism-new-sticker" class="fs-new-sticker mini-new-sticker" aria-label="New">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
+                <span id="glassmorphism-new-sticker"
+                  class="fs-new-sticker mini-new-sticker" aria-label="New">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36"
+                    role="img" aria-label="New">
                     <title>New</title>
-                    <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-                    <text x="39" y="24" fill="#141414" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">NEW</text>
+                    <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b"
+                      stroke="#141414" stroke-width="2.5"
+                      stroke-linejoin="round" />
+                    <path d="M13 8h11" stroke="#ffffff" stroke-width="2"
+                      stroke-linecap="round" opacity=".9" />
+                    <text x="39" y="24" fill="#141414"
+                      font-family="Arial, sans-serif" font-size="14"
+                      font-weight="800" letter-spacing="1"
+                      text-anchor="middle">NEW</text>
                   </svg>
                 </span>
               </span>
               <small>Add a transparent glass effect to dashboard surfaces.</small>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="transparency-toggle" aria-label="Enable Glassmorphism effect" />
+              <input type="checkbox" id="transparency-toggle"
+                aria-label="Enable Glassmorphism effect" />
               <span class="slider"></span>
             </label>
           </div>
@@ -719,7 +855,9 @@
                 </span>
               </span><small>Choose the dashboard font.</small>
             </div>
-            <select id="font-family-select" class="settings-dropdown" aria-label="Choose dashboard font" style="padding: 5px; border-radius: 5px; background: var(--bg-interactive); color: var(--text-primary); border: none;">
+            <select id="font-family-select" class="settings-dropdown"
+              aria-label="Choose dashboard font"
+              style="padding: 5px; border-radius: 5px; background: var(--bg-interactive); color: var(--text-primary); border: none;">
               <option value="outfit">Outfit</option>
               <option value="lexend">Lexend</option>
               <option value="inter">Inter</option>
@@ -730,7 +868,8 @@
               <option value="roboto-mono">Roboto Mono</option>
             </select>
           </div>
-          <div class="setting-row" style="flex-direction: column; align-items: stretch; margin-top: 0.5rem;">
+          <div class="setting-row"
+            style="flex-direction: column; align-items: stretch; margin-top: 0.5rem;">
             <div class="label" style="margin-bottom: 4px;">
               <span>Themes &amp; Presets</span><small>Click to apply theme or saved preset.</small>
             </div>
@@ -754,6 +893,7 @@
       </div>
     </div>
 
+    <!-- Dashboard layout -->
     <div class="layout-container">
       <div class="column-left">
         <div class="master-clock-container">
@@ -904,10 +1044,10 @@
             class="search-cp-badge"
             id="search-cp-badge"
             title="Open Command Palette (Ctrl+K)"
-            >Ctrl+K</span
-          >
+          >Ctrl+K</span>
 
-          <button type="button" id="voice-search-btn" title="Voice Search" aria-label="Start voice search">
+          <button type="button" id="voice-search-btn" title="Voice Search"
+            aria-label="Start voice search">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -925,11 +1065,13 @@
           <button type="submit" id="search-button" class="search-btn">
             Search
           </button>
-          <button type="button" id="open-site-button" class="search-btn hidden" aria-label="Open search provider">
+          <button type="button" id="open-site-button" class="search-btn hidden"
+            aria-label="Open search provider">
             Open
           </button>
 
-          <div id="search-dropdown" class="hidden" role="listbox" aria-label="Search providers" aria-hidden="true">
+          <div id="search-dropdown" class="hidden" role="listbox"
+            aria-label="Search providers" aria-hidden="true">
             <div class="dropdown-section">
               <h4 class="dropdown-section-heading">
                 <span>Search Engines</span>
@@ -947,7 +1089,8 @@
               <h4>Platforms</h4>
               <div id="dropdown-platforms" class="dropdown-grid"></div>
             </div>
-            <div id="dropdown-custom-section" class="dropdown-section hidden" aria-labelledby="custom-search-heading">
+            <div id="dropdown-custom-section" class="dropdown-section hidden"
+              aria-labelledby="custom-search-heading">
               <h4 id="custom-search-heading">CUSTOM</h4>
               <div id="dropdown-custom-engines" class="dropdown-grid"></div>
             </div>
@@ -963,9 +1106,12 @@
       </div>
     </div>
 
-    <div id="info-modal-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
+    <!-- Information modal -->
+    <div id="info-modal-overlay" class="hidden" role="dialog" aria-modal="true"
+      aria-labelledby="info-modal-title" aria-hidden="true">
       <div class="modal-box">
-        <button class="modal-close" id="info-modal-close" aria-label="Close information dialog">&times;</button>
+        <button class="modal-close" id="info-modal-close"
+          aria-label="Close information dialog">&times;</button>
         <h2 id="info-modal-title">Did You Know? (Read this)</h2>
         <div class="info-content">
           <div class="info-item">
@@ -1012,10 +1158,15 @@
       </div>
     </div>
 
-    <section id="news-feed-container" class="hidden" aria-label="News feeds"></section>
+    <!-- News feed -->
+    <section id="news-feed-container" class="hidden"
+      aria-label="News feeds"></section>
+    <!-- Shortcuts -->
     <div id="shortcuts-container"></div>
 
+    <!-- Application scripts -->
     <script type="module" src="src/main.js"></script>
   </body>
 </html>
+
 <!-- [index.html] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) -->

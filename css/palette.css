@@ -1,4 +1,4 @@
-/* --- 13. COMMAND PALETTE --- */
+/* Command palette */
 #cp-modal-overlay {
   position: fixed;
   inset: 0;
@@ -34,6 +34,7 @@ body.gradient-dark.transparency-active .cp-modal {
   background-color: rgba(16, 16, 16, 0.76) !important;
 }
 
+/* Command palette help */
 #cp-help-modal-overlay {
   opacity: 0;
   visibility: hidden;
@@ -69,8 +70,12 @@ body.gradient-dark.transparency-active .cp-modal {
 }
 
 @keyframes cpOverlayIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .cp-modal {
@@ -169,6 +174,7 @@ body.gradient-dark.transparency-active .cp-modal {
   outline-offset: 2px;
 }
 
+/* Command list */
 #cp-command-list {
   overflow-y: auto;
   flex: 1;
@@ -186,6 +192,7 @@ body.gradient-dark.transparency-active .cp-modal {
   border-radius: 4px;
 }
 
+/* Command items */
 .cp-item {
   display: flex;
   align-items: center;
@@ -265,6 +272,7 @@ body.gradient-dark.transparency-active .cp-modal {
   font-size: 0.95rem;
 }
 
+/* Search command shortcut */
 .search-cp-badge {
   background-color: var(--bg-interactive);
   color: var(--text-secondary);
@@ -293,6 +301,7 @@ body.gradient-dark.transparency-active .cp-modal {
   transform: translateY(-1px);
 }
 
+/* Responsive command palette */
 @media (max-width: 540px) {
   .search-cp-badge {
     display: none !important;

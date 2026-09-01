@@ -1,10 +1,12 @@
 import { state } from "../state.js";
 import { playNotificationSound } from "../utils.js";
 
+// Zen mode timing
 const ACKNOWLEDGE_DELAY = 5000;
 const MANUAL_CLOSE_DELAY = 7000;
 const AUTO_CLOSE_DELAY = 10000;
 
+// Zen mode controller
 export class ZenModeController {
   constructor() {
     this.notice = null;
@@ -29,6 +31,7 @@ export class ZenModeController {
     }
   }
 
+  // Border UI cleanup
   closeBorderUi() {
     document
       .querySelectorAll(".popup-container.visible")
@@ -47,6 +50,7 @@ export class ZenModeController {
     window.YD_Search?.closeDropdown();
   }
 
+  // Guidance notice
   showNotice() {
     if (this.notice) return;
 
@@ -137,5 +141,4 @@ export class ZenModeController {
     this.notice = null;
   }
 }
-
-// [src/modules/zenMode.js] YourDynamicDashboard V3.0.0
+// [src/modules/zenMode.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

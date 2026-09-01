@@ -11,19 +11,19 @@ import {
 } from "../utils.js";
 import {
   CONFIG,
-  FONT_OPTIONS,
   DEFAULT_KEY_MAP,
-  NEWS_CATEGORIES,
+  FONT_OPTIONS,
   NEWS_CARD_COUNTS,
+  NEWS_CATEGORIES,
   NEWS_HEADLINE_OPACITIES,
   NEWS_PROVIDERS,
   NEWS_REFRESH_INTERVALS,
 } from "../config.js";
 import {
   getBindableKey,
-  validateImageBlob,
-  MIN_SHORTCUTS,
   MAX_SHORTCUTS,
+  MIN_SHORTCUTS,
+  validateImageBlob,
 } from "../validators.js";
 import {
   dismissSearchSuggestionBadge,
@@ -32,6 +32,7 @@ import {
   validateCustomSuggestionRelay,
 } from "./suggestions.js";
 
+// Modal configuration
 const KEY_LABELS = Object.freeze({
   todo: "Toggle To-Do",
   ai: "Toggle AI Tools",
@@ -97,11 +98,7 @@ const DARK_SIGNAL_HINT_DELAY = 500;
 const DARK_SIGNAL_HINT_DURATION = 7000;
 const DARK_SIGNAL_HINT_MAX_COUNT = 3;
 
-/**
- * Isolated observer for the optional Dark signal background. The settings
- * modal owns normal theme clicks; this class only observes a completed native
- * double-click on a labelled Dark preset.
- */
+// Dark theme gesture
 class DarkSignalThemeGesture {
   constructor() {
     this.hintDelayTimer = null;
@@ -135,8 +132,7 @@ class DarkSignalThemeGesture {
     if (!this.getDarkThemeButton(event)) return;
 
     this.cancelHintDelay();
-    // Allow the ordinary second-click theme handler to finish first. This
-    // controller does not delay, cancel, or replace that handler.
+
     window.setTimeout(() => this.activateSignalBackground(), 0);
   }
 
@@ -226,20 +222,15 @@ class DarkSignalThemeGesture {
   }
 }
 
-/**
- * FullSettingsModal — A comprehensive, draggable settings window.
- * Dynamically builds its entire DOM and delegates theme/shortcut/backup
- * operations to the existing SettingsManager singleton.
- */
 export { DarkSignalThemeGesture };
 
+// Full settings modal
 export class FullSettingsModal {
   constructor() {
     this.overlay = null;
     this.modal = null;
     this.isOpen = false;
 
-    // Drag state
     this.isDragging = false;
     this.dragStartX = 0;
     this.dragStartY = 0;
@@ -248,7 +239,6 @@ export class FullSettingsModal {
     this.offsetX = 0;
     this.offsetY = 0;
 
-    // Element cache
     this.els = {};
     this._activeKeyCleanup = null;
     this._locationRequestId = 0;
@@ -262,7 +252,6 @@ export class FullSettingsModal {
     this._newsRefreshBusy = false;
     window.__fullSettingsModalInstance = this;
 
-    // Bound handlers for cleanup
     this._onMouseMove = this._handleDragMove.bind(this);
     this._onMouseUp = this._handleDragEnd.bind(this);
     this._onDialogKeyDown = this._handleDialogKeyDown.bind(this);
@@ -272,19 +261,18 @@ export class FullSettingsModal {
     this.subscribeState();
   }
 
-  // ─── Helpers ───────────────────────────────────────────────
-
+  // DOM helpers
   _el(tag, attrs = {}, children = []) {
     const el = document.createElement(tag);
     Object.entries(attrs).forEach(([k, v]) => {
       if (k === "className") el.className = v;
       else if (k === "textContent") el.textContent = v;
       else if (k === "innerHTML") el.innerHTML = v;
-      else if (k.startsWith("on"))
+      else if (k.startsWith("on")) {
         el.addEventListener(k.slice(2).toLowerCase(), v);
-      else if (k === "style" && typeof v === "object")
+      } else if (k === "style" && typeof v === "object") {
         Object.assign(el.style, v);
-      else el.setAttribute(k, v);
+      } else el.setAttribute(k, v);
     });
     children.forEach((c) => {
       if (typeof c === "string") el.appendChild(document.createTextNode(c));
@@ -296,7 +284,8 @@ export class FullSettingsModal {
   _newSticker(className = "fs-new-sticker") {
     return this._el("span", {
       className,
-      innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
+      innerHTML:
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
         <title>New</title>
         <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
         <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
@@ -377,10 +366,8 @@ export class FullSettingsModal {
     return sel;
   }
 
-  // ─── Build ─────────────────────────────────────────────────
-
+  // Modal structure
   build() {
-    // Overlay
     this.overlay = this._el("div", {
       id: "full-settings-overlay",
       className: "hidden",
@@ -388,7 +375,6 @@ export class FullSettingsModal {
       role: "presentation",
     });
 
-    // Modal
     this.modal = this._el("div", {
       id: "full-settings-modal",
       role: "dialog",
@@ -397,13 +383,13 @@ export class FullSettingsModal {
       tabindex: "-1",
     });
 
-    // Titlebar
     const titlebar = this._el("div", { className: "fs-titlebar" });
     const miniBtn = this._el("button", {
       id: "open-mini-settings-btn",
       className: "fs-nav-btn",
       title: "Switch to Mini Settings",
-      innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
+      innerHTML:
+        `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
     });
     this.els.miniBtn = miniBtn;
 
@@ -420,7 +406,6 @@ export class FullSettingsModal {
     titlebar.append(miniBtn, titleH2, closeBtn);
     this.els.titlebar = titlebar;
 
-    // Tabs
     const tabs = this._el("div", { className: "fs-tabs" });
     const tabDefs = [
       { id: "fs-tab-general", label: "General" },
@@ -443,7 +428,6 @@ export class FullSettingsModal {
       tabs.appendChild(btn);
     });
 
-    // Content
     const content = this._el("div", { className: "fs-content" });
     this.els.panes = [];
 
@@ -463,34 +447,33 @@ export class FullSettingsModal {
       },
     );
 
-    // Footer
     const footer = this._el("div", { className: "fs-footer" });
-    footer.innerHTML = `<p>&copy; Ditom Baroi Antu <span class="fs-copyright-year">2025</span></p>
+    footer.innerHTML =
+      `<p>&copy; Ditom Baroi Antu <span class="fs-copyright-year">2025</span></p>
 <p><strong>YourDynamicDashboard</strong> V3.0.0</p>`;
     const yearSpan = footer.querySelector(".fs-copyright-year");
     const year = new Date().getFullYear();
     if (year > 2025) yearSpan.textContent = `2025 - ${year}`;
     this.els.footer = footer;
 
-    // Assemble
     this.modal.append(titlebar, tabs, content, footer);
     this.overlay.appendChild(this.modal);
     document.body.appendChild(this.overlay);
     this.overlay.inert = true;
   }
 
-  // ─── General Pane ──────────────────────────────────────────
-
+  // General settings
   buildGeneralPane() {
     const pane = this._el("div");
 
-    // Clock & Display
     const clockToggle = this._toggle("fs-clock-type-toggle");
     const formatToggle = this._toggle("fs-clock-format-toggle");
     const dateToggle = this._toggle("fs-date-toggle");
     const greetToggle = this._toggle("fs-hide-greetings-toggle");
     const editableToggle = this._toggle("fs-editable-text-toggle");
-    const disableAnimationsToggle = this._toggle("fs-disable-animations-toggle");
+    const disableAnimationsToggle = this._toggle(
+      "fs-disable-animations-toggle",
+    );
 
     this.els.fsClockType = clockToggle.input;
     this.els.fsClockFormat = formatToggle.input;
@@ -500,10 +483,14 @@ export class FullSettingsModal {
     this.els.fsDisableAnimations = disableAnimationsToggle.input;
 
     const widgetSelect = this._dropdown("fs-widget-control", [
-      ["all", "All Visible"], ["search-only", "Search Only"],
-      ["weather-only", "Weather Only"], ["quote-only", "Quote Only"],
-      ["search-weather", "Search & Weather"], ["search-quote", "Search & Quote"],
-      ["weather-quote", "Weather & Quote"], ["nothing", "Nothing"],
+      ["all", "All Visible"],
+      ["search-only", "Search Only"],
+      ["weather-only", "Weather Only"],
+      ["quote-only", "Quote Only"],
+      ["search-weather", "Search & Weather"],
+      ["search-quote", "Search & Quote"],
+      ["weather-quote", "Weather & Quote"],
+      ["nothing", "Nothing"],
     ]);
     this.els.fsWidgetControl = widgetSelect;
 
@@ -527,7 +514,8 @@ export class FullSettingsModal {
       if ((Number(state.get("disableAnimationsToggleCount")) || 0) < 1) {
         const newSticker = this._el("span", {
           className: "fs-new-sticker",
-          innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
+          innerHTML:
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 36" role="img" aria-label="New">
             <title>New</title>
             <path d="M10 3h58l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
             <path d="M13 8h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
@@ -563,7 +551,6 @@ export class FullSettingsModal {
       ]),
     );
 
-    // Weather
     const locInput = this._el("input", {
       type: "text",
       id: "fs-location-input",
@@ -578,7 +565,8 @@ export class FullSettingsModal {
     const locGps = this._el("button", {
       className: "settings-button fs-location-action",
       title: "Detect My Location",
-      innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><g fill="none" fill-rule="evenodd"><path d="M18 0v18H0V0z"/><path fill="currentColor" fill-rule="nonzero" d="M5.04 12.48a.75.75 0 0 1 .42 1.44c-.375.11-.645.225-.818.33.178.107.46.227.852.339C6.36 14.836 7.6 15 9 15s2.64-.164 3.506-.411c.392-.112.674-.232.852-.339-.173-.105-.443-.22-.818-.33a.75.75 0 0 1 .42-1.44c.501.146.96.334 1.313.575.326.224.727.615.727 1.195 0 .587-.411.98-.743 1.205-.358.241-.827.43-1.34.576C11.884 16.327 10.5 16.5 9 16.5s-2.885-.173-3.918-.469c-.512-.146-.981-.335-1.34-.576C3.332 15.23 2.92 14.836 2.92 14.25c0-.58.401-.971.727-1.195.353-.241.812-.428 1.313-.575M9 1.5a5.625 5.625 0 0 1 5.625 5.625c0 1.926-1.05 3.492-2.137 4.605A12.3 12.3 0 0 1 11.098 12.94c-.446.335-1.464.962-1.464.962a1.283 1.283 0 0 1-1.268 0s-1.018-.627-1.464-.962a12.217 12.217 0 0 1-1.39-1.21C4.425 10.617 3.375 9.051 3.375 7.125A5.625 5.625 0 0 1 9 1.5m0 4.125a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/></g></svg>`,
+      innerHTML:
+        `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><g fill="none" fill-rule="evenodd"><path d="M18 0v18H0V0z"/><path fill="currentColor" fill-rule="nonzero" d="M5.04 12.48a.75.75 0 0 1 .42 1.44c-.375.11-.645.225-.818.33.178.107.46.227.852.339C6.36 14.836 7.6 15 9 15s2.64-.164 3.506-.411c.392-.112.674-.232.852-.339-.173-.105-.443-.22-.818-.33a.75.75 0 0 1 .42-1.44c.501.146.96.334 1.313.575.326.224.727.615.727 1.195 0 .587-.411.98-.743 1.205-.358.241-.827.43-1.34.576C11.884 16.327 10.5 16.5 9 16.5s-2.885-.173-3.918-.469c-.512-.146-.981-.335-1.34-.576C3.332 15.23 2.92 14.836 2.92 14.25c0-.58.401-.971.727-1.195.353-.241.812-.428 1.313-.575M9 1.5a5.625 5.625 0 0 1 5.625 5.625c0 1.926-1.05 3.492-2.137 4.605A12.3 12.3 0 0 1 11.098 12.94c-.446.335-1.464.962-1.464.962a1.283 1.283 0 0 1-1.268 0s-1.018-.627-1.464-.962a12.217 12.217 0 0 1-1.39-1.21C4.425 10.617 3.375 9.051 3.375 7.125A5.625 5.625 0 0 1 9 1.5m0 4.125a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/></g></svg>`,
       style: {
         padding: "0 12px",
         display: "flex",
@@ -599,7 +587,8 @@ export class FullSettingsModal {
     if ((Number(state.get("weatherLocationSaveCount")) || 0) < 1) {
       const updatedSticker = this._el("span", {
         className: "fs-updated-sticker",
-        innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+        innerHTML:
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
           <title>Updated</title>
           <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
           <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
@@ -644,32 +633,44 @@ export class FullSettingsModal {
       ]),
     );
 
-    // Search suggestions
     const suggestionModeSelect = this._dropdown("fs-search-suggestion-mode", [
       ["history-only", "History Only"],
       ["history-online", "History + Online"],
       ["history-custom", "History + Custom"],
     ]);
     this.els.fsSearchSuggestionMode = suggestionModeSelect;
-    suggestionModeSelect.addEventListener("focus", () =>
-      syncSuggestionModeSelect(suggestionModeSelect, true),
+    suggestionModeSelect.addEventListener(
+      "focus",
+      () => syncSuggestionModeSelect(suggestionModeSelect, true),
     );
-    suggestionModeSelect.addEventListener("blur", () =>
-      syncSuggestionModeSelect(suggestionModeSelect),
+    suggestionModeSelect.addEventListener(
+      "blur",
+      () => syncSuggestionModeSelect(suggestionModeSelect),
     );
-    const searchLabel = this._el("span", { textContent: "Dynamic Search Suggestions" });
-    const searchSectionTitle = this._el("span", { className: "fs-search-section-title" });
+    const searchLabel = this._el("span", {
+      textContent: "Dynamic Search Suggestions",
+    });
+    const searchSectionTitle = this._el("span", {
+      className: "fs-search-section-title",
+    });
     const searchSectionBadge = this._newSticker();
-    searchSectionBadge.hidden = state.get("searchSuggestionBadgeDismissed") === true;
+    searchSectionBadge.hidden =
+      state.get("searchSuggestionBadgeDismissed") === true;
     this.els.fsSearchSuggestionNewSticker = searchSectionBadge;
-    searchSectionTitle.append(this._el("span", { textContent: "Search Suggestions" }), searchSectionBadge);
+    searchSectionTitle.append(
+      this._el("span", { textContent: "Search Suggestions" }),
+      searchSectionBadge,
+    );
     const proxyInput = this._el("input", {
       id: "fs-search-suggestion-proxy",
       className: "fs-location-input",
       type: "url",
-      placeholder: "https://ydd-search-suggestions.yddbyxtditom.workers.dev/suggest",
+      placeholder:
+        "https://ydd-search-suggestions.yddbyxtditom.workers.dev/suggest",
     });
-    const proxyControl = this._el("div", { className: "fs-suggestion-proxy-control" });
+    const proxyControl = this._el("div", {
+      className: "fs-suggestion-proxy-control",
+    });
     proxyControl.append(proxyInput);
     this.els.fsSearchSuggestionProxy = proxyInput;
     const proxyRow = this._row(
@@ -679,19 +680,21 @@ export class FullSettingsModal {
     );
     this.els.fsSearchSuggestionProxyRow = proxyRow;
     pane.appendChild(this._section(searchSectionTitle, [
-      this._row(searchLabel, "Choose local history only or add online autocomplete.", suggestionModeSelect),
+      this._row(
+        searchLabel,
+        "Choose local history only or add online autocomplete.",
+        suggestionModeSelect,
+      ),
       proxyRow,
     ]));
 
     return pane;
   }
 
-  // ─── Appearance Pane ───────────────────────────────────────
-
+  // Appearance settings
   buildAppearancePane() {
     const pane = this._el("div");
 
-    // Theme controls
     const darkToggle = this._toggle("fs-dark-mode-toggle");
     const autoToggle = this._toggle("fs-auto-theme-toggle");
     const glowToggle = this._toggle("fs-glow-toggle");
@@ -713,7 +716,8 @@ export class FullSettingsModal {
       if ((Number(state.get("darkModeToggleUseCount")) || 0) < 1) {
         const updatedSticker = this._el("span", {
           className: "fs-updated-sticker",
-          innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+          innerHTML:
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
             <title>Updated</title>
             <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
             <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
@@ -782,7 +786,6 @@ export class FullSettingsModal {
       ]),
     );
 
-    // Background
     const uploadBtn = this._el("button", {
       className: "settings-button",
       id: "fs-upload-bg",
@@ -823,7 +826,8 @@ export class FullSettingsModal {
     if (state.get("randomBgScheduleBadgeDismissed") !== true) {
       const updatedSticker = this._el("span", {
         className: "fs-updated-sticker",
-        innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+        innerHTML:
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
           <title>Updated</title>
           <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
           <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
@@ -874,17 +878,14 @@ export class FullSettingsModal {
       ]),
     );
 
-    // Normal themes
     const normalGrid = this._el("div", { className: "fs-themes-grid" });
     this.els.fsNormalThemes = normalGrid;
     pane.appendChild(this._section("Theme Presets", [normalGrid]));
 
-    // Gradient themes
     const gradientGrid = this._el("div", { className: "fs-themes-grid" });
     this.els.fsGradientThemes = gradientGrid;
     pane.appendChild(this._section("Gradient Theme Presets", [gradientGrid]));
 
-    // Saved presets
     const saveBtn = this._el("button", {
       className: "settings-button",
       textContent: "Save Current Theme",
@@ -906,7 +907,6 @@ export class FullSettingsModal {
       ]),
     );
 
-    // Advanced Options
     const generateThemeBtn = this._el("button", {
       type: "button",
       className: "settings-button fs-generate-theme-btn",
@@ -923,7 +923,8 @@ export class FullSettingsModal {
     const colorNote = this._el("p", {
       className: "settings-note hidden",
       id: "fs-color-warning",
-      textContent: "(Switch to a normal theme without a wallpaper to use Advanced Options)",
+      textContent:
+        "(Switch to a normal theme without a wallpaper to use Advanced Options)",
       style: {
         color: "var(--text-secondary)",
         fontWeight: "bold",
@@ -975,14 +976,17 @@ export class FullSettingsModal {
     });
 
     pane.appendChild(
-      this._section("Advanced Options", [generateThemeBtn, colorNote, colorGrid]),
+      this._section("Advanced Options", [
+        generateThemeBtn,
+        colorNote,
+        colorGrid,
+      ]),
     );
 
     return pane;
   }
 
-  // ─── Shortcuts Pane ────────────────────────────────────────
-
+  // Shortcut settings
   buildShortcutsPane() {
     const pane = this._el("div");
 
@@ -1030,7 +1034,6 @@ export class FullSettingsModal {
       this._section(`Your Shortcuts (up to ${MAX_SHORTCUTS})`, [listContainer]),
     );
 
-    // Add shortcut form
     const form = this._el("form", { id: "fs-add-shortcut-form" });
     form.appendChild(
       this._el("h3", {
@@ -1069,12 +1072,10 @@ export class FullSettingsModal {
     return pane;
   }
 
-  // ─── Data Pane ─────────────────────────────────────────────
-
+  // Data settings
   buildDataPane() {
     const pane = this._el("div");
 
-    // Backup & Restore
     const backupBtn = this._el("button", {
       className: "settings-button",
       textContent: "Backup",
@@ -1101,7 +1102,6 @@ export class FullSettingsModal {
     backupControls.append(backupBtn, restoreBtn, restoreInput, resetBtn);
     pane.appendChild(this._section("Backup & Restore", [backupControls]));
 
-    // Visibility toggles
     const todoToggle = this._toggle("fs-todo-toggle");
     const appsToggle = this._toggle("fs-apps-toggle");
     const aiToggle = this._toggle("fs-ai-toggle");
@@ -1136,12 +1136,10 @@ export class FullSettingsModal {
       ]),
     );
 
-    // Link Direction
     const linkDirContainer = this._el("div", { className: "fs-key-grid" });
     this.els.fsLinkDirList = linkDirContainer;
     pane.appendChild(this._section("Link Direction", [linkDirContainer]));
 
-    // Keyboard Shortcuts
     const keyContainer = this._el("div", { className: "fs-key-grid" });
     const keyNoteContainer = this._el("div");
     const resetKeys = this._el("button", {
@@ -1161,20 +1159,22 @@ export class FullSettingsModal {
       ]),
     );
 
-    // About
     const updateBtn = this._el("button", {
       className: "icon-button",
-      innerHTML: `<svg stroke="currentColor" fill="currentColor" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z"/></svg><span>Check for Updates</span>`,
+      innerHTML:
+        `<svg stroke="currentColor" fill="currentColor" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z"/></svg><span>Check for Updates</span>`,
     });
     const ghBtn = this._el("button", {
       className: "icon-button",
-      innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg><span>GitHub</span>`,
+      innerHTML:
+        `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg><span>GitHub</span>`,
     });
     const ppLink = this._el("a", {
       href: "privacy-policy.html",
       className: "icon-button",
       rel: "noopener noreferrer",
-      innerHTML: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.25 5C17.5866 5 14.992 4.05652 12.45 2.15C12.1833 1.95 11.8167 1.95 11.55 2.15C9.00797 4.05652 6.41341 5 3.75 5C3.33579 5 3 5.33579 3 5.75V11C3 16.0012 5.95756 19.6757 11.7251 21.9478C11.9018 22.0174 12.0982 22.0174 12.2749 21.9478C18.0424 19.6757 21 16.0012 21 11V5.75C21 5.33579 20.6642 5 20.25 5ZM16.7568 9.30287L10.7568 14.8029C10.4608 15.0742 10.0036 15.0643 9.71967 14.7803L7.21967 12.2803C6.92678 11.9874 6.92678 11.5126 7.21967 11.2197C7.51256 10.9268 7.98744 10.9268 8.28033 11.2197L10.2726 13.2119L15.7432 8.19714C16.0485 7.91724 16.523 7.93787 16.8029 8.24321C17.0828 8.54855 17.0621 9.02297 16.7568 9.30287Z" fill="currentColor"/></svg><span>Privacy Policy</span>`,
+      innerHTML:
+        `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.25 5C17.5866 5 14.992 4.05652 12.45 2.15C12.1833 1.95 11.8167 1.95 11.55 2.15C9.00797 4.05652 6.41341 5 3.75 5C3.33579 5 3 5.33579 3 5.75V11C3 16.0012 5.95756 19.6757 11.7251 21.9478C11.9018 22.0174 12.0982 22.0174 12.2749 21.9478C18.0424 19.6757 21 16.0012 21 11V5.75C21 5.33579 20.6642 5 20.25 5ZM16.7568 9.30287L10.7568 14.8029C10.4608 15.0742 10.0036 15.0643 9.71967 14.7803L7.21967 12.2803C6.92678 11.9874 6.92678 11.5126 7.21967 11.2197C7.51256 10.9268 7.98744 10.9268 8.28033 11.2197L10.2726 13.2119L15.7432 8.19714C16.0485 7.91724 16.523 7.93787 16.8029 8.24321C17.0828 8.54855 17.0621 9.02297 16.7568 9.30287Z" fill="currentColor"/></svg><span>Privacy Policy</span>`,
     });
 
     this.els.fsUpdateBtn = updateBtn;
@@ -1189,10 +1189,8 @@ export class FullSettingsModal {
     return pane;
   }
 
-  // ─── Core Events ───────────────────────────────────────────
-
+  // Core events
   bindCoreEvents() {
-    // Close
     this.els.closeBtn.addEventListener("click", () => this.close());
     this.overlay.addEventListener("keydown", this._onDialogKeyDown, true);
     this.overlay.addEventListener("click", (e) => {
@@ -1214,12 +1212,13 @@ export class FullSettingsModal {
       });
     }
 
-    // Tab switching
     this.els.tabBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
         const idx = this.els.tabBtns.indexOf(btn);
         this.els.tabBtns.forEach((b) => b.classList.remove("active"));
-        this.els.tabBtns.forEach((b) => b.setAttribute("aria-selected", "false"));
+        this.els.tabBtns.forEach((b) =>
+          b.setAttribute("aria-selected", "false")
+        );
         this.els.panes.forEach((p) => p.classList.remove("active"));
         btn.classList.add("active");
         btn.setAttribute("aria-selected", "true");
@@ -1227,22 +1226,18 @@ export class FullSettingsModal {
       });
     });
 
-    // Drag
-    this.els.titlebar.addEventListener("mousedown", (e) =>
-      this._handleDragStart(e),
+    this.els.titlebar.addEventListener(
+      "mousedown",
+      (e) => this._handleDragStart(e),
     );
     this.els.footer.addEventListener("mousedown", (e) => {
-      // The entire footer is a drag handle. Let the footer link receive its
-      // normal click/open behavior instead of starting a modal drag.
       if (e.target.closest("a")) return;
       this._handleDragStart(e);
     });
 
-    // Open full settings button (in mini popup)
     const openBtn = document.getElementById("open-full-settings-btn");
     if (openBtn) openBtn.addEventListener("click", () => this.open());
 
-    // ─── General tab events ───
     this._bindToggle(this.els.fsClockType, "clockType", "analog");
     this._bindToggle(this.els.fsClockFormat, "clockFormat", "24");
     this._bindToggle(this.els.fsDateToggle, "showDate", true);
@@ -1255,34 +1250,48 @@ export class FullSettingsModal {
     this._bindToggle(this.els.fsTempUnit, "tempUnit", "imperial");
     this._bindToggle(this.els.fsTempDisplay, "tempDisplayMode", true);
 
-    this.els.fsWidgetControl.addEventListener("change", (e) =>
-      state.set("widgetControl", e.target.value),
+    this.els.fsWidgetControl.addEventListener(
+      "change",
+      (e) => state.set("widgetControl", e.target.value),
     );
-    this.els.fsSearchSuggestionMode.addEventListener("change", async (event) => {
-      const previousMode = state.get("searchSuggestionMode") || "history-only";
-      const requestedMode = event.target.value;
-      this._saveSearchSuggestionProxy();
+    this.els.fsSearchSuggestionMode.addEventListener(
+      "change",
+      async (event) => {
+        const previousMode = state.get("searchSuggestionMode") ||
+          "history-only";
+        const requestedMode = event.target.value;
+        this._saveSearchSuggestionProxy();
 
-      if (requestedMode === "history-custom") {
-        const relay = state.get("searchSuggestionProxyUrl");
-        if (!(await requestSearchSuggestionConsent(relay || "your custom relay"))) {
-          state.set("searchSuggestionMode", previousMode);
-          event.target.value = previousMode;
+        if (requestedMode === "history-custom") {
+          const relay = state.get("searchSuggestionProxyUrl");
+          if (
+            !(await requestSearchSuggestionConsent(
+              relay || "your custom relay",
+            ))
+          ) {
+            state.set("searchSuggestionMode", previousMode);
+            event.target.value = previousMode;
+            syncSuggestionModeSelect(event.target);
+            this._updateSearchSuggestionRelayAvailability();
+            return;
+          }
+        } else if (
+          requestedMode === "history-online" &&
+          !(await requestSearchSuggestionConsent())
+        ) {
+          event.target.value = state.get("searchSuggestionMode") ||
+            "history-only";
           syncSuggestionModeSelect(event.target);
-          this._updateSearchSuggestionRelayAvailability();
           return;
         }
-      } else if (requestedMode === "history-online" && !(await requestSearchSuggestionConsent())) {
-        event.target.value = state.get("searchSuggestionMode") || "history-only";
+        state.set("searchSuggestionMode", requestedMode);
+        dismissSearchSuggestionBadge();
         syncSuggestionModeSelect(event.target);
-        return;
-      }
-      state.set("searchSuggestionMode", requestedMode);
-      dismissSearchSuggestionBadge();
-      syncSuggestionModeSelect(event.target);
-      this._searchSuggestionRelayValidationPending = requestedMode === "history-custom";
-      this._updateSearchSuggestionRelayAvailability();
-    });
+        this._searchSuggestionRelayValidationPending =
+          requestedMode === "history-custom";
+        this._updateSearchSuggestionRelayAvailability();
+      },
+    );
     this.els.fsSearchSuggestionProxy.addEventListener("input", () => {
       this._searchSuggestionProxyDirty = true;
       this._searchSuggestionRelayValidationPending = true;
@@ -1296,7 +1305,7 @@ export class FullSettingsModal {
         e.target.value = state.get("shortcutsDisplayMode") || "shortcuts";
       }
     });
-    // Location search
+
     this.els.fsLocSave.addEventListener("click", () => {
       this._sm()?.recordWeatherLocationSaveUse?.();
       this._searchLocation();
@@ -1309,7 +1318,6 @@ export class FullSettingsModal {
       if (sm) sm.detectLocation();
     });
 
-    // ─── Appearance tab events ───
     this.els.fsDark.addEventListener("change", () => {
       if (this.els.fsDark.disabled) return;
       const sm = this._sm();
@@ -1347,7 +1355,6 @@ export class FullSettingsModal {
       this._sm()?.recordFeatureBadgeUse?.("fontFamilyUseCount");
     });
 
-    // BG upload
     this.els.fsUploadBg.addEventListener("click", () => {
       this.els.fsBgInput.value = "";
       this.els.fsBgInput.click();
@@ -1370,7 +1377,6 @@ export class FullSettingsModal {
       this._updateBgState();
     });
 
-    // Random BG
     this.els.fsRndBtn.addEventListener("click", async () => {
       const sm = this._sm();
       if (sm) {
@@ -1396,7 +1402,6 @@ export class FullSettingsModal {
       }
     });
 
-    // Blur
     this.els.fsBlurSelect.addEventListener("change", (e) => {
       state.set("bgBlurIntensity", e.target.value);
       const blurMap = { 0: 0, 10: 2, 20: 4, 30: 6, 40: 8, 50: 10 };
@@ -1404,12 +1409,11 @@ export class FullSettingsModal {
         "--bg-blur",
         (blurMap[e.target.value] || 0) + "px",
       );
-      if (e.target.value !== "0")
+      if (e.target.value !== "0") {
         document.documentElement.classList.add("high-bg-blur");
-      else document.documentElement.classList.remove("high-bg-blur");
+      } else document.documentElement.classList.remove("high-bg-blur");
     });
 
-    // Color pickers
     if (this.els.fsColorControls) {
       this.els.fsColorControls.addEventListener("input", (e) => {
         if (!e.target.classList.contains("color-picker")) return;
@@ -1420,8 +1424,11 @@ export class FullSettingsModal {
         if (hasBg) return;
 
         if (isGradient) {
-          const gradientIndex = e.target.id === "fs-gradient-color-1-picker" ? 0 :
-            e.target.id === "fs-gradient-color-2-picker" ? 1 : -1;
+          const gradientIndex = e.target.id === "fs-gradient-color-1-picker"
+            ? 0
+            : e.target.id === "fs-gradient-color-2-picker"
+            ? 1
+            : -1;
           if (gradientIndex >= 0) {
             this._sm()?.updateGradientColor?.(gradientIndex, e.target.value);
           }
@@ -1455,7 +1462,6 @@ export class FullSettingsModal {
       });
     }
 
-    // Save theme
     this.els.fsGenerateThemeBtn.addEventListener("click", () => {
       this.generateTheme();
     });
@@ -1468,9 +1474,9 @@ export class FullSettingsModal {
       }
     });
 
-    // ─── Shortcuts tab events ───
-    this.els.fsScPosition.addEventListener("change", (e) =>
-      state.set("shortcutsPosition", e.target.value),
+    this.els.fsScPosition.addEventListener(
+      "change",
+      (e) => state.set("shortcutsPosition", e.target.value),
     );
 
     this.els.fsShortcutForm.addEventListener("submit", async (e) => {
@@ -1488,7 +1494,6 @@ export class FullSettingsModal {
       }
     });
 
-    // ─── Data tab events ───
     this.els.fsResetKeys.addEventListener("click", async () => {
       if (await showCustomModal("Reset keyboard shortcuts to default?", true)) {
         state.set("keyMap", structuredClone(DEFAULT_KEY_MAP));
@@ -1506,8 +1511,9 @@ export class FullSettingsModal {
       const sm = this._sm();
       if (sm) sm.backup();
     });
-    this.els.fsRestore.addEventListener("click", () =>
-      this.els.fsRestoreInput.click(),
+    this.els.fsRestore.addEventListener(
+      "click",
+      () => this.els.fsRestoreInput.click(),
     );
     this.els.fsRestoreInput.addEventListener("change", (e) => {
       const sm = this._sm();
@@ -1544,8 +1550,8 @@ export class FullSettingsModal {
             input.checked
               ? trueValue
               : key === "clockFormat"
-                ? "12"
-                : "digital",
+              ? "12"
+              : "digital",
           );
         }
       }
@@ -1568,20 +1574,18 @@ export class FullSettingsModal {
   }
 
   updateDarkModeUpdatedBadge(hidden = null) {
-    const shouldHide =
-      hidden === null
-        ? (Number(state.get("darkModeToggleUseCount")) || 0) >= 1
-        : hidden;
+    const shouldHide = hidden === null
+      ? (Number(state.get("darkModeToggleUseCount")) || 0) >= 1
+      : hidden;
     if (this.els.fsDarkUpdatedSticker) {
       this.els.fsDarkUpdatedSticker.hidden = shouldHide;
     }
   }
 
   updateWeatherLocationBadge(hidden = null) {
-    const shouldHide =
-      hidden === null
-        ? (Number(state.get("weatherLocationSaveCount")) || 0) >= 1
-        : hidden;
+    const shouldHide = hidden === null
+      ? (Number(state.get("weatherLocationSaveCount")) || 0) >= 1
+      : hidden;
     if (this.els.fsWeatherLocationUpdatedSticker) {
       this.els.fsWeatherLocationUpdatedSticker.hidden = shouldHide;
     }
@@ -1590,8 +1594,7 @@ export class FullSettingsModal {
   updateThemeBadges() {
     const lavenderHidden =
       (Number(state.get("lavenderMistThemeUseCount")) || 0) >= 1;
-    const dawnHidden =
-      (Number(state.get("dawnBloomThemeUseCount")) || 0) >= 1;
+    const dawnHidden = (Number(state.get("dawnBloomThemeUseCount")) || 0) >= 1;
     this.els.fsNormalThemes
       ?.querySelector('[data-theme-feature-badge="lavenderMist"]')
       ?.toggleAttribute("hidden", lavenderHidden);
@@ -1601,10 +1604,9 @@ export class FullSettingsModal {
   }
 
   updateThemeGeneratorBadge(hidden = null) {
-    const shouldHide =
-      hidden === null
-        ? (Number(state.get("themeGeneratorUseCount")) || 0) >= 1
-        : hidden;
+    const shouldHide = hidden === null
+      ? (Number(state.get("themeGeneratorUseCount")) || 0) >= 1
+      : hidden;
     if (this.els.fsThemeGeneratorNewSticker) {
       this.els.fsThemeGeneratorNewSticker.hidden = shouldHide;
     }
@@ -1646,14 +1648,12 @@ export class FullSettingsModal {
 
   updateRandomBackgroundBadge(hidden = null) {
     if (!this.els.fsRandomBgUpdatedSticker) return;
-    this.els.fsRandomBgUpdatedSticker.hidden =
-      hidden === null
-        ? state.get("randomBgScheduleBadgeDismissed") === true
-        : hidden;
+    this.els.fsRandomBgUpdatedSticker.hidden = hidden === null
+      ? state.get("randomBgScheduleBadgeDismissed") === true
+      : hidden;
   }
 
-  // ─── State Subscription ────────────────────────────────────
-
+  // State synchronization
   subscribeState() {
     state.subscribe((key, value) => {
       if (key === "newsEnabled" && value === true) this._dismissNewsBadge();
@@ -1703,19 +1703,21 @@ export class FullSettingsModal {
       if (key === "userSavedThemes") {
         this._renderSavedThemes();
       }
-      if ([
-        "newsEnabled",
-        "newsProviderIds",
-        "newsCategoryIds",
-        "newsShowHeadlines",
-        "newsHeadlineOpacity",
-        "newsTotalCards",
-        "newsRefreshIntervalMinutes",
-        "newsPosition",
-        "newsCache",
-        "shortcutsPosition",
-        "clockFormat",
-      ].includes(key)) {
+      if (
+        [
+          "newsEnabled",
+          "newsProviderIds",
+          "newsCategoryIds",
+          "newsShowHeadlines",
+          "newsHeadlineOpacity",
+          "newsTotalCards",
+          "newsRefreshIntervalMinutes",
+          "newsPosition",
+          "newsCache",
+          "shortcutsPosition",
+          "clockFormat",
+        ].includes(key)
+      ) {
         this._populateNewsSettings();
       }
       if (
@@ -1752,7 +1754,10 @@ export class FullSettingsModal {
       showDate: { el: this.els.fsDateToggle, check: value === true },
       hideGreetings: { el: this.els.fsHideGreetings, check: value === true },
       showEditableText: { el: this.els.fsEditableText, check: value === false },
-      disableAnimations: { el: this.els.fsDisableAnimations, check: value === true },
+      disableAnimations: {
+        el: this.els.fsDisableAnimations,
+        check: value === true,
+      },
       tempUnit: { el: this.els.fsTempUnit, check: value === "imperial" },
       tempDisplayMode: { el: this.els.fsTempDisplay, check: value === true },
       darkMode: {
@@ -1775,15 +1780,16 @@ export class FullSettingsModal {
       syncFontSelect(this.els.fsFontFamily, value);
     }
 
-    if (key === "widgetControl")
+    if (key === "widgetControl") {
       this.els.fsWidgetControl.value = value || "all";
+    }
     if (key === "shortcutsPosition") {
       this.els.fsScPosition.value = value || "bottom";
     }
-    if (key === "yd_city" && this.els.fsLocInput)
+    if (key === "yd_city" && this.els.fsLocInput) {
       this.els.fsLocInput.value = value || "";
+    }
 
-    // Clock format row disabled when analog
     if (key === "clockType") {
       const isAnalog = value === "analog";
       if (this.els.fsClockFormatRow) {
@@ -1793,16 +1799,15 @@ export class FullSettingsModal {
     }
   }
 
-  // ─── Populate on Open ──────────────────────────────────────
-
+  // Modal population
   populateAll() {
-    // Toggles
     this.els.fsClockType.checked = state.get("clockType") === "analog";
     this.els.fsClockFormat.checked = state.get("clockFormat") === "24";
     this.els.fsDateToggle.checked = state.get("showDate") === true;
     this.els.fsHideGreetings.checked = state.get("hideGreetings") === true;
     this.els.fsEditableText.checked = state.get("showEditableText") === false;
-    this.els.fsDisableAnimations.checked = state.get("disableAnimations") === true;
+    this.els.fsDisableAnimations.checked =
+      state.get("disableAnimations") === true;
     this.els.fsTempUnit.checked = state.get("tempUnit") === "imperial";
     this.els.fsTempDisplay.checked = state.get("tempDisplayMode") === true;
     this.els.fsDark.checked = state.get("darkMode") === true;
@@ -1815,12 +1820,11 @@ export class FullSettingsModal {
     this.els.fsAiToggle.checked = state.get("showAiTools") === false;
     this.els.fsHideVoice.checked = state.get("hideVoiceSearch") === true;
 
-    // Dropdowns
     this.els.fsWidgetControl.value = state.get("widgetControl") || "all";
-    this.els.fsShortcutsDisplayMode.value =
-      state.get("shortcutsDisplayMode") || "shortcuts";
-    this.els.fsSearchSuggestionMode.value =
-      state.get("searchSuggestionMode") || "history-only";
+    this.els.fsShortcutsDisplayMode.value = state.get("shortcutsDisplayMode") ||
+      "shortcuts";
+    this.els.fsSearchSuggestionMode.value = state.get("searchSuggestionMode") ||
+      "history-only";
     syncSuggestionModeSelect(this.els.fsSearchSuggestionMode);
     this.els.fsSearchSuggestionProxy.value =
       state.get("searchSuggestionProxyUrl") || "";
@@ -1831,18 +1835,14 @@ export class FullSettingsModal {
     this.els.fsScPosition.value = state.get("shortcutsPosition") || "bottom";
     this.els.fsLocInput.value = state.get("yd_city") || "";
     this.els.fsBlurSelect.value = state.get("bgBlurIntensity") || "0";
-    this.els.fsRandomBgSchedule.value =
-      state.get("randomBgSchedule") || "1m";
+    this.els.fsRandomBgSchedule.value = state.get("randomBgSchedule") || "1m";
 
-    // Clock format row state
     const isAnalog = state.get("clockType") === "analog";
     this.els.fsClockFormatRow.classList.toggle("disabled", isAnalog);
     this.els.fsClockFormat.disabled = isAnalog;
 
-    // Color pickers
     this._syncColorPickers();
 
-    // Render dynamic content
     this._renderThemes();
     this._renderSavedThemes();
     this._renderShortcutEditor();
@@ -1854,18 +1854,20 @@ export class FullSettingsModal {
     this._updateControlAvailability();
   }
 
-  // ─── Open / Close ──────────────────────────────────────────
-
+  // Modal lifecycle
   open() {
     if (this.isOpen) return;
     this._searchSuggestionValidationId += 1;
     state.set("fullSettingsEverOpened", true);
-    // Close the mini popup if open
+
     const miniPopup = document.getElementById("settings-popup");
     if (miniPopup) {
       miniPopup.classList.remove("visible");
       miniPopup.setAttribute("aria-hidden", "true");
-      document.getElementById("settings-toggle-button")?.setAttribute("aria-expanded", "false");
+      document.getElementById("settings-toggle-button")?.setAttribute(
+        "aria-expanded",
+        "false",
+      );
     }
 
     this.populateAll();
@@ -1877,7 +1879,6 @@ export class FullSettingsModal {
     document.addEventListener("keydown", this._onDialogKeyDown, true);
     state.set("lastSettingsView", "full");
 
-    // Reset position to center
     this.modal.style.transform = "";
     this.offsetX = 0;
     this.offsetY = 0;
@@ -1903,13 +1904,18 @@ export class FullSettingsModal {
     state.set("lastSettingsView", "full");
 
     if (shouldValidateRelay) {
-      void this._validateCustomSuggestionRelayAfterClose(relayToValidate, validationId);
+      void this._validateCustomSuggestionRelayAfterClose(
+        relayToValidate,
+        validationId,
+      );
     }
   }
 
   openTab(tabId) {
     this.open();
-    const index = this.els.tabBtns.findIndex((button) => button.dataset.tab === tabId);
+    const index = this.els.tabBtns.findIndex((button) =>
+      button.dataset.tab === tabId
+    );
     if (index < 0) return;
     this.els.tabBtns.forEach((button, buttonIndex) => {
       const active = buttonIndex === index;
@@ -1919,6 +1925,7 @@ export class FullSettingsModal {
     });
   }
 
+  // News settings
   buildNewsPane() {
     const pane = this._el("div", { className: "fs-news-pane" });
     if (state.get("newsEnabled") === true) this._dismissNewsBadge();
@@ -1953,18 +1960,26 @@ export class FullSettingsModal {
     const newsSectionTitle = newsSection.querySelector(".fs-section-title");
     newsSectionTitle.classList.add("fs-news-section-title");
     newsSectionTitle.textContent = "";
-    const newsTitleLabel = this._el("span", { className: "fs-news-title-label" });
+    const newsTitleLabel = this._el("span", {
+      className: "fs-news-title-label",
+    });
     const newsBadge = this._newSticker();
     newsBadge.hidden = state.get("newsBadgeDismissed") === true;
     this.els.fsNewsNewSticker = newsBadge;
-    newsTitleLabel.append(this._el("span", { textContent: "News Feeds" }), newsBadge);
+    newsTitleLabel.append(
+      this._el("span", { textContent: "News Feeds" }),
+      newsBadge,
+    );
     newsSectionTitle.append(newsTitleLabel, this.els.fsNewsStatus);
     pane.appendChild(newsSection);
 
     const providerGrid = this._el("div", { className: "fs-news-choice-grid" });
     this.els.fsNewsProviders = NEWS_PROVIDERS.map((provider) => {
       const input = this._el("input", { type: "checkbox", value: provider.id });
-      const label = this._el("label", { className: "fs-news-choice" }, [input, createNewsCheckmark()]);
+      const label = this._el("label", { className: "fs-news-choice" }, [
+        input,
+        createNewsCheckmark(),
+      ]);
       label.appendChild(this._el("span", { textContent: provider.name }));
       providerGrid.appendChild(label);
       return input;
@@ -1972,7 +1987,8 @@ export class FullSettingsModal {
     const providersSection = this._section("Providers", [
       this._el("p", {
         className: "fs-news-help",
-        textContent: "Choose providers before enabling News. Your browser requests access only to these publisher hosts.",
+        textContent:
+          "Choose providers before enabling News. Your browser requests access only to these publisher hosts.",
       }),
       providerGrid,
     ]);
@@ -1982,7 +1998,10 @@ export class FullSettingsModal {
     const categoryGrid = this._el("div", { className: "fs-news-choice-grid" });
     this.els.fsNewsCategories = NEWS_CATEGORIES.map((category) => {
       const input = this._el("input", { type: "checkbox", value: category.id });
-      const label = this._el("label", { className: "fs-news-choice" }, [input, createNewsCheckmark()]);
+      const label = this._el("label", { className: "fs-news-choice" }, [
+        input,
+        createNewsCheckmark(),
+      ]);
       label.appendChild(this._el("span", { textContent: category.label }));
       categoryGrid.appendChild(label);
       return input;
@@ -1990,7 +2009,8 @@ export class FullSettingsModal {
     const categoriesSection = this._section("News Types", [
       this._el("p", {
         className: "fs-news-help",
-        textContent: "Only news types supported by at least one selected provider can be selected.",
+        textContent:
+          "Only news types supported by at least one selected provider can be selected.",
       }),
       categoryGrid,
     ]);
@@ -2000,7 +2020,9 @@ export class FullSettingsModal {
     const showHeadlinesToggle = this._toggle("fs-news-show-headlines-toggle");
     const headlineOpacity = this._dropdown(
       "fs-news-headline-opacity",
-      NEWS_HEADLINE_OPACITIES.map((opacity) => [String(opacity), `${opacity}%`]),
+      NEWS_HEADLINE_OPACITIES.map((
+        opacity,
+      ) => [String(opacity), `${opacity}%`]),
     );
     const totalCards = this._dropdown(
       "fs-news-total-cards",
@@ -2034,23 +2056,41 @@ export class FullSettingsModal {
 
     const interval = this._dropdown(
       "fs-news-refresh-interval",
-      NEWS_REFRESH_INTERVALS.map((minutes) => [String(minutes), `${minutes} minutes`]),
+      NEWS_REFRESH_INTERVALS.map((
+        minutes,
+      ) => [String(minutes), `${minutes} minutes`]),
     );
-    const position = this._dropdown("fs-news-position", [["top", "Top"], ["bottom", "Bottom"]]);
+    const position = this._dropdown("fs-news-position", [["top", "Top"], [
+      "bottom",
+      "Bottom",
+    ]]);
     this.els.fsNewsInterval = interval;
     this.els.fsNewsPosition = position;
-    this.els.fsNewsPositionHelp = this._el("small", { className: "fs-news-position-help" });
-    const positionControl = this._el("div", { className: "fs-news-position-control" }, [position, this.els.fsNewsPositionHelp]);
+    this.els.fsNewsPositionHelp = this._el("small", {
+      className: "fs-news-position-help",
+    });
+    const positionControl = this._el("div", {
+      className: "fs-news-position-control",
+    }, [position, this.els.fsNewsPositionHelp]);
     const updatesSection = this._section("Updates & Position", [
-      this._row("Automatic Update", "Choose how often news is automatically refreshed.", interval),
-      this._row("News Feed Position", "Used when shortcuts are left, right, or hidden.", positionControl),
+      this._row(
+        "Automatic Update",
+        "Choose how often news is automatically refreshed.",
+        interval,
+      ),
+      this._row(
+        "News Feed Position",
+        "Used when shortcuts are left, right, or hidden.",
+        positionControl,
+      ),
     ]);
     updatesSection.classList.add("fs-news-updates-section");
     pane.appendChild(updatesSection);
 
     pane.appendChild(this._el("p", {
       className: "fs-news-privacy fs-news-footer",
-      textContent: "Publisher access is optional and browser-controlled. YDD requests only selected hosts, removes access when a provider is deselected or News is disabled, and stores only feed metadata locally. No relay, account, or tracking profile is used.",
+      textContent:
+        "Publisher access is optional and browser-controlled. YDD requests only selected hosts, removes access when a provider is deselected or News is disabled, and stores only feed metadata locally. No relay, account, or tracking profile is used.",
     }));
 
     const applyNewsDraft = async (
@@ -2061,8 +2101,10 @@ export class FullSettingsModal {
       const manager = window.__newsFeedInstance;
       return manager?.applyConfiguration({
         enabled: enabledToggle.input.checked,
-        providerIds: this.els.fsNewsProviders.filter((input) => input.checked).map((input) => input.value),
-        categoryIds: this.els.fsNewsCategories.filter((input) => input.checked).map((input) => input.value),
+        providerIds: this.els.fsNewsProviders.filter((input) => input.checked)
+          .map((input) => input.value),
+        categoryIds: this.els.fsNewsCategories.filter((input) => input.checked)
+          .map((input) => input.value),
         showHeadlines: this.els.fsNewsShowHeadlines.checked,
         headlineOpacity: Number(this.els.fsNewsHeadlineOpacity.value),
         totalCards: Number(this.els.fsNewsTotalCards.value),
@@ -2078,24 +2120,49 @@ export class FullSettingsModal {
       this._populateNewsSettings();
     };
     const applyLiveNewsDraftFromChange = (event) => {
-      this._updateNewsCategoryAvailability(this.els.fsNewsProviders.includes(event?.target));
+      this._updateNewsCategoryAvailability(
+        this.els.fsNewsProviders.includes(event?.target),
+      );
       void applyLiveNewsDraft();
     };
-    this.els.fsNewsProviders.forEach((input) => input.addEventListener("change", applyLiveNewsDraftFromChange));
-    this.els.fsNewsCategories.forEach((input) => input.addEventListener("change", applyLiveNewsDraftFromChange));
-    this.els.fsNewsShowHeadlines.addEventListener("change", applyLiveNewsDraftFromChange);
-    this.els.fsNewsHeadlineOpacity.addEventListener("change", applyLiveNewsDraftFromChange);
-    this.els.fsNewsTotalCards.addEventListener("change", applyLiveNewsDraftFromChange);
+    this.els.fsNewsProviders.forEach((input) =>
+      input.addEventListener("change", applyLiveNewsDraftFromChange)
+    );
+    this.els.fsNewsCategories.forEach((input) =>
+      input.addEventListener("change", applyLiveNewsDraftFromChange)
+    );
+    this.els.fsNewsShowHeadlines.addEventListener(
+      "change",
+      applyLiveNewsDraftFromChange,
+    );
+    this.els.fsNewsHeadlineOpacity.addEventListener(
+      "change",
+      applyLiveNewsDraftFromChange,
+    );
+    this.els.fsNewsTotalCards.addEventListener(
+      "change",
+      applyLiveNewsDraftFromChange,
+    );
     interval.addEventListener("change", applyLiveNewsDraftFromChange);
     position.addEventListener("change", applyLiveNewsDraftFromChange);
-    const markNewsDisplayDraftDirty = () => { this._newsDisplayDraftDirty = true; };
-    this.els.fsNewsShowHeadlines.addEventListener("change", markNewsDisplayDraftDirty);
-    this.els.fsNewsHeadlineOpacity.addEventListener("change", markNewsDisplayDraftDirty);
+    const markNewsDisplayDraftDirty = () => {
+      this._newsDisplayDraftDirty = true;
+    };
+    this.els.fsNewsShowHeadlines.addEventListener(
+      "change",
+      markNewsDisplayDraftDirty,
+    );
+    this.els.fsNewsHeadlineOpacity.addEventListener(
+      "change",
+      markNewsDisplayDraftDirty,
+    );
     enabledToggle.input.addEventListener("change", async () => {
       enabledToggle.input.disabled = true;
       const success = await applyNewsDraft();
       enabledToggle.input.disabled = false;
-      if (!success) enabledToggle.input.checked = state.get("newsEnabled") === true;
+      if (!success) {
+        enabledToggle.input.checked = state.get("newsEnabled") === true;
+      }
       this._populateNewsSettings(success ? "News settings saved." : "");
     });
     refreshButton.addEventListener("click", async () => {
@@ -2104,8 +2171,11 @@ export class FullSettingsModal {
       refreshButton.disabled = true;
       try {
         const success = await applyNewsDraft("manual", true, true);
-        if (success) this._populateNewsSettings("News refreshed with the selected providers and types.");
-        else this._populateNewsSettings();
+        if (success) {
+          this._populateNewsSettings(
+            "News refreshed with the selected providers and types.",
+          );
+        } else this._populateNewsSettings();
       } finally {
         this._newsRefreshBusy = false;
         this._updateNewsRefreshAvailability();
@@ -2119,8 +2189,12 @@ export class FullSettingsModal {
 
   _newsSelectionKey(providerInputs, categoryInputs) {
     return JSON.stringify({
-      providers: providerInputs.filter((input) => input.checked).map((input) => input.value).sort(),
-      categories: categoryInputs.filter((input) => input.checked).map((input) => input.value).sort(),
+      providers: providerInputs.filter((input) => input.checked).map((input) =>
+        input.value
+      ).sort(),
+      categories: categoryInputs.filter((input) => input.checked).map((input) =>
+        input.value
+      ).sort(),
     });
   }
 
@@ -2133,39 +2207,63 @@ export class FullSettingsModal {
     );
     const supportedCategoryIds = new Set(
       NEWS_CATEGORIES
-        .filter((category) => NEWS_PROVIDERS.some(
-          (provider) => selectedProviderIds.has(provider.id) && provider.feeds[category.id],
-        ))
+        .filter((category) =>
+          NEWS_PROVIDERS.some(
+            (provider) =>
+              selectedProviderIds.has(provider.id) &&
+              provider.feeds[category.id],
+          )
+        )
         .map((category) => category.id),
     );
-    const hadSelectedCategory = this.els.fsNewsCategories.some((input) => input.checked);
+    const hadSelectedCategory = this.els.fsNewsCategories.some((input) =>
+      input.checked
+    );
 
     this.els.fsNewsCategories.forEach((input) => {
       const supported = supportedCategoryIds.has(input.value);
       if (!supported) input.checked = false;
       input.disabled = !supported;
-      input.closest(".fs-news-choice")?.classList.toggle("is-unavailable", !supported);
+      input.closest(".fs-news-choice")?.classList.toggle(
+        "is-unavailable",
+        !supported,
+      );
     });
 
-    if (providerChanged && hadSelectedCategory && !this.els.fsNewsCategories.some((input) => input.checked)) {
-      const firstSupported = this.els.fsNewsCategories.find((input) => supportedCategoryIds.has(input.value));
+    if (
+      providerChanged && hadSelectedCategory &&
+      !this.els.fsNewsCategories.some((input) => input.checked)
+    ) {
+      const firstSupported = this.els.fsNewsCategories.find((input) =>
+        supportedCategoryIds.has(input.value)
+      );
       if (firstSupported) firstSupported.checked = true;
     }
   }
 
   _updateNewsRefreshAvailability() {
-    if (!this.els.fsNewsRefresh || !this.els.fsNewsProviders || !this.els.fsNewsCategories) return;
+    if (
+      !this.els.fsNewsRefresh || !this.els.fsNewsProviders ||
+      !this.els.fsNewsCategories
+    ) return;
     const cache = state.get("newsCache") || CONFIG.defaults.newsCache;
-    const draftKey = this._newsSelectionKey(this.els.fsNewsProviders, this.els.fsNewsCategories);
+    const draftKey = this._newsSelectionKey(
+      this.els.fsNewsProviders,
+      this.els.fsNewsCategories,
+    );
     this._newsDraftDirty = draftKey !== (cache.selectionKey || "");
     const enabled = state.get("newsEnabled") === true;
-    this.els.fsNewsEnabled.closest(".fs-news-pane")?.classList.toggle("is-disabled", !enabled);
-    this.els.fsNewsRefresh.disabled = !enabled || !this._newsDraftDirty || this._newsRefreshBusy;
+    this.els.fsNewsEnabled.closest(".fs-news-pane")?.classList.toggle(
+      "is-disabled",
+      !enabled,
+    );
+    this.els.fsNewsRefresh.disabled = !enabled || !this._newsDraftDirty ||
+      this._newsRefreshBusy;
     this.els.fsNewsRefresh.title = !enabled
       ? "Enable News Feeds first"
       : !this._newsDraftDirty
-        ? "Modify a provider or news type first"
-        : "Refresh News";
+      ? "Modify a provider or news type first"
+      : "Refresh News";
     this.els.fsNewsRefresh.setAttribute("aria-label", "Refresh News");
   }
 
@@ -2192,18 +2290,25 @@ export class FullSettingsModal {
     const categoryIds = state.get("newsCategoryIds") || [];
     const savedShowHeadlines = state.get("newsShowHeadlines") !== false;
     const savedHeadlineOpacity = Number(state.get("newsHeadlineOpacity") ?? 50);
-    const savedTotalCards = NEWS_CARD_COUNTS.includes(Number(state.get("newsTotalCards")))
-      ? Number(state.get("newsTotalCards"))
-      : CONFIG.defaults.newsTotalCards;
+    const savedTotalCards =
+      NEWS_CARD_COUNTS.includes(Number(state.get("newsTotalCards")))
+        ? Number(state.get("newsTotalCards"))
+        : CONFIG.defaults.newsTotalCards;
     const enabled = state.get("newsEnabled") === true;
-    this.els.fsNewsProviders.forEach((input) => { input.checked = providerIds.includes(input.value); });
-    this.els.fsNewsCategories.forEach((input) => { input.checked = categoryIds.includes(input.value); });
+    this.els.fsNewsProviders.forEach((input) => {
+      input.checked = providerIds.includes(input.value);
+    });
+    this.els.fsNewsCategories.forEach((input) => {
+      input.checked = categoryIds.includes(input.value);
+    });
     [
       this.els.fsNewsShowHeadlines,
       this.els.fsNewsHeadlineOpacity,
       this.els.fsNewsTotalCards,
       this.els.fsNewsInterval,
-    ].forEach((control) => { control.disabled = !enabled; });
+    ].forEach((control) => {
+      control.disabled = !enabled;
+    });
     this._updateNewsCategoryAvailability();
     const displayDraftMatchesState =
       this.els.fsNewsShowHeadlines.checked === savedShowHeadlines &&
@@ -2219,14 +2324,19 @@ export class FullSettingsModal {
       "is-disabled",
       enabled && !showHeadlines,
     );
-    this.els.fsNewsInterval.value = String(state.get("newsRefreshIntervalMinutes") || 2);
+    this.els.fsNewsInterval.value = String(
+      state.get("newsRefreshIntervalMinutes") || 2,
+    );
     this.els.fsNewsTotalCards.value = String(savedTotalCards);
     this.els.fsNewsPosition.value = state.get("newsPosition") || "bottom";
     const shortcutsPosition = state.get("shortcutsPosition") || "bottom";
-    const forced = shortcutsPosition === "top" || shortcutsPosition === "bottom";
+    const forced = shortcutsPosition === "top" ||
+      shortcutsPosition === "bottom";
     this.els.fsNewsPosition.disabled = !enabled || forced;
     this.els.fsNewsPositionHelp.textContent = forced
-      ? `Currently placed ${shortcutsPosition === "top" ? "at the bottom" : "at the top"} to stay opposite shortcuts.`
+      ? `Currently placed ${
+        shortcutsPosition === "top" ? "at the bottom" : "at the top"
+      } to stay opposite shortcuts.`
       : "Choose the top or bottom edge.";
     const cache = state.get("newsCache") || CONFIG.defaults.newsCache;
     this._updateNewsRefreshAvailability();
@@ -2239,7 +2349,9 @@ export class FullSettingsModal {
   }
 
   _saveSearchSuggestionProxy() {
-    if (!this._searchSuggestionProxyDirty || !this.els.fsSearchSuggestionProxy) return;
+    if (
+      !this._searchSuggestionProxyDirty || !this.els.fsSearchSuggestionProxy
+    ) return;
     const value = this.els.fsSearchSuggestionProxy.value.trim();
     try {
       const saved = state.set("searchSuggestionProxyUrl", value);
@@ -2250,12 +2362,14 @@ export class FullSettingsModal {
       window.YD_Search?.suggestions?.clearCache?.();
       this._searchSuggestionProxyDirty = false;
     } catch {
-      this.els.fsSearchSuggestionProxy.value = state.get("searchSuggestionProxyUrl") || "";
+      this.els.fsSearchSuggestionProxy.value =
+        state.get("searchSuggestionProxyUrl") || "";
     }
   }
 
   async _validateCustomSuggestionRelayAfterClose(relay, validationId) {
-    const isValid = Boolean(relay) && await validateCustomSuggestionRelay(relay);
+    const isValid = Boolean(relay) &&
+      await validateCustomSuggestionRelay(relay);
     if (
       validationId !== this._searchSuggestionValidationId ||
       state.get("searchSuggestionMode") !== "history-custom" ||
@@ -2305,8 +2419,6 @@ export class FullSettingsModal {
     }
   }
 
-  // ─── Drag ──────────────────────────────────────────────────
-
   _handleDragStart(e) {
     if (e.target.closest(".fs-close-btn")) return;
     this.isDragging = true;
@@ -2325,7 +2437,8 @@ export class FullSettingsModal {
     const dy = e.clientY - this.dragStartY;
     this.offsetX = this.modalStartX + dx;
     this.offsetY = this.modalStartY + dy;
-    this.modal.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px)`;
+    this.modal.style.transform =
+      `translate(${this.offsetX}px, ${this.offsetY}px)`;
   }
 
   _handleDragEnd() {
@@ -2334,8 +2447,6 @@ export class FullSettingsModal {
     document.removeEventListener("mousemove", this._onMouseMove);
     document.removeEventListener("mouseup", this._onMouseUp);
   }
-
-  // ─── Settings Manager Reference ────────────────────────────
 
   _sm() {
     return window.__settingsManagerInstance || null;
@@ -2350,8 +2461,6 @@ export class FullSettingsModal {
     );
   }
 
-  // ─── Location Search ───────────────────────────────────────
-
   async _searchLocation() {
     const city = this.els.fsLocInput.value.trim();
     if (!city) return;
@@ -2364,7 +2473,9 @@ export class FullSettingsModal {
     this.els.fsLocSave.textContent = "...";
     try {
       const res = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=5&language=en&format=json`,
+        `https://geocoding-api.open-meteo.com/v1/search?name=${
+          encodeURIComponent(city)
+        }&count=5&language=en&format=json`,
         { signal: controller.signal },
       );
       if (!res.ok) throw new Error(`Geocoding request failed (${res.status})`);
@@ -2392,9 +2503,13 @@ export class FullSettingsModal {
         }, 2000);
       }
     } catch (error) {
-      if (error?.name !== "AbortError" && requestId === this._locationRequestId) {
+      if (
+        error?.name !== "AbortError" && requestId === this._locationRequestId
+      ) {
         console.error("Geocoding Error:", error);
-        showCustomModal("Could not look up that location. Check your connection and try again.");
+        showCustomModal(
+          "Could not look up that location. Check your connection and try again.",
+        );
       }
     } finally {
       if (requestId === this._locationRequestId) {
@@ -2406,8 +2521,7 @@ export class FullSettingsModal {
     }
   }
 
-  // ─── Theme Rendering ──────────────────────────────────────
-
+  // Theme rendering
   _renderThemes() {
     const sm = this._sm();
     if (!sm) return;
@@ -2427,25 +2541,25 @@ export class FullSettingsModal {
         btn.dataset.themePresetId = theme.id;
         btn.dataset.themePresetKind = isGradient ? "gradient" : "normal";
         btn.textContent = theme.name;
-        const badgeKey =
-          theme.id === "theme-8"
-            ? "lavenderMist"
-            : theme.id === "dawn-bloom"
-              ? "dawnBloom"
-              : null;
-        const badgeCountKey =
-          badgeKey === "lavenderMist"
-            ? "lavenderMistThemeUseCount"
-            : badgeKey === "dawnBloom"
-              ? "dawnBloomThemeUseCount"
-              : null;
+        const badgeKey = theme.id === "theme-8"
+          ? "lavenderMist"
+          : theme.id === "dawn-bloom"
+          ? "dawnBloom"
+          : null;
+        const badgeCountKey = badgeKey === "lavenderMist"
+          ? "lavenderMistThemeUseCount"
+          : badgeKey === "dawnBloom"
+          ? "dawnBloomThemeUseCount"
+          : null;
         if (badgeKey && (Number(state.get(badgeCountKey)) || 0) < 1) {
           const newSticker = this._newSticker("fs-theme-new-sticker");
           newSticker.dataset.themeFeatureBadge = badgeKey;
           btn.appendChild(newSticker);
         }
         if (isGradient) {
-          btn.style.background = `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]})`;
+          btn.style.background = `linear-gradient(135deg, ${theme.colors[0]}, ${
+            theme.colors[1]
+          })`;
           btn.style.color = "#ffffff";
           btn.style.textShadow =
             "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
@@ -2453,11 +2567,13 @@ export class FullSettingsModal {
           const rightColor = window.__getThemeRightColor
             ? window.__getThemeRightColor(theme)
             : theme.id === "theme-3"
-              ? "#006EFF"
-              : theme.id === "theme-7"
-                ? "#91AA5B"
-                : theme.colors["--accent-color"];
-          btn.style.background = `linear-gradient(135deg, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+            ? "#006EFF"
+            : theme.id === "theme-7"
+            ? "#91AA5B"
+            : theme.colors["--accent-color"];
+          btn.style.background = `linear-gradient(135deg, ${
+            theme.colors["--bg-primary"]
+          } 50%, ${rightColor} 50%)`;
           btn.style.color = "#ffffff";
           btn.style.textShadow =
             "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
@@ -2468,7 +2584,7 @@ export class FullSettingsModal {
             await sm.applySelectedTheme(theme, isGradient)
           ) {
             sm.recordThemePresetUse?.(theme.id);
-            // Re-sync pickers and disabled states
+
             setTimeout(() => {
               this._syncColorPickers();
               this._updateColorControlsState();
@@ -2479,7 +2595,6 @@ export class FullSettingsModal {
       });
     };
 
-    // Access THEMES through the exported reference
     if (window.__YDD_THEMES) {
       renderGrid(
         this.els.fsNormalThemes,
@@ -2500,8 +2615,9 @@ export class FullSettingsModal {
       fontFamilyUseCount: this.els.fsFontFamilyNewSticker,
     };
     const badge = elements[key];
-    const shouldHide =
-      hidden === null ? (Number(state.get(key)) || 0) >= 1 : hidden;
+    const shouldHide = hidden === null
+      ? (Number(state.get(key)) || 0) >= 1
+      : hidden;
     if (badge) badge.hidden = shouldHide;
   }
 
@@ -2522,7 +2638,9 @@ export class FullSettingsModal {
           : theme.colors["--accent-color"];
         btn.classList.add("filled");
         btn.textContent = theme.name;
-        btn.style.background = `linear-gradient(135deg, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+        btn.style.background = `linear-gradient(135deg, ${
+          theme.colors["--bg-primary"]
+        } 50%, ${rightColor} 50%)`;
         btn.style.color = "#ffffff";
         btn.style.textShadow =
           "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
@@ -2559,8 +2677,6 @@ export class FullSettingsModal {
     }
   }
 
-  // ─── Color Picker Sync ────────────────────────────────────
-
   _syncColorPickers() {
     const mapping = {
       "--bg-primary": "fs-bg-primary-picker",
@@ -2575,8 +2691,7 @@ export class FullSettingsModal {
     Object.entries(mapping).forEach(([cssVar, pickerId]) => {
       const el = document.getElementById(pickerId);
       if (el) {
-        const val =
-          state.get(`custom-${cssVar}`) ||
+        const val = state.get(`custom-${cssVar}`) ||
           getComputedStyle(document.body).getPropertyValue(cssVar).trim();
         if (val) el.value = val;
       }
@@ -2593,15 +2708,21 @@ export class FullSettingsModal {
       return `#${expanded}`;
     };
     const gradientValues = [
-      state.get("gradientColor1") || getComputedStyle(document.body).getPropertyValue("--gradient-color-1").trim(),
-      state.get("gradientColor2") || getComputedStyle(document.body).getPropertyValue("--gradient-color-2").trim(),
+      state.get("gradientColor1") ||
+      getComputedStyle(document.body).getPropertyValue("--gradient-color-1")
+        .trim(),
+      state.get("gradientColor2") ||
+      getComputedStyle(document.body).getPropertyValue("--gradient-color-2")
+        .trim(),
     ].map(toPickerColor);
-    ["fs-gradient-color-1-picker", "fs-gradient-color-2-picker"].forEach((id, index) => {
-      const picker = document.getElementById(id);
-      if (picker && gradientValues[index]) {
-        picker.value = gradientValues[index].toLowerCase();
-      }
-    });
+    ["fs-gradient-color-1-picker", "fs-gradient-color-2-picker"].forEach(
+      (id, index) => {
+        const picker = document.getElementById(id);
+        if (picker && gradientValues[index]) {
+          picker.value = gradientValues[index].toLowerCase();
+        }
+      },
+    );
   }
 
   _updateColorControlsState() {
@@ -2629,16 +2750,23 @@ export class FullSettingsModal {
     if (this.els.fsColorControls) {
       this.els.fsColorControls.style.opacity = hasBg ? "0.4" : "1";
       this.els.fsColorControls.style.pointerEvents = hasBg ? "none" : "auto";
-      this.els.fsColorControls.querySelectorAll(".fs-normal-color-row").forEach((row) => {
-        const active = !isGradient && !hasBg;
-        row.classList.toggle("hidden", !active);
-        row.querySelectorAll("input").forEach((input) => (input.disabled = !active));
-      });
-      this.els.fsColorControls.querySelectorAll(".fs-gradient-color-row").forEach((row) => {
-        const active = isGradient && !hasBg;
-        row.classList.toggle("hidden", !active);
-        row.querySelectorAll("input").forEach((input) => (input.disabled = !active));
-      });
+      this.els.fsColorControls.querySelectorAll(".fs-normal-color-row").forEach(
+        (row) => {
+          const active = !isGradient && !hasBg;
+          row.classList.toggle("hidden", !active);
+          row.querySelectorAll("input").forEach((
+            input,
+          ) => (input.disabled = !active));
+        },
+      );
+      this.els.fsColorControls.querySelectorAll(".fs-gradient-color-row")
+        .forEach((row) => {
+          const active = isGradient && !hasBg;
+          row.classList.toggle("hidden", !active);
+          row.querySelectorAll("input").forEach((
+            input,
+          ) => (input.disabled = !active));
+        });
     }
     if (this.els.fsColorWarning) {
       this.els.fsColorWarning.textContent = hasBg
@@ -2655,8 +2783,7 @@ export class FullSettingsModal {
       document.body.classList.contains("gradient-mode-active") ||
       state.get("gradientModeActive") === true;
     const autoThemeDisabled = hasBg;
-    const glowDisabled =
-      hasBg ||
+    const glowDisabled = hasBg ||
       isGradient ||
       state.get("disableAnimations") === true;
     const glassDisabled = hasBg || isGradient;
@@ -2676,8 +2803,8 @@ export class FullSettingsModal {
     const darkModeAvailable = this.isDefaultThemeModeAvailable();
     setDisabled(this.els.fsDark, this.els.fsDarkRow, !darkModeAvailable);
     if (this.els.fsDark) {
-      this.els.fsDark.checked =
-        darkModeAvailable && state.get("darkMode") === true;
+      this.els.fsDark.checked = darkModeAvailable &&
+        state.get("darkMode") === true;
     }
 
     const widgetControl = state.get("widgetControl") || "all";
@@ -2689,8 +2816,7 @@ export class FullSettingsModal {
     ].includes(widgetControl);
     const latitude = state.get("yd_lat");
     const longitude = state.get("yd_lon");
-    const hasLocation =
-      latitude !== null &&
+    const hasLocation = latitude !== null &&
       latitude !== undefined &&
       latitude !== "" &&
       longitude !== null &&
@@ -2741,8 +2867,7 @@ export class FullSettingsModal {
     return this.isDarkModeAvailable();
   }
 
-  // ─── Background State ─────────────────────────────────────
-
+  // Background controls
   _updateBgState() {
     const hasBg = this.hasCustomBackground();
     const mode = state.get("randomBgMode");
@@ -2782,8 +2907,7 @@ export class FullSettingsModal {
     this._updateColorControlsState();
   }
 
-  // ─── Shortcut Editor ──────────────────────────────────────
-
+  // Shortcut editor
   _renderShortcutEditor() {
     const list = this.els.fsShortcutList;
     if (!list) return;
@@ -2821,7 +2945,11 @@ export class FullSettingsModal {
       iconContainer.append(img, fileInput);
       const chooseIcon = () => fileInput.click();
       iconContainer.addEventListener("click", chooseIcon);
-      makeKeyboardInteractive(iconContainer, chooseIcon, `Change ${s.name} icon`);
+      makeKeyboardInteractive(
+        iconContainer,
+        chooseIcon,
+        `Change ${s.name} icon`,
+      );
 
       const inputsDiv = this._el("div", { className: "inputs" });
       const nameInput = this._el("input", {
@@ -2923,7 +3051,8 @@ export class FullSettingsModal {
               resetIconBtn.hidden = false;
             }
           };
-          tempImg.onerror = () => showCustomModal("The icon could not be decoded.");
+          tempImg.onerror = () =>
+            showCustomModal("The icon could not be decoded.");
           tempImg.src = ev.target.result;
         };
         reader.readAsDataURL(file);
@@ -2933,7 +3062,6 @@ export class FullSettingsModal {
       actionsDiv.append(resetIconBtn, delBtn);
       div.append(handle, iconContainer, inputsDiv, actionsDiv);
 
-      // Drag & drop
       div.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", index);
         div.classList.add("dragging");
@@ -2957,8 +3085,6 @@ export class FullSettingsModal {
       list.appendChild(div);
     });
   }
-
-  // ─── Key Editor ────────────────────────────────────────────
 
   _createResetIconButton(title, onClick) {
     const button = this._el("button", {
@@ -3035,6 +3161,7 @@ export class FullSettingsModal {
     this._renderKeyEditor();
   }
 
+  // Key editor
   _renderKeyEditor() {
     const container = this.els.fsKeyList;
     if (!container) return;
@@ -3070,16 +3197,16 @@ export class FullSettingsModal {
         className: "shortcut-key-label",
         textContent: labelText,
       });
-      const usageCountKey =
-        action === "settings"
-          ? "settingsShortcutUseCount"
-          : action === "miniSettings"
-            ? "miniSettingsShortcutUseCount"
-            : null;
+      const usageCountKey = action === "settings"
+        ? "settingsShortcutUseCount"
+        : action === "miniSettings"
+        ? "miniSettingsShortcutUseCount"
+        : null;
       if (usageCountKey && (Number(state.get(usageCountKey)) || 0) < 1) {
         const updatedSticker = this._el("span", {
           className: "fs-shortcut-updated-sticker",
-          innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
+          innerHTML:
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 36" role="img" aria-label="Updated">
             <title>Updated</title>
             <path d="M10 3h88l7 7v16l-7 7H10l-7-7V10z" fill="#ffe05b" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>
             <path d="M13 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
@@ -3092,8 +3219,7 @@ export class FullSettingsModal {
 
       const controls = this._el("div", { className: "key-controls" });
       const baseline = DEFAULT_KEY_MAP[action];
-      const changed =
-        !baseline ||
+      const changed = !baseline ||
         data.key !== baseline.key ||
         data.enabled !== baseline.enabled;
       const resetButton = this._createResetIconButton(
@@ -3200,7 +3326,6 @@ export class FullSettingsModal {
         controls.appendChild(btn);
       }
 
-      // Toggle
       const toggleLabel = this._el("label", {
         className: "toggle-switch mini",
       });
@@ -3220,20 +3345,18 @@ export class FullSettingsModal {
       container.appendChild(row);
     });
 
-    // Note
     const note = this._el("div", {
       className: "settings-note",
       style: { marginTop: "1rem" },
     });
     note.innerHTML =
       "<p>Keys <strong>1-9</strong> are reserved for <strong>Shortcuts</strong><br>Press <strong>Z</strong> for <strong>Zen Mode</strong>, <strong>V</strong> for <strong>Voice Search</strong></p>";
-    if (this.els.fsKeyNoteContainer)
+    if (this.els.fsKeyNoteContainer) {
       this.els.fsKeyNoteContainer.appendChild(note);
-    else container.appendChild(note);
+    } else container.appendChild(note);
   }
 
-  // ─── Link Direction Editor ─────────────────────────────────
-
+  // Link target editor
   _renderLinkDirectionEditor() {
     const container = this.els.fsLinkDirList;
     if (!container) return;

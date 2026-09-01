@@ -1,4 +1,4 @@
-/* --- 6. WIDGETS (Weather, Search, Quotes, Tasks) --- */
+/* Widgets (weather, search, quotes, tasks) */
 .widget-container {
   background-color: var(--bg-secondary);
   border-radius: 24px;
@@ -89,7 +89,7 @@ body:not(.loaded) #weather-widget {
   letter-spacing: -0.05em;
 }
 
-/* Preserve the original Lexend-mode temperature typography. */
+/* Weather typography */
 html[data-font-family="lexend"] #current-temp {
   font-family: "Inter", sans-serif;
 }
@@ -181,6 +181,7 @@ html[data-font-family="lexend"] #current-temp {
   opacity: 0 !important;
 }
 
+/* Search widget */
 #search-form {
   display: flex;
   padding: 0.75rem;
@@ -189,8 +190,6 @@ html[data-font-family="lexend"] #current-temp {
     transform 0.85s ease-out;
   position: relative;
   align-items: center;
-  /* Keep search and its dropdowns above news (80), but below dashboard
-     popups (99) so opening settings always covers the complete search widget. */
   z-index: 90;
 }
 body:not(.loaded) #search-form {
@@ -250,7 +249,7 @@ body:not(.loaded) #search-form {
   transition: opacity 0.5s ease-in-out;
 }
 
-/* Keep the default search face identical to the original Lexend dashboard. */
+/* Search typography */
 html[data-font-family="lexend"] #search-input,
 html[data-font-family="lexend"] #search-input::placeholder {
   font-family: "Lexend", sans-serif;
@@ -305,6 +304,7 @@ html[data-font-family="lexend"] #search-input::placeholder {
   }
 }
 
+/* Search provider dropdown */
 #search-dropdown {
   position: absolute;
   top: 75px;
@@ -320,10 +320,7 @@ html[data-font-family="lexend"] #search-input::placeholder {
   transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* The search form is itself a glass surface. Mounting the open provider
-   dropdown at the page level prevents that ancestor from becoming the
-   dropdown's backdrop root, so browser backdrop blur can sample the news and
-   wallpaper behind it just like the online-suggestions panel does. */
+/* Search dropdown backdrop */
 #search-dropdown.search-dropdown-overlay {
   position: fixed;
   z-index: 90;
@@ -429,10 +426,12 @@ html.disable-animations #search-dropdown.closing {
 }
 .google-ai-badge.is-active {
   border-color: #111111;
-  background: linear-gradient(135deg, #4285f4 0%, #34a853 34%, #fbbc05 67%, #ea4335 100%);
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 34%, #fbbc05 67%,
+    #ea4335 100%);
   color: #ffffff;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.72), 0 2px 6px rgba(0, 0, 0, 0.42);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.72), 0 2px 6px rgba(0, 0, 0,
+    0.42);
 }
 .google-ai-badge.is-active:hover {
   filter: saturate(1.2) brightness(1.06);
@@ -477,6 +476,8 @@ html.disable-animations #search-dropdown.closing {
   background: var(--bg-interactive-hover, var(--bg-interactive));
   color: var(--accent-color);
 }
+
+/* Custom search providers */
 .custom-search-provider-item {
   position: relative;
 }
@@ -573,6 +574,7 @@ html.disable-animations #search-dropdown.closing {
   opacity: 0.5;
 }
 
+/* Pinned tasks */
 #pinned-tasks-widget {
   padding: 1.5rem;
   display: flex;
@@ -640,10 +642,9 @@ html.disable-animations #search-dropdown.closing {
   transform: scale(1.2);
 }
 
+/* Search history quick dropdown */
 #sh-quick-dropdown {
   position: fixed;
-  /* This panel is appended to body, so explicitly mirror the search layer:
-     above news (80), below dashboard popups (99). */
   z-index: 90;
   list-style: none;
   margin: 24px 0 0;

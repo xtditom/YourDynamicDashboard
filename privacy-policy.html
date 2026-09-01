@@ -11,198 +11,201 @@
       rel="stylesheet"
     />
     <style>
-      :root {
-        --bg-color: #0a0a0a;
-        --card-bg: #121212;
-        --text-primary: #ededed;
-        --text-secondary: #a1a1a1;
-        --accent-color: #dd6d04;
-        --border-color: #ffa60025;
-        --code-bg: #2e2f30;
-      }
+    /* Theme tokens */
+    :root {
+      --bg-color: #0a0a0a;
+      --card-bg: #121212;
+      --text-primary: #ededed;
+      --text-secondary: #a1a1a1;
+      --accent-color: #dd6d04;
+      --border-color: #ffa60025;
+      --code-bg: #2e2f30;
+    }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-      body {
-        font-family: "Lexend", sans-serif;
-        background-color: var(--bg-color);
-        color: var(--text-primary);
-        line-height: 1.6;
-        display: flex;
-        justify-content: center;
-        min-height: 100vh;
-        padding: 4rem 1.5rem;
-      }
+    body {
+      font-family: "Lexend", sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      line-height: 1.6;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 4rem 1.5rem;
+    }
 
-      .wrapper {
-        max-width: 800px;
-        width: 100%;
-      }
+    .wrapper {
+      max-width: 800px;
+      width: 100%;
+    }
 
-      /* --- Header --- */
-      header {
-        text-align: center;
-        margin-bottom: 4rem;
-      }
+    /* Page header styles */
+    header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
 
-      h1 {
-        font-size: 2.5rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #fff;
-      }
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
 
-      .subtitle {
-        color: var(--text-secondary);
-        font-size: 1.1rem;
-      }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
 
-      .last-updated {
-        display: inline-block;
-        margin-top: 1.5rem;
-        font-size: 0.85rem;
-        background: var(--card-bg);
-        padding: 0.4rem 1rem;
-        border-radius: 20px;
-        border: 1px solid var(--border-color);
-        color: var(--accent-color);
-      }
+    .last-updated {
+      display: inline-block;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      background: var(--card-bg);
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      color: var(--accent-color);
+    }
 
-      /* --- Main Content --- */
-      main {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-      }
+    /* Main content styles */
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
 
-      section {
-        background-color: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 2.5rem;
-      }
+    section {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2.5rem;
+    }
 
-      h2 {
-        font-size: 1.4rem;
-        font-weight: 500;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        color: #fff;
-      }
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #fff;
+    }
 
-      h2 svg {
-        color: var(--accent-color);
-      }
+    h2 svg {
+      color: var(--accent-color);
+    }
 
-      p {
-        color: var(--text-secondary);
-        margin-bottom: 1rem;
-        font-size: 1rem;
-      }
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
 
-      p strong {
-        color: var(--text-primary);
-        font-weight: 500;
-      }
+    p strong {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
 
-      .policy-note {
-        margin-top: 1.25rem;
-        padding: 1rem 1.15rem;
-        border-left: 3px solid var(--accent-color);
-        border-radius: 0 8px 8px 0;
-        background-color: rgba(221, 109, 4, 0.08);
-      }
+    .policy-note {
+      margin-top: 1.25rem;
+      padding: 1rem 1.15rem;
+      border-left: 3px solid var(--accent-color);
+      border-radius: 0 8px 8px 0;
+      background-color: rgba(221, 109, 4, 0.08);
+    }
 
-      .policy-note p:last-child {
-        margin-bottom: 0;
-      }
+    .policy-note p:last-child {
+      margin-bottom: 0;
+    }
 
-      /* --- Grid & Cards --- */
-      .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin-top: 1.5rem;
-        /* Cards will now natively stretch to match the row height */
-      }
+    /* Information card grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
 
-      .info-card {
-        background-color: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--border-color);
-        padding: 1.5rem;
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        transition: border-color 0.2s ease;
-      }
+    .info-card {
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s ease;
+    }
 
-      .info-card:hover {
-        border-color: var(--accent-color);
-      }
+    .info-card:hover {
+      border-color: var(--accent-color);
+    }
 
-      .info-card h3 {
-        font-size: 1.05rem;
-        margin-bottom: 0.75rem;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
+    .info-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
-      .info-card p {
-        margin-bottom: 0;
-        font-size: 0.95rem;
-        flex-grow: 1; /* Pushes content down cleanly if heights differ */
-      }
+    .info-card p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      flex-grow: 1;
+    }
 
-      .full-width {
-        grid-column: 1 / -1;
-      }
+    .full-width {
+      grid-column: 1 / -1;
+    }
 
-      code {
-        background-color: var(--code-bg);
-        color: var(--accent-color);
-        padding: 0.2rem 0.4rem;
-        border-radius: 4px;
-        font-family: "Courier New", monospace;
-        font-size: 0.85rem;
-      }
+    code {
+      background-color: var(--code-bg);
+      color: var(--accent-color);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.85rem;
+    }
 
-      a {
-        color: var(--accent-color);
-        text-decoration: none;
-        transition: opacity 0.2s;
-      }
+    a {
+      color: var(--accent-color);
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
 
-      a:hover {
-        text-decoration: underline;
-      }
+    a:hover {
+      text-decoration: underline;
+    }
 
-      /* --- Footer --- */
-      footer {
-        text-align: center;
-        margin-top: 4rem;
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-        opacity: 0.7;
-      }
+    /* Page footer styles */
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
     </style>
   </head>
   <body>
     <div class="wrapper">
+      <!-- Page header -->
       <header>
         <h1>Privacy Policy</h1>
         <p class="subtitle">YourDynamicDashboard Extension</p>
-        <span class="last-updated">Last Updated: August 27, 2026</span>
+        <span class="last-updated">Last Updated: September 1, 2026</span>
       </header>
 
+      <!-- Policy content -->
       <main>
+        <!-- Introduction -->
         <section>
           <h2>
             <svg
@@ -238,6 +241,7 @@
           </p>
         </section>
 
+        <!-- Local data -->
         <section>
           <h2>
             <svg
@@ -308,6 +312,7 @@
           </div>
         </section>
 
+        <!-- Search suggestions -->
         <section>
           <h2>
             <svg
@@ -331,23 +336,6 @@
           </p>
 
           <div class="info-grid">
-            <div class="info-card full-width">
-              <h3>Optional News Feed Publishers</h3>
-              <p>
-                News Feeds is off by default. If enabled, YDD connects directly
-                to the selected publishers (BBC News, CNN, DW, Euronews, The
-                Guardian, and/or NPR) to download feed metadata from RSS or a
-                publisher-operated API. Before connecting, YDD asks the browser
-                for optional host access only to the publishers selected by the
-                user. The browser controls the grant or denial. Deselecting a
-                publisher or disabling News removes that optional host access.
-                Headline, link, source, date, and image URL metadata is cached
-                locally in the browser. Story images are requested directly
-                from publisher servers when displayed. YDD uses no news relay,
-                user account, or browsing-history upload. Publishers receive
-                ordinary network delivery data and apply their own policies.
-              </p>
-            </div>
             <div class="info-card">
               <h3>History Only</h3>
               <p>
@@ -401,6 +389,56 @@
           </p>
         </section>
 
+        <!-- News feeds -->
+        <section>
+          <h2>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 11a9 9 0 0 1 9 9"></path>
+              <path d="M4 4a16 16 0 0 1 16 16"></path>
+              <circle cx="5" cy="19" r="1"></circle>
+            </svg>
+            News Feeds
+          </h2>
+          <p>
+            <strong>Optional and disabled by default.</strong> When you enable
+            News Feeds, YDD connects directly from your browser to only the
+            publishers you select: BBC News, CNN, DW, Euronews, The Guardian,
+            and/or NPR. For the selected providers other than CNN, YDD reads
+            their published RSS/RDF feeds; CNN is read through its
+            publisher-operated news API. Your browser asks for optional host
+            access to the selected publisher hosts and controls whether that
+            access is granted.
+          </p>
+          <p>
+            News requests retrieve only the information needed to display the
+            cards, including headlines, story links, publisher names,
+            publication times, and available image URLs. Feed and API requests
+            omit credentials and referrer data. YDD does not send your search
+            history, typed search text, location, account details, or a
+            browsing profile with News requests.
+          </p>
+          <p>
+            The retrieved story metadata, selected image URLs, and limited
+            refresh status are stored in the extension's local news cache and
+            are not uploaded to a YDD server. Images load directly from
+            publisher servers when displayed, and story links open the
+            publisher's site. Publishers and network providers may receive
+            ordinary delivery metadata, such as an IP address, and apply their
+            own privacy policies. Disabling News or deselecting a provider asks
+            the browser to remove the corresponding optional host access.
+          </p>
+        </section>
+
+        <!-- Permissions and usage -->
         <section>
           <h2>
             <svg
@@ -466,6 +504,7 @@
           </div>
         </section>
 
+        <!-- External services -->
         <section>
           <h2>
             <svg
@@ -581,6 +620,7 @@
           </div>
         </section>
 
+        <!-- Open-source transparency -->
         <section>
           <h2>
             <svg
@@ -612,7 +652,10 @@
         </section>
       </main>
 
+      <!-- Document footer -->
       <footer>&copy; 2025-2026 Ditom Baroi Antu. All rights reserved.</footer>
     </div>
   </body>
 </html>
+
+<!-- [privacy-policy.html] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) -->

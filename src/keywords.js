@@ -1,5 +1,6 @@
+// AI URL keywords
 const AI_URL_KEYWORDS = [
-  // General-purpose assistants and model providers.
+  // AI services
   "chatgpt",
   "openai",
   "sora",
@@ -182,8 +183,8 @@ const AI_URL_KEYWORDS = [
   "character ai",
 ];
 
+// Social URL keywords
 const SOCIAL_URL_KEYWORDS = [
-  // Large social networks and messaging platforms.
   "facebook",
   "fb.com",
   "instagram",
@@ -221,7 +222,8 @@ const SOCIAL_URL_KEYWORDS = [
   "meetup",
   "clubhouse",
   "houseparty",
-  // Federated, decentralized, and alternative networks.
+
+  // Federated networks
   "mastodon",
   "mastodon.social",
   "bluesky",
@@ -256,7 +258,7 @@ const SOCIAL_URL_KEYWORDS = [
   "ello",
   "wt.social",
   "amino",
-  // Creator, community, publishing, and discussion platforms.
+
   "tumblr",
   "medium",
   "substack",
@@ -297,7 +299,8 @@ const SOCIAL_URL_KEYWORDS = [
   "buymeacoffee",
   "gumroad",
   "subscribestar",
-  // Video, live-streaming, audio, and gaming communities.
+
+  // Video and gaming communities
   "twitch",
   "kick.com",
   "rumble",
@@ -324,7 +327,7 @@ const SOCIAL_URL_KEYWORDS = [
   "onlyfans",
   "fansly",
   "cameo",
-  // Regional and professional social companies.
+
   "baidu tieba",
   "douban",
   "douyin",
@@ -352,6 +355,7 @@ const SOCIAL_URL_KEYWORDS = [
   "fishbowl",
 ];
 
+// Keyword matching helpers
 const normalizeKeywordText = (value) =>
   String(value || "")
     .toLowerCase()
@@ -365,8 +369,14 @@ const hasQualifiedHostname = (hostname) => {
 
 const containsTokenSequence = (tokens, targetTokens) => {
   if (!targetTokens.length || targetTokens.length > tokens.length) return false;
-  for (let index = 0; index <= tokens.length - targetTokens.length; index += 1) {
-    if (targetTokens.every((token, offset) => tokens[index + offset] === token)) {
+  for (
+    let index = 0;
+    index <= tokens.length - targetTokens.length;
+    index += 1
+  ) {
+    if (
+      targetTokens.every((token, offset) => tokens[index + offset] === token)
+    ) {
       return true;
     }
   }
@@ -409,7 +419,9 @@ export function classifyToolUrl(url, type) {
   }
 
   const keywords = type === "social" ? SOCIAL_URL_KEYWORDS : AI_URL_KEYWORDS;
-  const matchedKeyword = keywords.find((keyword) => matchesKeyword(parsedUrl, keyword));
+  const matchedKeyword = keywords.find((keyword) =>
+    matchesKeyword(parsedUrl, keyword)
+  );
   return {
     matched: Boolean(matchedKeyword),
     keyword: matchedKeyword || null,
@@ -420,7 +432,7 @@ export function isLikelyToolUrl(url, type) {
   return classifyToolUrl(url, type).matched;
 }
 
-// Search-engine and searchable-platform recognition.
+// Search query parameters
 export const SEARCH_QUERY_PARAMETER_CANDIDATES = [
   "q",
   "query",
@@ -441,8 +453,8 @@ export const SEARCH_QUERY_PARAMETER_CANDIDATES = [
   "querystring",
 ];
 
+// Search provider keywords
 const SEARCH_PROVIDER_URL_KEYWORDS = [
-  // General web search engines.
   "google",
   "google.com",
   "bing",
@@ -507,7 +519,8 @@ const SEARCH_PROVIDER_URL_KEYWORDS = [
   "searchcode.com",
   "wayback machine",
   "web.archive.org",
-  // Privacy, self-hosted, and metasearch engines.
+
+  // Privacy and metasearch engines
   "searx",
   "searxng",
   "whoogle",
@@ -525,8 +538,9 @@ const SEARCH_PROVIDER_URL_KEYWORDS = [
   "infinity search",
   "andisearch",
   "andi.search",
-  // AI-powered and specialist search providers.
+
   "perplexity",
+  // AI and specialist search
   "perplexity.ai",
   "you.com",
   "you search",
@@ -553,8 +567,9 @@ const SEARCH_PROVIDER_URL_KEYWORDS = [
   "wolframalpha",
   "wolframalpha.com",
   "wolfram alpha",
-  // Built-in searchable platforms and communities.
+
   "youtube",
+  // Searchable platforms
   "youtube.com",
   "spotify",
   "spotify.com",
@@ -606,6 +621,7 @@ const SEARCH_PROVIDER_URL_KEYWORDS = [
   "letterboxd.com",
 ];
 
+// Search matching helpers
 const normalizeSearchHost = (value) =>
   String(value || "")
     .toLowerCase()
@@ -619,7 +635,9 @@ const matchesSearchKeyword = (hostname, keyword) => {
   if (!normalizedKeyword || hostLabels.length < 2) return false;
 
   if (rawKeyword.includes(".")) {
-    if (hostname === rawKeyword || hostname.endsWith(`.${rawKeyword}`)) return true;
+    if (hostname === rawKeyword || hostname.endsWith(`.${rawKeyword}`)) {
+      return true;
+    }
   }
 
   const hostTokens = normalizeSearchHost(hostname).split(" ").filter(Boolean);
@@ -628,7 +646,7 @@ const matchesSearchKeyword = (hostname, keyword) => {
   if (targetTokens.length > hostTokens.length) return false;
 
   return hostTokens.some((_, index) =>
-    targetTokens.every((token, offset) => hostTokens[index + offset] === token),
+    targetTokens.every((token, offset) => hostTokens[index + offset] === token)
   );
 };
 
@@ -642,7 +660,7 @@ export function isLikelySearchProviderUrl(url) {
 
   const hostname = parsedUrl.hostname.toLowerCase();
   return SEARCH_PROVIDER_URL_KEYWORDS.some((keyword) =>
-    matchesSearchKeyword(hostname, keyword),
+    matchesSearchKeyword(hostname, keyword)
   );
 }
-
+// [src/keywords.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

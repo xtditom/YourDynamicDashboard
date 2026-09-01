@@ -1,4 +1,4 @@
-/* --- 7. CORNER BUTTONS & POPUPS --- */
+/* Corner buttons and popups */
 .corner-button {
   position: absolute;
   background-color: var(--bg-tertiary);
@@ -92,6 +92,7 @@ body.loaded .corner-button {
   animation: rotate-clockwise 0.4s ease-in-out;
 }
 
+/* Popup containers */
 .popup-container {
   position: absolute;
   width: 320px;
@@ -332,7 +333,7 @@ body.loaded .corner-button {
   transition: opacity 0.2s ease;
 }
 
-/* Keep the original button face for the default Lexend presentation. */
+/* Lexend button typography */
 html[data-font-family="lexend"] .tool-tab-button {
   font-family: Arial, sans-serif;
 }
@@ -509,6 +510,7 @@ body.has-custom-bg .tool-edit-button {
   border-top: 1px solid var(--border-color);
 }
 
+/* Apps popup */
 #apps-popup {
   top: 80px;
   right: 4.5rem;
@@ -537,10 +539,11 @@ body.has-custom-bg .tool-edit-button {
   font-weight: 500;
   margin-bottom: 1rem;
 }
+
+/* App grid */
 #apps-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  /* Let the next available app backfill holes created before/after the divider. */
   grid-auto-flow: row dense;
   gap: 6px;
   padding: 0;
@@ -573,7 +576,8 @@ body.has-custom-bg .tool-edit-button {
   justify-content: center;
   padding: 0.5rem;
   border-radius: 12px;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s
+    ease;
   text-decoration: none;
   color: var(--text-primary);
 }
@@ -609,7 +613,7 @@ body.has-custom-bg .tool-edit-button {
   transform: scale(1.2);
 }
 
-/* --- 8. SETTINGS POPUP --- */
+/* Settings popup */
 #settings-popup {
   top: auto;
   bottom: 80px;
@@ -625,7 +629,7 @@ body.has-custom-bg .tool-edit-button {
   transform: scale(1);
 }
 
-/* First-use guidance for the mini settings button. */
+/* First-use settings guidance */
 .mini-settings-hint {
   position: fixed;
   left: 4.5rem;
@@ -657,6 +661,8 @@ body.has-custom-bg .tool-edit-button {
   font-weight: 500;
   margin-bottom: 1rem;
 }
+
+/* Settings controls */
 .settings-content {
   flex-grow: 1;
   overflow-y: auto;
@@ -988,7 +994,7 @@ body.has-custom-bg .toggle-switch input:checked + .slider {
   border-color: #ffffff !important;
 }
 
-/* Keep light-gradient and wallpaper toggles readable without changing the theme palette. */
+/* Light popup control overrides */
 body.force-white-text .toggle-switch .slider:before,
 body.force-white-text .toggle-switch input:checked + .slider:before {
   background-color: var(--switch-thumb) !important;
@@ -1140,11 +1146,16 @@ body.gradient-mode-active .settings-dropdown option {
   border-radius: 0 0 12px 12px;
   background: var(--accent-color);
   transform-origin: left center;
-  animation: apps-edit-hint-countdown var(--apps-hint-duration, 7s) linear forwards;
+  animation: apps-edit-hint-countdown var(--apps-hint-duration, 7s) linear
+    forwards;
 }
 @keyframes apps-edit-hint-countdown {
-  from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
 }
 
 .mini-weather-location-label {
@@ -1164,7 +1175,7 @@ body.gradient-mode-active .settings-dropdown option {
   border-top: 1px solid var(--border-color) !important;
 }
 
-/* --- Mini Settings Theme Swatches --- */
+/* Mini settings theme swatches */
 .mini-themes-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

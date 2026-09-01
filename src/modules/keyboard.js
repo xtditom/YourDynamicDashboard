@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { COMMAND_PALETTE_SHORTCUT_USE_LIMIT } from "../config.js";
 
+// Keyboard manager
 export class KeyboardManager {
   constructor() {
     this.init();
@@ -10,12 +11,12 @@ export class KeyboardManager {
     document.addEventListener("keydown", (e) => this.handleKey(e));
   }
 
+  // Shortcut dispatch
   handleKey(e) {
     if (e.repeat) return;
 
     const key = e.key.toLowerCase();
 
-    // Global Command Palette Shortcut: Ctrl+K or Cmd+K
     if ((e.ctrlKey || e.metaKey) && key === "k") {
       e.preventDefault();
       if (window.YD_CommandPalette) {
@@ -29,7 +30,6 @@ export class KeyboardManager {
       return;
     }
 
-    // Do not collide with browser/OS shortcuts such as Ctrl+S or Alt+Left.
     if (e.ctrlKey || e.metaKey || e.altKey) return;
 
     const tag = e.target.tagName;
@@ -64,9 +64,10 @@ export class KeyboardManager {
     else if (isEnabled("settings")) {
       if (this.openFullSettings()) this.recordSettingsShortcutUse("settings");
     } else if (isEnabled("miniSettings")) {
-      if (this.openMiniSettings()) this.recordSettingsShortcutUse("miniSettings");
-    }
-    else if (isEnabled("clock")) {
+      if (this.openMiniSettings()) {
+        this.recordSettingsShortcutUse("miniSettings");
+      }
+    } else if (isEnabled("clock")) {
       const current = state.get("clockType");
       state.set("clockType", current === "analog" ? "digital" : "analog");
     } else if (isEnabled("date")) {
@@ -85,15 +86,9 @@ export class KeyboardManager {
     } else if (isEnabled("showEditableText")) {
       const current = state.get("showEditableText");
       state.set("showEditableText", !current);
-    }
-
-    // --- NEW: Zen Mode Shortcut ---
-    else if (key === "z") {
+    } else if (key === "z") {
       if (isActionEnabled("zen")) state.set("zenMode", true);
-    }
-
-    // --- NEW: Voice Search Shortcut (V) ---
-    else if (key === "v") {
+    } else if (key === "v") {
       if (isActionEnabled("voice")) {
         this.clickButton("voice-search-btn");
       }
@@ -105,6 +100,7 @@ export class KeyboardManager {
     }
   }
 
+  // Usage tracking
   recordCommandPaletteShortcutUse() {
     const current = Math.max(
       0,
@@ -118,8 +114,8 @@ export class KeyboardManager {
   }
 
   focusSearchInput() {
-    const input =
-      window.YD_Search?.els?.input || document.getElementById("search-input");
+    const input = window.YD_Search?.els?.input ||
+      document.getElementById("search-input");
     if (!input || input.disabled) return false;
     input.focus({ preventScroll: true });
     return true;
@@ -154,13 +150,13 @@ export class KeyboardManager {
   }
 
   recordSettingsShortcutUse(action) {
-    const key =
-      action === "miniSettings"
-        ? "miniSettingsShortcutUseCount"
-        : "settingsShortcutUseCount";
+    const key = action === "miniSettings"
+      ? "miniSettingsShortcutUseCount"
+      : "settingsShortcutUseCount";
     if ((Number(state.get(key)) || 0) < 1) state.set(key, 1);
   }
 
+  // Shortcut actions
   launchShortcut(index) {
     if (state.get("zenMode")) return;
     const shortcuts = state.get("userShortcuts");
@@ -203,6 +199,7 @@ export class KeyboardManager {
     return true;
   }
 
+  // Popup cleanup
   closeAllPopups() {
     const popups = document.querySelectorAll(".popup-container.visible");
     popups.forEach((p) => {

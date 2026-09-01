@@ -1,3 +1,4 @@
+/* Zen mode */
 .zen-mode-notice {
   position: fixed;
   right: 4.5rem;
@@ -118,8 +119,7 @@
   opacity: 0.75;
 }
 
-/* Wallpaper variables can make the accent and primary background transparent
-   or equally bright. Keep the acknowledgement action readable in that case. */
+/* Custom-background readability */
 body.has-custom-bg .zen-notice-understand {
   background: #ffffff !important;
   color: #111111 !important;
@@ -140,4 +140,4 @@ body.has-custom-bg .zen-notice-understand:hover {
   }
 }
 
-/* [css/zen-mode.css] YourDynamicDashboard V3.0.0 */
+/* [css/zen-mode.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

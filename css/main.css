@@ -1,4 +1,4 @@
-
+/* Stylesheet imports */
 @import url("variables.css");
 @import url("animations.css");
 @import url("layout.css");
@@ -15,12 +15,7 @@
 @import url("responsive.css");
 @import url("interaction-policy.css");
 
-/* [css/main.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */
-
-/* --- LIGHT GRADIENT DASHBOARD SURFACES ---
-   Mirrors the legacy dashboard: white transparency over the active gradient,
-   with no glass blur. This also covers dashboard popup containers, while
-   Full Settings and other theme modes retain their own styles. */
+/* Light gradient dashboard surfaces */
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) .widget-container,
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #search-dropdown,
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #sh-quick-dropdown,
@@ -56,16 +51,14 @@ body.gradient-mode-active.gradient-light:not(.has-custom-bg) .popup-container * 
   text-shadow: none !important;
 }
 
-/* Match the old dashboard's local glass treatment: only the area inside a
-   popup samples and blurs what is directly behind it. The rest of the
-   dashboard remains untouched and sharp. */
+/* Popup glass surface */
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) .popup-container {
   background-color: rgba(255, 255, 255, 0.4) !important;
   -webkit-backdrop-filter: blur(4px) !important;
   backdrop-filter: blur(4px) !important;
 }
 
-/* The clock area stays white on light gradients. */
+/* Light gradient clock surface */
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #digital-clock-container,
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #digital-clock-container *,
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #clock-date-row,
@@ -84,16 +77,13 @@ body.gradient-mode-active.gradient-light:not(.has-custom-bg) #analog-clock-svg {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7)) !important;
 }
 
-/* Legacy widget treatment keeps the temperature as the white visual accent. */
+/* Light gradient weather surface */
 body.gradient-mode-active.gradient-light:not(.has-custom-bg) #weather-widget #current-temp {
   color: #ffffff !important;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7) !important;
 }
 
-/* --- CUSTOM-BACKGROUND FULL SETTINGS SURFACE ---
-   Keep Full Settings on its own dark palette when a custom wallpaper is
-   active. This deliberately wins over light-gradient variables without
-   changing the normal light-gradient Full Settings appearance. */
+/* Custom-background full settings surface */
 body.has-custom-bg #full-settings-modal,
 body.has-custom-bg.gradient-mode-active.gradient-light #full-settings-modal {
   --bg-primary: #101010 !important;
@@ -128,181 +118,97 @@ body.has-custom-bg.gradient-mode-active.gradient-light #full-settings-modal {
   backdrop-filter: blur(5px) !important;
 }
 
-/* A light gradient remains active behind a custom wallpaper. Give the
-   wallpaper state priority for checked toggles so it cannot leak the
-   gradient's active color into the switch track. The pending selector covers
-   the short IndexedDB loading window before body.has-custom-bg is added. */
-body.has-custom-bg.gradient-mode-active.gradient-light
-  .toggle-switch input:checked + .slider,
-html.ydd-custom-bg-pending body.gradient-mode-active.gradient-light
-  .toggle-switch input:checked + .slider {
+/* Custom-background toggle overrides */
+body.has-custom-bg.gradient-mode-active.gradient-light .toggle-switch input:checked + .slider,
+html.ydd-custom-bg-pending body.gradient-mode-active.gradient-light .toggle-switch input:checked + .slider {
   background-color: #ffffff !important;
   border-color: #ffffff !important;
 }
 
-body.has-custom-bg.gradient-mode-active.gradient-light
-  .toggle-switch input:checked + .slider::before,
-html.ydd-custom-bg-pending body.gradient-mode-active.gradient-light
-  .toggle-switch input:checked + .slider::before {
+body.has-custom-bg.gradient-mode-active.gradient-light .toggle-switch input:checked + .slider::before,
+html.ydd-custom-bg-pending body.gradient-mode-active.gradient-light .toggle-switch input:checked + .slider::before {
   background-color: #000000 !important;
 }
 
-/* Dashboard asset images belong to their owning control, not a separate
-   browser image resource. Keep normal parent clicks and hover states intact
-   while preventing image dragging and image-level new-tab actions. */
+/* Dashboard asset controls */
 .ydd-asset-image {
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
 }
 
-/* Give placeholder-bearing fields the requested grey surface in only the
-   three requested light presets. Other presets, gradients, and wallpapers
-   keep their existing control backgrounds. */
-body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
-  input[placeholder]:not(#search-input):not(#cp-search-input),
-body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
-  textarea[placeholder],
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  input[placeholder]:not(#search-input):not(#cp-search-input),
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  textarea[placeholder],
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  input[placeholder]:not(#search-input):not(#cp-search-input),
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  textarea[placeholder] {
+/* Light preset control surfaces */
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) input[placeholder]:not(#search-input):not(#cp-search-input),
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) textarea[placeholder],
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) input[placeholder]:not(#search-input):not(#cp-search-input),
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) textarea[placeholder],
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) input[placeholder]:not(#search-input):not(#cp-search-input),
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) textarea[placeholder] {
   background: #c7c7c7 !important;
 }
 
-body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
-  .fs-about-row
-  .icon-button,
-body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
-  #add-shortcut-form
-  button,
-body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
-  #fs-add-shortcut-form
-  button,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  .fs-about-row
-  .icon-button,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  #add-shortcut-form
-  button,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  #fs-add-shortcut-form
-  button,
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  .fs-about-row
-  .icon-button,
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  #add-shortcut-form
-  button,
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  #fs-add-shortcut-form
-  button {
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) .fs-about-row .icon-button,
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) #add-shortcut-form button,
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) #fs-add-shortcut-form button,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) .fs-about-row .icon-button,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) #add-shortcut-form button,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) #fs-add-shortcut-form button,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) .fs-about-row .icon-button,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) #add-shortcut-form button,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) #fs-add-shortcut-form button {
   background-color: #c7c7c7 !important;
 }
 
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  input[placeholder]:not(#search-input):not(#cp-search-input),
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  textarea[placeholder],
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  .fs-about-row
-  .icon-button,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  #add-shortcut-form
-  button,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  #fs-add-shortcut-form
-  button {
-  /* 70% #c7c7c7 + 30% Minty Fresh #90c69e. */
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) input[placeholder]:not(#search-input):not(#cp-search-input),
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) textarea[placeholder],
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) .fs-about-row .icon-button,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) #add-shortcut-form button,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) #fs-add-shortcut-form button {
   background: #b7c7bb !important;
   background: color-mix(in srgb, #c7c7c7 70%, #90c69e 30%) !important;
 }
 
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  input[placeholder]:not(#search-input):not(#cp-search-input),
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  textarea[placeholder],
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  .fs-about-row
-  .icon-button,
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  #add-shortcut-form
-  button,
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  #fs-add-shortcut-form
-  button {
-  /* 70% #c7c7c7 + 30% Lavender Mist #ded6ff. */
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) input[placeholder]:not(#search-input):not(#cp-search-input),
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) textarea[placeholder],
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) .fs-about-row .icon-button,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) #add-shortcut-form button,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) #fs-add-shortcut-form button {
   background: #ceccd8 !important;
   background: color-mix(in srgb, #c7c7c7 70%, #ded6ff 30%) !important;
 }
 
-body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
-  .fs-about-row
-  .icon-button:hover,
-body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
-  #add-shortcut-form
-  button:hover,
-body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
-  #fs-add-shortcut-form
-  button:hover,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  .fs-about-row
-  .icon-button:hover,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  #add-shortcut-form
-  button:hover,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  #fs-add-shortcut-form
-  button:hover,
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  .fs-about-row
-  .icon-button:hover {
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) .fs-about-row .icon-button:hover,
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) #add-shortcut-form button:hover,
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) #fs-add-shortcut-form button:hover,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) .fs-about-row .icon-button:hover,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) #add-shortcut-form button:hover,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) #fs-add-shortcut-form button:hover,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) .fs-about-row .icon-button:hover {
   background-color: #b8b8b8 !important;
 }
 
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  .fs-about-row
-  .icon-button:hover,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  #add-shortcut-form
-  button:hover,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  #fs-add-shortcut-form
-  button:hover {
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) .fs-about-row .icon-button:hover,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) #add-shortcut-form button:hover,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) #fs-add-shortcut-form button:hover {
   background: #9ca99f !important;
   background: color-mix(in srgb, #b7c7bb 85%, #000000 15%) !important;
 }
 
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  .fs-about-row
-  .icon-button:hover,
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  #add-shortcut-form
-  button:hover,
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  #fs-add-shortcut-form
-  button:hover {
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) .fs-about-row .icon-button:hover,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) #add-shortcut-form button:hover,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) #fs-add-shortcut-form button:hover {
   background: #afadb8 !important;
   background: color-mix(in srgb, #ceccd8 85%, #000000 15%) !important;
 }
 
-/* Improve Full Settings contrast only for the three light presets whose
-   default white surface makes their controls difficult to distinguish. */
-body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg)
-  #full-settings-modal,
-body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg)
-  #full-settings-modal,
-body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg)
-  #full-settings-modal {
+/* Light preset settings contrast */
+body[data-theme-id="default-light"][data-theme="light"]:not(.has-custom-bg) #full-settings-modal,
+body[data-theme-id="theme-4"][data-theme="light"]:not(.has-custom-bg) #full-settings-modal,
+body[data-theme-id="theme-8"][data-theme="light"]:not(.has-custom-bg) #full-settings-modal {
   background-color: #d1d1d1 !important;
 }
 
-/* News selection marks use the same color as their provider/type label in
-   every normal theme, rather than the theme accent color. */
+/* News selection colors */
 body[data-theme-id="default-light"] .fs-news-choice-check,
 body[data-theme-id="default-dark"] .fs-news-choice-check,
 body[data-theme-id="theme-1"] .fs-news-choice-check,
@@ -316,7 +222,9 @@ body[data-theme-id="theme-8"] .fs-news-choice-check {
   color: inherit !important;
 }
 
-/* Gradient presets, especially light gradients, use their label color too. */
+/* Gradient news selection colors */
 body.gradient-mode-active .fs-news-choice-check {
   color: inherit !important;
 }
+
+/* [css/main.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

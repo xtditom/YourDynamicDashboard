@@ -25,13 +25,14 @@ import {
 import {
   isValidImageDataUrl,
   isValidThemeColor,
-  MIN_SHORTCUTS,
-  MAX_SHORTCUTS,
   MAX_SHORTCUT_NAME_LENGTH,
+  MAX_SHORTCUTS,
+  MIN_SHORTCUTS,
   normalizeHttpUrl,
   validateImageBlob,
 } from "../validators.js";
 
+// Background configuration
 const RANDOM_BG_QUEUE_TARGET = 2;
 const RANDOM_BG_PREVIEW_WIDTH = 480;
 const RANDOM_BG_FETCH_TIMEOUT_MS = 12000;
@@ -53,7 +54,7 @@ const RANDOM_BG_REFRESH_WARNING =
   "On slower connections, background fetching may struggle or take longer.\n\n" +
   "We recommend choosing a timed option if your connection is not fast or stable.";
 
-// --- ALIEN DNA (Glass Palettes) ---
+// Theme definitions
 const ALIEN_LIGHT = {
   "--bg-secondary": "rgba(255, 255, 255, 0.25)",
   "--bg-tertiary": "rgba(255, 255, 255, 0.35)",
@@ -123,17 +124,74 @@ const GENERATED_THEME_COLOR_KEYS = Object.freeze([
 ]);
 
 const GENERATED_THEME_RECIPES = Object.freeze([
-  { hue: 202, saturation: 68, accentOffset: 8, surfaceOffset: 24, lightPrimary: 76, lightSecondary: 89, lightTertiary: 68 },
-  { hue: 258, saturation: 64, accentOffset: -8, surfaceOffset: 18, lightPrimary: 80, lightSecondary: 91, lightTertiary: 73 },
-  { hue: 332, saturation: 70, accentOffset: 10, surfaceOffset: -18, lightPrimary: 78, lightSecondary: 88, lightTertiary: 67 },
-  { hue: 38, saturation: 78, accentOffset: -8, surfaceOffset: 18, lightPrimary: 80, lightSecondary: 91, lightTertiary: 71 },
-  { hue: 146, saturation: 58, accentOffset: 12, surfaceOffset: -16, lightPrimary: 73, lightSecondary: 87, lightTertiary: 65 },
-  { hue: 188, saturation: 72, accentOffset: -10, surfaceOffset: 22, lightPrimary: 77, lightSecondary: 89, lightTertiary: 69 },
-  { hue: 16, saturation: 74, accentOffset: 8, surfaceOffset: -20, lightPrimary: 75, lightSecondary: 87, lightTertiary: 64 },
+  {
+    hue: 202,
+    saturation: 68,
+    accentOffset: 8,
+    surfaceOffset: 24,
+    lightPrimary: 76,
+    lightSecondary: 89,
+    lightTertiary: 68,
+  },
+  {
+    hue: 258,
+    saturation: 64,
+    accentOffset: -8,
+    surfaceOffset: 18,
+    lightPrimary: 80,
+    lightSecondary: 91,
+    lightTertiary: 73,
+  },
+  {
+    hue: 332,
+    saturation: 70,
+    accentOffset: 10,
+    surfaceOffset: -18,
+    lightPrimary: 78,
+    lightSecondary: 88,
+    lightTertiary: 67,
+  },
+  {
+    hue: 38,
+    saturation: 78,
+    accentOffset: -8,
+    surfaceOffset: 18,
+    lightPrimary: 80,
+    lightSecondary: 91,
+    lightTertiary: 71,
+  },
+  {
+    hue: 146,
+    saturation: 58,
+    accentOffset: 12,
+    surfaceOffset: -16,
+    lightPrimary: 73,
+    lightSecondary: 87,
+    lightTertiary: 65,
+  },
+  {
+    hue: 188,
+    saturation: 72,
+    accentOffset: -10,
+    surfaceOffset: 22,
+    lightPrimary: 77,
+    lightSecondary: 89,
+    lightTertiary: 69,
+  },
+  {
+    hue: 16,
+    saturation: 74,
+    accentOffset: 8,
+    surfaceOffset: -20,
+    lightPrimary: 75,
+    lightSecondary: 87,
+    lightTertiary: 64,
+  },
 ]);
 
 let generatedThemeIndex = 0;
 
+// Theme generation
 function clampColorChannel(value) {
   return Math.max(0, Math.min(255, Math.round(value)));
 }
@@ -156,14 +214,20 @@ function hslToHex(hue, saturation, lightness) {
   else if (h < 5 / 6) [red, green, blue] = [x, 0, chroma];
   else [red, green, blue] = [chroma, 0, x];
 
-  return `#${[red, green, blue]
-    .map((channel) => clampColorChannel((channel + match) * 255).toString(16).padStart(2, "0"))
-    .join("")}`;
+  return `#${
+    [red, green, blue]
+      .map((channel) =>
+        clampColorChannel((channel + match) * 255).toString(16).padStart(2, "0")
+      )
+      .join("")
+  }`;
 }
 
 function hexToHsl(color) {
   const value = String(color || "").replace("#", "");
-  if (![3, 4, 6, 8].includes(value.length) || !/^[\da-f]+$/i.test(value)) return null;
+  if (![3, 4, 6, 8].includes(value.length) || !/^[\da-f]+$/i.test(value)) {
+    return null;
+  }
   const shortValue = value.length === 3 || value.length === 4;
   const rgbValue = value.slice(0, shortValue ? 3 : 6);
   const expanded = shortValue
@@ -184,21 +248,27 @@ function hexToHsl(color) {
   }
   if (hue < 0) hue += 360;
   const lightness = (max + min) / 2;
-  const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
+  const saturation = delta === 0
+    ? 0
+    : delta / (1 - Math.abs(2 * lightness - 1));
   return { hue, saturation: saturation * 100, lightness: lightness * 100 };
 }
 
 function relativeLuminance(color) {
   const value = String(color || "").replace("#", "");
-  if (![3, 4, 6, 8].includes(value.length) || !/^[\da-f]+$/i.test(value)) return 0;
+  if (![3, 4, 6, 8].includes(value.length) || !/^[\da-f]+$/i.test(value)) {
+    return 0;
+  }
   const shortValue = value.length === 3 || value.length === 4;
   const rgbValue = value.slice(0, shortValue ? 3 : 6);
   const expanded = shortValue
     ? rgbValue.split("").map((v) => v + v).join("")
     : rgbValue;
-  const channels = [0, 2, 4].map((index) => parseInt(expanded.slice(index, index + 2), 16) / 255);
+  const channels = [0, 2, 4].map((index) =>
+    parseInt(expanded.slice(index, index + 2), 16) / 255
+  );
   const linear = channels.map((channel) =>
-    channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+    channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
   );
   return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
 }
@@ -252,7 +322,12 @@ function ensureContrast(foreground, background, minimum, preferLighter) {
   return preferLighter ? "#ffffff" : "#111111";
 }
 
-function adjustHexColor(color, hueOffset = 0, saturationScale = 1, lightnessOffset = 0) {
+function adjustHexColor(
+  color,
+  hueOffset = 0,
+  saturationScale = 1,
+  lightnessOffset = 0,
+) {
   const hsl = hexToHsl(color);
   if (!hsl) return color;
   return hslToHex(
@@ -267,13 +342,34 @@ function colorOrFallback(color, fallback) {
 }
 
 function deriveCustomThemeUI(colors, isDark) {
-  const primary = colorOrFallback(colors["--bg-primary"], isDark ? "#101722" : "#f1f4f8");
-  const secondary = colorOrFallback(colors["--bg-secondary"], isDark ? "#1d2938" : "#ffffff");
-  const tertiary = colorOrFallback(colors["--bg-tertiary"], isDark ? "#2c3a4c" : "#e1e7ee");
-  const accent = colorOrFallback(colors["--accent-color"], isDark ? "#8fc7ff" : "#245d9c");
-  const primaryText = colorOrFallback(colors["--text-primary"], isDark ? "#f5f8fc" : "#17202a");
-  const secondaryText = colorOrFallback(colors["--text-secondary"], isDark ? "#d3deea" : "#344454");
-  const placeholder = colorOrFallback(colors["--text-placeholder"], isDark ? "#aebdce" : "#647384");
+  const primary = colorOrFallback(
+    colors["--bg-primary"],
+    isDark ? "#101722" : "#f1f4f8",
+  );
+  const secondary = colorOrFallback(
+    colors["--bg-secondary"],
+    isDark ? "#1d2938" : "#ffffff",
+  );
+  const tertiary = colorOrFallback(
+    colors["--bg-tertiary"],
+    isDark ? "#2c3a4c" : "#e1e7ee",
+  );
+  const accent = colorOrFallback(
+    colors["--accent-color"],
+    isDark ? "#8fc7ff" : "#245d9c",
+  );
+  const primaryText = colorOrFallback(
+    colors["--text-primary"],
+    isDark ? "#f5f8fc" : "#17202a",
+  );
+  const secondaryText = colorOrFallback(
+    colors["--text-secondary"],
+    isDark ? "#d3deea" : "#344454",
+  );
+  const placeholder = colorOrFallback(
+    colors["--text-placeholder"],
+    isDark ? "#aebdce" : "#647384",
+  );
 
   const interactive = adjustHexColor(tertiary, 0, 0.92, isDark ? 7 : -7);
   const interactiveHover = adjustHexColor(tertiary, 0, 0.98, isDark ? 14 : -14);
@@ -288,7 +384,9 @@ function deriveCustomThemeUI(colors, isDark) {
   return {
     "--bg-interactive": interactive,
     "--bg-interactive-hover": interactiveHover,
-    "--bg-hover-translucent": isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)",
+    "--bg-hover-translucent": isDark
+      ? "rgba(255, 255, 255, 0.08)"
+      : "rgba(0, 0, 0, 0.08)",
     "--border-color": border,
     "--switch-bg": switchBg,
     "--switch-border": switchBorder,
@@ -318,25 +416,37 @@ function createRecipeGeneratedTheme(mode, recipe) {
   } = recipe;
   const colors = isDark
     ? {
-        "--bg-primary": hslToHex(hue, saturation * 0.7, 7),
-        "--bg-secondary": hslToHex(hue + surfaceOffset, saturation * 0.78, 19),
-        "--bg-tertiary": hslToHex(hue - 14, saturation * 0.86, 30),
-        "--accent-color": hslToHex(hue + accentOffset, saturation, 66),
-        "--text-primary": hslToHex(hue + 8, saturation * 0.35, 94),
-        "--text-secondary": hslToHex(hue + surfaceOffset, saturation * 0.3, 79),
-        "--text-placeholder": hslToHex(hue + surfaceOffset, saturation * 0.25, 68),
-        "--glow-color": hslToHex(hue + accentOffset, saturation, 72),
-      }
+      "--bg-primary": hslToHex(hue, saturation * 0.7, 7),
+      "--bg-secondary": hslToHex(hue + surfaceOffset, saturation * 0.78, 19),
+      "--bg-tertiary": hslToHex(hue - 14, saturation * 0.86, 30),
+      "--accent-color": hslToHex(hue + accentOffset, saturation, 66),
+      "--text-primary": hslToHex(hue + 8, saturation * 0.35, 94),
+      "--text-secondary": hslToHex(hue + surfaceOffset, saturation * 0.3, 79),
+      "--text-placeholder": hslToHex(
+        hue + surfaceOffset,
+        saturation * 0.25,
+        68,
+      ),
+      "--glow-color": hslToHex(hue + accentOffset, saturation, 72),
+    }
     : {
-        "--bg-primary": hslToHex(hue, saturation * 0.82, lightPrimary),
-        "--bg-secondary": hslToHex(hue + surfaceOffset, saturation * 0.64, lightSecondary),
-        "--bg-tertiary": hslToHex(hue - 14, saturation * 0.9, lightTertiary),
-        "--accent-color": hslToHex(hue + accentOffset, saturation, 42),
-        "--text-primary": hslToHex(hue + 8, saturation * 0.58, 18),
-        "--text-secondary": hslToHex(hue + surfaceOffset, saturation * 0.45, 34),
-        "--text-placeholder": hslToHex(hue + surfaceOffset, saturation * 0.35, 45),
-        "--glow-color": hslToHex(hue + accentOffset, saturation, 54),
-      };
+      "--bg-primary": hslToHex(hue, saturation * 0.82, lightPrimary),
+      "--bg-secondary": hslToHex(
+        hue + surfaceOffset,
+        saturation * 0.64,
+        lightSecondary,
+      ),
+      "--bg-tertiary": hslToHex(hue - 14, saturation * 0.9, lightTertiary),
+      "--accent-color": hslToHex(hue + accentOffset, saturation, 42),
+      "--text-primary": hslToHex(hue + 8, saturation * 0.58, 18),
+      "--text-secondary": hslToHex(hue + surfaceOffset, saturation * 0.45, 34),
+      "--text-placeholder": hslToHex(
+        hue + surfaceOffset,
+        saturation * 0.35,
+        45,
+      ),
+      "--glow-color": hslToHex(hue + accentOffset, saturation, 54),
+    };
 
   colors["--text-primary"] = ensureContrast(
     colors["--text-primary"],
@@ -385,14 +495,18 @@ function getGenerationSourceTheme(mode, sourceIndex) {
   const variantColors = mode === "dark"
     ? LIGHT_THEME_DARK_VARIANTS[source.id]
     : DARK_THEME_LIGHT_VARIANTS[source.id];
-  return variantColors ? { ...source, type: mode, colors: { ...source.colors, ...variantColors } } : source;
+  return variantColors
+    ? { ...source, type: mode, colors: { ...source.colors, ...variantColors } }
+    : source;
 }
 
 function createSourceThemeVariation(mode, sourceTheme, variationIndex) {
   const isDark = mode === "dark";
   const sourceColors = sourceTheme?.colors || {};
   const sourceHsl = Object.fromEntries(
-    GENERATED_THEME_COLOR_KEYS.map((role) => [role, hexToHsl(sourceColors[role])]),
+    GENERATED_THEME_COLOR_KEYS.map((
+      role,
+    ) => [role, hexToHsl(sourceColors[role])]),
   );
   const anchor = [
     sourceHsl["--accent-color"],
@@ -411,7 +525,13 @@ function createSourceThemeVariation(mode, sourceTheme, variationIndex) {
     ["--accent-color"],
     ["--accent-color", "--glow-color"],
     ["--bg-tertiary", "--accent-color", "--text-placeholder"],
-    ["--bg-primary", "--bg-secondary", "--bg-tertiary", "--accent-color", "--glow-color"],
+    [
+      "--bg-primary",
+      "--bg-secondary",
+      "--bg-tertiary",
+      "--accent-color",
+      "--glow-color",
+    ],
   ];
   const mutatedRoles = new Set(mutationPlans[phase]);
   const hueJumps = [132, -112, 76, 178];
@@ -437,20 +557,28 @@ function createSourceThemeVariation(mode, sourceTheme, variationIndex) {
     };
 
     if (!mutatedRoles.has(role)) {
-      // Preserve the source theme's identity for untouched roles.
-      colors[role] = sourceColors[role] || hslToHex(base.hue, base.saturation, fallback);
+      colors[role] = sourceColors[role] ||
+        hslToHex(base.hue, base.saturation, fallback);
       return;
     }
 
     const isSurface = role.startsWith("--bg-");
-    const roleHueOffset = role === "--accent-color" ? 0 : role === "--glow-color" ? 24 : -18;
+    const roleHueOffset = role === "--accent-color"
+      ? 0
+      : role === "--glow-color"
+      ? 24
+      : -18;
     const targetLightness = isSurface
-      ? (role === "--bg-primary" ? (isDark ? 9 : 76) : role === "--bg-secondary" ? (isDark ? 21 : 88) : (isDark ? 34 : 68))
+      ? (role === "--bg-primary"
+        ? (isDark ? 9 : 76)
+        : role === "--bg-secondary"
+        ? (isDark ? 21 : 88)
+        : (isDark ? 34 : 68))
       : role === "--accent-color"
-        ? (isDark ? 64 : 44)
-        : role === "--glow-color"
-          ? (isDark ? 72 : 56)
-          : fallback;
+      ? (isDark ? 64 : 44)
+      : role === "--glow-color"
+      ? (isDark ? 72 : 56)
+      : fallback;
     const targetSaturation = isSurface ? 62 : 88;
     colors[role] = hslToHex(
       base.hue + hueJump + roleHueOffset,
@@ -459,10 +587,30 @@ function createSourceThemeVariation(mode, sourceTheme, variationIndex) {
     );
   });
 
-  colors["--text-primary"] = ensureContrast(colors["--text-primary"], colors["--bg-primary"], 4.5, isDark);
-  colors["--text-secondary"] = ensureContrast(colors["--text-secondary"], colors["--bg-secondary"], 4.5, isDark);
-  colors["--text-placeholder"] = ensureContrast(colors["--text-placeholder"], colors["--bg-secondary"], 3, isDark);
-  colors["--accent-color"] = ensureContrast(colors["--accent-color"], colors["--bg-primary"], 3, isDark);
+  colors["--text-primary"] = ensureContrast(
+    colors["--text-primary"],
+    colors["--bg-primary"],
+    4.5,
+    isDark,
+  );
+  colors["--text-secondary"] = ensureContrast(
+    colors["--text-secondary"],
+    colors["--bg-secondary"],
+    4.5,
+    isDark,
+  );
+  colors["--text-placeholder"] = ensureContrast(
+    colors["--text-placeholder"],
+    colors["--bg-secondary"],
+    3,
+    isDark,
+  );
+  colors["--accent-color"] = ensureContrast(
+    colors["--accent-color"],
+    colors["--bg-primary"],
+    3,
+    isDark,
+  );
   return colors;
 }
 
@@ -475,25 +623,75 @@ function createWildGeneratedTheme(mode, recipe, generationIndex) {
   };
   const baseHue = recipe.hue + (next() - 0.5) * 55;
   const colors = {
-    "--bg-primary": hslToHex(baseHue + (next() - 0.5) * 42, 48 + next() * 28, isDark ? 6 + next() * 7 : 70 + next() * 14),
-    "--bg-secondary": hslToHex(baseHue + 60 + (next() - 0.5) * 70, 42 + next() * 30, isDark ? 17 + next() * 9 : 84 + next() * 10),
-    "--bg-tertiary": hslToHex(baseHue - 46 + (next() - 0.5) * 58, 48 + next() * 32, isDark ? 27 + next() * 10 : 62 + next() * 16),
-    "--accent-color": hslToHex(baseHue + 120 + (next() - 0.5) * 55, 62 + next() * 28, isDark ? 57 + next() * 17 : 35 + next() * 18),
-    "--text-primary": hslToHex(baseHue + 14, 20 + next() * 28, isDark ? 91 + next() * 6 : 12 + next() * 12),
-    "--text-secondary": hslToHex(baseHue - 22, 18 + next() * 28, isDark ? 73 + next() * 15 : 25 + next() * 18),
-    "--text-placeholder": hslToHex(baseHue + 80, 20 + next() * 28, isDark ? 62 + next() * 14 : 36 + next() * 16),
-    "--glow-color": hslToHex(baseHue + 180 + (next() - 0.5) * 65, 62 + next() * 28, isDark ? 65 + next() * 15 : 45 + next() * 18),
+    "--bg-primary": hslToHex(
+      baseHue + (next() - 0.5) * 42,
+      48 + next() * 28,
+      isDark ? 6 + next() * 7 : 70 + next() * 14,
+    ),
+    "--bg-secondary": hslToHex(
+      baseHue + 60 + (next() - 0.5) * 70,
+      42 + next() * 30,
+      isDark ? 17 + next() * 9 : 84 + next() * 10,
+    ),
+    "--bg-tertiary": hslToHex(
+      baseHue - 46 + (next() - 0.5) * 58,
+      48 + next() * 32,
+      isDark ? 27 + next() * 10 : 62 + next() * 16,
+    ),
+    "--accent-color": hslToHex(
+      baseHue + 120 + (next() - 0.5) * 55,
+      62 + next() * 28,
+      isDark ? 57 + next() * 17 : 35 + next() * 18,
+    ),
+    "--text-primary": hslToHex(
+      baseHue + 14,
+      20 + next() * 28,
+      isDark ? 91 + next() * 6 : 12 + next() * 12,
+    ),
+    "--text-secondary": hslToHex(
+      baseHue - 22,
+      18 + next() * 28,
+      isDark ? 73 + next() * 15 : 25 + next() * 18,
+    ),
+    "--text-placeholder": hslToHex(
+      baseHue + 80,
+      20 + next() * 28,
+      isDark ? 62 + next() * 14 : 36 + next() * 16,
+    ),
+    "--glow-color": hslToHex(
+      baseHue + 180 + (next() - 0.5) * 65,
+      62 + next() * 28,
+      isDark ? 65 + next() * 15 : 45 + next() * 18,
+    ),
   };
-  colors["--text-primary"] = ensureContrast(colors["--text-primary"], colors["--bg-primary"], 4.5, isDark);
-  colors["--text-secondary"] = ensureContrast(colors["--text-secondary"], colors["--bg-secondary"], 4.5, isDark);
-  colors["--text-placeholder"] = ensureContrast(colors["--text-placeholder"], colors["--bg-secondary"], 3, isDark);
-  colors["--accent-color"] = ensureContrast(colors["--accent-color"], colors["--bg-primary"], 3, isDark);
+  colors["--text-primary"] = ensureContrast(
+    colors["--text-primary"],
+    colors["--bg-primary"],
+    4.5,
+    isDark,
+  );
+  colors["--text-secondary"] = ensureContrast(
+    colors["--text-secondary"],
+    colors["--bg-secondary"],
+    4.5,
+    isDark,
+  );
+  colors["--text-placeholder"] = ensureContrast(
+    colors["--text-placeholder"],
+    colors["--bg-secondary"],
+    3,
+    isDark,
+  );
+  colors["--accent-color"] = ensureContrast(
+    colors["--accent-color"],
+    colors["--bg-primary"],
+    3,
+    isDark,
+  );
   return colors;
 }
 
 function createGeneratedTheme(mode, recipe, generationIndex) {
-  // Deterministic 10-generation distribution:
-  // 4 source mutations, 3 curated recipes, and 3 bounded wild palettes.
   const generationPattern = [
     "source",
     "recipe",
@@ -516,15 +714,18 @@ function createGeneratedTheme(mode, recipe, generationIndex) {
   if (style === "source") {
     const sourcePositions = [0, 3, 6, 8];
     const cycleNumber = Math.floor(generationIndex / generationPattern.length);
-    const sourceSlot =
-      cycleNumber * sourcePositions.length + sourcePositions.indexOf(cycleIndex);
+    const sourceSlot = cycleNumber * sourcePositions.length +
+      sourcePositions.indexOf(cycleIndex);
     const sourceTheme = getGenerationSourceTheme(mode, sourceSlot);
-    if (sourceTheme) return createSourceThemeVariation(mode, sourceTheme, generationIndex);
+    if (sourceTheme) {
+      return createSourceThemeVariation(mode, sourceTheme, generationIndex);
+    }
   }
 
   return createRecipeGeneratedTheme(mode, recipe);
 }
 
+// Theme utilities
 export function getThemeRightColor(theme) {
   if (!theme || !theme.colors) return "#ffffff";
   if (theme.id === "theme-3" || theme.name === "Azure Sky") return "#006EFF";
@@ -537,6 +738,7 @@ export function getThemeRightColor(theme) {
 }
 window.__getThemeRightColor = getThemeRightColor;
 
+// Theme catalog
 export const THEMES = {
   normal: [
     {
@@ -863,6 +1065,7 @@ const DARK_THEME_LIGHT_VARIANTS = {
   },
 };
 
+// Settings manager
 export class SettingsManager {
   static instance = null;
   static THEMES = null;
@@ -893,7 +1096,6 @@ export class SettingsManager {
       { once: true },
     );
 
-    // Expose for full settings modal module
     window.__settingsManagerInstance = this;
     window.__YDD_THEMES = THEMES;
 
@@ -915,7 +1117,9 @@ export class SettingsManager {
       newsEnabled: document.getElementById("news-enabled-toggle"),
       newsBadge: document.getElementById("news-feeds-new-sticker"),
       configureNews: document.getElementById("configure-news-btn"),
-      searchSuggestionMode: document.getElementById("search-suggestion-mode-select"),
+      searchSuggestionMode: document.getElementById(
+        "search-suggestion-mode-select",
+      ),
       dark: document.getElementById("dark-mode-toggle"),
       autoThemeToggle: document.getElementById("auto-theme-toggle"),
       glowToggle: document.getElementById("glow-effect-toggle"),
@@ -943,7 +1147,9 @@ export class SettingsManager {
       randomBgFreeze: document.getElementById("random-bg-freeze-btn"),
       randomBgRnd: document.getElementById("random-bg-rnd-btn"),
       randomBgSchedule: document.getElementById("random-bg-schedule-select"),
-      randomBgUpdatedSticker: document.getElementById("random-bg-updated-sticker"),
+      randomBgUpdatedSticker: document.getElementById(
+        "random-bg-updated-sticker",
+      ),
       backup: document.getElementById("backup-button"),
       restore: document.getElementById("restore-button"),
       restoreInput: document.getElementById("restore-file-input"),
@@ -1089,6 +1295,7 @@ export class SettingsManager {
     return this._backgroundReady || Promise.resolve();
   }
 
+  // State loading
   loadInitialState() {
     this.bindSimpleToggle(this.els.clockType, "clockType", "analog");
     this.bindSimpleToggle(this.els.clockFormat, "clockFormat", "24");
@@ -1103,8 +1310,8 @@ export class SettingsManager {
     this.bindHideToggle(this.els.editableTextToggle, "showEditableText");
 
     if (this.els.shortcutsPosition) {
-      this.els.shortcutsPosition.value =
-        state.get("shortcutsPosition") || "bottom";
+      this.els.shortcutsPosition.value = state.get("shortcutsPosition") ||
+        "bottom";
       if (
         state.get("showShortcuts") === false &&
         !state.get("shortcutsPosition")
@@ -1117,18 +1324,24 @@ export class SettingsManager {
       this.els.newsEnabled.checked = state.get("newsEnabled") === true;
     }
     if (this.els.searchSuggestionMode) {
-      this.els.searchSuggestionMode.value = state.get("searchSuggestionMode") || "history-only";
+      this.els.searchSuggestionMode.value = state.get("searchSuggestionMode") ||
+        "history-only";
       syncSuggestionModeSelect(this.els.searchSuggestionMode);
-      this.els.searchSuggestionMode.addEventListener("focus", () =>
-        syncSuggestionModeSelect(this.els.searchSuggestionMode, true),
+      this.els.searchSuggestionMode.addEventListener(
+        "focus",
+        () => syncSuggestionModeSelect(this.els.searchSuggestionMode, true),
       );
-      this.els.searchSuggestionMode.addEventListener("blur", () =>
-        syncSuggestionModeSelect(this.els.searchSuggestionMode),
+      this.els.searchSuggestionMode.addEventListener(
+        "blur",
+        () => syncSuggestionModeSelect(this.els.searchSuggestionMode),
       );
     }
-    const searchSuggestionBadge = document.getElementById("search-suggestion-new-sticker");
+    const searchSuggestionBadge = document.getElementById(
+      "search-suggestion-new-sticker",
+    );
     if (searchSuggestionBadge) {
-      searchSuggestionBadge.hidden = state.get("searchSuggestionBadgeDismissed") === true;
+      searchSuggestionBadge.hidden =
+        state.get("searchSuggestionBadgeDismissed") === true;
     }
     if (this.els.newsBadge) {
       this.els.newsBadge.hidden = state.get("newsBadgeDismissed") === true;
@@ -1163,8 +1376,9 @@ export class SettingsManager {
     this.updateDarkModeUpdatedBadge();
     this.updateWeatherLocationBadge();
 
-    if (this.els.widgetControl)
+    if (this.els.widgetControl) {
       this.els.widgetControl.value = state.get("widgetControl") || "all";
+    }
     if (this.els.locInput) this.els.locInput.value = state.get("yd_city") || "";
 
     if (this.els.bgBlurSelect) {
@@ -1207,7 +1421,9 @@ export class SettingsManager {
       document.body.classList.add("has-custom-bg");
       if (randomBgTime === -1) {
         if (state.get("savedBgUrl")) {
-          document.body.style.backgroundImage = `url(${state.get("savedBgUrl")})`;
+          document.body.style.backgroundImage = `url(${
+            state.get("savedBgUrl")
+          })`;
         } else if (bg) {
           document.body.style.backgroundImage = `url(${bg})`;
         }
@@ -1267,8 +1483,8 @@ export class SettingsManager {
       const isGradient = state.get("gradientModeActive");
       if (isGradient) {
         const themeId = state.get("gradientThemeId");
-        const theme =
-          THEMES.gradient.find((t) => t.id === themeId) || THEMES.gradient[0];
+        const theme = THEMES.gradient.find((t) => t.id === themeId) ||
+          THEMES.gradient[0];
         this.applyGradientTheme(theme, false);
         this.resetGrayscaleForCurrentContext();
       } else {
@@ -1316,8 +1532,7 @@ export class SettingsManager {
     const lat = state.get("yd_lat");
     const lon = state.get("yd_lon");
 
-    const hasLocation =
-      lat !== null &&
+    const hasLocation = lat !== null &&
       lat !== undefined &&
       lat !== "" &&
       lon !== null &&
@@ -1353,6 +1568,7 @@ export class SettingsManager {
     });
   }
 
+  // Automatic theme selection
   generateCuratedTheme() {
     const hasBackground = this.hasCustomBackground();
     if (state.get("gradientModeActive") === true || hasBackground) return false;
@@ -1399,8 +1615,7 @@ export class SettingsManager {
       add(theme, "normal", `normal:${theme.id}:${baseMode}`);
 
       const opposite = this.getDarkModeTheme(theme, baseMode !== "dark");
-      const hasDifferentColors =
-        opposite &&
+      const hasDifferentColors = opposite &&
         JSON.stringify(opposite.colors) !== JSON.stringify(theme.colors);
       if (hasDifferentColors) {
         add(
@@ -1412,7 +1627,7 @@ export class SettingsManager {
     });
 
     THEMES.gradient.forEach((theme) =>
-      add(theme, "gradient", `gradient:${theme.id}`),
+      add(theme, "gradient", `gradient:${theme.id}`)
     );
 
     (state.get("userSavedThemes") || []).forEach((theme) => {
@@ -1470,8 +1685,8 @@ export class SettingsManager {
 
       const fullModal = window.__fullSettingsModalInstance;
       const isFullOpen = fullModal && fullModal.isOpen;
-      const isMiniOpen =
-        this.els.popup && this.els.popup.classList.contains("visible");
+      const isMiniOpen = this.els.popup &&
+        this.els.popup.classList.contains("visible");
 
       if (isFullOpen) {
         fullModal.close();
@@ -1496,7 +1711,6 @@ export class SettingsManager {
 
       this.renderShortcutEditor();
 
-      // --- DYNAMIC VIBE: DELETE FIRST DEFAULT TASK ---
       if (state.get("defaultTasksPinned")) {
         import("../utils.js").then((utils) => {
           utils.completeDefaultTask("dt-1");
@@ -1537,7 +1751,9 @@ export class SettingsManager {
     }
 
     document.addEventListener("click", (e) => {
-      if (e.target.closest?.(".ydd-custom-modal-overlay, #custom-modal-overlay")) {
+      if (
+        e.target.closest?.(".ydd-custom-modal-overlay, #custom-modal-overlay")
+      ) {
         return;
       }
       if (
@@ -1571,15 +1787,18 @@ export class SettingsManager {
         this.els.panes.forEach((p) => p.classList.remove("active"));
         tab.classList.add("active");
         tab.setAttribute("aria-selected", "true");
-        if (this.els.panes[index])
+        if (this.els.panes[index]) {
           this.els.panes[index].classList.add("active");
+        }
       });
     });
 
-    if (this.els.widgetControl)
-      this.els.widgetControl.addEventListener("change", (e) =>
-        state.set("widgetControl", e.target.value),
+    if (this.els.widgetControl) {
+      this.els.widgetControl.addEventListener(
+        "change",
+        (e) => state.set("widgetControl", e.target.value),
       );
+    }
 
     if (this.els.shortcutsPosition) {
       this.els.shortcutsPosition.addEventListener("change", (e) => {
@@ -1590,7 +1809,9 @@ export class SettingsManager {
     if (this.els.newsEnabled) {
       this.els.newsEnabled.addEventListener("change", async (event) => {
         const enabled = event.target.checked;
-        const success = await window.__newsFeedInstance?.setEnabledFromUser(enabled);
+        const success = await window.__newsFeedInstance?.setEnabledFromUser(
+          enabled,
+        );
         if (!success) {
           event.target.checked = state.get("newsEnabled") === true;
           if (enabled && !(state.get("newsProviderIds") || []).length) {
@@ -1605,19 +1826,25 @@ export class SettingsManager {
     });
 
     if (this.els.searchSuggestionMode) {
-      this.els.searchSuggestionMode.addEventListener("change", async (event) => {
-        const select = event.currentTarget;
-        const requestedMode = select.value;
-        if (requestedMode === "history-online" && !(await requestSearchSuggestionConsent())) {
-          select.value = state.get("searchSuggestionMode") || "history-only";
+      this.els.searchSuggestionMode.addEventListener(
+        "change",
+        async (event) => {
+          const select = event.currentTarget;
+          const requestedMode = select.value;
+          if (
+            requestedMode === "history-online" &&
+            !(await requestSearchSuggestionConsent())
+          ) {
+            select.value = state.get("searchSuggestionMode") || "history-only";
+            syncSuggestionModeSelect(select);
+            return;
+          }
+          state.set("searchSuggestionMode", requestedMode);
+          dismissSearchSuggestionBadge();
+          select.value = requestedMode;
           syncSuggestionModeSelect(select);
-          return;
-        }
-        state.set("searchSuggestionMode", requestedMode);
-        dismissSearchSuggestionBadge();
-        select.value = requestedMode;
-        syncSuggestionModeSelect(select);
-      });
+        },
+      );
     }
 
     if (this.els.dark) {
@@ -1657,8 +1884,11 @@ export class SettingsManager {
             document.body.classList.contains("gradient-mode-active") ||
             state.get("gradientModeActive") === true;
           if (isGradient) {
-            const gradientIndex = e.target.id === "gradient-color-1-picker" ? 0 :
-              e.target.id === "gradient-color-2-picker" ? 1 : -1;
+            const gradientIndex = e.target.id === "gradient-color-1-picker"
+              ? 0
+              : e.target.id === "gradient-color-2-picker"
+              ? 1
+              : -1;
             if (gradientIndex >= 0) {
               this.updateGradientColor(gradientIndex, e.target.value);
             }
@@ -1689,8 +1919,9 @@ export class SettingsManager {
           if (cssVar) {
             document.body.style.setProperty(cssVar, e.target.value);
             state.set(`custom-${cssVar}`, e.target.value);
-            if (cssVar === "--bg-tertiary")
+            if (cssVar === "--bg-tertiary") {
               this.updateIconInversion(e.target.value);
+            }
           }
           state.set("normalThemeId", "custom");
           this.applyCustomThemeUI();
@@ -1717,8 +1948,9 @@ export class SettingsManager {
     }
 
     if (this.els.saveThemeBtn) {
-      this.els.saveThemeBtn.addEventListener("click", () =>
-        this.saveCurrentTheme(),
+      this.els.saveThemeBtn.addEventListener(
+        "click",
+        () => this.saveCurrentTheme(),
       );
     }
 
@@ -1726,7 +1958,6 @@ export class SettingsManager {
       this.els.infoBtn.addEventListener("click", () => {
         this.openInfoModal();
 
-        // --- DYNAMIC VIBE: DELETE SECOND DEFAULT TASK ---
         if (state.get("defaultTasksPinned")) {
           import("../utils.js").then((utils) => {
             utils.completeDefaultTask("dt-2");
@@ -1773,8 +2004,8 @@ export class SettingsManager {
     const openCount = previousCount + 1;
     if (!state.set("miniSettingsOpenCount", openCount)) return;
 
-    const shouldShowFirstHint =
-      openCount === 1 && state.get("miniSettingsHintShown") !== true;
+    const shouldShowFirstHint = openCount === 1 &&
+      state.get("miniSettingsHintShown") !== true;
     const shouldShowRepeatHint = openCount % 8 === 0;
     if (shouldShowFirstHint || shouldShowRepeatHint) {
       this.showMiniSettingsHint();
@@ -1818,7 +2049,8 @@ export class SettingsManager {
     hint.className = "mini-settings-hint";
     hint.setAttribute("role", "status");
     hint.setAttribute("aria-live", "polite");
-    hint.textContent = "Need more control? Click the top-right button to open Full Settings.";
+    hint.textContent =
+      "Need more control? Click the top-right button to open Full Settings.";
     const timer = document.createElement("div");
     timer.className = "zen-notice-timer";
     timer.setAttribute("aria-hidden", "true");
@@ -1850,7 +2082,9 @@ export class SettingsManager {
         event.preventDefault();
         this.closeInfoModal();
       } else if (event.key === "Tab") {
-        const focusable = this.els.infoOverlay.querySelectorAll("button, a[href], input, select, textarea");
+        const focusable = this.els.infoOverlay.querySelectorAll(
+          "button, a[href], input, select, textarea",
+        );
         if (!focusable.length) return;
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
@@ -1896,8 +2130,7 @@ export class SettingsManager {
     ];
 
     vars.forEach((v) => {
-      currentColors[v] =
-        state.get(`custom-${v}`) ||
+      currentColors[v] = state.get(`custom-${v}`) ||
         getComputedStyle(document.body).getPropertyValue(v).trim();
     });
 
@@ -1910,8 +2143,9 @@ export class SettingsManager {
     }
 
     let savedThemes = state.get("userSavedThemes") || [];
-    const type =
-      document.body.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    const type = document.body.getAttribute("data-theme") === "dark"
+      ? "dark"
+      : "light";
 
     if (savedThemes.length >= 5) {
       savedThemes[4] = {
@@ -1946,10 +2180,17 @@ export class SettingsManager {
         if (theme) {
           btn.classList.add("filled");
           btn.textContent = theme.name;
-          const isAzureSky = theme.name === "Azure Sky" || theme.id === "theme-3";
-          const isPhosphor = theme.name === "Phosphor" || theme.id === "theme-7";
-          const rightColor = isAzureSky ? "#006EFF" : (isPhosphor ? "#91AA5B" : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]));
-          btn.style.background = `linear-gradient(to top right, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+          const isAzureSky = theme.name === "Azure Sky" ||
+            theme.id === "theme-3";
+          const isPhosphor = theme.name === "Phosphor" ||
+            theme.id === "theme-7";
+          const rightColor = isAzureSky
+            ? "#006EFF"
+            : (isPhosphor ? "#91AA5B" : (theme.colors["--accent-color"] ||
+              theme.colors["--bg-secondary"]));
+          btn.style.background = `linear-gradient(to top right, ${
+            theme.colors["--bg-primary"]
+          } 50%, ${rightColor} 50%)`;
           btn.style.color = "#ffffff";
           btn.style.textShadow =
             "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
@@ -1986,8 +2227,8 @@ export class SettingsManager {
     if (!container) return;
     container.innerHTML = "";
 
-    const targetNormalIds = ["theme-1", "theme-7", "theme-5"]; // Crimson Red, Phosphor, Sakura
-    const targetGradientIds = ["glacier", "bio-lime", "deep-space"]; // Glacier, Bio Lime, Deep Space
+    const targetNormalIds = ["theme-1", "theme-7", "theme-5"];
+    const targetGradientIds = ["glacier", "bio-lime", "deep-space"];
 
     targetNormalIds.forEach((id) => {
       const theme = THEMES.normal.find((t) => t.id === id);
@@ -1997,8 +2238,14 @@ export class SettingsManager {
       btn.title = theme.name;
       const isAzureSky = theme.name === "Azure Sky" || theme.id === "theme-3";
       const isPhosphor = theme.name === "Phosphor" || theme.id === "theme-7";
-      const rightColor = isAzureSky ? "#006EFF" : (isPhosphor ? "#91AA5B" : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]));
-      btn.style.background = `linear-gradient(to top right, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+      const rightColor = isAzureSky
+        ? "#006EFF"
+        : (isPhosphor
+          ? "#91AA5B"
+          : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]));
+      btn.style.background = `linear-gradient(to top right, ${
+        theme.colors["--bg-primary"]
+      } 50%, ${rightColor} 50%)`;
       btn.addEventListener("click", async () => {
         await this.applySelectedTheme(theme);
       });
@@ -2011,7 +2258,9 @@ export class SettingsManager {
       const btn = document.createElement("button");
       btn.className = "mini-theme-swatch";
       btn.title = theme.name;
-      btn.style.background = `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]})`;
+      btn.style.background = `linear-gradient(135deg, ${theme.colors[0]}, ${
+        theme.colors[1]
+      })`;
       btn.addEventListener("click", async () => {
         await this.applySelectedTheme(theme, true);
       });
@@ -2028,7 +2277,9 @@ export class SettingsManager {
         const rightColor = window.__getThemeRightColor
           ? window.__getThemeRightColor(theme)
           : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]);
-        btn.style.background = `linear-gradient(to top right, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+        btn.style.background = `linear-gradient(to top right, ${
+          theme.colors["--bg-primary"]
+        } 50%, ${rightColor} 50%)`;
         btn.addEventListener("click", async () => {
           await this.applySelectedTheme(theme);
         });
@@ -2040,6 +2291,7 @@ export class SettingsManager {
     }
   }
 
+  // Background state
   hasCustomBackground() {
     return (
       document.body.classList.contains("has-custom-bg") ||
@@ -2049,6 +2301,7 @@ export class SettingsManager {
     );
   }
 
+  // Theme application
   async applySelectedTheme(theme, isGradient = false) {
     if (this.hasCustomBackground()) {
       const decision = await showCustomModal(
@@ -2132,11 +2385,15 @@ export class SettingsManager {
     });
 
     const isDarkType = this.getThemeType(theme) === "dark";
-    const isBuiltInTheme = THEMES.normal.some((builtIn) => builtIn.id === theme.id);
+    const isBuiltInTheme = THEMES.normal.some((builtIn) =>
+      builtIn.id === theme.id
+    );
     if (!isBuiltInTheme) {
-      Object.entries(deriveCustomThemeUI(theme.colors, isDarkType)).forEach(([key, val]) => {
-        document.body.style.setProperty(key, val);
-      });
+      Object.entries(deriveCustomThemeUI(theme.colors, isDarkType)).forEach(
+        ([key, val]) => {
+          document.body.style.setProperty(key, val);
+        },
+      );
     }
 
     this.syncColorPickers(theme.colors);
@@ -2157,7 +2414,9 @@ export class SettingsManager {
   }
 
   applyCustomThemeUI(colors = {}) {
-    if (state.get("gradientModeActive") === true || this.hasCustomBackground()) return;
+    if (
+      state.get("gradientModeActive") === true || this.hasCustomBackground()
+    ) return;
 
     const colorKeys = [
       "--bg-primary",
@@ -2195,12 +2454,12 @@ export class SettingsManager {
   getDarkModeTheme(theme, enabled) {
     if (!theme?.id) return theme;
 
-    const baseTheme =
-      THEMES.normal.find((item) => item.id === theme.id) || theme;
+    const baseTheme = THEMES.normal.find((item) => item.id === theme.id) ||
+      theme;
 
     if (theme.id === "default-light" || theme.id === "default-dark") {
       return THEMES.normal.find((item) =>
-        enabled ? item.id === "default-dark" : item.id === "default-light",
+        enabled ? item.id === "default-dark" : item.id === "default-light"
       );
     }
 
@@ -2237,8 +2496,7 @@ export class SettingsManager {
       normalizeHexColor(state.get("gradientColor1")),
       normalizeHexColor(state.get("gradientColor2")),
     ];
-    const hasStoredColors =
-      !save &&
+    const hasStoredColors = !save &&
       storedThemeId === theme.id &&
       storedColors.every((color) => isHexColor(color));
     const gradientColors = hasStoredColors
@@ -2259,10 +2517,10 @@ export class SettingsManager {
     }
 
     const builtInTheme = THEMES.gradient.find((item) => item.id === theme.id);
-    const colorsWereCustomized =
-      Boolean(builtInTheme) &&
+    const colorsWereCustomized = Boolean(builtInTheme) &&
       gradientColors.some(
-        (color, index) => color !== normalizeHexColor(builtInTheme.colors[index]),
+        (color, index) =>
+          color !== normalizeHexColor(builtInTheme.colors[index]),
       );
     const gradientType = colorsWereCustomized
       ? classifyGradientType(gradientColors)
@@ -2307,9 +2565,7 @@ export class SettingsManager {
 
     const useCustomGradientUI = colorsWereCustomized;
     const gradientUI = useCustomGradientUI
-      ? isDarkType
-        ? ALIEN_DARK
-        : ALIEN_LIGHT
+      ? isDarkType ? ALIEN_DARK : ALIEN_LIGHT
       : theme.ui;
     Object.entries(gradientUI).forEach(([key, val]) => {
       document.body.style.setProperty(key, val);
@@ -2325,11 +2581,15 @@ export class SettingsManager {
   updateGradientColor(index, value) {
     const color = String(value || "").trim();
     if (![0, 1].includes(index) || !isHexColor(color)) return false;
-    const themeId = state.get("gradientThemeId") || state.get("gradientColorThemeId");
-    const theme = THEMES.gradient.find((item) => item.id === themeId) || THEMES.gradient[0];
+    const themeId = state.get("gradientThemeId") ||
+      state.get("gradientColorThemeId");
+    const theme = THEMES.gradient.find((item) => item.id === themeId) ||
+      THEMES.gradient[0];
     const current = [
-      normalizeHexColor(state.get("gradientColor1")) || normalizeHexColor(theme.colors[0]),
-      normalizeHexColor(state.get("gradientColor2")) || normalizeHexColor(theme.colors[1]),
+      normalizeHexColor(state.get("gradientColor1")) ||
+      normalizeHexColor(theme.colors[0]),
+      normalizeHexColor(state.get("gradientColor2")) ||
+      normalizeHexColor(theme.colors[1]),
     ];
     current[index] = color;
     state.set("gradientColorThemeId", theme.id);
@@ -2365,16 +2625,14 @@ export class SettingsManager {
   }
 
   updateDarkModeUpdatedBadge() {
-    const hidden =
-      (Number(state.get("darkModeToggleUseCount")) || 0) >= 1;
+    const hidden = (Number(state.get("darkModeToggleUseCount")) || 0) >= 1;
     const miniSticker = document.getElementById("dark-mode-updated-sticker");
     if (miniSticker) miniSticker.hidden = hidden;
     window.__fullSettingsModalInstance?.updateDarkModeUpdatedBadge?.(hidden);
   }
 
   updateWeatherLocationBadge() {
-    const hidden =
-      (Number(state.get("weatherLocationSaveCount")) || 0) >= 1;
+    const hidden = (Number(state.get("weatherLocationSaveCount")) || 0) >= 1;
     const miniSticker = document.getElementById(
       "weather-location-updated-sticker",
     );
@@ -2394,8 +2652,9 @@ export class SettingsManager {
       fontFamilyUseCount: this.els.fontFamilyBadge,
     };
     const badge = elements[key];
-    const shouldHide =
-      hidden === null ? (Number(state.get(key)) || 0) >= 1 : hidden;
+    const shouldHide = hidden === null
+      ? (Number(state.get(key)) || 0) >= 1
+      : hidden;
     if (badge) badge.hidden = shouldHide;
     window.__fullSettingsModalInstance?.updateFeatureBadge?.(key, shouldHide);
   }
@@ -2408,12 +2667,11 @@ export class SettingsManager {
   }
 
   recordThemePresetUse(themeId) {
-    const key =
-      themeId === "theme-8"
-        ? "lavenderMistThemeUseCount"
-        : themeId === "dawn-bloom"
-          ? "dawnBloomThemeUseCount"
-          : null;
+    const key = themeId === "theme-8"
+      ? "lavenderMistThemeUseCount"
+      : themeId === "dawn-bloom"
+      ? "dawnBloomThemeUseCount"
+      : null;
     if (!key || (Number(state.get(key)) || 0) >= 1) return;
     if (!state.set(key, 1)) return;
     window.__fullSettingsModalInstance?.updateThemeBadges?.();
@@ -2449,8 +2707,7 @@ export class SettingsManager {
 
     const colors = {};
     vars.forEach((v) => {
-      const saved =
-        state.get(`custom-${v}`) ||
+      const saved = state.get(`custom-${v}`) ||
         defaultFallback[v] ||
         getComputedStyle(document.body).getPropertyValue(v).trim();
       if (saved) {
@@ -2467,8 +2724,7 @@ export class SettingsManager {
 
   resetGrayscaleForCurrentContext() {
     const themeId = document.body.getAttribute("data-theme-id");
-    const shouldUseGrayscale =
-      themeId === "default-dark" &&
+    const shouldUseGrayscale = themeId === "default-dark" &&
       state.get("gradientModeActive") !== true &&
       !this.hasCustomBackground();
 
@@ -2486,9 +2742,13 @@ export class SettingsManager {
       "--icon-filter",
       useGrayscale ? "grayscale(100%) brightness(1)" : "grayscale(0%)",
     );
-    document.body.style.setProperty("--icon-opacity", useGrayscale ? "0.8" : "1");
+    document.body.style.setProperty(
+      "--icon-opacity",
+      useGrayscale ? "0.8" : "1",
+    );
   }
 
+  // Location services
   async searchLocation() {
     const city = this.els.locInput.value.trim();
     if (!city) return;
@@ -2502,7 +2762,9 @@ export class SettingsManager {
     if (this.els.locSave) this.els.locSave.textContent = "...";
     try {
       const res = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=5&language=en&format=json`,
+        `https://geocoding-api.open-meteo.com/v1/search?name=${
+          encodeURIComponent(city)
+        }&count=5&language=en&format=json`,
         { signal: controller.signal },
       );
       if (!res.ok) throw new Error(`Geocoding request failed (${res.status})`);
@@ -2534,7 +2796,9 @@ export class SettingsManager {
     } catch (e) {
       if (e?.name !== "AbortError" && requestId === this._locationRequestId) {
         console.error("Geocoding Error:", e);
-        showCustomModal("Could not look up that location. Check your connection and try again.");
+        showCustomModal(
+          "Could not look up that location. Check your connection and try again.",
+        );
       }
     } finally {
       if (requestId === this._locationRequestId) {
@@ -2553,9 +2817,12 @@ export class SettingsManager {
       );
       if (!res.ok) throw new Error(`Reverse geocoding failed (${res.status})`);
       const data = await res.json();
-      if (!data || typeof data !== "object") throw new TypeError("Invalid reverse geocoding response");
+      if (!data || typeof data !== "object") {
+        throw new TypeError("Invalid reverse geocoding response");
+      }
       return [data.city, data.locality, data.principalSubdivision]
-        .find((value) => typeof value === "string" && value.trim()) || "Unknown Location";
+        .find((value) => typeof value === "string" && value.trim()) ||
+        "Unknown Location";
     } catch (e) {
       return `${parseFloat(lat).toFixed(1)}, ${parseFloat(lon).toFixed(1)}`;
     }
@@ -2564,7 +2831,11 @@ export class SettingsManager {
   async freezeRandomBackground() {
     const currentMode = state.get("randomBgMode");
     if (currentMode === "freeze") {
-      if (await this.fetchRandomBackground("user", null, { preserveSchedule: true })) {
+      if (
+        await this.fetchRandomBackground("user", null, {
+          preserveSchedule: true,
+        })
+      ) {
         state.set("randomBgTime", null);
       }
     } else {
@@ -2599,10 +2870,9 @@ export class SettingsManager {
       state.set("randomBgTime", result === "forever" ? -1 : Date.now());
       this.updateRandomBgButtons();
 
-      const message =
-        result === "forever"
-          ? "Background is saved forever! It won't change until you manually update it."
-          : "Background is freezed for the next 72 hours.";
+      const message = result === "forever"
+        ? "Background is saved forever! It won't change until you manually update it."
+        : "Background is freezed for the next 72 hours.";
 
       setTimeout(() => showCustomModal(message), 10);
     }
@@ -2670,7 +2940,6 @@ export class SettingsManager {
     }
   }
 
-  /** Requests the current position after the user explicitly enables it. */
   _requestBrowserLocation() {
     const requestId = ++this._gpsRequestId;
     navigator.geolocation.getCurrentPosition(
@@ -2789,15 +3058,24 @@ export class SettingsManager {
         btn.className = `theme-preset-button ${isGradient ? "gradient" : ""}`;
         btn.textContent = theme.name;
         if (isGradient) {
-          btn.style.background = `linear-gradient(to top right, ${theme.colors[0]} 50%, ${theme.colors[1]} 50%)`;
+          btn.style.background = `linear-gradient(to top right, ${
+            theme.colors[0]
+          } 50%, ${theme.colors[1]} 50%)`;
           btn.style.color = "#ffffff";
           btn.style.textShadow =
             "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
         } else {
-          const isAzureSky = theme.name === "Azure Sky" || theme.id === "theme-3";
-          const isPhosphor = theme.name === "Phosphor" || theme.id === "theme-7";
-          const rightColor = isAzureSky ? "#006EFF" : (isPhosphor ? "#91AA5B" : (theme.colors["--accent-color"] || theme.colors["--bg-secondary"]));
-          btn.style.background = `linear-gradient(to top right, ${theme.colors["--bg-primary"]} 50%, ${rightColor} 50%)`;
+          const isAzureSky = theme.name === "Azure Sky" ||
+            theme.id === "theme-3";
+          const isPhosphor = theme.name === "Phosphor" ||
+            theme.id === "theme-7";
+          const rightColor = isAzureSky
+            ? "#006EFF"
+            : (isPhosphor ? "#91AA5B" : (theme.colors["--accent-color"] ||
+              theme.colors["--bg-secondary"]));
+          btn.style.background = `linear-gradient(to top right, ${
+            theme.colors["--bg-primary"]
+          } 50%, ${rightColor} 50%)`;
           btn.style.color = "#ffffff";
           btn.style.textShadow =
             "0 1px 3px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.9)";
@@ -2838,14 +3116,13 @@ export class SettingsManager {
     }
 
     el.addEventListener("change", () => {
-      const val =
-        typeof trueValue === "boolean"
-          ? el.checked
-          : el.checked
-            ? trueValue
-            : key === "clockFormat"
-              ? "12"
-              : "digital";
+      const val = typeof trueValue === "boolean"
+        ? el.checked
+        : el.checked
+        ? trueValue
+        : key === "clockFormat"
+        ? "12"
+        : "digital";
       const saved = key === "tempUnit"
         ? state.set(key, el.checked ? "imperial" : "metric")
         : state.set(key, val);
@@ -2908,8 +3185,9 @@ export class SettingsManager {
       this.els.backup.addEventListener("click", () => this.backup());
     }
     if (this.els.restore && this.els.restoreInput) {
-      this.els.restore.addEventListener("click", () =>
-        this.els.restoreInput.click(),
+      this.els.restore.addEventListener(
+        "click",
+        () => this.els.restoreInput.click(),
       );
       this.els.restoreInput.addEventListener("change", (e) => this.restore(e));
     }
@@ -2958,6 +3236,7 @@ export class SettingsManager {
     window.__fullSettingsModalInstance?._updateBgState();
   }
 
+  // Random background settings
   getRandomBackgroundSchedule() {
     const schedule = state.get("randomBgSchedule");
     return Object.prototype.hasOwnProperty.call(RANDOM_BG_SCHEDULES, schedule)
@@ -2975,7 +3254,8 @@ export class SettingsManager {
   _isRandomBackgroundDue(schedule = this.getRandomBackgroundSchedule()) {
     if (schedule === "refresh") return false;
     if (schedule === "day") {
-      return state.get("randomBgLastChangedDate") !== this._getRandomBackgroundDateKey();
+      return state.get("randomBgLastChangedDate") !==
+        this._getRandomBackgroundDateKey();
     }
 
     const interval = RANDOM_BG_SCHEDULES[schedule]?.interval;
@@ -3247,7 +3527,9 @@ export class SettingsManager {
   }
 
   _normalizeRandomBackgroundEntry(entry) {
-    if (!entry || typeof entry.url !== "string" || !entry.url.trim()) return null;
+    if (!entry || typeof entry.url !== "string" || !entry.url.trim()) {
+      return null;
+    }
 
     let url;
     try {
@@ -3261,10 +3543,10 @@ export class SettingsManager {
     return {
       url: url.href,
       blob: entry.blob instanceof Blob ? entry.blob : null,
-      preview:
-        typeof entry.preview === "string" && entry.preview.startsWith("data:image/")
-          ? entry.preview
-          : null,
+      preview: typeof entry.preview === "string" &&
+          entry.preview.startsWith("data:image/")
+        ? entry.preview
+        : null,
     };
   }
 
@@ -3305,7 +3587,8 @@ export class SettingsManager {
     image.decoding = "async";
     const loaded = new Promise((resolve, reject) => {
       image.onload = resolve;
-      image.onerror = () => reject(new Error("Background image could not be decoded."));
+      image.onerror = () =>
+        reject(new Error("Background image could not be decoded."));
     });
     image.src = url;
 
@@ -3314,7 +3597,6 @@ export class SettingsManager {
         await image.decode();
         return true;
       } catch (error) {
-        // Fall back to the load event for browsers with incomplete decode support.
       }
     }
     await loaded;
@@ -3333,7 +3615,8 @@ export class SettingsManager {
         image.src = objectUrl;
         await new Promise((resolve, reject) => {
           image.onload = resolve;
-          image.onerror = () => reject(new Error("Preview image could not be decoded."));
+          image.onerror = () =>
+            reject(new Error("Preview image could not be decoded."));
         });
         source = image;
       }
@@ -3389,6 +3672,7 @@ export class SettingsManager {
     return true;
   }
 
+  // Random background queue
   async _getStoredRandomBackgroundQueue() {
     try {
       const storedQueue = await secondStorage.getRandomBackgroundQueue();
@@ -3419,7 +3703,10 @@ export class SettingsManager {
         queue: remainingQueue,
       };
     } catch (error) {
-      console.warn("Random background queue item could not be consumed:", error);
+      console.warn(
+        "Random background queue item could not be consumed:",
+        error,
+      );
       return { hadEntry: false, queueExists: false, entry: null, queue: [] };
     }
   }
@@ -3451,7 +3738,9 @@ export class SettingsManager {
 
     let lastError = null;
     for (let attempt = 0; attempt < 5; attempt += 1) {
-      const cacheKey = `${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0]}`;
+      const cacheKey = `${Date.now()}-${
+        crypto.getRandomValues(new Uint32Array(1))[0]
+      }`;
       const controller = new AbortController();
       const timeoutId = window.setTimeout(
         () => controller.abort(),
@@ -3473,7 +3762,9 @@ export class SettingsManager {
         }
 
         const finalUrl = response.url;
-        if (!finalUrl) throw new Error("Wallpaper service returned no image URL.");
+        if (!finalUrl) {
+          throw new Error("Wallpaper service returned no image URL.");
+        }
         if (excluded.has(this._getRandomBackgroundIdentity(finalUrl))) {
           await response.body?.cancel?.();
           continue;
@@ -3500,7 +3791,8 @@ export class SettingsManager {
       }
     }
 
-    throw lastError || new Error("Wallpaper service repeatedly returned the current image.");
+    throw lastError ||
+      new Error("Wallpaper service repeatedly returned the current image.");
   }
 
   async _advanceRandomBackground(origin = "schedule", operationId = null) {
@@ -3552,8 +3844,7 @@ export class SettingsManager {
     const schedule = this.getRandomBackgroundSchedule();
 
     if (schedule !== "refresh") {
-      const currentEntry =
-        (await this._getStoredRandomBackgroundCurrent()) ||
+      const currentEntry = (await this._getStoredRandomBackgroundCurrent()) ||
         this._getRandomBackgroundFallbackCurrent();
       if (operationId !== this._backgroundOperationId) return;
 
@@ -3584,7 +3875,12 @@ export class SettingsManager {
     if (operationId !== this._backgroundOperationId) return;
 
     if (consumedQueue.entry) {
-      if (!(await this._useRandomBackgroundEntry(consumedQueue.entry, operationId))) {
+      if (
+        !(await this._useRandomBackgroundEntry(
+          consumedQueue.entry,
+          operationId,
+        ))
+      ) {
         return;
       }
       this._syncBackgroundControls();
@@ -3601,7 +3897,9 @@ export class SettingsManager {
         url: queuedUrl,
         preview: this._getRandomBackgroundNextPreview(),
       };
-      if (!(await this._useRandomBackgroundEntry(legacyEntry, operationId))) return;
+      if (!(await this._useRandomBackgroundEntry(legacyEntry, operationId))) {
+        return;
+      }
       await this._persistRandomBackgroundQueue([]);
       this._syncBackgroundControls();
       void this._fillRandomBackgroundQueue(operationId, []);
@@ -3615,11 +3913,12 @@ export class SettingsManager {
         priority: "high",
       });
       if (operationId !== this._backgroundOperationId) return;
-      if (!(await this._useRandomBackgroundEntry(currentEntry, operationId))) return;
+      if (!(await this._useRandomBackgroundEntry(currentEntry, operationId))) {
+        return;
+      }
       await this._persistRandomBackgroundQueue([]);
       this._syncBackgroundControls();
-      // The current wallpaper is the foreground operation. Refill the queue
-      // afterward at low priority so it cannot compete with weather or RSS.
+
       void this._fillRandomBackgroundQueue(operationId, []);
     } catch (error) {
       if (operationId === this._backgroundOperationId) {
@@ -3678,6 +3977,7 @@ export class SettingsManager {
     return storedQueue.length > 0;
   }
 
+  // Custom background actions
   async handleBgUpload(file) {
     if (!file) return false;
     const operationId = ++this._backgroundOperationId;
@@ -3751,6 +4051,7 @@ export class SettingsManager {
     }
   }
 
+  // Reset and cleanup
   async resetAll() {
     if (
       await showCustomModal(
@@ -3773,6 +4074,7 @@ export class SettingsManager {
     }
   }
 
+  // Shortcut editor
   renderShortcutEditor() {
     if (!this.els.shortcutList) return;
     this.els.shortcutList.innerHTML = "";
@@ -3810,7 +4112,11 @@ export class SettingsManager {
 
       const chooseIcon = () => fileInput.click();
       iconContainer.addEventListener("click", chooseIcon);
-      makeKeyboardInteractive(iconContainer, chooseIcon, `Change ${s.name} icon`);
+      makeKeyboardInteractive(
+        iconContainer,
+        chooseIcon,
+        `Change ${s.name} icon`,
+      );
 
       const inputsDiv = document.createElement("div");
       inputsDiv.className = "inputs";
@@ -3903,7 +4209,8 @@ export class SettingsManager {
             );
             resetBtn.style.display = "";
           };
-          tempImg.onerror = () => showCustomModal("The icon could not be decoded.");
+          tempImg.onerror = () =>
+            showCustomModal("The icon could not be decoded.");
           tempImg.src = ev.target.result;
         };
         reader.readAsDataURL(file);
@@ -3958,7 +4265,10 @@ export class SettingsManager {
       await showCustomModal(`You can add up to ${MAX_SHORTCUTS} shortcuts.`);
       return false;
     }
-    const cleanName = String(name || "").trim().slice(0, MAX_SHORTCUT_NAME_LENGTH);
+    const cleanName = String(name || "").trim().slice(
+      0,
+      MAX_SHORTCUT_NAME_LENGTH,
+    );
     if (!cleanName) {
       await showCustomModal("Enter a shortcut name.");
       return false;
@@ -3986,7 +4296,10 @@ export class SettingsManager {
     if (!Number.isInteger(index) || index < 0 || index >= current.length) {
       return false;
     }
-    const cleanName = String(name || "").trim().slice(0, MAX_SHORTCUT_NAME_LENGTH);
+    const cleanName = String(name || "").trim().slice(
+      0,
+      MAX_SHORTCUT_NAME_LENGTH,
+    );
     if (!cleanName) {
       void showCustomModal("Enter a shortcut name.");
       return false;
@@ -4034,7 +4347,9 @@ export class SettingsManager {
       return false;
     }
     if (current.length <= MIN_SHORTCUTS) {
-      void showCustomModal(`There must be at least ${MIN_SHORTCUTS} shortcuts.`);
+      void showCustomModal(
+        `There must be at least ${MIN_SHORTCUTS} shortcuts.`,
+      );
       return false;
     }
     current.splice(index, 1);
@@ -4063,6 +4378,7 @@ export class SettingsManager {
     return true;
   }
 
+  // Backup and restore
   async backup() {
     try {
       let backgroundBlob = null;
@@ -4106,7 +4422,7 @@ export class SettingsManager {
     let channels = null;
     if (/^#[\da-f]{3}$/i.test(color)) {
       channels = [color[1], color[2], color[3]].map((value) =>
-        parseInt(value + value, 16),
+        parseInt(value + value, 16)
       );
     } else if (/^#[\da-f]{6}/i.test(color)) {
       channels = [
@@ -4116,15 +4432,17 @@ export class SettingsManager {
       ];
     } else if (/^rgba?\(/i.test(color)) {
       const values = color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
-      if (values?.length === 3 && values.every(Number.isFinite)) channels = values;
+      if (values?.length === 3 && values.every(Number.isFinite)) {
+        channels = values;
+      }
     }
     if (channels) {
       const [r, g, b] = channels;
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128
-        ? "dark"
-        : "light";
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128 ? "dark" : "light";
     }
-    return document.body.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    return document.body.getAttribute("data-theme") === "dark"
+      ? "dark"
+      : "light";
   }
 
   async restore(e) {
@@ -4148,8 +4466,8 @@ export class SettingsManager {
         console.warn("IndexedDB was unavailable before restore:", error);
       }
       const data = JSON.parse(await file.text());
-      const isCurrentFormat =
-        data?.format === "YourDynamicDashboard" && data?.version === 2;
+      const isCurrentFormat = data?.format === "YourDynamicDashboard" &&
+        data?.version === 2;
       const entries = validateYddStorageEntries(
         isCurrentFormat ? data.localStorage : data,
       );
@@ -4166,7 +4484,7 @@ export class SettingsManager {
       mutationStarted = true;
       clearYddLocalStorage();
       Object.entries(entries).forEach(([key, value]) =>
-        localStorage.setItem(key, value),
+        localStorage.setItem(key, value)
       );
 
       if (isCurrentFormat) {
@@ -4193,7 +4511,7 @@ export class SettingsManager {
         try {
           clearYddLocalStorage();
           Object.entries(previousEntries).forEach(([key, value]) =>
-            localStorage.setItem(key, value),
+            localStorage.setItem(key, value)
           );
           if (previousBackground) {
             await secondStorage.saveImage(previousBackground);
@@ -4227,18 +4545,24 @@ export class SettingsManager {
 
   async dataUrlToBlob(dataUrl) {
     const response = await fetch(dataUrl);
-    if (!response.ok) throw new TypeError("Could not decode backup background.");
+    if (!response.ok) {
+      throw new TypeError("Could not decode backup background.");
+    }
     return response.blob();
   }
 
-  async fetchRandomBackground(origin = "user", triggerButton = null, options = {}) {
+  // Background fetching
+  async fetchRandomBackground(
+    origin = "user",
+    triggerButton = null,
+    options = {},
+  ) {
     const operationId = ++this._backgroundOperationId;
-    const fullSettingsButton =
-      triggerButton || window.__fullSettingsModalInstance?.els?.fsRndBtn;
-    const loadingButtons =
-      origin === "startup"
-        ? []
-        : [this.els.randomBgRnd, fullSettingsButton].filter(Boolean);
+    const fullSettingsButton = triggerButton ||
+      window.__fullSettingsModalInstance?.els?.fsRndBtn;
+    const loadingButtons = origin === "startup"
+      ? []
+      : [this.els.randomBgRnd, fullSettingsButton].filter(Boolean);
     const originalButtonContents = new Map();
     loadingButtons.forEach((button) => {
       originalButtonContents.set(button, {
@@ -4247,8 +4571,7 @@ export class SettingsManager {
       });
       button.replaceChildren();
       const loadingIndicator = document.createElement("span");
-      const animationsDisabled =
-        state.get("disableAnimations") === true ||
+      const animationsDisabled = state.get("disableAnimations") === true ||
         document.documentElement.classList.contains("disable-animations");
       loadingIndicator.className = animationsDisabled
         ? "background-loading-indicator"
@@ -4271,7 +4594,9 @@ export class SettingsManager {
       await secondStorage.deleteImage();
       if (operationId !== this._backgroundOperationId) return false;
 
-      if (!(await this._useRandomBackgroundEntry(entry, operationId))) return false;
+      if (!(await this._useRandomBackgroundEntry(entry, operationId))) {
+        return false;
+      }
       await this._persistRandomBackgroundQueue([]);
       localStorage.removeItem("has_idb_bg");
       localStorage.removeItem("lowResBg");
@@ -4327,10 +4652,12 @@ export class SettingsManager {
 
     if (this.els.randomBgRnd) {
       this.els.randomBgRnd.classList.toggle("hidden", mode === "random");
-      this.els.randomBgRnd.style.color =
-        mode === "random" ? "var(--accent-color)" : "";
-      this.els.randomBgRnd.style.borderColor =
-        mode === "random" ? "var(--accent-color)" : "";
+      this.els.randomBgRnd.style.color = mode === "random"
+        ? "var(--accent-color)"
+        : "";
+      this.els.randomBgRnd.style.borderColor = mode === "random"
+        ? "var(--accent-color)"
+        : "";
     }
     if (this.els.randomBgSchedule) {
       this.els.randomBgSchedule.value = schedule;

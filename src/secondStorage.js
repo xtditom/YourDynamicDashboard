@@ -1,3 +1,4 @@
+// IndexedDB configuration
 const DB_NAME = "YDD_Storage";
 const STORE_NAME = "images";
 const DB_VERSION = 2;
@@ -7,13 +8,16 @@ const RANDOM_BACKGROUND_CURRENT_KEY = "random_bg_current";
 let databasePromise = null;
 let mutationQueue = Promise.resolve();
 
+// Database lifecycle
 function openDB() {
   if (databasePromise) return databasePromise;
   databasePromise = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
     };
     request.onsuccess = (event) => {
       const db = event.target.result;
@@ -35,6 +39,7 @@ function openDB() {
   return databasePromise;
 }
 
+// Transaction helpers
 async function runTransaction(mode, operation) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -47,7 +52,6 @@ async function runTransaction(mode, operation) {
         result = request.result;
       };
       request.onerror = () => {
-        // The transaction handlers below provide the final rejection.
       };
     } catch (error) {
       transaction.abort();
@@ -55,8 +59,12 @@ async function runTransaction(mode, operation) {
       return;
     }
     transaction.oncomplete = () => resolve(result);
-    transaction.onerror = () => reject(transaction.error || new Error("IndexedDB transaction failed."));
-    transaction.onabort = () => reject(transaction.error || new Error("IndexedDB transaction was aborted."));
+    transaction.onerror = () =>
+      reject(transaction.error || new Error("IndexedDB transaction failed."));
+    transaction.onabort = () =>
+      reject(
+        transaction.error || new Error("IndexedDB transaction was aborted."),
+      );
   });
 }
 
@@ -66,6 +74,7 @@ function enqueueMutation(operation) {
   return pending;
 }
 
+// Background queue mutations
 function mutateRandomBackgroundQueue(mutator) {
   return openDB().then(
     (db) =>
@@ -81,7 +90,6 @@ function mutateRandomBackgroundQueue(mutator) {
           try {
             transaction.abort();
           } catch (abortError) {
-            // The transaction may already be completing.
           }
           reject(error || new Error("Random background queue update failed."));
         };
@@ -90,16 +98,12 @@ function mutateRandomBackgroundQueue(mutator) {
         request.onerror = () => fail(request.error);
         request.onsuccess = () => {
           try {
-            const queue = Array.isArray(request.result)
-              ? request.result
-              : [];
+            const queue = Array.isArray(request.result) ? request.result : [];
             const mutation = mutator(queue) || {};
-            result = Array.isArray(mutation.result)
-              ? mutation.result
-              : {
-                  ...(mutation.result || {}),
-                  queueExists: Array.isArray(request.result),
-                };
+            result = Array.isArray(mutation.result) ? mutation.result : {
+              ...(mutation.result || {}),
+              queueExists: Array.isArray(request.result),
+            };
             if (mutation.queue) {
               store.put(mutation.queue, RANDOM_BACKGROUND_QUEUE_KEY);
             }
@@ -133,10 +137,11 @@ function randomBackgroundIdentity(url) {
   }
 }
 
+// Background storage API
 export const secondStorage = {
   saveImage(blob) {
     return enqueueMutation(() =>
-      runTransaction("readwrite", (store) => store.put(blob, "current_bg")),
+      runTransaction("readwrite", (store) => store.put(blob, "current_bg"))
     );
   },
 
@@ -147,22 +152,24 @@ export const secondStorage = {
 
   deleteImage() {
     return enqueueMutation(() =>
-      runTransaction("readwrite", (store) => store.delete("current_bg")),
+      runTransaction("readwrite", (store) => store.delete("current_bg"))
     );
   },
 
   saveRandomBackgroundQueue(queue) {
     return enqueueMutation(() =>
-      runTransaction("readwrite", (store) =>
-        store.put(queue, RANDOM_BACKGROUND_QUEUE_KEY),
-      ),
+      runTransaction(
+        "readwrite",
+        (store) => store.put(queue, RANDOM_BACKGROUND_QUEUE_KEY),
+      )
     );
   },
 
   async getRandomBackgroundQueue() {
     await mutationQueue;
-    const queue = await runTransaction("readonly", (store) =>
-      store.get(RANDOM_BACKGROUND_QUEUE_KEY),
+    const queue = await runTransaction(
+      "readonly",
+      (store) => store.get(RANDOM_BACKGROUND_QUEUE_KEY),
     );
     return Array.isArray(queue) ? queue : [];
   },
@@ -175,7 +182,7 @@ export const secondStorage = {
           result: { entry: entry || null, queue: remaining },
           queue: remaining,
         };
-      }),
+      })
     );
   },
 
@@ -183,7 +190,7 @@ export const secondStorage = {
     return enqueueMutation(() =>
       mutateRandomBackgroundQueue((queue) => {
         const nextQueue = queue.filter((entry) =>
-          Boolean(randomBackgroundIdentity(entry?.url)),
+          Boolean(randomBackgroundIdentity(entry?.url))
         );
         const knownUrls = new Set(
           nextQueue
@@ -201,38 +208,42 @@ export const secondStorage = {
 
         const limitedQueue = nextQueue.slice(0, limit);
         return { result: limitedQueue, queue: limitedQueue };
-      }),
+      })
     );
   },
 
   deleteRandomBackgroundQueue() {
     return enqueueMutation(() =>
-      runTransaction("readwrite", (store) =>
-        store.delete(RANDOM_BACKGROUND_QUEUE_KEY),
-      ),
+      runTransaction(
+        "readwrite",
+        (store) => store.delete(RANDOM_BACKGROUND_QUEUE_KEY),
+      )
     );
   },
 
   saveRandomBackgroundCurrent(entry) {
     return enqueueMutation(() =>
-      runTransaction("readwrite", (store) =>
-        store.put(entry, RANDOM_BACKGROUND_CURRENT_KEY),
-      ),
+      runTransaction(
+        "readwrite",
+        (store) => store.put(entry, RANDOM_BACKGROUND_CURRENT_KEY),
+      )
     );
   },
 
   async getRandomBackgroundCurrent() {
     await mutationQueue;
-    return runTransaction("readonly", (store) =>
-      store.get(RANDOM_BACKGROUND_CURRENT_KEY),
+    return runTransaction(
+      "readonly",
+      (store) => store.get(RANDOM_BACKGROUND_CURRENT_KEY),
     );
   },
 
   deleteRandomBackgroundCurrent() {
     return enqueueMutation(() =>
-      runTransaction("readwrite", (store) =>
-        store.delete(RANDOM_BACKGROUND_CURRENT_KEY),
-      ),
+      runTransaction(
+        "readwrite",
+        (store) => store.delete(RANDOM_BACKGROUND_CURRENT_KEY),
+      )
     );
   },
 
@@ -252,5 +263,4 @@ if (typeof window !== "undefined") {
     void secondStorage.close();
   });
 }
-
 // [src/secondStorage.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

@@ -2,8 +2,8 @@ import { state } from "../state.js";
 import {
   CONFIG,
   SEARCH_PROVIDERS,
-  SEARCH_SUGGESTIONS,
   SEARCH_SUGGESTION_MODES,
+  SEARCH_SUGGESTIONS,
 } from "../config.js";
 import {
   createHoverPauseTimer,
@@ -14,10 +14,10 @@ import {
 } from "../utils.js";
 import { BANG_MAP } from "./palette.js";
 import {
-  MAX_QUERY_LENGTH,
-  SuggestionEngine,
   dismissSearchSuggestionBadge,
   isOnlineSuggestionMode,
+  MAX_QUERY_LENGTH,
+  SuggestionEngine,
 } from "./suggestions.js";
 import {
   MAX_CUSTOM_SEARCH_ENGINES,
@@ -34,6 +34,7 @@ import {
   SEARCH_QUERY_PARAMETER_CANDIDATES,
 } from "../keywords.js";
 
+// Search configuration
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const MAX_TIMEOUT_MS = 2_147_483_647;
 const CUSTOM_SEARCH_ICON_SIZE = 128;
@@ -53,6 +54,7 @@ const GOOGLE_AI_QUERY_VALUE = "50";
 const GOOGLE_AI_HINT_DURATION_MS = 8 * 1000;
 const GOOGLE_AI_HINT_MAX_SHOWS = 5;
 
+// Search module
 export class Search {
   constructor() {
     this.els = {
@@ -67,7 +69,9 @@ export class Search {
       engineList: document.getElementById("dropdown-engines"),
       customEngineSection: document.getElementById("dropdown-custom-section"),
       customEngineList: document.getElementById("dropdown-custom-engines"),
-      customEngineAction: document.getElementById("custom-search-engine-action"),
+      customEngineAction: document.getElementById(
+        "custom-search-engine-action",
+      ),
       platformList: document.getElementById("dropdown-platforms"),
     };
 
@@ -118,6 +122,7 @@ export class Search {
     window.YD_Search = this;
   }
 
+  // Provider management
   getCustomSearchEngines() {
     return (state.get("customSearchEngines") || []).map((provider) => ({
       ...provider,
@@ -133,7 +138,8 @@ export class Search {
   }
 
   getProvider(id, type) {
-    return this.getProviders(type).find((provider) => provider.id === id) || null;
+    return this.getProviders(type).find((provider) => provider.id === id) ||
+      null;
   }
 
   getValidProvider(value) {
@@ -156,6 +162,7 @@ export class Search {
     return fallback;
   }
 
+  // Event wiring
   init() {
     this.els.input.setAttribute("role", "combobox");
     this.els.input.setAttribute("aria-autocomplete", "list");
@@ -210,7 +217,6 @@ export class Search {
       this.updateButtons();
       const val = e.target.value;
 
-      // --- Reactive Bang Search Engine Switcher (!yt , !g , !sp , !ddg , etc.) ---
       if (val.endsWith(" ") && (val.startsWith("!") || val.startsWith("/"))) {
         const bangKey = val.trim().substring(1).toLowerCase();
         const target = BANG_MAP[bangKey];
@@ -235,8 +241,8 @@ export class Search {
           next < 0
             ? this._suggestionItems.length - 1
             : next >= this._suggestionItems.length
-              ? 0
-              : next,
+            ? 0
+            : next,
         );
         return;
       }
@@ -278,14 +284,14 @@ export class Search {
 
     this.els.form.addEventListener("submit", (e) => this.handleSubmit(e));
 
-    // --- Voice Search Logic ---
     if (this.els.voiceBtn) {
       if (
         "webkitSpeechRecognition" in window ||
         "SpeechRecognition" in window
       ) {
-        this.els.voiceBtn.addEventListener("click", () =>
-          this.toggleVoiceSearch(),
+        this.els.voiceBtn.addEventListener(
+          "click",
+          () => this.toggleVoiceSearch(),
         );
       }
       this.updateVoiceButton();
@@ -302,19 +308,20 @@ export class Search {
     });
   }
 
-  // --- SECTION: SAVE SEARCH ---
+  // Search history
   getHistoryMaxAge() {
     const configuredDays = Number(state.get("searchAutoDeleteDays"));
-    const days =
-      Number.isFinite(configuredDays) && configuredDays > 0
-        ? configuredDays
-        : CONFIG.defaults.searchAutoDeleteDays;
+    const days = Number.isFinite(configuredDays) && configuredDays > 0
+      ? configuredDays
+      : CONFIG.defaults.searchAutoDeleteDays;
     return days * DAY_IN_MS;
   }
 
   isSearchVisible() {
     const control = state.get("widgetControl") || "all";
-    return ["all", "search-only", "search-weather", "search-quote"].includes(control);
+    return ["all", "search-only", "search-weather", "search-quote"].includes(
+      control,
+    );
   }
 
   syncTypewriterVisibility() {
@@ -403,7 +410,7 @@ export class Search {
     state.set("searchHistory", history);
   }
 
-  // --- SECTION: SEARCH SUGGESTIONS DROPDOWN ---
+  // Search suggestions
   getHistorySuggestions(rawQuery) {
     const typed = String(rawQuery || "").trim().toLocaleLowerCase();
     const history = state.get("searchHistory") || [];
@@ -411,7 +418,10 @@ export class Search {
     return history
       .filter((item) => {
         const query = item.query.toLocaleLowerCase();
-        if ((typed && !query.startsWith(typed)) || query === typed || seen.has(query)) {
+        if (
+          (typed && !query.startsWith(typed)) || query === typed ||
+          seen.has(query)
+        ) {
           return false;
         }
         seen.add(query);
@@ -430,8 +440,8 @@ export class Search {
 
   renderSuggestionsForCurrentInput() {
     const rawQuery = this.els.input.value || "";
-    const mode =
-      state.get("searchSuggestionMode") || SEARCH_SUGGESTION_MODES.HISTORY_ONLY;
+    const mode = state.get("searchSuggestionMode") ||
+      SEARCH_SUGGESTION_MODES.HISTORY_ONLY;
     const queryKey = rawQuery.trim().toLocaleLowerCase();
     const history = this.getHistorySuggestions(rawQuery);
     this.currentFilteredHistory = history;
@@ -568,13 +578,17 @@ export class Search {
         li.setAttribute("aria-selected", "false");
         li.setAttribute(
           "aria-label",
-          `${item.source === "history" ? "Recent search" : "Search suggestion"}: ${item.query}`,
+          `${
+            item.source === "history" ? "Recent search" : "Search suggestion"
+          }: ${item.query}`,
         );
 
         const text = document.createElement("span");
         text.className = "sh-qd-text";
         text.textContent = item.query;
-        if (item.source === "history") li.append(this._createSuggestionIcon(item));
+        if (item.source === "history") {
+          li.append(this._createSuggestionIcon(item));
+        }
         li.append(text);
 
         if (item.source === "history") {
@@ -647,7 +661,9 @@ export class Search {
   _setActiveSuggestion(index) {
     if (index < 0 || index >= this._suggestionItems.length) return;
     this._activeSuggestionIndex = index;
-    const rows = this._historyDropdownEl?.querySelectorAll("[data-suggestion-index]") || [];
+    const rows =
+      this._historyDropdownEl?.querySelectorAll("[data-suggestion-index]") ||
+      [];
     rows.forEach((row) => {
       const active = Number(row.dataset.suggestionIndex) === index;
       row.classList.toggle("is-active", active);
@@ -659,7 +675,6 @@ export class Search {
     });
   }
 
-  // Kept as a compatibility wrapper for existing history refresh callers.
   renderHistoryDropdown() {
     this.renderSuggestionsForCurrentInput();
   }
@@ -690,8 +705,10 @@ export class Search {
   _restoreQuotes() {
     if (!this._quoteHiddenBySearch) return;
 
-    const mainHidden = this.els.dropdown.classList.contains("hidden") || this.els.dropdown.classList.contains("closing");
-    const historyHidden = !this._historyDropdownEl || this._historyDropdownEl.classList.contains("closing");
+    const mainHidden = this.els.dropdown.classList.contains("hidden") ||
+      this.els.dropdown.classList.contains("closing");
+    const historyHidden = !this._historyDropdownEl ||
+      this._historyDropdownEl.classList.contains("closing");
 
     if (mainHidden && historyHidden) {
       this._quoteHiddenBySearch = false;
@@ -758,9 +775,21 @@ export class Search {
     const isDark = document.body.getAttribute("data-theme") === "dark";
     element.classList.add("search-glass-surface");
     element.style.setProperty("backdrop-filter", `blur(${blur})`, "important");
-    element.style.setProperty("-webkit-backdrop-filter", `blur(${blur})`, "important");
-    element.style.setProperty("background-color", "var(--widget-bg)", "important");
-    element.style.setProperty("color", isDark ? "#ffffff" : "#000000", "important");
+    element.style.setProperty(
+      "-webkit-backdrop-filter",
+      `blur(${blur})`,
+      "important",
+    );
+    element.style.setProperty(
+      "background-color",
+      "var(--widget-bg)",
+      "important",
+    );
+    element.style.setProperty(
+      "color",
+      isDark ? "#ffffff" : "#000000",
+      "important",
+    );
     if (hideQuote) this._hideQuoteForOverlay();
   }
 
@@ -807,7 +836,7 @@ export class Search {
     );
   }
 
-  // --- SECTION: LAYER 2 — FULL HISTORY MODAL ---
+  // History modal
   buildHistoryModal() {
     this.closeHistoryModal(true);
 
@@ -824,7 +853,10 @@ export class Search {
     modal.style.width = "90%";
     modal.addEventListener("click", (e) => e.stopPropagation());
 
-    if (document.body.classList.contains("force-white-text") && !document.body.classList.contains("has-custom-bg")) {
+    if (
+      document.body.classList.contains("force-white-text") &&
+      !document.body.classList.contains("has-custom-bg")
+    ) {
       modal.style.color = "#000000";
       modal.style.setProperty("--text-primary", "#000000");
       modal.style.setProperty("--text-secondary", "rgba(0,0,0,0.7)");
@@ -845,8 +877,9 @@ export class Search {
     infoBtn.style.padding = "0";
     infoBtn.style.display = "flex";
     infoBtn.style.alignItems = "center";
-    
-    const svgString = `<svg class="sh-info-btn" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor: pointer; margin-right: 8px; opacity: 0.8; transition: opacity 0.2s;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+
+    const svgString =
+      `<svg class="sh-info-btn" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor: pointer; margin-right: 8px; opacity: 0.8; transition: opacity 0.2s;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgString, "image/svg+xml");
     infoBtn.appendChild(svgDoc.documentElement);
@@ -855,8 +888,8 @@ export class Search {
       import("../utils.js").then(({ showCustomModal: scm }) => {
         scm(
           "Searches are saved locally on your device up to 1,000 items. " +
-          "The oldest ones are deleted first. Searches are auto-deleted " +
-          "after your chosen timeframe. No data is ever sent to any server.",
+            "The oldest ones are deleted first. Searches are auto-deleted " +
+            "after your chosen timeframe. No data is ever sent to any server.",
         );
       });
     });
@@ -919,8 +952,12 @@ export class Search {
         false,
         [
           { text: "Cancel", value: "cancel", width: "90px" },
-          { text: "Clear All", value: "ok", width: "90px",
-            style: "background-color: #c0392b; color: #fff;" },
+          {
+            text: "Clear All",
+            value: "ok",
+            width: "90px",
+            style: "background-color: #c0392b; color: #fff;",
+          },
         ],
       ).then((result) => {
         if (result === "ok") {
@@ -1000,7 +1037,9 @@ export class Search {
         return;
       }
       if (e.key === "Tab") {
-        const focusable = overlay.querySelectorAll("button, input, select, [tabindex]:not([tabindex='-1'])");
+        const focusable = overlay.querySelectorAll(
+          "button, input, select, [tabindex]:not([tabindex='-1'])",
+        );
         if (!focusable.length) return;
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
@@ -1035,7 +1074,7 @@ export class Search {
 
     if (filter) {
       history = history.filter((item) =>
-        item.query.toLowerCase().includes(filter),
+        item.query.toLowerCase().includes(filter)
       );
     }
 
@@ -1076,7 +1115,11 @@ export class Search {
           this.closeHistoryModal();
           this._executeViaEngine(item.query, item.engineId);
         };
-        makeKeyboardInteractive(queryEl, repeatSearch, `Search again for ${item.query}`);
+        makeKeyboardInteractive(
+          queryEl,
+          repeatSearch,
+          `Search again for ${item.query}`,
+        );
         queryEl.addEventListener("click", repeatSearch);
 
         const timeEl = document.createElement("span");
@@ -1131,15 +1174,18 @@ export class Search {
 
     try {
       const url = new URL(provider.url);
-      const queryParams = Array.isArray(provider.queryParams) && provider.queryParams.length
-        ? provider.queryParams
-        : [provider.queryParam];
+      const queryParams =
+        Array.isArray(provider.queryParams) && provider.queryParams.length
+          ? provider.queryParams
+          : [provider.queryParam];
       const selectedParams = [...new Set(queryParams.filter(Boolean))];
       const preferredParam = selectedParams.includes(provider.queryParam)
         ? provider.queryParam
         : selectedParams[0];
       const preferredNormalized = preferredParam?.toLowerCase();
-      const hasQAndQuery = selectedParams.some((param) => param.toLowerCase() === "q") &&
+      const hasQAndQuery = selectedParams.some((param) =>
+        param.toLowerCase() === "q"
+      ) &&
         selectedParams.some((param) => param.toLowerCase() === "query");
       selectedParams.forEach((param) => {
         const normalizedParam = param.toLowerCase();
@@ -1161,12 +1207,12 @@ export class Search {
       }
       return url.href;
     } catch {
-      const queryParam = provider.queryParam || provider.queryParams?.[0] || "q";
+      const queryParam = provider.queryParam || provider.queryParams?.[0] ||
+        "q";
       return `${provider.url}?${queryParam}=${encodeURIComponent(query)}`;
     }
   }
 
-  // --- SECTION: HELPERS ---
   _getHistoryGroup(timestamp) {
     const now = Date.now();
     const diff = now - timestamp;
@@ -1186,8 +1232,29 @@ export class Search {
     if (ts >= yesterdayStart) return "Yesterday";
     if (diff > THIRTY_DAYS) return "Older than 30 days";
 
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     return `${days[ts.getDay()]}, ${months[ts.getMonth()]} ${ts.getDate()}`;
   }
 
@@ -1221,7 +1288,9 @@ export class Search {
     icon.width = size;
     icon.height = size;
     icon.onerror = () => {
-      icon.replaceWith(this._createHistoryIcon("__unknown_history_engine__", className, size));
+      icon.replaceWith(
+        this._createHistoryIcon("__unknown_history_engine__", className, size),
+      );
     };
     return icon;
   }
@@ -1246,8 +1315,8 @@ export class Search {
   }
 
   _markGoogleAiSearchUsed(provider = null) {
-    const selectedProvider =
-      provider || this.getProvider(this.current.id, this.current.type);
+    const selectedProvider = provider ||
+      this.getProvider(this.current.id, this.current.type);
     if (
       selectedProvider?.id !== GOOGLE_PROVIDER_ID ||
       !this._isGoogleAiActive() ||
@@ -1293,14 +1362,15 @@ export class Search {
     const nextActive = !this._isGoogleAiActive();
     if (
       nextActive &&
-      (this.current.id !== GOOGLE_PROVIDER_ID || this.current.type !== "engines")
+      (this.current.id !== GOOGLE_PROVIDER_ID ||
+        this.current.type !== "engines")
     ) {
       this.setProvider(GOOGLE_PROVIDER_ID, "engines");
     }
     state.set("googleAiSearchActive", nextActive);
   }
 
-  // --- SECTION: VOICE SEARCH ---
+  // Voice search
   updateVoiceButton() {
     if (!this.els.voiceBtn) return;
     const hide = state.get("hideVoiceSearch") === true;
@@ -1317,8 +1387,8 @@ export class Search {
   }
 
   getSpeechRecognitionConstructor() {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
     return typeof SpeechRecognition === "function" ? SpeechRecognition : null;
   }
 
@@ -1357,8 +1427,6 @@ export class Search {
 
     let stream = null;
     try {
-      // Calling getUserMedia directly from the user's click is what makes
-      // Chromium show its microphone permission prompt for this extension.
       stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: false,
@@ -1370,8 +1438,6 @@ export class Search {
         throw error;
       }
     } finally {
-      // SpeechRecognition opens its own audio input. Release the short-lived
-      // permission-check stream first so the two consumers never compete.
       stream?.getTracks().forEach((track) => track.stop());
     }
   }
@@ -1408,7 +1474,6 @@ export class Search {
           try {
             recognition.abort();
           } catch {
-            // The browser may already have cancelled this stale request.
           }
           return;
         }
@@ -1443,12 +1508,10 @@ export class Search {
       recognition.onspeechend = () => {
         if (this.recognition !== recognition) return;
         this.els.input.placeholder = "Processing speech...";
-        // Keep the recognition object alive until its final result and end
-        // events arrive. Clearing it here used to discard valid transcripts.
+
         try {
           recognition.stop();
         } catch {
-          // Some implementations have already stopped by this event.
         }
       };
 
@@ -1462,7 +1525,10 @@ export class Search {
         this.finishVoiceSearch(recognition);
         this.els.input.placeholder = "Error. Try again.";
         void this.showVoiceError(event).catch((modalError) =>
-          console.error("Could not show the Voice Search error dialog.", modalError),
+          console.error(
+            "Could not show the Voice Search error dialog.",
+            modalError,
+          )
         );
       };
 
@@ -1479,7 +1545,10 @@ export class Search {
       this.finishVoiceSearch(recognition);
       this.els.input.placeholder = "Voice search unavailable. Try again.";
       void this.showVoiceError(error).catch((modalError) =>
-        console.error("Could not show the Voice Search error dialog.", modalError),
+        console.error(
+          "Could not show the Voice Search error dialog.",
+          modalError,
+        )
       );
     }
   }
@@ -1568,7 +1637,8 @@ export class Search {
       message =
         "This browser cannot request microphone access from the extension page. Update the browser and try again.";
     } else {
-      message = "Voice Search could not start. Check microphone access and try again.";
+      message =
+        "Voice Search could not start. Check microphone access and try again.";
     }
 
     const result = await showCustomModal(message, false, false, [
@@ -1585,8 +1655,6 @@ export class Search {
     if (result === "hide") {
       state.set("hideVoiceSearch", true);
     }
-    // The retry action only dismisses this modal. The next microphone-button
-    // click is the fresh user gesture that starts a new permission request.
   }
 
   async isBraveBrowser() {
@@ -1599,7 +1667,7 @@ export class Search {
     }
   }
 
-  // --- SECTION: UI & ANIMATION ---
+  // UI animation
   startTypewriterEffect() {
     this.stopTypewriterEffect();
     if (!this.isSearchVisible()) return;
@@ -1621,10 +1689,9 @@ export class Search {
           return;
         }
 
-        const text =
-          SEARCH_SUGGESTIONS[
-            Math.floor(Math.random() * SEARCH_SUGGESTIONS.length)
-          ];
+        const text = SEARCH_SUGGESTIONS[
+          Math.floor(Math.random() * SEARCH_SUGGESTIONS.length)
+        ];
         let i = 0;
         this._typewriterInterval = window.setInterval(() => {
           if (
@@ -1687,10 +1754,13 @@ export class Search {
     }
   }
 
+  // Provider dropdown
   renderProviderDropdown() {
     const createItem = (p, type) => {
       const div = document.createElement("div");
-      div.className = `dropdown-item ${p.id === this.current.id ? "active" : ""}`;
+      div.className = `dropdown-item ${
+        p.id === this.current.id ? "active" : ""
+      }`;
       const selectProvider = () => {
         if (this._customSearchDragOccurred) return;
         this.setProvider(p.id, type);
@@ -1719,8 +1789,9 @@ export class Search {
         aiBadge.className = "google-ai-badge";
         aiBadge.dataset.googleAiBadge = "true";
         aiBadge.textContent = "AI";
-        aiBadge.addEventListener("click", (event) =>
-          this.toggleGoogleAiSearch(event),
+        aiBadge.addEventListener(
+          "click",
+          (event) => this.toggleGoogleAiSearch(event),
         );
         aiBadge.addEventListener("keydown", (event) => {
           if (event.key === "Enter" || event.key === " ") {
@@ -1798,14 +1869,17 @@ export class Search {
         editButton.classList.toggle("hidden", !this.customSearchEditMode);
         editButton.setAttribute("aria-label", `Edit ${p.name}`);
         editButton.title = `Edit ${p.name}`;
-        editButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4L19.5 8.5a2.121 2.121 0 0 0-3-3L4 17v3Z"/><path d="m14.5 5.5 4 4"/></svg>';
+        editButton.innerHTML =
+          '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4L19.5 8.5a2.121 2.121 0 0 0-3-3L4 17v3Z"/><path d="m14.5 5.5 4 4"/></svg>';
         editButton.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
           this.openCustomSearchEngineModal(p);
         });
         editButton.addEventListener("keydown", (event) => {
-          if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+          if (event.key === "Enter" || event.key === " ") {
+            event.stopPropagation();
+          }
         });
 
         const deleteButton = document.createElement("button");
@@ -1814,7 +1888,8 @@ export class Search {
         deleteButton.classList.toggle("hidden", !this.customSearchEditMode);
         deleteButton.setAttribute("aria-label", `Delete ${p.name}`);
         deleteButton.title = `Delete ${p.name}`;
-        deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        deleteButton.innerHTML =
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         deleteButton.addEventListener("click", async (event) => {
           event.preventDefault();
           event.stopPropagation();
@@ -1831,7 +1906,9 @@ export class Search {
           }
         });
         deleteButton.addEventListener("keydown", (event) => {
-          if (event.key === "Enter" || event.key === " ") event.stopPropagation();
+          if (event.key === "Enter" || event.key === " ") {
+            event.stopPropagation();
+          }
         });
         actionGroup.append(editButton, deleteButton);
         div.appendChild(actionGroup);
@@ -1854,7 +1931,7 @@ export class Search {
 
     this.els.engineList.innerHTML = "";
     SEARCH_PROVIDERS.engines.forEach((p) =>
-      this.els.engineList.appendChild(createItem(p, "engines")),
+      this.els.engineList.appendChild(createItem(p, "engines"))
     );
 
     const customEngines = this.getCustomSearchEngines();
@@ -1863,9 +1940,12 @@ export class Search {
       Boolean(customEngines.length && this.customSearchEditMode),
     );
     this.els.customEngineList.innerHTML = "";
-    this.els.customEngineSection.classList.toggle("hidden", !customEngines.length);
+    this.els.customEngineSection.classList.toggle(
+      "hidden",
+      !customEngines.length,
+    );
     customEngines.forEach((provider) =>
-      this.els.customEngineList.appendChild(createItem(provider, "engines")),
+      this.els.customEngineList.appendChild(createItem(provider, "engines"))
     );
     if (customEngines.length && this.customSearchEditMode) {
       const addItem = document.createElement("button");
@@ -1881,9 +1961,7 @@ export class Search {
     }
     if (this.els.customEngineAction) {
       this.els.customEngineAction.textContent = customEngines.length
-        ? this.customSearchEditMode
-          ? "SAVE"
-          : "EDIT"
+        ? this.customSearchEditMode ? "SAVE" : "EDIT"
         : "ADD";
       this.els.customEngineAction.setAttribute(
         "aria-label",
@@ -1901,14 +1979,17 @@ export class Search {
 
     this.els.platformList.innerHTML = "";
     SEARCH_PROVIDERS.platforms.forEach((p) =>
-      this.els.platformList.appendChild(createItem(p, "platforms")),
+      this.els.platformList.appendChild(createItem(p, "platforms"))
     );
     this.updateGoogleAiBadge();
     this._syncGlassSurface(this.els.dropdown);
   }
 
+  // Custom search engines
   createCustomSearchEngineId() {
-    const existing = new Set(this.getCustomSearchEngines().map((provider) => provider.id));
+    const existing = new Set(
+      this.getCustomSearchEngines().map((provider) => provider.id),
+    );
     let id;
     do {
       const randomPart = globalThis.crypto?.randomUUID?.() ||
@@ -1940,7 +2021,8 @@ export class Search {
       const image = await new Promise((resolve, reject) => {
         const element = new Image();
         element.onload = () => resolve(element);
-        element.onerror = () => reject(new TypeError("The icon could not be decoded."));
+        element.onerror = () =>
+          reject(new TypeError("The icon could not be decoded."));
         element.src = objectUrl;
       });
       const width = image.naturalWidth;
@@ -1949,7 +2031,11 @@ export class Search {
         throw new TypeError("The icon dimensions are too large.");
       }
 
-      const scale = Math.min(1, CUSTOM_SEARCH_ICON_SIZE / width, CUSTOM_SEARCH_ICON_SIZE / height);
+      const scale = Math.min(
+        1,
+        CUSTOM_SEARCH_ICON_SIZE / width,
+        CUSTOM_SEARCH_ICON_SIZE / height,
+      );
       const canvas = document.createElement("canvas");
       canvas.width = Math.max(1, Math.round(width * scale));
       canvas.height = Math.max(1, Math.round(height * scale));
@@ -1972,19 +2058,23 @@ export class Search {
     try {
       normalizedUrl = normalizeHttpUrl(rawUrl, MAX_CUSTOM_SEARCH_URL_LENGTH);
     } catch {
-      return SEARCH_QUERY_PARAMETER_CANDIDATES.slice(0, MAX_CUSTOM_SEARCH_QUERY_PARAMS);
+      return SEARCH_QUERY_PARAMETER_CANDIDATES.slice(
+        0,
+        MAX_CUSTOM_SEARCH_QUERY_PARAMS,
+      );
     }
 
     let existing = [];
     try {
       existing = [...new URL(normalizedUrl).searchParams.keys()];
     } catch {
-      // The URL was already normalized; use the common candidates below.
     }
-    return [...new Set([
-      ...existing,
-      ...SEARCH_QUERY_PARAMETER_CANDIDATES,
-    ])]
+    return [
+      ...new Set([
+        ...existing,
+        ...SEARCH_QUERY_PARAMETER_CANDIDATES,
+      ]),
+    ]
       .filter((param) => /^[a-z][a-z\d._-]*$/i.test(param))
       .filter((param) => param.length <= MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH)
       .slice(0, MAX_CUSTOM_SEARCH_QUERY_PARAMS);
@@ -1993,7 +2083,9 @@ export class Search {
   deleteCustomSearchEngine(id) {
     const current = state.get("customSearchEngines") || [];
     const next = current.filter((provider) => provider.id !== id);
-    if (next.length === current.length || !state.set("customSearchEngines", next)) return false;
+    if (
+      next.length === current.length || !state.set("customSearchEngines", next)
+    ) return false;
 
     if (this.current.id === id) {
       this.current = this.getValidProvider(CONFIG.defaults.searchProvider);
@@ -2011,8 +2103,12 @@ export class Search {
   reorderCustomSearchEngines(sourceId, targetId) {
     if (!sourceId || !targetId || sourceId === targetId) return false;
     const current = [...(state.get("customSearchEngines") || [])];
-    const sourceIndex = current.findIndex((provider) => provider.id === sourceId);
-    const targetIndex = current.findIndex((provider) => provider.id === targetId);
+    const sourceIndex = current.findIndex((provider) =>
+      provider.id === sourceId
+    );
+    const targetIndex = current.findIndex((provider) =>
+      provider.id === targetId
+    );
     if (sourceIndex < 0 || targetIndex < 0) return false;
 
     const [moved] = current.splice(sourceIndex, 1);
@@ -2038,7 +2134,9 @@ export class Search {
 
     const title = document.createElement("h2");
     title.id = "ydd-add-search-engine-title";
-    title.textContent = isEditing ? "Edit Search Engine" : "Add a new Search Engine";
+    title.textContent = isEditing
+      ? "Edit Search Engine"
+      : "Add a new Search Engine";
 
     const subtitle = document.createElement("p");
     subtitle.className = "ydd-add-tool-subtitle";
@@ -2069,7 +2167,8 @@ export class Search {
     iconHint.textContent = "Optional icon";
     const iconInput = document.createElement("input");
     iconInput.type = "file";
-    iconInput.accept = "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml";
+    iconInput.accept =
+      "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml";
     iconInput.className = "visually-hidden";
     iconInput.setAttribute(
       "aria-label",
@@ -2124,7 +2223,8 @@ export class Search {
     queryLegend.textContent = "Query parameter(s)";
     const queryHint = document.createElement("p");
     queryHint.className = "ydd-search-query-hint";
-    queryHint.textContent = "Select one or more parameters. All selected parameters receive your search text; q and query are handled as one compatible pair.";
+    queryHint.textContent =
+      "Select one or more parameters. All selected parameters receive your search text; q and query are handled as one compatible pair.";
     const queryOptions = document.createElement("div");
     queryOptions.className = "ydd-search-query-options";
     const customParamRow = document.createElement("div");
@@ -2139,11 +2239,13 @@ export class Search {
     customParamInput.setAttribute("aria-label", "Custom query parameter");
     const customParamAddButton = document.createElement("button");
     customParamAddButton.type = "button";
-    customParamAddButton.className = "settings-button ydd-search-query-add-button";
+    customParamAddButton.className =
+      "settings-button ydd-search-query-add-button";
     customParamAddButton.textContent = "Add";
     customParamRow.append(customParamInput, customParamAddButton);
     const customParamError = document.createElement("span");
-    customParamError.className = "ydd-add-tool-error ydd-search-custom-param-error";
+    customParamError.className =
+      "ydd-add-tool-error ydd-search-custom-param-error";
     customParamError.setAttribute("aria-live", "polite");
     const queryError = document.createElement("span");
     queryError.className = "ydd-add-tool-error";
@@ -2172,7 +2274,14 @@ export class Search {
     addButton.textContent = isEditing ? "Save" : "Add";
     actions.append(cancelButton, addButton);
 
-    form.append(iconLabel, nameField.wrapper, urlField.wrapper, queryFieldset, formError, actions);
+    form.append(
+      iconLabel,
+      nameField.wrapper,
+      urlField.wrapper,
+      queryFieldset,
+      formError,
+      actions,
+    );
     modal.append(title, subtitle, note, form);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
@@ -2189,7 +2298,10 @@ export class Search {
     const updateCount = (field) => {
       const length = field.input.value.length;
       field.count.textContent = `${length}/${field.input.dataset.limit}`;
-      field.count.classList.toggle("is-over-limit", length > Number(field.input.dataset.limit));
+      field.count.classList.toggle(
+        "is-over-limit",
+        length > Number(field.input.dataset.limit),
+      );
     };
     const initialQueryParams = new Set(
       editProvider?.queryParams?.length
@@ -2203,12 +2315,16 @@ export class Search {
     );
     const renderQueryOptions = (preferUrlParams = false) => {
       const previous = new Set(
-        [...queryOptions.querySelectorAll("input:checked")].map((input) => input.value),
+        [...queryOptions.querySelectorAll("input:checked")].map((input) =>
+          input.value
+        ),
       );
-      const candidates = [...new Set([
-        ...customQueryParams,
-        ...this.getSearchQueryParamCandidates(urlField.input.value),
-      ])]
+      const candidates = [
+        ...new Set([
+          ...customQueryParams,
+          ...this.getSearchQueryParamCandidates(urlField.input.value),
+        ]),
+      ]
         .filter((param) => /^[a-z][a-z\d._-]*$/i.test(param))
         .filter((param) => param.length <= MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH)
         .slice(0, MAX_CUSTOM_SEARCH_QUERY_PARAMS);
@@ -2218,13 +2334,12 @@ export class Search {
           normalizeHttpUrl(urlField.input.value, MAX_CUSTOM_SEARCH_URL_LENGTH),
         ).searchParams.keys()];
       } catch {
-        // Use the common candidates when the URL is still being typed.
       }
       const selected = preferUrlParams && urlParams.length
         ? new Set([...urlParams, ...customQueryParams])
         : previous.size
-          ? previous
-          : initialQueryParams;
+        ? previous
+        : initialQueryParams;
       queryOptions.replaceChildren();
       candidates.forEach((param, index) => {
         const label = document.createElement("label");
@@ -2246,12 +2361,17 @@ export class Search {
         parameter.length > MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH ||
         !/^[a-z][a-z\d._-]*$/i.test(parameter)
       ) {
-        customParamError.textContent = "Use a parameter name beginning with a letter; letters, numbers, ., _, and - are allowed.";
+        customParamError.textContent =
+          "Use a parameter name beginning with a letter; letters, numbers, ., _, and - are allowed.";
         customParamInput.classList.add("is-invalid");
         return;
       }
-      if (!customQueryParams.has(parameter) && customQueryParams.size >= MAX_CUSTOM_SEARCH_QUERY_PARAMS) {
-        customParamError.textContent = `You can add up to ${MAX_CUSTOM_SEARCH_QUERY_PARAMS} query parameters.`;
+      if (
+        !customQueryParams.has(parameter) &&
+        customQueryParams.size >= MAX_CUSTOM_SEARCH_QUERY_PARAMS
+      ) {
+        customParamError.textContent =
+          `You can add up to ${MAX_CUSTOM_SEARCH_QUERY_PARAMS} query parameters.`;
         customParamInput.classList.add("is-invalid");
         return;
       }
@@ -2265,7 +2385,9 @@ export class Search {
       if (checkbox) checkbox.checked = true;
     };
     const getSelectedQueryParams = () =>
-      [...queryOptions.querySelectorAll("input:checked")].map((input) => input.value);
+      [...queryOptions.querySelectorAll("input:checked")].map((input) =>
+        input.value
+      );
     const validateFields = () => {
       let valid = true;
       updateCount(nameField);
@@ -2278,7 +2400,10 @@ export class Search {
         setFieldError(nameField, "Enter a name.");
         valid = false;
       } else if (nameField.input.value.length > MAX_CUSTOM_SEARCH_NAME_LENGTH) {
-        setFieldError(nameField, `Name must be ${MAX_CUSTOM_SEARCH_NAME_LENGTH} characters or fewer.`);
+        setFieldError(
+          nameField,
+          `Name must be ${MAX_CUSTOM_SEARCH_NAME_LENGTH} characters or fewer.`,
+        );
         valid = false;
       } else {
         setFieldError(nameField);
@@ -2308,7 +2433,9 @@ export class Search {
       overlay.classList.remove("is-open");
       const remove = () => {
         if (overlay.isConnected) overlay.remove();
-        if (this.customSearchModal?.overlay === overlay) this.customSearchModal = null;
+        if (this.customSearchModal?.overlay === overlay) {
+          this.customSearchModal = null;
+        }
       };
       if (immediate) remove();
       else window.setTimeout(remove, 220);
@@ -2320,7 +2447,9 @@ export class Search {
         return;
       }
       if (event.key !== "Tab") return;
-      const focusable = modal.querySelectorAll("button, input, [tabindex]:not([tabindex='-1'])");
+      const focusable = modal.querySelectorAll(
+        "button, input, [tabindex]:not([tabindex='-1'])",
+      );
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
@@ -2390,12 +2519,15 @@ export class Search {
         iconPreview.replaceChildren(preview);
         iconHint.textContent = "Change icon";
         iconLabel.classList.remove("is-invalid");
-        if (formError.textContent === "Choose an icon image.") formError.textContent = "";
+        if (formError.textContent === "Choose an icon image.") {
+          formError.textContent = "";
+        }
       } catch (error) {
         iconData = null;
         iconPreview.textContent = "+";
         iconLabel.classList.add("is-invalid");
-        formError.textContent = error.message || "The icon could not be processed.";
+        formError.textContent = error.message ||
+          "The icon could not be processed.";
       } finally {
         iconInput.disabled = false;
       }
@@ -2418,10 +2550,14 @@ export class Search {
       try {
         const current = state.get("customSearchEngines") || [];
         if (!isEditing && current.length >= MAX_CUSTOM_SEARCH_ENGINES) {
-          formError.textContent = `You can add up to ${MAX_CUSTOM_SEARCH_ENGINES} custom search engines.`;
+          formError.textContent =
+            `You can add up to ${MAX_CUSTOM_SEARCH_ENGINES} custom search engines.`;
           return;
         }
-        const cleanUrl = normalizeHttpUrl(urlField.input.value, MAX_CUSTOM_SEARCH_URL_LENGTH);
+        const cleanUrl = normalizeHttpUrl(
+          urlField.input.value,
+          MAX_CUSTOM_SEARCH_URL_LENGTH,
+        );
         const queryParams = getSelectedQueryParams();
         if (!isLikelySearchProviderUrl(cleanUrl)) {
           const previousOverlayZIndex = overlay.style.zIndex;
@@ -2438,7 +2574,8 @@ export class Search {
                   text: "Cancel",
                   value: "cancel",
                   width: "120px",
-                  style: "background: var(--bg-interactive); color: var(--text-primary);",
+                  style:
+                    "background: var(--bg-interactive); color: var(--text-primary);",
                 },
               ],
             );
@@ -2451,8 +2588,8 @@ export class Search {
         const providerIcon = iconChanged
           ? iconData
           : editProvider?.icon?.startsWith("data:image/")
-            ? editProvider.icon
-            : getIconUrl(cleanUrl);
+          ? editProvider.icon
+          : getIconUrl(cleanUrl);
         const provider = {
           id: isEditing ? editProvider.id : this.createCustomSearchEngineId(),
           name: nameField.input.value.trim(),
@@ -2462,10 +2599,13 @@ export class Search {
           queryParam: queryParams[0],
         };
         const next = isEditing
-          ? current.map((item) => (item.id === editProvider.id ? provider : item))
+          ? current.map((
+            item,
+          ) => (item.id === editProvider.id ? provider : item))
           : [...current, provider];
         if (!state.set("customSearchEngines", next)) {
-          formError.textContent = "The search engine could not be saved. Check browser storage.";
+          formError.textContent =
+            "The search engine could not be saved. Check browser storage.";
           return;
         }
         if (!isEditing) {
@@ -2478,7 +2618,8 @@ export class Search {
         this.renderProviderDropdown();
         closeModal();
       } catch (error) {
-        formError.textContent = error.message || "The search engine could not be saved.";
+        formError.textContent = error.message ||
+          "The search engine could not be saved.";
       } finally {
         isSubmitting = false;
         addButton.disabled = false;
@@ -2508,8 +2649,7 @@ export class Search {
   updateUI() {
     const provider = this.getProvider(this.current.id, this.current.type);
     if (provider) {
-      const googleAiActive =
-        provider.id === GOOGLE_PROVIDER_ID &&
+      const googleAiActive = provider.id === GOOGLE_PROVIDER_ID &&
         this.current.type === "engines" &&
         this._isGoogleAiActive();
       this.els.providerIcon.src = this._getProviderIconUrl(
@@ -2518,7 +2658,10 @@ export class Search {
       this.els.providerIcon.alt = googleAiActive
         ? `${provider.name} AI Search`
         : provider.name;
-      this.els.providerBtn.classList.toggle("google-ai-current", googleAiActive);
+      this.els.providerBtn.classList.toggle(
+        "google-ai-current",
+        googleAiActive,
+      );
       this.els.providerBtn.setAttribute(
         "data-google-ai-active",
         String(googleAiActive),
@@ -2542,17 +2685,17 @@ export class Search {
         this.els.openBtn.title = `Open ${provider.name}`;
         this.els.openBtn.onclick = () => {
           const urlObj = new URL(provider.url);
-          const targets =
-            state.get("linkTargets") || CONFIG.defaults.linkTargets;
+          const targets = state.get("linkTargets") ||
+            CONFIG.defaults.linkTargets;
           window.open(urlObj.origin, targets.searchOpen || "_blank");
         };
       }
     }
   }
 
+  // Dropdown lifecycle
   toggleDropdown() {
-    const isHiddenOrClosing =
-      this.els.dropdown.classList.contains("hidden") ||
+    const isHiddenOrClosing = this.els.dropdown.classList.contains("hidden") ||
       this.els.dropdown.classList.contains("closing");
     if (isHiddenOrClosing) {
       this.openDropdown();
@@ -2687,7 +2830,7 @@ export class Search {
     ) {
       return;
     }
-    
+
     this.els.providerBtn.classList.remove("is-open");
 
     if (state.get("disableAnimations") === true) {
@@ -2723,6 +2866,7 @@ export class Search {
     }, 180);
   }
 
+  // Search submission
   handleSubmit(e) {
     if (e.preventDefault) e.preventDefault();
     const query = this.els.input.value.trim();

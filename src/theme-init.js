@@ -1,14 +1,15 @@
+// Theme preload bootstrap
 try {
   var preloadObjectUrl = null;
   var preloadBackgroundEnabled = true;
-  var releasePreloadObjectUrl = function() {
+  var releasePreloadObjectUrl = function () {
     if (preloadObjectUrl) {
       URL.revokeObjectURL(preloadObjectUrl);
       preloadObjectUrl = null;
       window.__yddPreloadBackgroundUrl = null;
     }
   };
-  var cancelPreloadBackground = function() {
+  var cancelPreloadBackground = function () {
     preloadBackgroundEnabled = false;
     releasePreloadObjectUrl();
   };
@@ -18,6 +19,7 @@ try {
     document.documentElement.classList.add("zen-mode-preload");
   }
 
+  // Theme color fallbacks
   var THEME_COLORS = {
     "default-light": "#c3c3c3",
     "default-dark": "#030303",
@@ -28,26 +30,27 @@ try {
     "theme-5": "#ffa9d2",
     "theme-6": "#0A043C",
     "theme-7": "#0f0f15",
-    "theme-8": "#ded6ff"
+    "theme-8": "#ded6ff",
   };
 
   var THEME_DARK_COLORS = {
     "theme-3": "#1c2635",
     "theme-4": "#14291d",
     "theme-5": "#321727",
-    "theme-8": "#211d3b"
+    "theme-8": "#211d3b",
   };
 
   var THEME_LIGHT_COLORS = {
     "theme-1": "#f4f4f4",
     "theme-2": "#e7f3d0",
     "theme-6": "#d8f7f7",
-    "theme-7": "#d9e2c5"
+    "theme-7": "#d9e2c5",
   };
 
   var dm = localStorage.getItem("darkMode");
   var gm = localStorage.getItem("gradientModeActive");
-  var thId = (localStorage.getItem("normalThemeId") || '"default-dark"').replace(/^"|"$/g, "");
+  var thId = (localStorage.getItem("normalThemeId") || '"default-dark"')
+    .replace(/^"|"$/g, "");
 
   if (gm !== "true" && (dm === null || dm === "true")) {
     document.documentElement.setAttribute("data-theme", "dark");
@@ -57,14 +60,16 @@ try {
       : (THEME_LIGHT_COLORS[thId] || THEME_COLORS[thId] || "#c3c3c3");
     document.documentElement.style.setProperty("--bg-primary", preloadColor);
     document.documentElement.style.backgroundColor = preloadColor;
-  } 
-  else if (gm === "true") {
+  } else if (gm === "true") {
     document.documentElement.classList.add("gradient-mode-active");
-    var gradientId = (localStorage.getItem("gradientThemeId") || "gradient").replace(/^"|"$/g, "");
-    document.documentElement.setAttribute("data-theme-id", "gradient-" + gradientId);
-    document.documentElement.style.backgroundColor = "#302b63"; 
-  } 
-  else {
+    var gradientId = (localStorage.getItem("gradientThemeId") || "gradient")
+      .replace(/^"|"$/g, "");
+    document.documentElement.setAttribute(
+      "data-theme-id",
+      "gradient-" + gradientId,
+    );
+    document.documentElement.style.backgroundColor = "#302b63";
+  } else {
     document.documentElement.setAttribute("data-theme", "light");
     document.documentElement.setAttribute("data-theme-id", thId);
     if (thId === "custom") {
@@ -81,6 +86,7 @@ try {
     }
   }
 
+  // Background state
   var bgMode = localStorage.getItem("randomBgMode");
   var bg = localStorage.getItem("backgroundImage");
   var savedBg = localStorage.getItem("savedBgUrl");
@@ -93,13 +99,13 @@ try {
   var RANDOM_BG_MAX_WIDTH = 1920;
   var RANDOM_BG_MAX_HEIGHT = 1080;
 
-  var readStoredUrl = function(value) {
+  // Stored value readers
+  var readStoredUrl = function (value) {
     if (!value || value === "null" || value === '"null"') return null;
     var parsed = value;
     try {
       parsed = JSON.parse(value);
     } catch (error) {
-      // Support older or manually-entered unquoted URL values.
     }
     if (typeof parsed !== "string" || !parsed) return null;
     try {
@@ -111,7 +117,7 @@ try {
     }
   };
 
-  var isSafeThemeColor = function(value) {
+  var isSafeThemeColor = function (value) {
     var color = typeof value === "string" ? value.trim() : "";
     var number = "[-+]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)%?";
     var alpha = "[-+]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)%?";
@@ -149,19 +155,18 @@ try {
     );
   };
 
-  var readStoredColor = function(value) {
+  var readStoredColor = function (value) {
     if (!value || value === "null" || value === '"null"') return null;
     var parsed = value;
     try {
       parsed = JSON.parse(value);
     } catch (error) {
-      // Support older or manually-entered values.
     }
     var color = typeof parsed === "string" ? parsed.trim() : "";
     return isSafeThemeColor(color) ? color : null;
   };
 
-  var isCompatiblePicsumUrl = function(value) {
+  var isCompatiblePicsumUrl = function (value) {
     var parsed;
     try {
       parsed = new URL(value);
@@ -185,52 +190,54 @@ try {
     );
   };
 
-  var readStoredRandomUrl = function(value) {
+  var readStoredRandomUrl = function (value) {
     var url = readStoredUrl(value);
     return url && isCompatiblePicsumUrl(url) ? url : null;
   };
 
-  var isSafeStoredRandomEntryUrl = function(value) {
+  var isSafeStoredRandomEntryUrl = function (value) {
     if (typeof value !== "string" || !value) return false;
     return isCompatiblePicsumUrl(value);
   };
 
   var randomBgNextUrl = readStoredRandomUrl(randomBgNext);
-  var readStoredString = function(value, fallback) {
+  var readStoredString = function (value, fallback) {
     if (!value || value === "null" || value === '"null"') return fallback;
     var parsed = value;
     try {
       parsed = JSON.parse(value);
     } catch (error) {
-      // Support older or manually-entered values.
     }
     return typeof parsed === "string" && parsed ? parsed : fallback;
   };
 
   var parsedRandomBgSchedule = readStoredString(randomBgSchedule, "1m");
-  var randomBgCurrentPreviewUrl = (function(value) {
+  var randomBgCurrentPreviewUrl = (function (value) {
     var parsed = readStoredString(value, null);
     return typeof parsed === "string" && parsed.startsWith("data:image/")
       ? parsed
       : null;
   })(randomBgCurrentPreview);
-  var randomBgNextPreviewUrl = (function(value) {
+  var randomBgNextPreviewUrl = (function (value) {
     if (!value || value === "null" || value === '"null"') return null;
     var parsed = value;
     try {
       parsed = JSON.parse(value);
     } catch (error) {
-      // Support older or manually-entered preview values.
     }
     return typeof parsed === "string" && parsed.startsWith("data:image/")
       ? parsed
       : null;
   })(randomBgNextPreview);
 
-  if (!["refresh", "30s", "1m", "1h", "6h", "day"].includes(parsedRandomBgSchedule)) {
+  if (
+    !["refresh", "30s", "1m", "1h", "6h", "day"].includes(
+      parsedRandomBgSchedule,
+    )
+  ) {
     parsedRandomBgSchedule = "refresh";
   }
-  var readStoredNumber = function(value, fallback) {
+  var readStoredNumber = function (value, fallback) {
     var parsed = value;
     try {
       parsed = JSON.parse(value);
@@ -239,8 +246,10 @@ try {
     }
     return Number.isFinite(Number(parsed)) ? Number(parsed) : fallback;
   };
-  var localDateKey = function(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  var localDateKey = function (date) {
+    return `${date.getFullYear()}-${
+      String(date.getMonth() + 1).padStart(2, "0")
+    }-${String(date.getDate()).padStart(2, "0")}`;
   };
   var randomBgLastChangedAt = readStoredNumber(
     localStorage.getItem("randomBgLastChangedAt"),
@@ -252,7 +261,8 @@ try {
   );
   var randomBgTimedChangeDue = false;
   if (parsedRandomBgSchedule === "day") {
-    randomBgTimedChangeDue = randomBgLastChangedDate !== localDateKey(new Date());
+    randomBgTimedChangeDue =
+      randomBgLastChangedDate !== localDateKey(new Date());
   } else if (parsedRandomBgSchedule !== "refresh") {
     var randomBgIntervals = {
       "30s": 30000,
@@ -260,12 +270,12 @@ try {
       "1h": 3600000,
       "6h": 21600000,
     };
-    randomBgTimedChangeDue =
-      !randomBgLastChangedAt ||
+    randomBgTimedChangeDue = !randomBgLastChangedAt ||
       Date.now() - randomBgLastChangedAt >=
         randomBgIntervals[parsedRandomBgSchedule];
   }
 
+  // Background preload
   var bgBlur = localStorage.getItem("bgBlurIntensity");
   if (bgBlur) {
     var cleanBlur = bgBlur.replace(/^"|"$/g, "");
@@ -273,7 +283,10 @@ try {
     var blurPx = blurMap[cleanBlur] || 0;
     document.documentElement.style.setProperty("--bg-blur", blurPx + "px");
 
-    if (cleanBlur === "10" || cleanBlur === "20" || cleanBlur === "30" || cleanBlur === "40" || cleanBlur === "50") {
+    if (
+      cleanBlur === "10" || cleanBlur === "20" || cleanBlur === "30" ||
+      cleanBlur === "40" || cleanBlur === "50"
+    ) {
       document.documentElement.classList.add("high-bg-blur");
     } else {
       document.documentElement.classList.remove("high-bg-blur");
@@ -281,13 +294,15 @@ try {
   }
 
   if (bgMode === '"freeze"') {
-    if (bgTime === "null" || bgTime === '"-1"' || Date.now() - parseInt(bgTime) <= 259200000) {
+    if (
+      bgTime === "null" || bgTime === '"-1"' ||
+      Date.now() - parseInt(bgTime) <= 259200000
+    ) {
       imgUrl = readStoredRandomUrl(savedBg) || readStoredRandomUrl(bg);
     }
   } else if (bgMode === '"random"') {
     if (parsedRandomBgSchedule === "refresh") {
-      imgUrl =
-        randomBgNextPreviewUrl ||
+      imgUrl = randomBgNextPreviewUrl ||
         randomBgNextUrl ||
         readStoredRandomUrl(savedBg) ||
         readStoredRandomUrl(bg);
@@ -295,8 +310,7 @@ try {
       var queuedTimedPreview = randomBgTimedChangeDue
         ? randomBgNextPreviewUrl || randomBgNextUrl
         : null;
-      imgUrl =
-        queuedTimedPreview ||
+      imgUrl = queuedTimedPreview ||
         randomBgCurrentPreviewUrl ||
         readStoredRandomUrl(savedBg) ||
         readStoredRandomUrl(bg) ||
@@ -314,70 +328,85 @@ try {
       .replace(/\\/g, "\\\\")
       .replace(/"/g, '\\"')
       .replace(/\)/g, "\\)");
-    style.textContent = "body { background-image: url(\"" + cssUrl.replace(/^"|"$/g, "") + "\") !important; background-size: cover !important; background-position: center !important; }";
+    style.textContent = 'body { background-image: url("' +
+      cssUrl.replace(/^"|"$/g, "") +
+      '") !important; background-size: cover !important; background-position: center !important; }';
     document.head.appendChild(style);
   }
 
   var hasIdbBg = localStorage.getItem("has_idb_bg") === "true";
   if (imgUrl || hasIdbBg) {
-    // Mark the custom-background state before IndexedDB finishes loading so
-    // checked controls do not briefly inherit a normal theme's accent color.
     document.documentElement.classList.add("ydd-custom-bg-pending");
   }
   var fallback = THEME_COLORS[thId] || "#0a0a0a";
   var randomModeWithoutImage = bgMode === '"random"' && !imgUrl;
-  if ((hasIdbBg && bgMode !== '"random"') || bgMode === '"freeze"' || randomModeWithoutImage) {
+  if (
+    (hasIdbBg && bgMode !== '"random"') || bgMode === '"freeze"' ||
+    randomModeWithoutImage
+  ) {
     var preloader = document.createElement("style");
     preloader.id = "idb-preloader";
     var pColor = fallback || "#0a0a0a";
-    preloader.textContent = "body { background-color: " + pColor + " !important; background-image: none !important; transition: none !important; }";
+    preloader.textContent = "body { background-color: " + pColor +
+      " !important; background-image: none !important; transition: none !important; }";
     document.head.appendChild(preloader);
   }
 
+  // IndexedDB background preload
   var request = indexedDB.open("YDD_Storage", 2);
-  request.onupgradeneeded = function(event) {
+  request.onupgradeneeded = function (event) {
     var db = event.target.result;
     if (!db.objectStoreNames.contains("images")) {
       db.createObjectStore("images");
     }
   };
-  request.onsuccess = function(event) {
+  request.onsuccess = function (event) {
     var db = event.target.result;
     if (db.objectStoreNames.contains("images")) {
       var transaction = db.transaction("images", "readonly");
       var store = transaction.objectStore("images");
-      var randomUsesCurrentRecord =
-        bgMode === '"random"' &&
+      var randomUsesCurrentRecord = bgMode === '"random"' &&
         parsedRandomBgSchedule !== "refresh" &&
-        !(randomBgTimedChangeDue && (randomBgNextPreviewUrl || randomBgNextUrl));
+        !(randomBgTimedChangeDue &&
+          (randomBgNextPreviewUrl || randomBgNextUrl));
       var getRequest = store.get(
         randomUsesCurrentRecord ? "random_bg_current" : "current_bg",
       );
-      transaction.oncomplete = function() { db.close(); };
-      transaction.onerror = function() { db.close(); };
-      transaction.onabort = function() { db.close(); };
-      
-      getRequest.onsuccess = function(e) {
+      transaction.oncomplete = function () {
+        db.close();
+      };
+      transaction.onerror = function () {
+        db.close();
+      };
+      transaction.onabort = function () {
+        db.close();
+      };
+
+      getRequest.onsuccess = function (e) {
         var storedBackground = e.target.result;
         var storedRandomBlob =
-          randomUsesCurrentRecord && storedBackground?.blob instanceof Blob
-            && isSafeStoredRandomEntryUrl(storedBackground?.url)
+          randomUsesCurrentRecord && storedBackground?.blob instanceof Blob &&
+            isSafeStoredRandomEntryUrl(storedBackground?.url)
             ? storedBackground.blob
             : null;
         var usableBackground = storedRandomBlob || storedBackground;
-        if (usableBackground && preloadBackgroundEnabled && (bgMode !== '"random"' || randomUsesCurrentRecord)) {
+        if (
+          usableBackground && preloadBackgroundEnabled &&
+          (bgMode !== '"random"' || randomUsesCurrentRecord)
+        ) {
           releasePreloadObjectUrl();
           var objectUrl = URL.createObjectURL(usableBackground);
           preloadObjectUrl = objectUrl;
           window.__yddPreloadBackgroundUrl = objectUrl;
           var style = document.createElement("style");
           style.id = "ydd-idb-background";
-          style.textContent = "body { background-image: url(" + objectUrl + ") !important; background-size: cover !important; background-position: center !important; }";
+          style.textContent = "body { background-image: url(" + objectUrl +
+            ") !important; background-size: cover !important; background-position: center !important; }";
           document.head.appendChild(style);
           if (document.body) {
             document.body.classList.add("has-custom-bg");
           } else {
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
               document.body.classList.add("has-custom-bg");
             });
           }
@@ -387,8 +416,10 @@ try {
         var p = document.getElementById("idb-preloader");
         if (p) p.remove();
       };
-      getRequest.onerror = function() {
-        if (!imgUrl) document.documentElement.classList.remove("ydd-custom-bg-pending");
+      getRequest.onerror = function () {
+        if (!imgUrl) {
+          document.documentElement.classList.remove("ydd-custom-bg-pending");
+        }
         var p = document.getElementById("idb-preloader");
         if (p) p.remove();
       };
@@ -398,8 +429,10 @@ try {
       if (p) p.remove();
     }
   };
-  request.onerror = function() {
-    if (!imgUrl) document.documentElement.classList.remove("ydd-custom-bg-pending");
+  request.onerror = function () {
+    if (!imgUrl) {
+      document.documentElement.classList.remove("ydd-custom-bg-pending");
+    }
     var p = document.getElementById("idb-preloader");
     if (p) p.remove();
   };

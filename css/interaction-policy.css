@@ -1,18 +1,4 @@
-/*
- * Dashboard interaction policy
- *
- * Display-only UI is non-selectable by default. Native text editors and
- * explicitly allowlisted custom editors retain normal selection behavior.
- *
- * Future component contracts:
- *   data-ydd-selection="allow" - allow selection/copy for a subtree
- *   data-ydd-selection="deny"  - force the subtree to remain locked
- *   data-ydd-drag="allow"      - allow an intentional native drag source
- *
- * Shadow roots must include equivalent CSS because document styles do not
- * cross a shadow boundary. The delegated JavaScript policy handles composed
- * events, but cannot style a shadow tree by itself.
- */
+/* Interaction policy */
 
 html[data-ydd-ui-lock="true"],
 html[data-ydd-ui-lock="true"] body,
@@ -25,7 +11,7 @@ html[data-ydd-ui-lock="true"] body *::after {
   user-select: none;
 }
 
-/* Keep genuine text-entry controls fully editable and copyable. */
+/* Editable controls */
 html[data-ydd-ui-lock="true"] body textarea,
 html[data-ydd-ui-lock="true"] body input:not([type]),
 html[data-ydd-ui-lock="true"] body input[type="text" i],
@@ -50,7 +36,7 @@ html[data-ydd-ui-lock="true"] body [role="textbox" i] * {
   user-select: text;
 }
 
-/* Explicit exceptions are intentionally stronger than component styles. */
+/* Selection allowlist */
 html[data-ydd-ui-lock="true"] body [data-ydd-selection="allow"],
 html[data-ydd-ui-lock="true"] body [data-ydd-selection="allow"] * {
   -webkit-user-select: text !important;
@@ -59,7 +45,7 @@ html[data-ydd-ui-lock="true"] body [data-ydd-selection="allow"] * {
   user-select: text !important;
 }
 
-/* A deny marker wins over native-editor and allowlist detection. */
+/* Selection denylist */
 html[data-ydd-ui-lock="true"] body [data-ydd-selection="deny"],
 html[data-ydd-ui-lock="true"] body [data-ydd-selection="deny"] * {
   -webkit-user-select: none !important;

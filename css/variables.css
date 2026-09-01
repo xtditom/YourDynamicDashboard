@@ -1,4 +1,4 @@
-/* --- 1. RESET & VARIABLES --- */
+/* Reset & variables */
 * {
   margin: 0;
   padding: 0;
@@ -36,7 +36,6 @@ textarea {
   --icon-opacity: 1;
   --ydd-font-family: "Outfit", system-ui, sans-serif;
   --glow-color: rgba(0, 0, 0, 0.8);
-
   --gradient-color-1: #89f7fe;
   --gradient-color-2: #66a6ff;
 }
@@ -67,8 +66,7 @@ html[data-theme="dark"] body {
   --glow-color: rgba(255, 255, 255, 0.7);
 }
 
-/* SettingsManager applies the persisted command-palette grayscale preference
-   after the active theme and background have been restored. */
+/* Command palette icon override */
 body[data-theme="dark"][data-theme-id]:not([data-theme-id="default-dark"]),
 html[data-theme="dark"][data-theme-id]:not([data-theme-id="default-dark"]) body {
   --icon-filter: grayscale(0%);

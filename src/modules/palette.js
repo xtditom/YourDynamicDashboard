@@ -1,15 +1,15 @@
 import { state } from "../state.js";
 import {
-  GOOGLE_APPS,
   AI_TOOLS,
-  SOCIAL_LINKS,
-  SEARCH_PROVIDERS,
   COMMAND_PALETTE_SHORTCUT_USE_LIMIT,
+  GOOGLE_APPS,
+  SEARCH_PROVIDERS,
+  SOCIAL_LINKS,
 } from "../config.js";
 
-// Complete Bang Mapping for Search Engines & Platforms
+// Bang command map
 export const BANG_MAP = {
-  // Search Engines
+  // Search commands
   "g": { id: "google", type: "engines" },
   "google": { id: "google", type: "engines" },
   "b": { id: "bing", type: "engines" },
@@ -23,7 +23,7 @@ export const BANG_MAP = {
   "yd": { id: "yandex", type: "engines" },
   "yandex": { id: "yandex", type: "engines" },
 
-  // Platforms
+  // Platform commands
   "yt": { id: "youtube", type: "platforms" },
   "youtube": { id: "youtube", type: "platforms" },
   "sp": { id: "spotify", type: "platforms" },
@@ -35,7 +35,7 @@ export const BANG_MAP = {
   "r": { id: "reddit", type: "platforms" },
   "reddit": { id: "reddit", type: "platforms" },
   "q": { id: "quora", type: "platforms" },
-  "quora": { id: "quora", type: "platforms" }
+  "quora": { id: "quora", type: "platforms" },
 };
 
 const RESERVED_COMMAND_IDS = ["check-updates", "help-palette", "help-info"];
@@ -44,42 +44,42 @@ const BACKGROUND_COMMAND_IDS = new Set([
   "bg-random-freeze",
 ]);
 
+// Command palette
 export class CommandPalette {
   constructor() {
     this.isOpen = false;
     this.activeIndex = 0;
-    this.currentMenu = "main"; // "main", "search", "apps", "ai", "socials"
+    this.currentMenu = "main";
     this._helpModalClose = null;
 
-    // 1. Core main commands
     this.mainCommands = [
       {
         id: "help-palette",
         name: "Command Palette Help",
         icon: "❓",
         shortcut: "",
-        action: () => this.openHelpModal()
+        action: () => this.openHelpModal(),
       },
       {
         id: "settings-full",
         name: "Open Full Settings",
         icon: "⚙️",
         shortcut: () => this.getShortcutLabel("settings"),
-        action: () => window.__fullSettingsModalInstance?.open()
+        action: () => window.__fullSettingsModalInstance?.open(),
       },
       {
         id: "zen-mode",
         name: "Toggle Zen Mode",
         icon: "🧘",
         shortcut: () => this.getShortcutLabel("zen"),
-        action: () => state.set("zenMode", !state.get("zenMode"))
+        action: () => state.set("zenMode", !state.get("zenMode")),
       },
       {
         id: "voice-search",
         name: "Start / Stop Voice Search",
         icon: "🎙️",
         shortcut: () => this.getShortcutLabel("voice"),
-        action: () => window.YD_Search?.toggleVoiceSearch()
+        action: () => window.YD_Search?.toggleVoiceSearch(),
       },
       {
         id: "clock-type",
@@ -90,14 +90,14 @@ export class CommandPalette {
           state.set(
             "clockType",
             state.get("clockType") === "analog" ? "digital" : "analog",
-          )
+          ),
       },
       {
         id: "date-visibility",
         name: "Toggle Day & Date Visibility",
         icon: "📅",
         shortcut: () => this.getShortcutLabel("date"),
-        action: () => this.toggleBooleanState("showDate", false)
+        action: () => this.toggleBooleanState("showDate", false),
       },
       {
         id: "disable-animations",
@@ -107,7 +107,7 @@ export class CommandPalette {
         action: () => {
           this.toggleBooleanState("disableAnimations", false);
           state.set("disableAnimationsToggleCount", 1);
-        }
+        },
       },
       {
         id: "glow-effect",
@@ -117,14 +117,14 @@ export class CommandPalette {
         action: () => {
           if (state.get("disableAnimations") === true) return;
           this.toggleBooleanState("glowEffect", false);
-        }
+        },
       },
       {
         id: "generate-theme",
         name: "Generate a New Theme",
         icon: "🎨",
         shortcut: "",
-        action: () => window.__fullSettingsModalInstance?.generateTheme?.()
+        action: () => window.__fullSettingsModalInstance?.generateTheme?.(),
       },
       {
         id: "auto-theme",
@@ -135,14 +135,14 @@ export class CommandPalette {
           if (!document.body.classList.contains("has-custom-bg")) {
             this.toggleBooleanState("autoTheme", false);
           }
-        }
+        },
       },
       {
         id: "temperature-display",
         name: "Toggle Temperature Display",
         icon: "🌡️",
         shortcut: () => this.getShortcutLabel("tempDisplay"),
-        action: () => this.toggleBooleanState("tempDisplayMode", false)
+        action: () => this.toggleBooleanState("tempDisplayMode", false),
       },
       {
         id: "temperature-unit",
@@ -153,35 +153,35 @@ export class CommandPalette {
           state.set(
             "tempUnit",
             state.get("tempUnit") === "imperial" ? "metric" : "imperial",
-          )
+          ),
       },
       {
         id: "detect-weather-location",
         name: "Detect Weather Location Automatically",
         icon: "📍",
         shortcut: "",
-        action: () => window.__settingsManagerInstance?.detectLocation?.()
+        action: () => window.__settingsManagerInstance?.detectLocation?.(),
       },
       {
         id: "greeting-visibility",
         name: "Toggle Greeting Visibility",
         icon: "👋",
         shortcut: () => this.getShortcutLabel("hideGreetings"),
-        action: () => this.toggleBooleanState("hideGreetings", false)
+        action: () => this.toggleBooleanState("hideGreetings", false),
       },
       {
         id: "editable-text-visibility",
         name: "Toggle Editable Text Visibility",
         icon: "✏️",
         shortcut: () => this.getShortcutLabel("showEditableText"),
-        action: () => this.toggleBooleanState("showEditableText", true)
+        action: () => this.toggleBooleanState("showEditableText", true),
       },
       {
         id: "check-updates",
         name: "Check for Updates",
         icon: "🔄",
         shortcut: "",
-        action: () => this.clickBtn("check-for-updates-btn")
+        action: () => this.clickBtn("check-for-updates-btn"),
       },
       {
         id: "help-info",
@@ -192,14 +192,14 @@ export class CommandPalette {
           const settings = window.__settingsManagerInstance;
           if (settings?.openInfoModal) settings.openInfoModal();
           else document.getElementById("info-btn")?.click();
-        }
+        },
       },
       {
         id: "bg-remove",
         name: "Remove Custom Wallpaper Background",
         icon: "🖼️",
         shortcut: "",
-        action: () => this.clickBtn("remove-bg-button")
+        action: () => this.clickBtn("remove-bg-button"),
       },
       {
         id: "history",
@@ -210,7 +210,7 @@ export class CommandPalette {
           if (window.YD_Search) {
             window.YD_Search.buildHistoryModal();
           }
-        }
+        },
       },
       {
         id: "history-ghost",
@@ -219,7 +219,7 @@ export class CommandPalette {
         shortcut: "",
         action: () => {
           state.set("searchHistoryPaused", !state.get("searchHistoryPaused"));
-        }
+        },
       },
       {
         id: "clock-format",
@@ -227,15 +227,18 @@ export class CommandPalette {
         icon: "⏰",
         shortcut: "",
         action: () => {
-          state.set("clockFormat", state.get("clockFormat") === "12" ? "24" : "12");
-        }
+          state.set(
+            "clockFormat",
+            state.get("clockFormat") === "12" ? "24" : "12",
+          );
+        },
       },
       {
         id: "mode-dark",
         name: "Toggle Dark / Light Theme Mode",
         icon: "🌗",
         shortcut: "",
-        action: () => this.clickBtn("dark-mode-toggle")
+        action: () => this.clickBtn("dark-mode-toggle"),
       },
       {
         id: "transparency",
@@ -245,14 +248,14 @@ export class CommandPalette {
         action: () => {
           state.set("transparencyActive", !state.get("transparencyActive"));
           state.set("glassmorphismUseCount", 1);
-        }
+        },
       },
       {
         id: "grayscale",
         name: "Toggle Grayscale",
         icon: "◐",
         shortcut: "",
-        action: () => this.toggleBooleanState("grayscaleActive", true)
+        action: () => this.toggleBooleanState("grayscaleActive", true),
       },
       {
         id: "shortcuts-pos",
@@ -260,22 +263,25 @@ export class CommandPalette {
         icon: "↕️",
         shortcut: "",
         action: () => {
-          state.set("shortcutsPosition", state.get("shortcutsPosition") === "bottom" ? "top" : "bottom");
-        }
+          state.set(
+            "shortcutsPosition",
+            state.get("shortcutsPosition") === "bottom" ? "top" : "bottom",
+          );
+        },
       },
       {
         id: "bg-random-rnd",
         name: "Trigger New Random Background Image",
         icon: "🖼️",
         shortcut: "",
-        action: () => this.clickBtn("random-bg-rnd-btn")
+        action: () => this.clickBtn("random-bg-rnd-btn"),
       },
       {
         id: "bg-random-freeze",
         name: "Toggle Freeze Random Background Image",
         icon: "❄️",
         shortcut: "",
-        action: () => this.clickBtn("random-bg-freeze-btn")
+        action: () => this.clickBtn("random-bg-freeze-btn"),
       },
       {
         id: "reset",
@@ -296,29 +302,29 @@ export class CommandPalette {
         name: "Launch App...",
         icon: "🚀",
         shortcut: "Folder",
-        action: () => this.switchMenu("apps")
+        action: () => this.switchMenu("apps"),
       },
       {
         id: "submenu-ai",
         name: "Launch AI...",
         icon: "🤖",
         shortcut: "Folder",
-        action: () => this.switchMenu("ai")
+        action: () => this.switchMenu("ai"),
       },
       {
         id: "submenu-socials",
         name: "Launch Social...",
         icon: "📱",
         shortcut: "Folder",
-        action: () => this.switchMenu("socials")
+        action: () => this.switchMenu("socials"),
       },
       {
         id: "submenu-search",
         name: "Do Search...",
         icon: "🔎",
         shortcut: "Folder",
-        action: () => this.switchMenu("search")
-      }
+        action: () => this.switchMenu("search"),
+      },
     ];
 
     this.searchCommands = [
@@ -331,27 +337,25 @@ export class CommandPalette {
         providerType: "platforms",
       })),
     ].map((provider) => ({
-        id: `search-${provider.providerType}-${provider.id}`,
-        name: provider.name,
-        icon: "🔎",
-        shortcut: "",
-        action: () => {
-          if (provider.id === "perplexity") {
-            window.YD_Search?.recordPerplexityUse?.();
-          }
-          window.YD_Search?.setProvider(provider.id, provider.providerType);
-        },
-      }));
+      id: `search-${provider.providerType}-${provider.id}`,
+      name: provider.name,
+      icon: "🔎",
+      shortcut: "",
+      action: () => {
+        if (provider.id === "perplexity") {
+          window.YD_Search?.recordPerplexityUse?.();
+        }
+        window.YD_Search?.setProvider(provider.id, provider.providerType);
+      },
+    }));
 
     this.syncCustomSearchCommands();
 
-    // 2. Google Apps and user-added app commands
     this.appCommands = [];
     this.syncAppCommands();
 
-    // 3. AI Tools commands
     this.aiCommands = [];
-    (AI_TOOLS || []).forEach(tool => {
+    (AI_TOOLS || []).forEach((tool) => {
       if (tool.name) {
         this.aiCommands.push({
           id: `ai-${tool.name.toLowerCase()}`,
@@ -361,14 +365,13 @@ export class CommandPalette {
           action: () => {
             const targets = state.get("linkTargets") || {};
             window.open(tool.url, targets.ai || "_blank");
-          }
+          },
         });
       }
     });
 
-    // 4. Social networks commands
     this.socialCommands = [];
-    (SOCIAL_LINKS || []).forEach(social => {
+    (SOCIAL_LINKS || []).forEach((social) => {
       if (social.name) {
         this.socialCommands.push({
           id: `social-${social.name.toLowerCase()}`,
@@ -378,7 +381,7 @@ export class CommandPalette {
           action: () => {
             const targets = state.get("linkTargets") || {};
             window.open(social.url, targets.socials || targets.ai || "_blank");
-          }
+          },
         });
       }
     });
@@ -389,6 +392,7 @@ export class CommandPalette {
     this.init();
   }
 
+  // Command sources
   syncCustomToolCommands() {
     this.aiCommands = (this.aiCommands || []).filter(
       (command) => !command.id.startsWith("custom-ai-"),
@@ -457,6 +461,7 @@ export class CommandPalette {
     }));
   }
 
+  // Event wiring
   init() {
     this.createDomElements();
     this.registerEvents();
@@ -552,7 +557,7 @@ export class CommandPalette {
       overlay,
       input: overlay.querySelector("#cp-search-input"),
       list: overlay.querySelector("#cp-command-list"),
-      escapeBtn: overlay.querySelector(".cp-esc-badge")
+      escapeBtn: overlay.querySelector(".cp-esc-badge"),
     };
   }
 
@@ -590,7 +595,9 @@ export class CommandPalette {
         return;
       }
       if (e.key === "Tab") {
-        const focusable = this.els.overlay.querySelectorAll("button, input, [tabindex]:not([tabindex='-1'])");
+        const focusable = this.els.overlay.querySelectorAll(
+          "button, input, [tabindex]:not([tabindex='-1'])",
+        );
         if (!focusable.length) return;
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
@@ -612,22 +619,27 @@ export class CommandPalette {
       if (e.key === "ArrowDown") {
         e.preventDefault();
         if (this.filteredCommands.length === 0) return;
-        this.activeIndex = (this.activeIndex + 1) % this.filteredCommands.length;
+        this.activeIndex = (this.activeIndex + 1) %
+          this.filteredCommands.length;
         this.render();
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         if (this.filteredCommands.length === 0) return;
-        this.activeIndex = (this.activeIndex - 1 + this.filteredCommands.length) % this.filteredCommands.length;
+        this.activeIndex =
+          (this.activeIndex - 1 + this.filteredCommands.length) %
+          this.filteredCommands.length;
         this.render();
       } else if (e.key === "Enter") {
         e.preventDefault();
-        
-        // Check for universal search command (/s) & bang engine shortcuts (!yt, /g, !sp, etc.)
+
         const isSearch = this.handleUniversalSearch(this.els.input.value);
         if (isSearch) return;
 
         this.execute();
-      } else if (e.key === "Backspace" && this.els.input.value === "" && this.currentMenu !== "main") {
+      } else if (
+        e.key === "Backspace" && this.els.input.value === "" &&
+        this.currentMenu !== "main"
+      ) {
         e.preventDefault();
         this.switchMenu("main");
       }
@@ -637,8 +649,7 @@ export class CommandPalette {
   syncShortcutBadge() {
     const badge = document.getElementById("search-cp-badge");
     if (!badge) return;
-    const hidden =
-      (Number(state.get("commandPaletteShortcutUseCount")) || 0) >=
+    const hidden = (Number(state.get("commandPaletteShortcutUseCount")) || 0) >=
       COMMAND_PALETTE_SHORTCUT_USE_LIMIT;
     badge.hidden = hidden;
     badge.classList.toggle("hidden", hidden);
@@ -673,16 +684,16 @@ export class CommandPalette {
     this.currentMenu = targetMenu;
     this.els.input.value = "";
     this.activeIndex = 0;
-    
+
     const placeholders = {
       main: "Type a command or search... (Esc to close)",
       search: "Choose a search engine or platform... (Backspace to go back)",
       apps: "Search Google Apps... (Backspace to go back)",
       ai: "Search AI Tools... (Backspace to go back)",
-      socials: "Search Social Links... (Backspace to go back)"
+      socials: "Search Social Links... (Backspace to go back)",
     };
     this.els.input.placeholder = placeholders[targetMenu];
-    
+
     this.filter("");
     this.focusInput();
   }
@@ -716,7 +727,8 @@ export class CommandPalette {
         return aReserved - bReserved;
       }
 
-      const usageDifference = (usage[b.command.id] || 0) - (usage[a.command.id] || 0);
+      const usageDifference = (usage[b.command.id] || 0) -
+        (usage[a.command.id] || 0);
       return usageDifference || a.index - b.index;
     });
 
@@ -732,26 +744,31 @@ export class CommandPalette {
     state.set("commandUsage", usage);
   }
 
+  // Command filtering
   filter(text) {
     const query = text.toLowerCase().trim();
 
     if (this.currentMenu === "main" && query !== "") {
-      // Unified search crawls all commands across all categories
       const allSearchable = this.orderCommands(this.getVisibleCommands([
-        ...this.mainCommands.filter(c => c.id !== "submenu-apps" && c.id !== "submenu-ai" && c.id !== "submenu-socials" && c.id !== "submenu-search"),
+        ...this.mainCommands.filter((c) =>
+          c.id !== "submenu-apps" && c.id !== "submenu-ai" &&
+          c.id !== "submenu-socials" && c.id !== "submenu-search"
+        ),
         ...this.appCommands,
         ...this.aiCommands,
         ...this.socialCommands,
         ...this.searchCommands,
       ]));
-      this.filteredCommands = allSearchable.filter(c => 
-        c.name.toLowerCase().includes(query) || 
+      this.filteredCommands = allSearchable.filter((c) =>
+        c.name.toLowerCase().includes(query) ||
         c.id.toLowerCase().includes(query)
       );
     } else {
       let baseList = [];
       if (this.currentMenu === "main") {
-        baseList = this.orderCommands(this.getVisibleCommands(this.mainCommands));
+        baseList = this.orderCommands(
+          this.getVisibleCommands(this.mainCommands),
+        );
       } else if (this.currentMenu === "apps") {
         baseList = this.orderCommands(this.appCommands);
       } else if (this.currentMenu === "ai") {
@@ -765,8 +782,8 @@ export class CommandPalette {
       if (!query) {
         this.filteredCommands = [...baseList];
       } else {
-        this.filteredCommands = baseList.filter(c => 
-          c.name.toLowerCase().includes(query) || 
+        this.filteredCommands = baseList.filter((c) =>
+          c.name.toLowerCase().includes(query) ||
           c.id.toLowerCase().includes(query)
         );
       }
@@ -778,7 +795,7 @@ export class CommandPalette {
         name: "← Back to Main Menu",
         icon: "↩️",
         shortcut: "Backspace",
-        action: () => this.switchMenu("main")
+        action: () => this.switchMenu("main"),
       });
     }
 
@@ -786,6 +803,7 @@ export class CommandPalette {
     this.render();
   }
 
+  // Command rendering
   render() {
     this.els.list.innerHTML = "";
 
@@ -805,10 +823,10 @@ export class CommandPalette {
       item.tabIndex = 0;
       item.setAttribute("aria-label", c.name);
       item.setAttribute("aria-selected", String(idx === this.activeIndex));
-      
+
       const left = document.createElement("div");
       left.className = "cp-item-left";
-      
+
       const icon = document.createElement("span");
       icon.className = "cp-item-icon";
       icon.textContent = c.icon;
@@ -821,8 +839,9 @@ export class CommandPalette {
       left.appendChild(name);
       item.appendChild(left);
 
-      const shortcut =
-        typeof c.shortcut === "function" ? c.shortcut() : c.shortcut;
+      const shortcut = typeof c.shortcut === "function"
+        ? c.shortcut()
+        : c.shortcut;
       if (shortcut) {
         const badge = document.createElement("span");
         badge.className = "cp-item-badge";
@@ -869,6 +888,7 @@ export class CommandPalette {
     });
   }
 
+  // Command execution
   execute() {
     const cmd = this.filteredCommands[this.activeIndex];
     if (cmd) this.executeCommand(cmd);
@@ -877,7 +897,13 @@ export class CommandPalette {
   executeCommand(command) {
     if (!command?.action) return false;
     if (
-      !["submenu-apps", "submenu-ai", "submenu-socials", "submenu-search", "cp-back-button"].includes(
+      ![
+        "submenu-apps",
+        "submenu-ai",
+        "submenu-socials",
+        "submenu-search",
+        "cp-back-button",
+      ].includes(
         command.id,
       )
     ) {
@@ -895,21 +921,17 @@ export class CommandPalette {
     }
   }
 
-  /**
-   * Universal Search Handler with Bang Search Engine Switching (!yt, /g, !sp, !ddg, /w, etc.)
-   */
+  // Universal search
   handleUniversalSearch(query) {
     const trimmed = query.trim();
     const words = trimmed.split(/\s+/);
-    const sIdx = words.findIndex(w => w === "/s");
+    const sIdx = words.findIndex((w) => w === "/s");
     if (sIdx === -1) return false;
 
-    // Remove "/s" token
     words.splice(sIdx, 1);
 
-    // Look for target engine/platform bang shortcut starting with ! or / (e.g. !yt, /g, !sp, /w, !ddg)
     let targetEngine = null;
-    const engineIdx = words.findIndex(w => {
+    const engineIdx = words.findIndex((w) => {
       if (w.startsWith("/") || w.startsWith("!")) {
         const cmd = w.substring(1).toLowerCase();
         return BANG_MAP[cmd] !== undefined;
@@ -931,7 +953,7 @@ export class CommandPalette {
         window.YD_Search.setProvider(targetEngine.id, targetEngine.type);
       }
       this.close();
-      
+
       window.YD_Search.els.input.value = searchQuery;
       window.YD_Search.handleSubmit(new Event("submit"));
       return true;
@@ -1019,7 +1041,9 @@ export class CommandPalette {
         return;
       }
       if (e.key === "Tab") {
-        const focusable = overlay.querySelectorAll("button, a[href], input, select, textarea");
+        const focusable = overlay.querySelectorAll(
+          "button, a[href], input, select, textarea",
+        );
         if (!focusable.length) return;
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
@@ -1097,3 +1121,4 @@ export class CommandPalette {
     document.getElementById("cp-help-modal-overlay")?.remove();
   }
 }
+// [src/modules/palette.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

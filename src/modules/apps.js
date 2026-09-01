@@ -8,14 +8,15 @@ import {
   showCustomModal,
 } from "../utils.js";
 import {
-  MAX_CUSTOM_APPS,
   MAX_CUSTOM_APP_NAME_LENGTH,
   MAX_CUSTOM_APP_URL_LENGTH,
+  MAX_CUSTOM_APPS,
   MAX_CUSTOM_TOOL_ICON_LENGTH,
   normalizeHttpUrl,
   validateImageBlob,
 } from "../validators.js";
 
+// App configuration
 const CUSTOM_APP_ICON_SIZE = 128;
 const CUSTOM_APP_ICON_MAX_BYTES = 5 * 1024 * 1024;
 const APP_DIVIDER_ID = "app-divider";
@@ -32,11 +33,14 @@ const CUSTOM_APP_IMAGE_TYPES = new Set([
 ]);
 
 const getDefaultAppId = (name) =>
-  `app-default-${String(name || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")}`;
+  `app-default-${
+    String(name || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+  }`;
 
+// Google apps grid
 export class AppGrid {
   constructor() {
     this.els = {
@@ -92,7 +96,10 @@ export class AppGrid {
         this.close();
       }
     });
-    this.els.popup.addEventListener("click", (event) => event.stopPropagation());
+    this.els.popup.addEventListener(
+      "click",
+      (event) => event.stopPropagation(),
+    );
     if (window.MutationObserver) {
       this._popupObserver = new MutationObserver(() => {
         if (!this.els.popup.classList.contains("visible") && this.isEditMode) {
@@ -122,6 +129,7 @@ export class AppGrid {
     this.updateVisibility();
   }
 
+  // App state and ordering
   getDefaultApps() {
     const overrides = state.get("googleAppOverrides") || {};
     return GOOGLE_APPS.map((app) => {
@@ -184,8 +192,7 @@ export class AppGrid {
       seen.add(id);
       normalized.push(id);
     });
-    // Add newly registered built-in apps at their configured default
-    // positions. Existing user ordering is preserved for apps already saved.
+
     apps.forEach((app, appIndex) => {
       if (seen.has(app.id)) return;
 
@@ -200,8 +207,6 @@ export class AppGrid {
       seen.add(app.id);
     });
 
-    // Keep the built-in divider above the Chat / News / Contacts group even
-    // for users who already have an older saved Google Apps order.
     const dividerIndex = normalized.indexOf(APP_DIVIDER_ID);
     const chatId = getDefaultAppId("Chat");
     const chatIndex = normalized.indexOf(chatId);
@@ -304,7 +309,9 @@ export class AppGrid {
     );
     this.els.hint.classList.remove("hidden");
     playNotificationSound();
-    window.requestAnimationFrame(() => this.els.hint.classList.add("is-visible"));
+    window.requestAnimationFrame(() =>
+      this.els.hint.classList.add("is-visible")
+    );
     this._hintTimer = createHoverPauseTimer(
       this.els.hint,
       APP_EDIT_HINT_DURATION,
@@ -326,6 +333,7 @@ export class AppGrid {
     else window.setTimeout(finish, 180);
   }
 
+  // App rendering
   render() {
     const apps = this.getAllApps();
     const appMap = new Map(apps.map((app) => [app.id, app]));
@@ -366,7 +374,10 @@ export class AppGrid {
         if (this.isEditMode) {
           item.setAttribute("role", "button");
           item.tabIndex = 0;
-          item.setAttribute("aria-pressed", String(this.selectedIds.has(app.id)));
+          item.setAttribute(
+            "aria-pressed",
+            String(this.selectedIds.has(app.id)),
+          );
           item.setAttribute("aria-label", `Select ${app.name}`);
           item.addEventListener("click", () => {
             if (this._dragOccurred) return;
@@ -386,7 +397,8 @@ export class AppGrid {
         } else {
           const openApp = () => {
             if (this._dragOccurred) return;
-            const targets = state.get("linkTargets") || CONFIG.defaults.linkTargets;
+            const targets = state.get("linkTargets") ||
+              CONFIG.defaults.linkTargets;
             window.open(app.url, targets.apps || "_blank");
           };
           item.addEventListener("click", openApp);
@@ -438,10 +450,13 @@ export class AppGrid {
     );
     this.els.moreBtn?.setAttribute(
       "aria-label",
-      `Actions for ${this.selectedIds.size} selected app${this.selectedIds.size === 1 ? "" : "s"}`,
+      `Actions for ${this.selectedIds.size} selected app${
+        this.selectedIds.size === 1 ? "" : "s"
+      }`,
     );
   }
 
+  // Selection actions
   toggleSelection(id) {
     if (!this.isEditMode) return;
     if (this.selectedIds.has(id)) this.selectedIds.delete(id);
@@ -502,7 +517,9 @@ export class AppGrid {
         false,
         buttons,
       );
-      if (action === "toggle-visibility") this.toggleSelectedVisibility(selected);
+      if (action === "toggle-visibility") {
+        this.toggleSelectedVisibility(selected);
+      }
       if (action === "delete") await this.deleteSelectedApps(selected);
       if (action === "modify" && selected.length === 1) {
         this.openAppModal(selected[0]);
@@ -574,7 +591,9 @@ export class AppGrid {
     if (!confirmed) return;
     delete overrides[app.id];
     if (!state.set("googleAppOverrides", overrides)) {
-      await showCustomModal("The app could not be reset. Check browser storage.");
+      await showCustomModal(
+        "The app could not be reset. Check browser storage.",
+      );
       return;
     }
     this.selectedIds.clear();
@@ -596,7 +615,9 @@ export class AppGrid {
     const ids = new Set(selected.map((app) => app.id));
     const current = state.get("customApps") || [];
     if (!state.set("customApps", current.filter((app) => !ids.has(app.id)))) {
-      await showCustomModal("The selected apps could not be deleted. Check browser storage.");
+      await showCustomModal(
+        "The selected apps could not be deleted. Check browser storage.",
+      );
       return;
     }
     const nextHidden = { ...(state.get("hiddenApps") || {}) };
@@ -610,14 +631,14 @@ export class AppGrid {
     this.render();
   }
 
+  // Custom app management
   createCustomAppId() {
     const existing = new Set(
       (state.get("customApps") || []).map((app) => app.id),
     );
     let id;
     do {
-      const randomPart =
-        globalThis.crypto?.randomUUID?.() ||
+      const randomPart = globalThis.crypto?.randomUUID?.() ||
         `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
       id = `custom-app-${randomPart}`;
     } while (existing.has(id));
@@ -627,8 +648,13 @@ export class AppGrid {
   normalizeAppUrl(value) {
     const normalized = normalizeHttpUrl(value, MAX_CUSTOM_APP_URL_LENGTH);
     const hostname = new URL(normalized).hostname;
-    if (!hostname.includes(".") && hostname !== "localhost" && !hostname.includes(":")) {
-      throw new TypeError("Enter a valid website URL, such as https://example.com.");
+    if (
+      !hostname.includes(".") && hostname !== "localhost" &&
+      !hostname.includes(":")
+    ) {
+      throw new TypeError(
+        "Enter a valid website URL, such as https://example.com.",
+      );
     }
     return normalized;
   }
@@ -655,7 +681,8 @@ export class AppGrid {
       const image = await new Promise((resolve, reject) => {
         const element = new Image();
         element.onload = () => resolve(element);
-        element.onerror = () => reject(new TypeError("The icon could not be decoded."));
+        element.onerror = () =>
+          reject(new TypeError("The icon could not be decoded."));
         element.src = objectUrl;
       });
       const width = image.naturalWidth;
@@ -685,6 +712,7 @@ export class AppGrid {
     }
   }
 
+  // App editor
   openAppModal(app = null) {
     if (this.appModal) return;
     const isEditing = Boolean(app?.id);
@@ -707,8 +735,8 @@ export class AppGrid {
     subtitle.textContent = isDefault
       ? "Change the app name or icon. Built-in app URLs cannot be changed."
       : isEditing
-        ? "Change this custom app's icon, name, or URL."
-        : "Add any website or web app to the Apps window.";
+      ? "Change this custom app's icon, name, or URL."
+      : "Add any website or web app to the Apps window.";
 
     const form = document.createElement("form");
     form.noValidate = true;
@@ -726,7 +754,8 @@ export class AppGrid {
     iconHint.textContent = isEditing ? "Change icon" : "Optional icon";
     const iconInput = document.createElement("input");
     iconInput.type = "file";
-    iconInput.accept = "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml";
+    iconInput.accept =
+      "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml";
     iconInput.className = "visually-hidden";
     iconInput.setAttribute(
       "aria-label",
@@ -794,8 +823,7 @@ export class AppGrid {
     formError.setAttribute("aria-live", "polite");
     const actions = document.createElement("div");
     actions.className = "ydd-add-tool-actions";
-    const hasDefaultOverride =
-      isDefault &&
+    const hasDefaultOverride = isDefault &&
       Object.keys(state.get("googleAppOverrides")?.[app.id] || {}).length > 0;
     if (hasDefaultOverride) {
       const resetButton = document.createElement("button");
@@ -816,7 +844,13 @@ export class AppGrid {
     saveButton.className = "settings-button";
     saveButton.textContent = isEditing ? "Save" : "Add";
     actions.append(cancelButton, saveButton);
-    form.append(iconLabel, nameField.wrapper, urlField.wrapper, formError, actions);
+    form.append(
+      iconLabel,
+      nameField.wrapper,
+      urlField.wrapper,
+      formError,
+      actions,
+    );
     modal.append(title, subtitle, form);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
@@ -943,7 +977,8 @@ export class AppGrid {
         iconLabel.classList.remove("is-invalid");
         formError.textContent = "";
       } catch (error) {
-        formError.textContent = error.message || "The icon could not be processed.";
+        formError.textContent = error.message ||
+          "The icon could not be processed.";
       } finally {
         iconInput.disabled = false;
       }
@@ -972,7 +1007,8 @@ export class AppGrid {
         if (!isEditing) {
           const current = state.get("customApps") || [];
           if (current.length >= MAX_CUSTOM_APPS) {
-            formError.textContent = `You can add up to ${MAX_CUSTOM_APPS} custom apps.`;
+            formError.textContent =
+              `You can add up to ${MAX_CUSTOM_APPS} custom apps.`;
             return;
           }
           const cleanUrl = this.normalizeAppUrl(urlField.input.value);
@@ -983,7 +1019,8 @@ export class AppGrid {
             icon: iconData || getIconUrl(cleanUrl),
           };
           if (!state.set("customApps", [...current, newApp])) {
-            formError.textContent = "The app could not be saved. Check browser storage.";
+            formError.textContent =
+              "The app could not be saved. Check browser storage.";
             return;
           }
         } else if (app.isCustom) {
@@ -992,19 +1029,20 @@ export class AppGrid {
           const updated = current.map((item) =>
             item.id === app.id
               ? {
-                  ...item,
-                  name,
-                  url: cleanUrl,
-                  icon: iconChanged
-                    ? iconData
-                    : item.icon?.startsWith("data:image/")
-                      ? item.icon
-                      : getIconUrl(cleanUrl),
-                }
-              : item,
+                ...item,
+                name,
+                url: cleanUrl,
+                icon: iconChanged
+                  ? iconData
+                  : item.icon?.startsWith("data:image/")
+                  ? item.icon
+                  : getIconUrl(cleanUrl),
+              }
+              : item
           );
           if (!state.set("customApps", updated)) {
-            formError.textContent = "The app could not be updated. Check browser storage.";
+            formError.textContent =
+              "The app could not be updated. Check browser storage.";
             return;
           }
         } else {
@@ -1016,7 +1054,8 @@ export class AppGrid {
           if (Object.keys(next).length) overrides[app.id] = next;
           else delete overrides[app.id];
           if (!state.set("googleAppOverrides", overrides)) {
-            formError.textContent = "The app could not be updated. Check browser storage.";
+            formError.textContent =
+              "The app could not be updated. Check browser storage.";
             return;
           }
         }
@@ -1040,6 +1079,7 @@ export class AppGrid {
     this.appModal?.close?.(immediate);
   }
 
+  // App drag and drop
   enableDragAndDrop() {
     const items = this.els.grid.querySelectorAll(".app-item");
     const slots = this.els.grid.querySelectorAll(".app-slot");
@@ -1068,7 +1108,10 @@ export class AppGrid {
         event.dataTransfer.dropEffect = "move";
         slot.classList.add("drag-over");
       });
-      slot.addEventListener("dragleave", () => slot.classList.remove("drag-over"));
+      slot.addEventListener(
+        "dragleave",
+        () => slot.classList.remove("drag-over"),
+      );
       slot.addEventListener("drop", (event) => {
         event.stopPropagation();
         event.preventDefault();
@@ -1090,9 +1133,7 @@ export class AppGrid {
     const [movedApp] = order.splice(sourceIndex, 1);
     const targetPosition = order.indexOf(targetId);
     if (targetPosition < 0) return;
-    // Keep the drop target before the dragged app. This makes dropping onto
-    // the final app place the dragged app in the final square and shifts the
-    // former final app one position back.
+
     order.splice(targetPosition + 1, 0, movedApp);
     state.set("googleAppsOrder", order);
   }

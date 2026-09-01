@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { CONFIG, QUOTES } from "../config.js";
 
+// Quote widget
 export class QuoteWidget {
   constructor() {
     this.els = {
@@ -16,10 +17,10 @@ export class QuoteWidget {
     this.init();
   }
 
+  // Quote lifecycle
   init() {
     this.updateText();
 
-    // --- ANIMATED CYCLE: 12.5 Seconds (visible tabs only) ---
     document.addEventListener("visibilitychange", this._visibilityHandler);
 
     state.subscribe((key) => {
@@ -31,7 +32,9 @@ export class QuoteWidget {
 
   startQuoteTimer() {
     this.stopQuoteTimer();
-    if (document.hidden || this.els.widget?.classList.contains("hidden")) return;
+    if (document.hidden || this.els.widget?.classList.contains("hidden")) {
+      return;
+    }
     this._quoteTimer = window.setInterval(() => this.cycleQuote(), 12500);
   }
 
@@ -49,6 +52,7 @@ export class QuoteWidget {
     else this.startQuoteTimer();
   }
 
+  // Quote rendering
   updateText() {
     const random = QUOTES[Math.floor(Math.random() * QUOTES.length)];
     this.els.text.textContent = `"${random.text}"`;
@@ -56,7 +60,9 @@ export class QuoteWidget {
   }
 
   cycleQuote() {
-    if (document.hidden || this.els.widget?.classList.contains("hidden")) return;
+    if (document.hidden || this.els.widget?.classList.contains("hidden")) {
+      return;
+    }
     if (state.get("disableAnimations") === true) {
       this.updateText();
       return;
@@ -73,21 +79,28 @@ export class QuoteWidget {
     }, 500);
   }
 
+  // Widget visibility and animation
   applyWidgetVisibility() {
     const control = state.get("widgetControl") || "all";
 
-    const showSearch  = ["all", "search-only", "search-weather", "search-quote"].includes(control);
-    const showWeather = ["all", "weather-only", "search-weather", "weather-quote"].includes(control);
-    const showQuote   = ["all", "quote-only",  "search-quote",  "weather-quote"].includes(control);
+    const showSearch = ["all", "search-only", "search-weather", "search-quote"]
+      .includes(control);
+    const showWeather = [
+      "all",
+      "weather-only",
+      "search-weather",
+      "weather-quote",
+    ].includes(control);
+    const showQuote = ["all", "quote-only", "search-quote", "weather-quote"]
+      .includes(control);
 
-    // --- Animation assignments per mode ---
     let weatherAnim = null, searchAnim = null, quoteAnim = null;
     let searchDelay = null;
     switch (control) {
       case "all":
         weatherAnim = "fade-down";
-        searchAnim  = "popup-scale-entry";
-        quoteAnim   = "fade-up";
+        searchAnim = "popup-scale-entry";
+        quoteAnim = "fade-up";
         break;
       case "weather-only":
         weatherAnim = "popup-scale-entry";
@@ -99,18 +112,18 @@ export class QuoteWidget {
         quoteAnim = "popup-scale-entry";
         break;
       case "search-weather":
-        searchAnim  = "popup-scale-entry";
+        searchAnim = "popup-scale-entry";
         searchDelay = "0.22s";
         weatherAnim = "popup-scale-entry";
         break;
       case "search-quote":
-        searchAnim  = "popup-scale-entry";
+        searchAnim = "popup-scale-entry";
         searchDelay = "0.22s";
-        quoteAnim   = "popup-scale-entry";
+        quoteAnim = "popup-scale-entry";
         break;
       case "weather-quote":
         weatherAnim = "fade-down";
-        quoteAnim   = "fade-up";  
+        quoteAnim = "fade-up";
         break;
     }
 
@@ -142,7 +155,11 @@ export class QuoteWidget {
       } else {
         this.els.search.classList.add("hidden");
         this.els.search.style.animationDelay = "";
-        this.els.search.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+        this.els.search.classList.remove(
+          "fade-up",
+          "fade-down",
+          "popup-scale-entry",
+        );
       }
     }
 
@@ -152,7 +169,11 @@ export class QuoteWidget {
         animate(this.els.weather, weatherAnim);
       } else {
         this.els.weather.classList.add("hidden");
-        this.els.weather.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+        this.els.weather.classList.remove(
+          "fade-up",
+          "fade-down",
+          "popup-scale-entry",
+        );
       }
     }
 
@@ -162,7 +183,11 @@ export class QuoteWidget {
         animate(this.els.widget, quoteAnim);
       } else {
         this.els.widget.classList.add("hidden");
-        this.els.widget.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+        this.els.widget.classList.remove(
+          "fade-up",
+          "fade-down",
+          "popup-scale-entry",
+        );
       }
     }
 

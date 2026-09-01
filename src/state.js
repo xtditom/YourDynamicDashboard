@@ -2,8 +2,8 @@ import {
   CONFIG,
   DEFAULT_KEY_MAP,
   FONT_OPTIONS,
-  NEWS_CATEGORIES,
   NEWS_CARD_COUNTS,
+  NEWS_CATEGORIES,
   NEWS_HEADLINE_OPACITIES,
   NEWS_PROVIDERS,
   NEWS_REFRESH_INTERVALS,
@@ -11,21 +11,23 @@ import {
   SEARCH_SUGGESTION_MODES,
 } from "./config.js";
 import {
-  sanitizeCustomSearchEngines,
-  sanitizeCustomApps,
-  sanitizeGoogleAppOverrides,
-  sanitizeHiddenApps,
-  sanitizeCustomTools,
-  sanitizeShortcuts,
-  sanitizeSavedThemes,
   normalizeStoredBackgroundUrl,
   normalizeStoredImageDataUrl,
   normalizeStoredThemeColor,
+  sanitizeCustomApps,
+  sanitizeCustomSearchEngines,
+  sanitizeCustomTools,
+  sanitizeGoogleAppOverrides,
+  sanitizeHiddenApps,
+  sanitizeSavedThemes,
+  sanitizeShortcuts,
 } from "./validators.js";
 
+// State configuration
 const STATE_SCHEMA_VERSION = 1;
 const VERSION_PREFIX = "ydd_state_version:";
 
+// State manager
 class StateManager {
   constructor() {
     this.cache = {};
@@ -50,10 +52,13 @@ class StateManager {
     const rightKeys = Object.keys(right);
     if (leftKeys.length !== rightKeys.length) return false;
     return leftKeys.every(
-      (key) => Object.prototype.hasOwnProperty.call(right, key) && this.areEqual(left[key], right[key]),
+      (key) =>
+        Object.prototype.hasOwnProperty.call(right, key) &&
+        this.areEqual(left[key], right[key]),
     );
   }
 
+  // State validation
   normalizeValue(key, value) {
     if (key === "fontFamily") {
       const savedFontId = String(value || "");
@@ -72,7 +77,9 @@ class StateManager {
       if (!Array.isArray(value)) throw new TypeError("Invalid news providers");
       const allowed = new Set(NEWS_PROVIDERS.map((provider) => provider.id));
       const normalized = [
-        ...new Set(value.filter((id) => typeof id === "string" && allowed.has(id))),
+        ...new Set(
+          value.filter((id) => typeof id === "string" && allowed.has(id)),
+        ),
       ];
       const legacyDefault = ["bbc", "guardian", "voa", "npr"];
       if (
@@ -86,7 +93,11 @@ class StateManager {
     if (key === "newsCategoryIds") {
       if (!Array.isArray(value)) throw new TypeError("Invalid news categories");
       const allowed = new Set(NEWS_CATEGORIES.map((category) => category.id));
-      return [...new Set(value.filter((id) => typeof id === "string" && allowed.has(id)))];
+      return [
+        ...new Set(
+          value.filter((id) => typeof id === "string" && allowed.has(id)),
+        ),
+      ];
     }
     if (key === "newsShowHeadlines" && typeof value !== "boolean") {
       throw new TypeError("Invalid news headline visibility");
@@ -118,7 +129,9 @@ class StateManager {
       const safeUrl = (candidate) => {
         try {
           const url = new URL(candidate);
-          return ["http:", "https:"].includes(url.protocol) ? url.toString() : "";
+          return ["http:", "https:"].includes(url.protocol)
+            ? url.toString()
+            : "";
         } catch {
           return "";
         }
@@ -126,9 +139,10 @@ class StateManager {
       const safeImageUrl = (candidate) => {
         const url = safeUrl(candidate);
         try {
-          return url && !/\.(?:avi|m4v|m3u8|mkv|mov|mp4|mpeg|mpg|webm|wmv)$/i.test(
-            new URL(url).pathname,
-          )
+          return url &&
+              !/\.(?:avi|m4v|m3u8|mkv|mov|mp4|mpeg|mpg|webm|wmv)$/i.test(
+                new URL(url).pathname,
+              )
             ? url
             : "";
         } catch {
@@ -137,23 +151,29 @@ class StateManager {
       };
       const items = Array.isArray(value.items)
         ? value.items.slice(0, 30).map((item) => {
-            const imageCandidates = [...new Set([
-              item?.imageUrl,
-              ...(Array.isArray(item?.imageCandidates) ? item.imageCandidates : []),
-            ].map(safeImageUrl).filter(Boolean))].slice(0, 8);
-            return {
-              id: String(item?.id || "").slice(0, 500),
-              title: String(item?.title || "").trim().slice(0, 300),
-              url: safeUrl(item?.url),
-              imageUrl: imageCandidates[0] || "",
-              imageCandidates,
-              providerId: String(item?.providerId || "").slice(0, 40),
-              providerName: String(item?.providerName || "").slice(0, 80),
-              publishedAt: Number.isFinite(Number(item?.publishedAt))
-                ? Number(item.publishedAt)
-                : 0,
-            };
-          }).filter((item) => item.title && item.url)
+          const imageCandidates = [
+            ...new Set(
+              [
+                item?.imageUrl,
+                ...(Array.isArray(item?.imageCandidates)
+                  ? item.imageCandidates
+                  : []),
+              ].map(safeImageUrl).filter(Boolean),
+            ),
+          ].slice(0, 8);
+          return {
+            id: String(item?.id || "").slice(0, 500),
+            title: String(item?.title || "").trim().slice(0, 300),
+            url: safeUrl(item?.url),
+            imageUrl: imageCandidates[0] || "",
+            imageCandidates,
+            providerId: String(item?.providerId || "").slice(0, 40),
+            providerName: String(item?.providerName || "").slice(0, 80),
+            publishedAt: Number.isFinite(Number(item?.publishedAt))
+              ? Number(item.publishedAt)
+              : 0,
+          };
+        }).filter((item) => item.title && item.url)
         : [];
       return {
         version: 2,
@@ -164,18 +184,26 @@ class StateManager {
         fetchedAt: Math.max(0, Number(value.fetchedAt) || 0),
         items,
         failures: Array.isArray(value.failures)
-          ? value.failures.slice(0, 20).map((failure) => String(failure).slice(0, 200))
+          ? value.failures.slice(0, 20).map((failure) =>
+            String(failure).slice(0, 200)
+          )
           : [],
       };
     }
     if (key === "searchSuggestionMode") {
-      if (value === "history-local-online") return SEARCH_SUGGESTION_MODES.HISTORY_ONLINE;
-      if (value === "history-local") return SEARCH_SUGGESTION_MODES.HISTORY_ONLY;
+      if (value === "history-local-online") {
+        return SEARCH_SUGGESTION_MODES.HISTORY_ONLINE;
+      }
+      if (value === "history-local") {
+        return SEARCH_SUGGESTION_MODES.HISTORY_ONLY;
+      }
     }
     if (key === "searchSuggestionProxyUrl") {
       if (value === "") return value;
       const url = new URL(value);
-      if (url.protocol !== "https:") throw new TypeError("Suggestion proxy must use HTTPS");
+      if (url.protocol !== "https:") {
+        throw new TypeError("Suggestion proxy must use HTTPS");
+      }
       return url.toString();
     }
     if (["backgroundImage", "savedBgUrl", "randomBgNextUrl"].includes(key)) {
@@ -193,8 +221,12 @@ class StateManager {
     if (key === "customApps") return sanitizeCustomApps(value);
     if (key === "googleAppOverrides") return sanitizeGoogleAppOverrides(value);
     if (key === "hiddenApps") return sanitizeHiddenApps(value);
-    if (key === "customSearchEngines") return sanitizeCustomSearchEngines(value);
-    if (key === "customSocialLinks") return sanitizeCustomTools(value, "social");
+    if (key === "customSearchEngines") {
+      return sanitizeCustomSearchEngines(value);
+    }
+    if (key === "customSocialLinks") {
+      return sanitizeCustomTools(value, "social");
+    }
     if (key === "searchHistory") {
       if (!Array.isArray(value)) throw new TypeError("Invalid search history");
       return value.filter(
@@ -207,8 +239,7 @@ class StateManager {
     }
     if (key === "searchProvider") {
       const providers = SEARCH_PROVIDERS[value?.type];
-      const isCustomSearchEngine =
-        value?.type === "engines" &&
+      const isCustomSearchEngine = value?.type === "engines" &&
         typeof value?.id === "string" &&
         value.id.startsWith("custom-search-");
       if (
@@ -238,8 +269,9 @@ class StateManager {
       const migrated = { ...DEFAULT_KEY_MAP };
       Object.keys(value).forEach((action) => {
         const saved = value[action];
-        if (typeof saved === "string") migrated[action] = { key: saved, enabled: true };
-        else if (saved && typeof saved === "object") {
+        if (typeof saved === "string") {
+          migrated[action] = { key: saved, enabled: true };
+        } else if (saved && typeof saved === "object") {
           migrated[action] = { ...migrated[action], ...saved };
         }
       });
@@ -252,6 +284,7 @@ class StateManager {
     return value;
   }
 
+  // State persistence
   writeValue(key, value) {
     const serialized = JSON.stringify(value);
     if (serialized === undefined) {
@@ -280,17 +313,28 @@ class StateManager {
       try {
         const parsed = JSON.parse(fromDisk);
 
-        const storedVersion = Number(localStorage.getItem(this.versionKey(key)) || 0);
-        if (!Number.isFinite(storedVersion) || storedVersion > STATE_SCHEMA_VERSION) {
+        const storedVersion = Number(
+          localStorage.getItem(this.versionKey(key)) || 0,
+        );
+        if (
+          !Number.isFinite(storedVersion) ||
+          storedVersion > STATE_SCHEMA_VERSION
+        ) {
           throw new TypeError(`Unsupported state version for ${key}`);
         }
         const normalized = this.normalizeValue(key, parsed);
         this.cache[key] = normalized;
-        if (storedVersion !== STATE_SCHEMA_VERSION || !this.areEqual(normalized, parsed)) {
+        if (
+          storedVersion !== STATE_SCHEMA_VERSION ||
+          !this.areEqual(normalized, parsed)
+        ) {
           try {
             this.writeValue(key, normalized);
           } catch (writeError) {
-            console.warn(`Could not persist normalized state for ${key}.`, writeError);
+            console.warn(
+              `Could not persist normalized state for ${key}.`,
+              writeError,
+            );
             this.showStorageWarning();
           }
         }
@@ -301,7 +345,10 @@ class StateManager {
           localStorage.removeItem(key);
           localStorage.removeItem(this.versionKey(key));
         } catch (removeError) {
-          console.warn(`Could not remove corrupt state for ${key}.`, removeError);
+          console.warn(
+            `Could not remove corrupt state for ${key}.`,
+            removeError,
+          );
         }
       }
     }
@@ -341,10 +388,13 @@ class StateManager {
     return true;
   }
 
+  // Subscriptions and cache
   subscribe(callback) {
     this.listeners.push(callback);
     return () => {
-      this.listeners = this.listeners.filter((listener) => listener !== callback);
+      this.listeners = this.listeners.filter((listener) =>
+        listener !== callback
+      );
     };
   }
 
@@ -366,7 +416,8 @@ class StateManager {
     if (fallback === null) return value === null;
     if (Array.isArray(fallback)) return Array.isArray(value);
     if (fallback && typeof fallback === "object") {
-      return value !== null && typeof value === "object" && !Array.isArray(value);
+      return value !== null && typeof value === "object" &&
+        !Array.isArray(value);
     }
     return typeof value === typeof fallback;
   }
@@ -379,6 +430,7 @@ class StateManager {
     return JSON.parse(JSON.stringify(value));
   }
 
+  // Storage warnings
   showStorageWarning() {
     if (this.storageWarningPending) return;
     this.storageWarningPending = true;
@@ -386,7 +438,7 @@ class StateManager {
       .then(({ showCustomModal }) =>
         showCustomModal(
           "Your change could not be saved. Browser storage may be full or unavailable. No in-memory setting was changed.",
-        ),
+        )
       )
       .catch(() => {})
       .finally(() => {

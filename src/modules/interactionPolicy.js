@@ -1,3 +1,4 @@
+// Interaction policy configuration
 const INSTALLED_POLICIES = new WeakMap();
 
 const NON_TEXT_INPUT_TYPES = new Set([
@@ -13,6 +14,7 @@ const NON_TEXT_INPUT_TYPES = new Set([
   "submit",
 ]);
 
+// Event path helpers
 function isElement(value) {
   return value?.nodeType === 1;
 }
@@ -46,10 +48,7 @@ function isNativeTextEditor(element) {
   return element.getAttribute("role")?.toLowerCase() === "textbox";
 }
 
-/**
- * Resolves whether selection/copy/cut should be allowed for an event path.
- * Explicit deny wins globally, followed by explicit allow and native editors.
- */
+// Selection policy
 export function isTextInteractionAllowed(path) {
   const elements = path.filter(isElement);
 
@@ -85,10 +84,7 @@ function blockEvent(event) {
   event.stopImmediatePropagation();
 }
 
-/**
- * Installs the dashboard's delegated interaction policy exactly once per root.
- * The returned controller can remove every listener through destroy().
- */
+// Policy installation
 export function installInteractionPolicy(root = document) {
   const existing = INSTALLED_POLICIES.get(root);
   if (existing) return existing;
@@ -125,5 +121,4 @@ export function installInteractionPolicy(root = document) {
   INSTALLED_POLICIES.set(root, controller);
   return controller;
 }
-
 // [src/modules/interactionPolicy.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

@@ -1,3 +1,4 @@
+// Validation limits
 export const MAX_SHORTCUTS = 20;
 export const MIN_SHORTCUTS = 5;
 export const MAX_SHORTCUT_NAME_LENGTH = 35;
@@ -15,6 +16,7 @@ export const MAX_CUSTOM_APPS = 20;
 export const MAX_CUSTOM_APP_NAME_LENGTH = 35;
 export const MAX_CUSTOM_APP_URL_LENGTH = 2048;
 
+// Theme value validation
 export const THEME_COLOR_KEYS = Object.freeze([
   "--bg-primary",
   "--bg-secondary",
@@ -59,6 +61,7 @@ const HSL_COLOR_PATTERN = new RegExp(
   "i",
 );
 
+// Primitive value validation
 export function normalizeHttpUrl(value, maxLength = MAX_SHORTCUT_URL_LENGTH) {
   let input = String(value || "").trim();
   if (!input) throw new TypeError("Enter a URL.");
@@ -85,7 +88,10 @@ export function normalizeHttpUrl(value, maxLength = MAX_SHORTCUT_URL_LENGTH) {
   return parsed.href;
 }
 
-export function isValidImageDataUrl(value, maxLength = MAX_CUSTOM_TOOL_ICON_LENGTH) {
+export function isValidImageDataUrl(
+  value,
+  maxLength = MAX_CUSTOM_TOOL_ICON_LENGTH,
+) {
   return (
     typeof value === "string" &&
     value.length > 0 &&
@@ -116,6 +122,7 @@ export function normalizeThemeColor(value) {
   return color;
 }
 
+// Stored value validation
 export function normalizeStoredBackgroundUrl(value) {
   if (value === null || value === "") return value;
   if (typeof value !== "string" || !/^https?:\/\//i.test(value.trim())) {
@@ -150,7 +157,9 @@ export function isValidStoredIcon(
   maxDataLength = MAX_CUSTOM_TOOL_ICON_LENGTH,
 ) {
   if (typeof value !== "string") return false;
-  if (value.startsWith("data:image/")) return isValidImageDataUrl(value, maxDataLength);
+  if (value.startsWith("data:image/")) {
+    return isValidImageDataUrl(value, maxDataLength);
+  }
   if (value.length > MAX_SHORTCUT_URL_LENGTH) return false;
 
   try {
@@ -171,6 +180,7 @@ export function isValidStoredIcon(
   }
 }
 
+// Custom item sanitizers
 export function sanitizeCustomTools(value, type) {
   if (!Array.isArray(value)) return [];
   const expectedPrefix = type === "social" ? "custom-social-" : "custom-ai-";
@@ -238,15 +248,17 @@ export function sanitizeCustomSearchEngines(value) {
     const rawParams = Array.isArray(item.queryParams)
       ? item.queryParams
       : [item.queryParam];
-    const queryParams = [...new Set(
-      rawParams
-        .map((param) => String(param || "").trim())
-        .filter(
-          (param) =>
-            param.length <= MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH &&
-            queryParamPattern.test(param),
-        ),
-    )].slice(0, MAX_CUSTOM_SEARCH_QUERY_PARAMS);
+    const queryParams = [
+      ...new Set(
+        rawParams
+          .map((param) => String(param || "").trim())
+          .filter(
+            (param) =>
+              param.length <= MAX_CUSTOM_SEARCH_QUERY_PARAM_LENGTH &&
+              queryParamPattern.test(param),
+          ),
+      ),
+    ].slice(0, MAX_CUSTOM_SEARCH_QUERY_PARAMS);
     if (!queryParams.length) continue;
 
     if (!isValidStoredIcon(item.icon)) continue;
@@ -289,7 +301,10 @@ export function sanitizeCustomApps(value) {
     try {
       url = normalizeHttpUrl(item.url, MAX_CUSTOM_APP_URL_LENGTH);
       const hostname = new URL(url).hostname;
-      if (!hostname.includes(".") && hostname !== "localhost" && !hostname.includes(":")) {
+      if (
+        !hostname.includes(".") && hostname !== "localhost" &&
+        !hostname.includes(":")
+      ) {
         continue;
       }
     } catch {
@@ -310,7 +325,10 @@ export function sanitizeGoogleAppOverrides(value) {
   const sanitized = {};
 
   Object.entries(value).forEach(([id, override]) => {
-    if (!/^app-default-[a-z0-9-]+$/i.test(id) || !override || typeof override !== "object") {
+    if (
+      !/^app-default-[a-z0-9-]+$/i.test(id) || !override ||
+      typeof override !== "object"
+    ) {
       return;
     }
     const next = {};
@@ -343,7 +361,12 @@ export function sanitizeSavedThemes(value) {
   if (!Array.isArray(value)) return [];
   const sanitized = [];
   const seenIds = new Set();
-  const allowedTypes = new Set(["dark", "light", "default-dark", "default-light"]);
+  const allowedTypes = new Set([
+    "dark",
+    "light",
+    "default-dark",
+    "default-light",
+  ]);
 
   for (const item of value) {
     if (sanitized.length >= 5) break;
@@ -386,7 +409,10 @@ export function sanitizeShortcuts(value) {
   for (const item of value) {
     if (sanitized.length >= MAX_SHORTCUTS) break;
     if (!item) continue;
-    const name = String(item.name || "").trim().slice(0, MAX_SHORTCUT_NAME_LENGTH);
+    const name = String(item.name || "").trim().slice(
+      0,
+      MAX_SHORTCUT_NAME_LENGTH,
+    );
     if (!name) continue;
     try {
       const url = normalizeHttpUrl(item.url);
@@ -401,12 +427,12 @@ export function sanitizeShortcuts(value) {
       }
       sanitized.push(shortcut);
     } catch {
-      // Invalid restored shortcuts are ignored instead of reaching the DOM.
     }
   }
   return sanitized;
 }
 
+// Keyboard validation
 export function getBindableKey(event) {
   if (event.ctrlKey || event.metaKey || event.altKey) return null;
   const key = String(event.key || "").toLowerCase();
@@ -414,6 +440,7 @@ export function getBindableKey(event) {
   return key;
 }
 
+// Image validation
 export async function validateImageBlob(
   blob,
   {
@@ -434,7 +461,9 @@ export async function validateImageBlob(
     throw new TypeError("Choose a PNG, JPEG, WebP, GIF, or AVIF image.");
   }
   if (blob.size <= 0 || blob.size > maxBytes) {
-    throw new TypeError(`The image must be smaller than ${Math.round(maxBytes / 1048576)} MB.`);
+    throw new TypeError(
+      `The image must be smaller than ${Math.round(maxBytes / 1048576)} MB.`,
+    );
   }
 
   let width;
@@ -455,8 +484,10 @@ export async function validateImageBlob(
     try {
       const dimensions = await new Promise((resolve, reject) => {
         const image = new Image();
-        image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
-        image.onerror = () => reject(new TypeError("The image could not be decoded."));
+        image.onload = () =>
+          resolve({ width: image.naturalWidth, height: image.naturalHeight });
+        image.onerror = () =>
+          reject(new TypeError("The image could not be decoded."));
         image.src = objectUrl;
       });
       width = dimensions.width;
@@ -476,3 +507,4 @@ export async function validateImageBlob(
   }
   return { width, height };
 }
+// [src/validators.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

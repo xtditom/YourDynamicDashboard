@@ -1,4 +1,4 @@
-/* --- 5. CLOCK WIDGET --- */
+/* Clock widget */
 .master-clock-container {
   position: relative;
   width: 440px;
@@ -28,7 +28,7 @@
   width: 100%;
 }
 
-/* Preserve the original Lexend-mode display typography. */
+/* Digital clock typography */
 html[data-font-family="lexend"] #digital-clock-container {
   font-family: "Inter", sans-serif;
 }
@@ -93,12 +93,13 @@ body:not(.loaded) #analog-clock-container {
 .clock-separator {
   transition: opacity 1.5s ease-in-out;
   transition-delay: 400ms;
-  opacity: 0.85; 
+  opacity: 0.85;
 }
 body.loaded .clock-separator {
-  animation: fade-in-out 2s infinite 2s; 
+  animation: fade-in-out 2s infinite 2s;
 }
 
+/* Clock effects */
 @keyframes fade-in-out {
   0%,
   100% {
@@ -120,6 +121,7 @@ body.loaded .clock-separator {
   }
 }
 
+/* Clock display modes */
 .analog-active {
   height: auto;
   min-height: 300px;
@@ -171,14 +173,21 @@ body.loaded .clock-separator {
 }
 
 @keyframes digitalFadeIn {
-  0% { opacity: 0; transform: scale(0.8); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .master-clock-container.clock-switched.digital-active #digital-clock-container {
   animation: digitalFadeIn 1.8s cubic-bezier(0.19, 1, 0.22, 1) both;
 }
 
+/* Analog clock */
 #analog-clock-container {
   width: 250px;
   height: 250px;
@@ -230,6 +239,7 @@ body.loaded .clock-separator {
   transition: transform 1.8s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
+/* Greeting and credit text */
 .text-container {
   margin-top: 0.85rem;
   text-align: center;
@@ -240,13 +250,13 @@ body.loaded .clock-separator {
   font-weight: 500;
 }
 
-/* Match the reference's legacy Lexend-mode greeting face. */
+/* Greeting typography */
 html[data-font-family="lexend"] #greeting-text {
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 400;
 }
 
-/* Keep the editable credit line in the original regular Lexend face. */
+/* Credit typography */
 html[data-font-family="lexend"] #welcome-text {
   font-family: "Lexend", sans-serif;
   font-weight: 400;
@@ -264,6 +274,8 @@ html[data-font-family="lexend"] #welcome-text {
     color: var(--text-primary);
   }
 }
+
+/* Editable credit line */
 #welcome-text {
   font-size: 1rem;
   color: var(--text-primary);
@@ -295,6 +307,7 @@ body.loaded #clock-ampm {
   transition-delay: 1s;
 }
 
+/* Clock glow overrides */
 body.no-glow #clock-hours,
 body.no-glow #clock-minutes,
 body.no-glow #clock-seconds,

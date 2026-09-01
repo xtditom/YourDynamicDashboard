@@ -1,4 +1,6 @@
-/* --- 10. SHORTCUTS BAR & EDITOR --- */
+/* Shortcuts */
+
+/* Shortcut bar */
 #shortcuts-container {
   position: absolute;
   bottom: 2rem;
@@ -168,6 +170,7 @@ body.loaded #shortcuts-container.position-right .shortcut-item {
   transition: all 0.25s ease-in-out;
 }
 
+/* Shortcut editor */
 .shortcut-editor-item {
   display: flex;
   align-items: center;
@@ -251,6 +254,8 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
 .shortcut-editor-item .action-btn.delete:hover {
   color: #e53e3e;
 }
+
+/* Add-shortcut forms */
 #add-shortcut-form,
 #fs-add-shortcut-form {
   border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
@@ -293,7 +298,8 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
   border: 1px solid var(--form-control-border, var(--border-color));
   outline: none;
   font-size: 0.9rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color
+    0.2s ease;
 }
 #add-shortcut-form input:focus,
 #fs-add-shortcut-form input:focus {
@@ -302,7 +308,8 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
 }
 #add-shortcut-form input::placeholder,
 #fs-add-shortcut-form input::placeholder {
-  color: var(--form-control-placeholder, var(--text-secondary, var(--text-placeholder, #b8c0cc))) !important;
+  color: var(--form-control-placeholder, var(--text-secondary,
+    var(--text-placeholder, #b8c0cc))) !important;
   opacity: 1;
   font-size: 0.88rem;
 }
@@ -312,7 +319,8 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
   max-width: 480px;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  background-color: var(--form-control-bg, var(--bg-interactive, rgba(255, 255, 255, 0.08)));
+  background-color: var(--form-control-bg, var(--bg-interactive, rgba(255, 255,
+    255, 0.08)));
   color: var(--form-control-text, var(--accent-color));
   font-weight: 600;
   font-size: 0.92rem;
@@ -325,7 +333,8 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
 }
 #add-shortcut-form button:hover,
 #fs-add-shortcut-form button:hover {
-  background-color: var(--bg-interactive-hover, var(--bg-tertiary, rgba(255, 255, 255, 0.14)));
+  background-color: var(--bg-interactive-hover, var(--bg-tertiary, rgba(255,
+    255, 255, 0.14)));
   transform: translateY(-1px);
 }
 #add-shortcut-form button:active,
@@ -336,11 +345,11 @@ body.gradient-light .shortcut-editor-item .icon-container:hover .icon {
 body.gradient-mode-active.gradient-dark #custom-location-input::placeholder {
   color: #ffffff;
 }
-body.gradient-mode-active:not(.gradient-dark)
-  #custom-location-input::placeholder {
+body.gradient-mode-active:not(.gradient-dark) #custom-location-input::placeholder {
   color: #000000;
 }
 
+/* Responsive shortcuts */
 @media (max-width: 500px), (max-height: 700px) {
   #shortcuts-container {
     bottom: 7rem;

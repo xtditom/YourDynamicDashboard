@@ -7,8 +7,10 @@ import {
 } from "../utils.js";
 import { SettingsManager } from "./settings.js";
 
+// Weather configuration
 const WEATHER_FETCH_TIMEOUT_MS = 12000;
 
+// Weather widget
 export class Weather {
   constructor() {
     this.els = {
@@ -40,14 +42,16 @@ export class Weather {
   init() {
     if (this.els.locInput) {
       this.els.locInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter")
+        if (e.key === "Enter") {
           this.searchLocation(this.els.locInput.value.trim());
+        }
       });
     }
     if (this.els.saveBtn) {
       this.els.saveBtn.addEventListener("click", () => {
-        if (this.els.locInput)
+        if (this.els.locInput) {
           this.searchLocation(this.els.locInput.value.trim());
+        }
       });
     }
     if (this.els.gpsBtn) {
@@ -77,7 +81,9 @@ export class Weather {
 
   isWeatherVisible() {
     const control = state.get("widgetControl") || "all";
-    return ["all", "weather-only", "search-weather", "weather-quote"].includes(control);
+    return ["all", "weather-only", "search-weather", "weather-quote"].includes(
+      control,
+    );
   }
 
   syncRefreshTimer() {
@@ -99,6 +105,7 @@ export class Weather {
     this.fetchData();
   }
 
+  // Location services
   async searchLocation(city) {
     if (!city) return;
     const requestId = ++this._searchRequestId;
@@ -107,7 +114,9 @@ export class Weather {
     this._searchController = controller;
     try {
       const res = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=5&language=en&format=json`,
+        `https://geocoding-api.open-meteo.com/v1/search?name=${
+          encodeURIComponent(city)
+        }&count=5&language=en&format=json`,
         { signal: controller.signal },
       );
       if (!res.ok) throw new Error(`Geocoding request failed (${res.status})`);
@@ -127,7 +136,9 @@ export class Weather {
     } catch (e) {
       if (e?.name !== "AbortError" && requestId === this._searchRequestId) {
         console.error("Geocoding Error:", e);
-        showCustomModal("Could not look up that location. Check your connection and try again.");
+        showCustomModal(
+          "Could not look up that location. Check your connection and try again.",
+        );
       }
     }
   }
@@ -140,7 +151,7 @@ export class Weather {
     }
   }
 
-  // --- SECTION: LOCATION LOGIC ---
+  // Location state
   async getLocation() {
     const city = state.get("yd_city");
     const lat = state.get("yd_lat");
@@ -152,7 +163,11 @@ export class Weather {
       isValidCoordinate(lat, -90, 90) &&
       isValidCoordinate(lon, -180, 180)
     ) {
-      return { latitude: Number(lat), longitude: Number(lon), city: city.trim() };
+      return {
+        latitude: Number(lat),
+        longitude: Number(lon),
+        city: city.trim(),
+      };
     }
 
     return null;
@@ -165,7 +180,9 @@ export class Weather {
       );
       if (!res.ok) throw new Error(`Reverse geocoding failed (${res.status})`);
       const data = await res.json();
-      if (!data || typeof data !== "object") throw new TypeError("Invalid reverse geocoding response");
+      if (!data || typeof data !== "object") {
+        throw new TypeError("Invalid reverse geocoding response");
+      }
       const city = [data.city, data.locality, data.principalSubdivision]
         .find((value) => typeof value === "string" && value.trim());
       return city || "Unknown Location";
@@ -174,7 +191,7 @@ export class Weather {
     }
   }
 
-  // --- SECTION: DATA FETCHING ---
+  // Weather data fetching
   async fetchData(onlyRender = false) {
     if (document.hidden || !this.isWeatherVisible()) return;
     const requestId = ++this._weatherRequestId;
@@ -210,7 +227,8 @@ export class Weather {
         () => controller.abort(),
         WEATHER_FETCH_TIMEOUT_MS,
       );
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=celsius&timezone=auto`;
+      const url =
+        `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=celsius&timezone=auto`;
 
       let res;
       let data;
@@ -223,8 +241,7 @@ export class Weather {
       }
       const current = data?.current;
       const daily = data?.daily;
-      const validCurrent =
-        current &&
+      const validCurrent = current &&
         Number.isFinite(Number(current.temperature_2m)) &&
         Number.isFinite(Number(current.relative_humidity_2m)) &&
         Number(current.relative_humidity_2m) >= 0 &&
@@ -232,26 +249,30 @@ export class Weather {
         Number.isFinite(Number(current.apparent_temperature)) &&
         Number.isInteger(Number(current.weather_code)) &&
         Number(current.weather_code) >= 0;
-      const validDaily =
-        daily &&
+      const validDaily = daily &&
         Array.isArray(daily.temperature_2m_min) &&
         Array.isArray(daily.temperature_2m_max) &&
         Number.isFinite(Number(daily.temperature_2m_min[0])) &&
         Number.isFinite(Number(daily.temperature_2m_max[0]));
-      if (!validCurrent || !validDaily) throw new TypeError("Invalid weather response");
+      if (!validCurrent || !validDaily) {
+        throw new TypeError("Invalid weather response");
+      }
       if (requestId !== this._weatherRequestId) return;
       this.lastData = data;
       this.lastCoords = coords;
       this.render(current, daily, coords);
     } catch (error) {
-      if (error?.name === "AbortError" || requestId !== this._weatherRequestId) return;
+      if (
+        error?.name === "AbortError" || requestId !== this._weatherRequestId
+      ) return;
       console.error("Weather Error:", error);
-      if (this.els.condition)
+      if (this.els.condition) {
         this.els.condition.textContent = "Weather Unavailable";
+      }
     }
   }
 
-  // --- SECTION: RENDERING ---
+  // Weather rendering
   renderCachedData() {
     if (!this.lastData || !this.lastCoords) return;
     this.render(
@@ -274,18 +295,29 @@ export class Weather {
     const code = current.weather_code;
     const wmo = this.getWmo(code);
     const unitSym = state.get("tempUnit") === "imperial" ? "°F" : "°C";
-    const currentTemperature = this.toDisplayTemperature(current.temperature_2m);
-    const apparentTemperature = this.toDisplayTemperature(current.apparent_temperature);
-    const minTemperature = this.toDisplayTemperature(daily?.temperature_2m_min?.[0]);
-    const maxTemperature = this.toDisplayTemperature(daily?.temperature_2m_max?.[0]);
+    const currentTemperature = this.toDisplayTemperature(
+      current.temperature_2m,
+    );
+    const apparentTemperature = this.toDisplayTemperature(
+      current.apparent_temperature,
+    );
+    const minTemperature = this.toDisplayTemperature(
+      daily?.temperature_2m_min?.[0],
+    );
+    const maxTemperature = this.toDisplayTemperature(
+      daily?.temperature_2m_max?.[0],
+    );
 
     if (this.els.condition) this.els.condition.textContent = wmo.desc;
-    if (this.els.humidity)
+    if (this.els.humidity) {
       this.els.humidity.textContent = `${current.relative_humidity_2m}%`;
-    if (this.els.bar)
+    }
+    if (this.els.bar) {
       this.els.bar.style.width = `${current.relative_humidity_2m}%`;
-    if (this.els.temp)
+    }
+    if (this.els.temp) {
       this.els.temp.textContent = `${Math.round(currentTemperature)}°`;
+    }
 
     if (this.els.feelsLike) {
       if (
@@ -294,9 +326,13 @@ export class Weather {
         daily.temperature_2m_max &&
         daily.temperature_2m_min
       ) {
-        this.els.feelsLike.textContent = `Min: ${Math.round(minTemperature)}° | Max: ${Math.round(maxTemperature)}°`;
+        this.els.feelsLike.textContent = `Min: ${
+          Math.round(minTemperature)
+        }° | Max: ${Math.round(maxTemperature)}°`;
       } else {
-        this.els.feelsLike.textContent = `Feels like ${Math.round(apparentTemperature)}${unitSym}`;
+        this.els.feelsLike.textContent = `Feels like ${
+          Math.round(apparentTemperature)
+        }${unitSym}`;
       }
     }
 

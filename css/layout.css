@@ -1,4 +1,4 @@
-/* --- 3. LAYOUT & COLUMNS --- */
+/* Layout and columns */
 body {
   font-family: var(--ydd-font-family, "Outfit", system-ui, sans-serif);
   background-color: var(--bg-primary);
@@ -11,7 +11,7 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  isolation: isolate; 
+  isolation: isolate;
 }
 
 body:not(.loaded) {
@@ -26,8 +26,10 @@ body:not(.loaded) {
   height: 100%;
   z-index: -1;
   pointer-events: none;
-  backdrop-filter: blur(var(--bg-blur, 0px)) brightness(var(--bg-brightness, 1));
-  -webkit-backdrop-filter: blur(var(--bg-blur, 0px)) brightness(var(--bg-brightness, 1));
+  backdrop-filter: blur(var(--bg-blur, 0px)) brightness(var(--bg-brightness,
+    1));
+  -webkit-backdrop-filter: blur(var(--bg-blur, 0px))
+    brightness(var(--bg-brightness, 1));
   transition: backdrop-filter 0.5s ease;
 }
 
@@ -125,7 +127,7 @@ body:not(.loaded) {
   }
 }
 
-/* --- Widget Control: Nothing mode --- */
+/* Widget control: nothing mode */
 body.widgets-hidden .column-right {
   display: none;
 }
@@ -138,49 +140,48 @@ body.widgets-hidden .column-left {
   text-align: center;
 }
 
-/* --- Interactive Ambient Canvas --- */
+/* Interactive ambient canvas */
 #ambient-canvas {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: -2; /* Directly in front of background body image/color, but behind overlays & widgets */
-  pointer-events: none; /* Let all mouse interactions pass straight through to widgets */
+  z-index: -2;
+  pointer-events: none;
   opacity: 0;
   transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  mix-blend-mode: screen; /* Perfect, premium glowing blend in dark mode */
+  mix-blend-mode: screen;
 }
 
 body[data-theme="light"] #ambient-canvas {
-  mix-blend-mode: multiply; /* Perfect color integration in light themes */
+  mix-blend-mode: multiply;
 }
 
 body.ambient-active #ambient-canvas {
-  opacity: 0.55; /* Soft, aesthetic glow intensity */
+  opacity: 0.55;
 }
 
-/* --- Interactive 3D Antigravity Canvas --- */
+/* Interactive 3D antigravity canvas */
 #antigravity-canvas {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: -2; /* Identical layer to ambient canvas */
-  pointer-events: none; /* Let all mouse interactions pass straight through to widgets */
+  z-index: -2;
+  pointer-events: none;
   opacity: 0;
   transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   mix-blend-mode: screen;
 }
 
 body[data-theme="light"] #antigravity-canvas {
-  mix-blend-mode: multiply; /* Better blend in solid light themes */
+  mix-blend-mode: multiply;
 }
 
 body.antigravity-active #antigravity-canvas {
-  opacity: 0.7; /* Soft, readable 3D swarm glow intensity */
+  opacity: 0.7;
 }
 
 /* [css/layout.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */
-
