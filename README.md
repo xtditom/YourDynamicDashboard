@@ -210,7 +210,7 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 </a>
 
 **1. Download & Prepare**
-1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v3.0.0/YourDynamicDashboard-V3.0.zip)
+1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v3.0.0/YourDynamicDashboard-V3.zip)
 2.  **Unzip** the folder to a **permanent location** (e.g., `Downloads/YDD`).
     > ⚠️ **Important:** Do not delete or move this folder after installing, or the extension will stop working.
 
@@ -224,7 +224,7 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 #### 🦊 Gecko Browsers (Firefox, Zen, Waterfox, etc.)
 
 **1. Download & Prepare**
-1.  Download the latest `.xpi` release from above. Or, Direct download: [![Download XPI](https://img.shields.io/badge/Download-XPI-orange.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v3.0.0/YourDynamicDashboard-V3.0.xpi)
+1.  Download the latest `.xpi` release from above. Or, Direct download: [![Download XPI](https://img.shields.io/badge/Download-XPI-orange.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v3.0.0/YourDynamicDashboard-V3.xpi)
 2.  Keep the `.xpi` file in a **safe location** (e.g., `Downloads/YDD`).
     > ⚠️ **Important:** Do not delete or move this file after installing, or the extension will stop working.
 
