@@ -10,7 +10,7 @@ YourDynamicDashboard 3.0.0 turns the new-tab dashboard into a faster,
 more capable command center while keeping customization and privacy controls
 at the center of the experience.
 
-### New Features
+### ✨ New Features
 
 - **Command Palette:** Press `Ctrl+K` or `Cmd+K` to open a keyboard-driven action panel for dashboard controls, settings, tools, themes, and search.
 - **Bang Search Shortcuts:** Route searches instantly with shortcuts such as `!g`, `!yt`, `!sp`, and `/w` across supported engines and platforms.
@@ -22,7 +22,7 @@ at the center of the experience.
 - **Enhanced Backup & Restore:** Backups now include the active background data alongside the rest of the local dashboard configuration.
 - **Optional Most-Visited Shortcuts:** Use the browser’s most-visited sites as shortcut entries when the optional browser permission is granted.
 
-### Improvements
+### 🚀 Improvements
 
 - **Performance:** Reduced unnecessary CPU and memory work, improved startup behavior, and moved active/random background handling into serialized IndexedDB storage for faster, safer loading.
 - **Theme System:** Expanded the dark-mode theme flow, improved gradient and custom-background contrast, and refined theme-dependent control states.
@@ -32,7 +32,7 @@ at the center of the experience.
 - **Integrated Services:** Added Mistral and TikTok, expanded the Google Apps collection, and refreshed service icon presentation.
 - **Motion Controls:** Added an option to disable animations and transitions for a calmer or more accessible interface.
 
-### Fixes
+### 🔧 Fixes
 
 - **Shortcut Handling:** Corrected modifier-key event handling so configurable shortcuts do not interfere with browser commands, while `Ctrl+K`/`Cmd+K` remains dedicated to the Command Palette.
 - **Theme Readability:** Resolved color conflicts that could make controls or text difficult to read across dark, light, gradient, and custom-background states.
