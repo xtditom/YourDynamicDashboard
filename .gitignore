@@ -26,3 +26,9 @@ lerna-debug.log*
 # Build output folder (for future use)
 /dist
 /build
+
+# Cloudflare Wrangler local state and account metadata
+.wrangler/
+
+# Local worker deployment files
+/worker/

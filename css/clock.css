@@ -1,0 +1,333 @@
+/* Clock widget */
+.master-clock-container {
+  position: relative;
+  width: 440px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.4s ease-in-out;
+}
+
+.clock-container {
+  transition:
+    opacity 0s ease-in-out,
+    transform 0.5s ease-in-out;
+}
+
+#digital-clock-container {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  font-family: inherit;
+  font-weight: 750;
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+  font-size: 5.5rem;
+  color: var(--accent-color);
+  width: 100%;
+}
+
+/* Digital clock typography */
+html[data-font-family="lexend"] #digital-clock-container {
+  font-family: "Inter", sans-serif;
+}
+
+#clock-date-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 385px;
+  margin-top: 5px;
+  padding: 1px 10px;
+  font-size: 1.05rem;
+  font-weight: 200;
+  color: var(--accent-color);
+  opacity: 0.9;
+  z-index: 10;
+  transition: opacity 1.5s ease;
+}
+
+#clock-hours,
+#clock-minutes,
+#clock-seconds {
+  transition: opacity 1.5s ease-in-out;
+  animation: digit-glow 2s infinite;
+}
+body:not(.loaded) #clock-hours,
+body:not(.loaded) #clock-minutes,
+body:not(.loaded) #clock-seconds,
+body:not(.loaded) .clock-separator,
+body:not(.loaded) #clock-ampm,
+body:not(.loaded) #clock-date-row,
+body:not(.loaded) #welcome-text {
+  opacity: 0 !important;
+}
+body:not(.loaded) #analog-clock-container {
+  opacity: 0 !important;
+}
+#clock-hours {
+  opacity: 1;
+  transition-delay: 100ms;
+}
+#clock-minutes {
+  opacity: 0.7;
+  transition-delay: 300ms;
+}
+#clock-seconds {
+  opacity: 0.35;
+  transition-delay: 500ms;
+}
+#clock-date-row {
+  opacity: 1;
+  transition-delay: 0.75s;
+}
+#clock-ampm {
+  font-size: 2rem;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-left: 1rem;
+  transition: opacity 1.5s ease-in-out;
+  transition-delay: 1000ms;
+}
+.clock-separator {
+  transition: opacity 1.5s ease-in-out;
+  transition-delay: 400ms;
+  opacity: 0.85;
+}
+body.loaded .clock-separator {
+  animation: fade-in-out 2s infinite 2s;
+}
+
+/* Clock effects */
+@keyframes fade-in-out {
+  0%,
+  100% {
+    opacity: 0.05;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+@keyframes digit-glow {
+  50% {
+    text-shadow: 0 0 4px var(--glow-color);
+  }
+  0%,
+  100% {
+    text-shadow:
+      0 0 20px var(--glow-color),
+      0 0 30px var(--glow-color);
+  }
+}
+
+/* Clock display modes */
+.analog-active {
+  height: auto;
+  min-height: 300px;
+}
+.digital-active {
+  height: auto;
+  min-height: 150px;
+}
+
+.analog-active #digital-clock-container {
+  display: none;
+}
+
+@keyframes analogPopUp {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.analog-active #analog-clock-container {
+  order: 1;
+  display: block;
+  opacity: 1;
+  transform: scale(1);
+  margin-bottom: 10px;
+  animation: analogPopUp 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+}
+.analog-active #clock-date-row {
+  order: 2;
+  max-width: 280px;
+  margin-top: 0;
+}
+
+.digital-active #analog-clock-container {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+  position: absolute;
+}
+.digital-active #digital-clock-container {
+  opacity: 1;
+  transform: scale(1);
+  display: flex;
+}
+
+@keyframes digitalFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.master-clock-container.clock-switched.digital-active #digital-clock-container {
+  animation: digitalFadeIn 1.8s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+/* Analog clock */
+#analog-clock-container {
+  width: 250px;
+  height: 250px;
+  transform: scale(1);
+}
+#analog-clock-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  animation: analog-glow 2s infinite;
+}
+
+@keyframes analog-glow {
+  50% {
+    filter: drop-shadow(0 0 5px var(--glow-color));
+  }
+  0%,
+  70% {
+    filter: drop-shadow(0 0 15px var(--glow-color));
+  }
+  0%,
+  100% {
+    filter: drop-shadow(0 0 27.5px var(--glow-color));
+  }
+}
+
+.clock-face {
+  fill: var(--bg-secondary);
+  transition: fill 0.3s ease;
+}
+.clock-hands * {
+  stroke: var(--accent-color);
+  fill: var(--accent-color);
+  transform-origin: center;
+  transition:
+    stroke 0.3s ease,
+    fill 0.3s ease;
+}
+#hour-hand {
+  opacity: 1;
+  stroke-width: 15;
+  stroke-linecap: round;
+  transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+#minute-hand {
+  opacity: 0.6;
+  stroke-width: 12;
+  stroke-linecap: round;
+  transition: transform 1.8s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Greeting and credit text */
+.text-container {
+  margin-top: 0.85rem;
+  text-align: center;
+}
+#greeting-text {
+  font-family: inherit;
+  font-size: 2.25rem;
+  font-weight: 500;
+}
+
+/* Greeting typography */
+html[data-font-family="lexend"] #greeting-text {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+
+/* Credit typography */
+html[data-font-family="lexend"] #welcome-text {
+  font-family: "Lexend", sans-serif;
+  font-weight: 400;
+}
+#greeting-text.typing-effect::after {
+  content: "|";
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  from,
+  to {
+    color: transparent;
+  }
+  50% {
+    color: var(--text-primary);
+  }
+}
+
+/* Editable credit line */
+#welcome-text {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  opacity: 1;
+  transition:
+    opacity 1.5s ease-in-out,
+    background-color 0.2s ease-in-out;
+  transition-delay: 1.5s;
+}
+#welcome-text:hover,
+#welcome-text:focus {
+  background-color: var(--bg-interactive);
+  outline: none;
+}
+#welcome-text.hidden {
+  display: none !important;
+}
+#welcome-text:empty::before {
+  content: "Click here to Edit";
+  opacity: 0.5;
+  font-style: italic;
+  pointer-events: none;
+}
+body.loaded #welcome-text,
+body.loaded #clock-ampm {
+  transition-delay: 1s;
+}
+
+/* Clock glow overrides */
+body.no-glow #clock-hours,
+body.no-glow #clock-minutes,
+body.no-glow #clock-seconds,
+body.gradient-mode-active #clock-hours,
+body.gradient-mode-active #clock-minutes,
+body.gradient-mode-active #clock-seconds {
+  animation: none !important;
+  text-shadow: none !important;
+}
+
+body.no-glow .clock-separator,
+body.gradient-mode-active .clock-separator {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+body.no-glow #analog-clock-svg,
+body.gradient-mode-active #analog-clock-svg {
+  animation: none !important;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* [css/clock.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

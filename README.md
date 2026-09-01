@@ -1,14 +1,13 @@
 <div align="center">
-  <h1 align="center">🚀 YourDynamicDashboard (v2.2.0)</h1>
+  <h1 align="center">🚀 YourDynamicDashboard (v3.0.0)</h1>
   <p align="center">
-    <strong>The Performance & Scaling Update.</strong><br>
+    <strong>The Biggest Update Ever.</strong><br>
     Transform your new tab into a powerful, customizable,<br> minimalist & privacy-first command center.<br>
     <br />
-    <a href="#-features-of-v2"><strong>Features</strong></a> ·
+    <a href="#-features-of-v3"><strong>Features</strong></a> ·
     <a href="#-the-showcase"><strong>Extension Preview</strong></a> .
     <a href="https://ditom.me/ydd"><strong>YDD Landing Page</strong></a> .
-        <a href="#%EF%B8%8F-installation-guide"><strong>Installation</strong></a> ·
-    <a href="#-future-plans"><strong>Future Plans</strong></a>
+        <a href="#%EF%B8%8F-installation-guide"><strong>Installation</strong></a>
   </p>
 </div>
 
@@ -64,24 +63,26 @@
 
 ## ⚡ Why Choose YourDynamicDashboard?
 
-Most New Tab Page/ Dashboards are either too simple (just a clock) or too cluttered (ads and news feeds). **YDD** strikes the perfect balance:
+Most new-tab dashboards are either too simple or overloaded with distractions. **YDD** gives you a focused, flexible command center that adapts to the way you work:
 
-* **🔒 Privacy First:** No tracking. Your data (Search History, To-Do lists, links, settings) lives on your computer, not our servers.
-* **🏎️ Speed:** Built with vanilla JavaScript. No heavy frameworks. Loads instantly.
-* **🎨 Aesthetics:** Glassmorphism UI, animated gradients, and full color control.
+* **🔒 Privacy First:** No account, analytics, or behavioral profiles. Your history, tasks, links, settings, and news cache stay in your browser.
+* **🏎️ Fast & Lightweight:** Built with vanilla JavaScript and no heavy framework, keeping the dashboard responsive and quick to load.
+* **⌨️ Command-Driven:** Use the Command Palette, customizable shortcuts, and search bang commands to reach actions, tools, and services quickly.
+* **🎨 Personal by Design:** Shape the experience with custom themes, backgrounds, icons, widget visibility, and separate Mini and Full Settings.
+* **🌐 Optional Live Features:** Enable weather, News Feeds, or online suggestions only when you want them, with clear control over their data flow.
 
 ---
 
-## ✨ Features of V2
+## ✨ Features of V3
 
 YourDynamicDashboard has been heavily upgraded with the "Performance & Scaling" patch.
 
 | Category | Premium Features |
 | :--- | :--- |
-| **🤖 Interaction** | <li>**Local Search History:** Native-feeling, privacy-first search history with real-time filtering and auto-delete.</li><li>**Drag & Drop Engine:** Reorder To-Do tasks, AI Tools, and Google Apps seamlessly.</li><li>**Voice Search ("Jarvis Mode"):** Hands-free control with privacy-browser fallback support.</li><li>**Zen Mode:** Press `Z` to banish all clutter. Only the clock and wallpaper remain.</li> |
-| **🎨 Personalization** | <li>**Custom Icons:** Upload and set your own image icons for individual web shortcuts.</li><li>**BG Blur Control:** Adjust the blur intensity of custom backgrounds for perfect UI readability.</li><li>**Random Backgrounds:** Fetch fresh wallpapers automatically, and **Freeze** the ones you love.</li><li>**Toxic Palettes:** New  'Radioactive' and 'Phosphor' theme presets.</li> |
-| **☁️ Utilities** | <li>**Advanced Weather:** Live local weather including daily Min/Max temperatures. No API keys required.</li><li>**Smart Search:** Switch engines (Google, Bing, DuckDuckGo) or platforms (YouTube, Reddit) instantly.</li><li>**Widget Expansion:** More granular visibility combinations (e.g., Search & Quote, Weather & Quote).</li> |
-| **⚡ Quick Access** | <li>**UI Toggles:** Hide greetings and editable text instantly via settings or custom shortcut keys.</li><li>**Link Direction:** Control exactly how and where your shortcut links open.</li><li>**Layout Flexibility:** Dock your Shortcuts bar to either the Top or Bottom of the screen.</li> |
+| **🤖 Interaction** | <li>**Local Search History:** Native-feeling, privacy-first search history with real-time filtering and auto-delete.</li><li>**Command Palette:** Press `Ctrl+K` or `Cmd+K` to access dashboard actions, settings, tools, and search from one keyboard-driven panel.</li><li>**Drag & Drop Engine:** Reorder To-Do tasks, AI Tools, and Google Apps seamlessly.</li><li>**Voice Search:** Hands-free control with privacy-browser fallback support.</li><li>**Zen Mode:** Press `Z` to banish all clutter. Only the clock and wallpaper remain.</li> |
+| **🎨 Personalization** | <li>**Custom Icons:** Upload and set your own image icons for individual web shortcuts.</li><li>**Theme Generator:** Create custom themes with advanced color and gradient support.</li><li>**BG Blur Control:** Adjust the blur intensity of custom backgrounds for perfect UI readability.</li><li>**Random Backgrounds:** Fetch fresh wallpapers automatically, and **Freeze** the ones you love.</li> |
+| **☁️ Utilities** | <li>**Advanced Weather:** Live local weather including daily Min/Max temperatures. No API keys required.</li><li>**Expanded Search:** Switch engines or platforms with commands such as `!g`, `!yt`, `!sp`, and `!w`, with Perplexity, Google AI Search, and optional online suggestions available.</li><li>**RSS News Feeds:** Follow selected publishers through an optional, customizable news feed.</li><li>**Widget Expansion:** More granular visibility combinations (e.g., Search & Quote, Weather & Quote).</li> |
+| **⚡ Quick Access** | <li>**Separated Settings:** Use Mini Settings for everyday controls and Full Settings for advanced configuration.</li><li>**Custom Integrations:** Add your own AI tools, social links, search engines, and apps.</li><li>**Backup & Restore:** Export and import your settings, including background data.</li><li>**UI Toggles:** Hide greetings and editable text instantly via settings or custom shortcut keys.</li><li>**Link Direction:** Control exactly how and where your shortcut links open.</li><li>**Layout Flexibility:** Dock your Shortcuts bar to either the Top or Bottom of the screen.</li> |
 
 ### 🎨 The Showcase
 <table>
@@ -205,11 +206,11 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 #### 🟢 Chromium Browsers (Chrome, Edge, Brave, etc.)
 
 <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
-    <img src="https://img.shields.io/badge/Download%20Latest%20Version-v2.2.0-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
+    <img src="https://img.shields.io/badge/Download%20Latest%20Version-v3.0.0-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
 </a>
 
 **1. Download & Prepare**
-1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.2.0/YourDynamicDashboard-V2.2.zip)
+1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v3.0.0/YourDynamicDashboard-V3.0.zip)
 2.  **Unzip** the folder to a **permanent location** (e.g., `Downloads/YDD`).
     > ⚠️ **Important:** Do not delete or move this folder after installing, or the extension will stop working.
 
@@ -223,7 +224,7 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 #### 🦊 Gecko Browsers (Firefox, Zen, Waterfox, etc.)
 
 **1. Download & Prepare**
-1.  Download the latest `.xpi` release from above. Or, Direct download: [![Download XPI](https://img.shields.io/badge/Download-XPI-orange.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v2.2.0/YourDynamicDashboard-V2.2.xpi)
+1.  Download the latest `.xpi` release from above. Or, Direct download: [![Download XPI](https://img.shields.io/badge/Download-XPI-orange.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v3.0.0/YourDynamicDashboard-V3.0.xpi)
 2.  Keep the `.xpi` file in a **safe location** (e.g., `Downloads/YDD`).
     > ⚠️ **Important:** Do not delete or move this file after installing, or the extension will stop working.
 
@@ -233,36 +234,6 @@ If your Theme, Location, or To-Do list resets every time you close the browser:
 3.  Select **Install Add-on From File...**
 4.  Browse and select the `.xpi` file you downloaded.
 5.  **Done!** Open a new tab to see your new dashboard.
-
----
-
-## ⚙️ Configuration
-
-**Good news!** As of v2.2.0, **configuration is essentially zero.**
-
-* **Weather:** Auto-detects your approximate location securely.
-    * *Prefer manual?* Go to **Settings > Functions > Custom Location** and type your city.
-* **Search:** Click the Engine/Platform icon in the search bar to switch between Google, Bing, YouTube, etc.
-* **Shortcuts:** Use the Settings panel to add/edit/delete shortcuts and upload custom icons.
-
----
-
-## ⌨️ Keyboard Shortcuts
-
-Navigate like a pro without touching your mouse.
-
-| Key | Action |
-| :--- | :--- |
-| **`V`** | **Voice Search:** Activate microphone instantly. |
-| **`Z`** | **Zen Mode:** Toggle distractions On/Off. |
-| **`/`** | **Focus Search:** Jump to the search bar. |
-| **`T`** | Toggle **To-Do List**. |
-| **`A`** | Toggle **AI / Social Tools**. |
-| **`G`** | Toggle **Google Apps Grid**. |
-| **`S`** | Open **Settings**. |
-| **`1-9`** | Launch **Shortcut Link** (1 through 9). |
-
-*You can also re-bind the keys in Settings.*
 
 ---
 
@@ -283,27 +254,13 @@ See the [LICENSE](LICENSE) file for the full legal text and details.
 
 With **YourDynamicDashboard**, you are the product owner, not the product.
 
-* **No Analytics:** We do not track you.
-* **Local Storage:** Your history, todos, shortcuts, and themes stay on your PC.
-* **Icons:** Icons sourced from various open-source libraries.
-* **Voice Search:** Processed locally by your browser's Web Speech API; audio is never sent to us.
-* **Weather Data:** We use [Open-Meteo](https://open-meteo.com/), a privacy-focused open-source weather provider.
+* **Local-first:** Your customizations, search history, preferences, and News Feed cache stay in your browser. YDD has no account system and does not automatically upload this data.
+* **Search Suggestions:** History Only is the default and sends nothing typed online. Optional online modes send only the current prefix to the selected relay/provider after consent; results are cached locally for a limited time.
+* **News Feeds:** Optional and disabled by default. YDD connects directly to selected publishers through their RSS/RDF feeds or publisher-operated API, stores story metadata locally, and does not send browsing history or use a YDD news relay.
+* **Voice & Location:** Voice Search uses your browser's Web Speech API and YDD does not record or store your voice. Location is requested only after you click and confirm, then sent to weather providers and saved locally.
+* **Third-Party Services:** Weather, autocomplete, fonts, favicons, backgrounds, and other online features use the providers described in the full policy. Those providers may process ordinary network metadata under their own policies.
 
 Read the full [Privacy Policy](https://xtditom.github.io/YourDynamicDashboard/privacy-policy.html).
-
----
-
-## 🔜 Future Plans
-
-Features planned for upcoming major releases:
-
-- [ ] **Fully Draggable Grid:** Move the clock, weather, and quote modules anywhere on the screen.
-- [ ] **Time-based Theme Change:** Theme changes based on Day & Night time.
-- [ ] **Fonts:** Adding Various fonts to enhance the experience.
-- [ ] **More Apps & Tools:** Adding new Google Apps, AI & Socials.
-- [ ] **Resolution Selection:** An option to select device resolution.
-- [ ] **Language Options:** Adding multiple languages for better UX.
-- [ ] **Fix remaining bugs:** Fixing remaining bugs & issues.
 
 ---
 
@@ -323,7 +280,7 @@ Feel free to check the [issues page](https://github.com/xtditom/YourDynamicDashb
 ## ❤️ Acknowledgments
 
 * **Inspiration:** A huge thanks to **XengShi** for their project, **[MaterialYouNewTab](https://github.com/prem-k-r/MaterialYouNewTab)**, which served as a major inspiration. (Currently maintained by _Prem Kumar_ & _Itz-RJ_)
-* **AI Assistance:** Developed with help from **Google's Gemini Pro**.
+* **AI Assistance:** Developed with help from **Google's Gemini & OpenAI's ChatGPT**.
 
 ---
 

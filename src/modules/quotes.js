@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { CONFIG, QUOTES } from "../config.js";
 
+// Quote widget
 export class QuoteWidget {
   constructor() {
     this.els = {
@@ -10,21 +11,48 @@ export class QuoteWidget {
       weather: document.getElementById("weather-widget"),
       search: document.getElementById("search-form"),
     };
+    this._quoteTimer = null;
+    this._quoteFadeTimer = null;
+    this._visibilityHandler = () => this.handleVisibilityChange();
     this.init();
   }
 
+  // Quote lifecycle
   init() {
     this.updateText();
 
-    // --- ANIMATED CYCLE: 12.5 Seconds ---
-    setInterval(() => this.cycleQuote(), 12500);
+    document.addEventListener("visibilitychange", this._visibilityHandler);
 
     state.subscribe((key) => {
       if (key === "widgetControl") this.applyWidgetVisibility();
+      if (key === "disableAnimations") this.applyWidgetVisibility();
     });
     this.applyWidgetVisibility();
   }
 
+  startQuoteTimer() {
+    this.stopQuoteTimer();
+    if (document.hidden || this.els.widget?.classList.contains("hidden")) {
+      return;
+    }
+    this._quoteTimer = window.setInterval(() => this.cycleQuote(), 12500);
+  }
+
+  stopQuoteTimer() {
+    clearInterval(this._quoteTimer);
+    clearTimeout(this._quoteFadeTimer);
+    this._quoteTimer = null;
+    this._quoteFadeTimer = null;
+    this.els.text?.classList.remove("quote-fading");
+    this.els.author?.classList.remove("quote-fading");
+  }
+
+  handleVisibilityChange() {
+    if (document.hidden) this.stopQuoteTimer();
+    else this.startQuoteTimer();
+  }
+
+  // Quote rendering
   updateText() {
     const random = QUOTES[Math.floor(Math.random() * QUOTES.length)];
     this.els.text.textContent = `"${random.text}"`;
@@ -32,31 +60,47 @@ export class QuoteWidget {
   }
 
   cycleQuote() {
+    if (document.hidden || this.els.widget?.classList.contains("hidden")) {
+      return;
+    }
+    if (state.get("disableAnimations") === true) {
+      this.updateText();
+      return;
+    }
     this.els.text.classList.add("quote-fading");
     this.els.author.classList.add("quote-fading");
 
-    setTimeout(() => {
+    clearTimeout(this._quoteFadeTimer);
+    this._quoteFadeTimer = window.setTimeout(() => {
       this.updateText();
       this.els.text.classList.remove("quote-fading");
       this.els.author.classList.remove("quote-fading");
+      this._quoteFadeTimer = null;
     }, 500);
   }
 
+  // Widget visibility and animation
   applyWidgetVisibility() {
     const control = state.get("widgetControl") || "all";
 
-    const showSearch  = ["all", "search-only", "search-weather", "search-quote"].includes(control);
-    const showWeather = ["all", "weather-only", "search-weather", "weather-quote"].includes(control);
-    const showQuote   = ["all", "quote-only",  "search-quote",  "weather-quote"].includes(control);
+    const showSearch = ["all", "search-only", "search-weather", "search-quote"]
+      .includes(control);
+    const showWeather = [
+      "all",
+      "weather-only",
+      "search-weather",
+      "weather-quote",
+    ].includes(control);
+    const showQuote = ["all", "quote-only", "search-quote", "weather-quote"]
+      .includes(control);
 
-    // --- Animation assignments per mode ---
     let weatherAnim = null, searchAnim = null, quoteAnim = null;
     let searchDelay = null;
     switch (control) {
       case "all":
         weatherAnim = "fade-down";
-        searchAnim  = "popup-scale-entry";
-        quoteAnim   = "fade-up";
+        searchAnim = "popup-scale-entry";
+        quoteAnim = "fade-up";
         break;
       case "weather-only":
         weatherAnim = "popup-scale-entry";
@@ -68,25 +112,38 @@ export class QuoteWidget {
         quoteAnim = "popup-scale-entry";
         break;
       case "search-weather":
-        searchAnim  = "popup-scale-entry";
+        searchAnim = "popup-scale-entry";
         searchDelay = "0.22s";
         weatherAnim = "popup-scale-entry";
         break;
       case "search-quote":
-        searchAnim  = "popup-scale-entry";
+        searchAnim = "popup-scale-entry";
         searchDelay = "0.22s";
-        quoteAnim   = "popup-scale-entry";
+        quoteAnim = "popup-scale-entry";
         break;
       case "weather-quote":
         weatherAnim = "fade-down";
-        quoteAnim   = "fade-up";  
+        quoteAnim = "fade-up";
         break;
     }
 
+    const motionDisabled = state.get("disableAnimations") === true;
     const animate = (el, animClass, inlineDelay = null) => {
       if (!el) return;
-      el.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+      el.classList.remove(
+        "fade-up",
+        "fade-down",
+        "popup-scale-entry",
+        "quote-dropdown-restore",
+      );
       el.style.animationDelay = inlineDelay || "";
+      if (motionDisabled) {
+        el.style.opacity = "1";
+        el.style.transform = "none";
+        return;
+      }
+      el.style.opacity = "";
+      el.style.transform = "";
       void el.offsetWidth;
       if (animClass) el.classList.add(animClass);
     };
@@ -98,7 +155,11 @@ export class QuoteWidget {
       } else {
         this.els.search.classList.add("hidden");
         this.els.search.style.animationDelay = "";
-        this.els.search.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+        this.els.search.classList.remove(
+          "fade-up",
+          "fade-down",
+          "popup-scale-entry",
+        );
       }
     }
 
@@ -108,7 +169,11 @@ export class QuoteWidget {
         animate(this.els.weather, weatherAnim);
       } else {
         this.els.weather.classList.add("hidden");
-        this.els.weather.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+        this.els.weather.classList.remove(
+          "fade-up",
+          "fade-down",
+          "popup-scale-entry",
+        );
       }
     }
 
@@ -118,11 +183,16 @@ export class QuoteWidget {
         animate(this.els.widget, quoteAnim);
       } else {
         this.els.widget.classList.add("hidden");
-        this.els.widget.classList.remove("fade-up", "fade-down", "popup-scale-entry");
+        this.els.widget.classList.remove(
+          "fade-up",
+          "fade-down",
+          "popup-scale-entry",
+        );
       }
     }
 
     document.body.classList.toggle("widgets-hidden", control === "nothing");
+    this.startQuoteTimer();
   }
 }
-// [src/modules/quotes.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/quotes.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

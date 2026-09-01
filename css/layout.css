@@ -1,0 +1,187 @@
+/* Layout and columns */
+body {
+  font-family: var(--ydd-font-family, "Outfit", system-ui, sans-serif);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  isolation: isolate;
+}
+
+body:not(.loaded) {
+  transition: none !important;
+}
+
+#bg-blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  backdrop-filter: blur(var(--bg-blur, 0px)) brightness(var(--bg-brightness,
+    1));
+  -webkit-backdrop-filter: blur(var(--bg-blur, 0px))
+    brightness(var(--bg-brightness, 1));
+  transition: backdrop-filter 0.5s ease;
+}
+
+.layout-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 2rem 4rem;
+  gap: 20rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.column-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.column-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1270px) {
+  .layout-container {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+  }
+  .column-left,
+  .column-right {
+    align-items: center;
+    text-align: center;
+  }
+  .column-right {
+    gap: 0.75rem;
+  }
+
+  body.shortcuts-at-bottom:not(.zen-mode) .layout-container {
+    height: calc(100% - 8rem);
+  }
+
+  body.shortcuts-at-top:not(.zen-mode) .layout-container {
+    position: relative;
+    top: 8rem;
+    height: calc(100% - 8rem);
+  }
+
+  body.shortcuts-at-left:not(.zen-mode) .layout-container {
+    width: calc(100% - 7rem);
+    margin-left: 7rem;
+  }
+
+  body.shortcuts-at-right:not(.zen-mode) .layout-container {
+    width: calc(100% - 7rem);
+    margin-right: 7rem;
+  }
+}
+
+@media (max-width: 600px), (max-height: 700px) {
+  body.shortcuts-at-bottom:not(.zen-mode) .layout-container {
+    height: calc(100% - 13rem);
+  }
+
+  body.shortcuts-at-top:not(.zen-mode) .layout-container {
+    position: relative;
+    top: 13rem;
+    height: calc(100% - 13rem);
+  }
+
+  body.shortcuts-at-left:not(.zen-mode) .layout-container {
+    width: calc(100% - 6rem);
+    margin-left: 6rem;
+  }
+
+  body.shortcuts-at-right:not(.zen-mode) .layout-container {
+    width: calc(100% - 6rem);
+    margin-right: 6rem;
+  }
+}
+
+@media (max-width: 1270px) and (max-height: 700px) {
+  .layout-container {
+    justify-content: flex-start;
+  }
+
+  .column-left,
+  .column-right {
+    flex-shrink: 0;
+  }
+}
+
+/* Widget control: nothing mode */
+body.widgets-hidden .column-right {
+  display: none;
+}
+body.widgets-hidden .layout-container {
+  gap: 0;
+  justify-content: center;
+}
+body.widgets-hidden .column-left {
+  align-items: center;
+  text-align: center;
+}
+
+/* Interactive ambient canvas */
+#ambient-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  mix-blend-mode: screen;
+}
+
+body[data-theme="light"] #ambient-canvas {
+  mix-blend-mode: multiply;
+}
+
+body.ambient-active #ambient-canvas {
+  opacity: 0.55;
+}
+
+/* Interactive 3D antigravity canvas */
+#antigravity-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  mix-blend-mode: screen;
+}
+
+body[data-theme="light"] #antigravity-canvas {
+  mix-blend-mode: multiply;
+}
+
+body.antigravity-active #antigravity-canvas {
+  opacity: 0.7;
+}
+
+/* [css/layout.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

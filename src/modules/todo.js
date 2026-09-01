@@ -1,5 +1,10 @@
 import { state } from "../state.js";
+import {
+  markDefaultTaskComplete,
+  markDefaultTaskIncomplete,
+} from "../utils.js";
 
+// To-do widget
 export class TodoManager {
   constructor() {
     this.els = {
@@ -11,12 +16,15 @@ export class TodoManager {
       pinnedWidget: document.getElementById("pinned-tasks-widget"),
       pinnedList: document.getElementById("pinned-tasks-list"),
     };
+    this.draggedIndex = null;
+    this.draggedItemId = null;
 
     if (!this.els.btn) return;
 
     this.init();
   }
 
+  // To-do initialization
   init() {
     this.render();
 
@@ -43,7 +51,11 @@ export class TodoManager {
     this.els.popup.addEventListener("click", (e) => e.stopPropagation());
 
     state.subscribe((key) => {
-      if (key === "todos") this.render();
+      if (key === "todos") {
+        this.draggedIndex = null;
+        this.draggedItemId = null;
+        this.render();
+      }
       if (key === "showTodo") this.updateVisibility();
     });
 
@@ -53,11 +65,16 @@ export class TodoManager {
   toggle() {
     this.els.popup.classList.toggle("visible");
     this.els.btn.classList.toggle("is-open");
+    const visible = this.els.popup.classList.contains("visible");
+    this.els.btn.setAttribute("aria-expanded", String(visible));
+    this.els.popup.setAttribute("aria-hidden", String(!visible));
   }
 
   close() {
     this.els.popup.classList.remove("visible");
     this.els.btn.classList.remove("is-open");
+    this.els.btn.setAttribute("aria-expanded", "false");
+    this.els.popup.setAttribute("aria-hidden", "true");
   }
 
   add(text) {
@@ -86,16 +103,16 @@ export class TodoManager {
       pinned: false,
     });
     state.set("todos", todos);
-    this.render();
   }
 
   remove(index) {
     const todos = this.getNormalizedTodos();
+    if (!Number.isInteger(index) || index < 0 || index >= todos.length) return;
     todos.splice(index, 1);
     state.set("todos", todos);
-    this.render();
   }
 
+  // Task editing
   startNativeEdit(index, textElement, itemElement) {
     const todos = this.getNormalizedTodos();
     const currentText = todos[index].text;
@@ -105,48 +122,68 @@ export class TodoManager {
     input.className = "todo-edit-input";
     input.maxLength = 50;
     input.value = currentText;
+    input.setAttribute("aria-label", `Edit task: ${currentText}`);
 
-    let saved = false;
+    let finished = false;
+    let cancelled = false;
     const saveEdit = () => {
-      if (saved) return;
-      saved = true;
+      if (finished || cancelled) return;
+      finished = true;
       const newText = input.value.trim();
       if (newText !== "" && newText !== currentText) {
         if (newText.length > 50) {
           import("../utils.js").then(({ showCustomModal }) => {
             showCustomModal("Tasks cannot exceed 50 characters.");
           });
+          input.onblur = null;
           this.render();
           return;
         }
         todos[index].text = newText;
         state.set("todos", todos);
+      } else {
+        this.render();
       }
-      this.render();
     };
 
     input.onblur = saveEdit;
     input.onkeydown = (e) => {
       if (e.key === "Enter") saveEdit();
-      if (e.key === "Escape") this.render();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        cancelled = true;
+        finished = true;
+        input.onblur = null;
+        this.render();
+      }
     };
 
     itemElement.replaceChild(input, textElement);
-    input.focus();
   }
 
+  // Task state
   toggleStatus(index) {
     const todos = this.getNormalizedTodos();
-    todos[index].completed = !todos[index].completed;
+    if (!Number.isInteger(index) || !todos[index]) return;
+    const todo = todos[index];
+    const completed = !todo.completed;
+    if (completed && String(todo.id).startsWith("dt-")) {
+      markDefaultTaskComplete(String(todo.id));
+      return;
+    }
+    todo.completed = completed;
     state.set("todos", todos);
-    this.render();
+    if (!completed && String(todo.id).startsWith("dt-")) {
+      markDefaultTaskIncomplete(String(todo.id));
+    }
   }
 
   togglePin(index) {
     const todos = this.getNormalizedTodos();
+    if (!Number.isInteger(index) || !todos[index]) return;
 
     if (!todos[index].pinned) {
-      const pinnedCount = todos.filter((t) => t.pinned).length;
+      const pinnedCount = todos.filter((t) => t.pinned && !t.completed).length;
       if (pinnedCount >= 3) {
         import("../utils.js").then(({ showCustomModal }) => {
           showCustomModal(
@@ -159,7 +196,21 @@ export class TodoManager {
 
     todos[index].pinned = !todos[index].pinned;
     state.set("todos", todos);
-    this.render();
+  }
+
+  move(index, delta) {
+    const todos = this.getNormalizedTodos();
+    const target = index + delta;
+    if (
+      !Number.isInteger(index) ||
+      !Number.isInteger(target) ||
+      index < 0 ||
+      target < 0 ||
+      index >= todos.length ||
+      target >= todos.length
+    ) return;
+    [todos[index], todos[target]] = [todos[target], todos[index]];
+    state.set("todos", todos);
   }
 
   getNormalizedTodos() {
@@ -172,6 +223,7 @@ export class TodoManager {
     }));
   }
 
+  // Task rendering
   render() {
     if (this.els.list) {
       this.els.list.innerHTML = "";
@@ -180,11 +232,23 @@ export class TodoManager {
       todos.forEach((todo, index) => {
         const item = document.createElement("div");
         item.className = `todo-item ${todo.completed ? "completed" : ""}`;
+        item.tabIndex = 0;
+        item.setAttribute("aria-label", `Task: ${todo.text}`);
+        item.addEventListener("keydown", (event) => {
+          if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+            event.preventDefault();
+            this.move(index, event.key === "ArrowUp" ? -1 : 1);
+          }
+        });
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.className = "todo-checkbox";
         checkbox.checked = todo.completed;
+        checkbox.setAttribute(
+          "aria-label",
+          `${todo.completed ? "Completed" : "Edit"} task: ${todo.text}`,
+        );
         checkbox.onclick = (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -208,7 +272,10 @@ export class TodoManager {
         const pinSvgString = todo.pinned
           ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11.2V5h1V3H7v2h1v6.2l-2 3v2h5v6l1 1 1-1v-6h5v-2z"/></svg>'
           : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11.2V5h1V3H7v2h1v6.2l-2 3v2h5v6l1 1 1-1v-6h5v-2z"/></svg>';
-        const pinParsedSvg = new DOMParser().parseFromString(pinSvgString, 'image/svg+xml');
+        const pinParsedSvg = new DOMParser().parseFromString(
+          pinSvgString,
+          "image/svg+xml",
+        );
         pinBtn.appendChild(pinParsedSvg.documentElement);
         pinBtn.title = "Pin to Dashboard";
         pinBtn.onclick = (e) => {
@@ -220,7 +287,10 @@ export class TodoManager {
         delBtn.className = "action-btn delete-btn";
         const delSvgString =
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9" fill="#EF4444"/><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        const delParsedSvg = new DOMParser().parseFromString(delSvgString, 'image/svg+xml');
+        const delParsedSvg = new DOMParser().parseFromString(
+          delSvgString,
+          "image/svg+xml",
+        );
         delBtn.appendChild(delParsedSvg.documentElement);
         delBtn.title = "Delete Task";
         delBtn.onclick = (e) => {
@@ -231,11 +301,14 @@ export class TodoManager {
         item.draggable = true;
         item.ondragstart = (e) => {
           this.draggedIndex = index;
+          this.draggedItemId = todo.id;
           item.classList.add("dragging");
           e.dataTransfer.effectAllowed = "move";
         };
         item.ondragend = () => {
           item.classList.remove("dragging");
+          this.draggedIndex = null;
+          this.draggedItemId = null;
         };
         item.ondragover = (e) => {
           e.preventDefault();
@@ -248,14 +321,23 @@ export class TodoManager {
         item.ondrop = (e) => {
           e.preventDefault();
           item.classList.remove("drag-over");
-          if (this.draggedIndex === null || this.draggedIndex === index) return;
+          const sourceIndex = this.draggedIndex;
+          const sourceId = this.draggedItemId;
+          this.draggedIndex = null;
+          this.draggedItemId = null;
+          const currentTodos = this.getNormalizedTodos();
+          if (
+            !Number.isInteger(sourceIndex) ||
+            sourceIndex < 0 ||
+            sourceIndex >= currentTodos.length ||
+            sourceIndex === index ||
+            currentTodos[sourceIndex]?.id !== sourceId
+          ) return;
 
-          const todos = this.getNormalizedTodos();
-          const draggedItem = todos.splice(this.draggedIndex, 1)[0];
+          const todos = currentTodos;
+          const draggedItem = todos.splice(sourceIndex, 1)[0];
           todos.splice(index, 0, draggedItem);
           state.set("todos", todos);
-          this.draggedIndex = null;
-          this.render();
         };
 
         item.appendChild(checkbox);
@@ -277,6 +359,7 @@ export class TodoManager {
     this.renderPinned();
   }
 
+  // Pinned task rendering
   renderPinned() {
     if (!this.els.pinnedWidget || !this.els.pinnedList) return;
 
@@ -312,4 +395,4 @@ export class TodoManager {
     this.els.btn.classList.toggle("hidden", !show);
   }
 }
-// [src/modules/todo.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/todo.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

@@ -1,0 +1,57 @@
+/* Interaction policy */
+
+html[data-ydd-ui-lock="true"],
+html[data-ydd-ui-lock="true"] body,
+html[data-ydd-ui-lock="true"] body *,
+html[data-ydd-ui-lock="true"] body *::before,
+html[data-ydd-ui-lock="true"] body *::after {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Editable controls */
+html[data-ydd-ui-lock="true"] body textarea,
+html[data-ydd-ui-lock="true"] body input:not([type]),
+html[data-ydd-ui-lock="true"] body input[type="text" i],
+html[data-ydd-ui-lock="true"] body input[type="search" i],
+html[data-ydd-ui-lock="true"] body input[type="url" i],
+html[data-ydd-ui-lock="true"] body input[type="email" i],
+html[data-ydd-ui-lock="true"] body input[type="tel" i],
+html[data-ydd-ui-lock="true"] body input[type="password" i],
+html[data-ydd-ui-lock="true"] body input[type="number" i],
+html[data-ydd-ui-lock="true"] body input[type="date" i],
+html[data-ydd-ui-lock="true"] body input[type="datetime-local" i],
+html[data-ydd-ui-lock="true"] body input[type="month" i],
+html[data-ydd-ui-lock="true"] body input[type="time" i],
+html[data-ydd-ui-lock="true"] body input[type="week" i],
+html[data-ydd-ui-lock="true"] body [contenteditable]:not([contenteditable="false" i]),
+html[data-ydd-ui-lock="true"] body [contenteditable]:not([contenteditable="false" i]) *,
+html[data-ydd-ui-lock="true"] body [role="textbox" i],
+html[data-ydd-ui-lock="true"] body [role="textbox" i] * {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Selection allowlist */
+html[data-ydd-ui-lock="true"] body [data-ydd-selection="allow"],
+html[data-ydd-ui-lock="true"] body [data-ydd-selection="allow"] * {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+/* Selection denylist */
+html[data-ydd-ui-lock="true"] body [data-ydd-selection="deny"],
+html[data-ydd-ui-lock="true"] body [data-ydd-selection="deny"] * {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+/* [css/interaction-policy.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

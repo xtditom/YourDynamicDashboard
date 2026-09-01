@@ -1,0 +1,666 @@
+// AI URL keywords
+const AI_URL_KEYWORDS = [
+  // AI services
+  "chatgpt",
+  "openai",
+  "sora",
+  "codex",
+  "operator",
+  "anthropic",
+  "claude",
+  "gemini",
+  "bard",
+  "notebooklm",
+  "gemini.google.com",
+  "notebooklm.google.com",
+  "aistudio.google.com",
+  "ai studio",
+  "deepmind",
+  "labs.google",
+  "google ai",
+  "copilot",
+  "microsoft ai",
+  "bing ai",
+  "designer.microsoft.com",
+  "meta ai",
+  "meta.ai",
+  "ai.meta",
+  "metademolab",
+  "llama",
+  "xai",
+  "x.ai",
+  "grok",
+  "deepseek",
+  "qwen",
+  "alibaba ai",
+  "mistral",
+  "cohere",
+  "openrouter",
+  "moonshot",
+  "kimi",
+  "minimax",
+  "zhipu",
+  "chatglm",
+  "baichuan",
+  "ernie",
+  "wenxin",
+  "doubao",
+  "coze",
+  "manus",
+  "venice ai",
+  "blackbox ai",
+  "chub ai",
+  "command-r",
+  "ai21",
+  "jamba",
+  "inflection",
+  "pi.ai",
+  "perplexity",
+  "you.com",
+  "phind",
+  "poe",
+  "character.ai",
+  "janitor ai",
+  "replika",
+  "pi ai",
+  "huggingface",
+  "hugging face",
+  "replicate",
+  "together ai",
+  "fireworks ai",
+  "groq",
+  "cerebras",
+  "ai.google",
+  "vertex ai",
+  "firebase ai",
+  "bedrock",
+  "aws ai",
+  "amazon q",
+  "azure ai",
+  "ibm watson",
+  "watsonx",
+  "nvidia ai",
+  "build.nvidia.com",
+  "nvidia nim",
+  "stability",
+  "stability ai",
+  "midjourney",
+  "ideogram",
+  "leonardo ai",
+  "adobe firefly",
+  "firefly",
+  "canva ai",
+  "runway",
+  "pika",
+  "luma ai",
+  "lumalabs",
+  "kling ai",
+  "heygen",
+  "synthesia",
+  "elevenlabs",
+  "eleven labs",
+  "suno",
+  "udio",
+  "gamma",
+  "tome app",
+  "beautiful ai",
+  "napkin ai",
+  "descript",
+  "otter ai",
+  "fireflies ai",
+  "granola",
+  "notion ai",
+  "mem ai",
+  "motion ai",
+  "reclaim ai",
+  "superhuman ai",
+  "grammarly",
+  "jasper",
+  "copy.ai",
+  "copy ai",
+  "writesonic",
+  "rytr",
+  "quillbot",
+  "wordtune",
+  "deepl",
+  "deepl write",
+  "language tool",
+  "writer.com",
+  "writer ai",
+  "aiva",
+  "soundraw",
+  "mubert",
+  "lovo",
+  "murf",
+  "play.ht",
+  "playht",
+  "resemble ai",
+  "assemblyai",
+  "deepgram",
+  "whisper",
+  "ollama",
+  "lm studio",
+  "jan.ai",
+  "msty",
+  "anythingllm",
+  "privategpt",
+  "localai",
+  "cursor",
+  "windsurf",
+  "codeium",
+  "tabnine",
+  "sourcegraph",
+  "cody",
+  "github copilot",
+  "amazon codewhisperer",
+  "replit ai",
+  "v0",
+  "vercel ai",
+  "bolt.new",
+  "lovable",
+  "builder.io",
+  "same.dev",
+  "tempo labs",
+  "uizard",
+  "framer ai",
+  "durable",
+  "10web",
+  "krea ai",
+  "getimg",
+  "playground ai",
+  "artbreeder",
+  "clipdrop",
+  "dreamstudio",
+  "tensor.art",
+  "civitai",
+  "lexica",
+  "huggingchat",
+  "janitorai",
+  "smodin",
+  "turnitin",
+  "originality.ai",
+  "perchance ai",
+  "character ai",
+];
+
+// Social URL keywords
+const SOCIAL_URL_KEYWORDS = [
+  "facebook",
+  "fb.com",
+  "instagram",
+  "threads",
+  "twitter",
+  "x.com",
+  "youtube",
+  "youtu.be",
+  "tiktok",
+  "snapchat",
+  "linkedin",
+  "pinterest",
+  "reddit",
+  "discord",
+  "telegram",
+  "whatsapp",
+  "signal",
+  "messenger",
+  "wechat",
+  "weixin",
+  "weibo",
+  "qq.com",
+  "line.me",
+  "kakaotalk",
+  "kakao",
+  "viber",
+  "imo.im",
+  "skype",
+  "vk.com",
+  "ok.ru",
+  "odnoklassniki",
+  "mixi",
+  "taringa",
+  "nextdoor",
+  "meetup",
+  "clubhouse",
+  "houseparty",
+
+  // Federated networks
+  "mastodon",
+  "mastodon.social",
+  "bluesky",
+  "bsky.app",
+  "threads.net",
+  "diaspora",
+  "pixelfed",
+  "friendica",
+  "pleroma",
+  "misskey",
+  "lemmy",
+  "kbin",
+  "nostr",
+  "farcaster",
+  "lens protocol",
+  "lens.xyz",
+  "mirror.xyz",
+  "warpcast",
+  "minds",
+  "gab",
+  "truth social",
+  "truthsocial",
+  "parler",
+  "gettr",
+  "mewe",
+  "steemit",
+  "hive social",
+  "hivesocial",
+  "social.coop",
+  "cohost",
+  "vero",
+  "ello",
+  "wt.social",
+  "amino",
+
+  "tumblr",
+  "medium",
+  "substack",
+  "quora",
+  "stack overflow",
+  "stackoverflow",
+  "stackexchange",
+  "superuser",
+  "serverfault",
+  "github",
+  "gitlab",
+  "bitbucket",
+  "sourceforge",
+  "codeberg",
+  "dev.to",
+  "hashnode",
+  "news.ycombinator",
+  "hacker news",
+  "lobsters",
+  "product hunt",
+  "producthunt",
+  "indie hackers",
+  "indiehackers",
+  "behance",
+  "dribbble",
+  "deviantart",
+  "artstation",
+  "500px",
+  "flickr",
+  "unsplash",
+  "goodreads",
+  "letterboxd",
+  "researchgate",
+  "academia.edu",
+  "patreon",
+  "ko-fi",
+  "buy me a coffee",
+  "buymeacoffee",
+  "gumroad",
+  "subscribestar",
+
+  // Video and gaming communities
+  "twitch",
+  "kick.com",
+  "rumble",
+  "vimeo",
+  "dailymotion",
+  "odysee",
+  "bitchute",
+  "livestream",
+  "soundcloud",
+  "spotify",
+  "bandcamp",
+  "last.fm",
+  "mixcloud",
+  "discord.gg",
+  "steam community",
+  "steamcommunity",
+  "roblox",
+  "xbox live",
+  "playstation network",
+  "the d social",
+  "newgrounds",
+  "fanbox",
+  "fanhouse",
+  "onlyfans",
+  "fansly",
+  "cameo",
+
+  "baidu tieba",
+  "douban",
+  "douyin",
+  "xiaohongshu",
+  "little red book",
+  "bilibili",
+  "zhihu",
+  "niconico",
+  "plurk",
+  "weheartit",
+  "sina.com.cn",
+  "jodel",
+  "yubo",
+  "wizz",
+  "bereal",
+  "be real",
+  "bere.al",
+  "peanut",
+  "lunchclub",
+  "shapr",
+  "xing",
+  "xing.com",
+  "glassdoor",
+  "blind",
+  "fishbowl",
+];
+
+// Keyword matching helpers
+const normalizeKeywordText = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const hasQualifiedHostname = (hostname) => {
+  const labels = String(hostname || "").split(".");
+  return labels.length > 1 && labels.some((label) => label.length > 1);
+};
+
+const containsTokenSequence = (tokens, targetTokens) => {
+  if (!targetTokens.length || targetTokens.length > tokens.length) return false;
+  for (
+    let index = 0;
+    index <= tokens.length - targetTokens.length;
+    index += 1
+  ) {
+    if (
+      targetTokens.every((token, offset) => tokens[index + offset] === token)
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
+function matchesKeyword(parsedUrl, keyword) {
+  const normalizedKeyword = normalizeKeywordText(keyword);
+  if (!normalizedKeyword) return false;
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const hostLabels = hostname.split(".");
+  const hostTokens = normalizeKeywordText(hostname).split(" ").filter(Boolean);
+  const targetTokens = normalizedKeyword.split(" ").filter(Boolean);
+
+  if (!hasQualifiedHostname(hostname)) return false;
+
+  if (keyword.includes(".")) {
+    const domain = keyword.toLowerCase();
+    if (hostname === domain || hostname.endsWith(`.${domain}`)) return true;
+  }
+
+  if (targetTokens.length === 1) {
+    return hostLabels.includes(normalizedKeyword);
+  }
+
+  return containsTokenSequence(hostTokens, targetTokens);
+}
+
+export function classifyToolUrl(url, type) {
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    return { matched: false, keyword: null };
+  }
+
+  if (!hasQualifiedHostname(parsedUrl.hostname)) {
+    return { matched: false, keyword: null };
+  }
+
+  const keywords = type === "social" ? SOCIAL_URL_KEYWORDS : AI_URL_KEYWORDS;
+  const matchedKeyword = keywords.find((keyword) =>
+    matchesKeyword(parsedUrl, keyword)
+  );
+  return {
+    matched: Boolean(matchedKeyword),
+    keyword: matchedKeyword || null,
+  };
+}
+
+export function isLikelyToolUrl(url, type) {
+  return classifyToolUrl(url, type).matched;
+}
+
+// Search query parameters
+export const SEARCH_QUERY_PARAMETER_CANDIDATES = [
+  "q",
+  "query",
+  "search",
+  "search_query",
+  "text",
+  "term",
+  "keyword",
+  "keywords",
+  "k",
+  "p",
+  "s",
+  "wd",
+  "word",
+  "searchterm",
+  "search_term",
+  "qstr",
+  "querystring",
+];
+
+// Search provider keywords
+const SEARCH_PROVIDER_URL_KEYWORDS = [
+  "google",
+  "google.com",
+  "bing",
+  "bing.com",
+  "yahoo",
+  "yahoo.com",
+  "duckduckgo",
+  "duck.com",
+  "ddg",
+  "brave search",
+  "search.brave.com",
+  "brave.com",
+  "ecosia",
+  "ecosia.org",
+  "startpage",
+  "startpage.com",
+  "qwant",
+  "qwant.com",
+  "swisscows",
+  "swisscows.com",
+  "mojeek",
+  "mojeek.com",
+  "yandex",
+  "yandex.com",
+  "baidu",
+  "baidu.com",
+  "sogou",
+  "sogou.com",
+  "naver",
+  "naver.com",
+  "daum",
+  "daum.net",
+  "seznam",
+  "seznam.cz",
+  "aol search",
+  "search.aol.com",
+  "ask.com",
+  "ask jeeves",
+  "lycos",
+  "lycos.com",
+  "excite",
+  "excite.com",
+  "webcrawler",
+  "dogpile",
+  "info.com",
+  "gibiru",
+  "gibiru.com",
+  "kagi",
+  "kagi.com",
+  "neeva",
+  "presearch",
+  "presearch.com",
+  "yep.com",
+  "yep",
+  "metager",
+  "metager.org",
+  "marginalia",
+  "marginalia.search",
+  "wiby",
+  "wiby.me",
+  "searchcode",
+  "searchcode.com",
+  "wayback machine",
+  "web.archive.org",
+
+  // Privacy and metasearch engines
+  "searx",
+  "searxng",
+  "whoogle",
+  "whoogle search",
+  "4get",
+  "4get.ca",
+  "librex",
+  "librex.eu",
+  "metabrowser",
+  "private.sh",
+  "gigablast",
+  "gigablast.com",
+  "yacy",
+  "yacy.net",
+  "infinity search",
+  "andisearch",
+  "andi.search",
+
+  "perplexity",
+  // AI and specialist search
+  "perplexity.ai",
+  "you.com",
+  "you search",
+  "phind",
+  "phind.com",
+  "komo ai",
+  "komo.ai",
+  "brave leo",
+  "consensus",
+  "consensus.app",
+  "semantic scholar",
+  "semanticscholar.org",
+  "elicit",
+  "elicit.com",
+  "scite",
+  "scite.ai",
+  "research rabbit",
+  "researchrabbit.ai",
+  "connected papers",
+  "connectedpapers.com",
+  "google scholar",
+  "scholar.google.com",
+  "base search",
+  "wolframalpha",
+  "wolframalpha.com",
+  "wolfram alpha",
+
+  "youtube",
+  // Searchable platforms
+  "youtube.com",
+  "spotify",
+  "spotify.com",
+  "wikipedia",
+  "wikipedia.org",
+  "pinterest",
+  "pinterest.com",
+  "reddit",
+  "reddit.com",
+  "quora",
+  "quora.com",
+  "github",
+  "github.com",
+  "gitlab",
+  "gitlab.com",
+  "stack overflow",
+  "stackoverflow.com",
+  "stackexchange",
+  "medium",
+  "medium.com",
+  "substack",
+  "substack.com",
+  "tiktok",
+  "tiktok.com",
+  "twitter",
+  "x.com",
+  "instagram",
+  "facebook",
+  "linkedin",
+  "discord",
+  "discord.com",
+  "ebay",
+  "amazon",
+  "amazon.com",
+  "walmart",
+  "walmart.com",
+  "etsy",
+  "etsy.com",
+  "indeed",
+  "indeed.com",
+  "glassdoor",
+  "glassdoor.com",
+  "booking.com",
+  "airbnb",
+  "airbnb.com",
+  "goodreads",
+  "goodreads.com",
+  "letterboxd",
+  "letterboxd.com",
+];
+
+// Search matching helpers
+const normalizeSearchHost = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const matchesSearchKeyword = (hostname, keyword) => {
+  const rawKeyword = String(keyword || "").toLowerCase();
+  const normalizedKeyword = normalizeSearchHost(keyword);
+  const hostLabels = hostname.split(".");
+  if (!normalizedKeyword || hostLabels.length < 2) return false;
+
+  if (rawKeyword.includes(".")) {
+    if (hostname === rawKeyword || hostname.endsWith(`.${rawKeyword}`)) {
+      return true;
+    }
+  }
+
+  const hostTokens = normalizeSearchHost(hostname).split(" ").filter(Boolean);
+  const targetTokens = normalizedKeyword.split(" ").filter(Boolean);
+  if (targetTokens.length === 1) return hostLabels.includes(targetTokens[0]);
+  if (targetTokens.length > hostTokens.length) return false;
+
+  return hostTokens.some((_, index) =>
+    targetTokens.every((token, offset) => hostTokens[index + offset] === token)
+  );
+};
+
+export function isLikelySearchProviderUrl(url) {
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    return false;
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+  return SEARCH_PROVIDER_URL_KEYWORDS.some((keyword) =>
+    matchesSearchKeyword(hostname, keyword)
+  );
+}
+// [src/keywords.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

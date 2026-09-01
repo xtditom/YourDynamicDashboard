@@ -1,3 +1,4 @@
+// Core configuration
 export const CONFIG = {
   defaults: {
     clockFormat: "12",
@@ -7,7 +8,53 @@ export const CONFIG = {
     showTodo: true,
     showApps: true,
     shortcutsPosition: "bottom",
+    shortcutsDisplayMode: "shortcuts",
+    fontFamily: "outfit",
+    newsEnabled: false,
+    newsPermissionModelVersion: 0,
+    newsBadgeDismissed: false,
+    newsProviderIds: ["bbc", "guardian", "cnn"],
+    newsCategoryIds: ["top", "world"],
+    newsShowHeadlines: true,
+    newsHeadlineOpacity: 50,
+    newsTotalCards: 6,
+    newsRefreshIntervalMinutes: 2,
+    newsPosition: "bottom",
+    newsConsentRemembered: false,
+    newsCache: {
+      version: 2,
+      imageParserVersion: 6,
+      ageMinutes: 0,
+      selectionKey: "",
+      lastAttemptAt: 0,
+      fetchedAt: 0,
+      items: [],
+      failures: [],
+    },
     showAiTools: true,
+    showEditableText: true,
+    disableAnimations: false,
+    disableAnimationsToggleCount: 0,
+    glowEffect: false,
+    glowDefaultOffMigrated: false,
+    glassmorphismUseCount: 0,
+    fontFamilyUseCount: 0,
+    randomBgSchedule: "1m",
+    randomBgScheduleBadgeDismissed: false,
+    randomBgRefreshWarningDismissed: false,
+    randomBgLastChangedAt: 0,
+    randomBgLastChangedDate: "",
+    randomBgCurrentPreview: "",
+    settingsShortcutUseCount: 0,
+    miniSettingsShortcutUseCount: 0,
+    darkModeToggleUseCount: 0,
+    weatherLocationSaveCount: 0,
+    lavenderMistThemeUseCount: 0,
+    dawnBloomThemeUseCount: 0,
+    mistralToolUseCount: 0,
+    tiktokToolUseCount: 0,
+    perplexityUseCount: 0,
+    themeGeneratorUseCount: 0,
     todos: [
       {
         id: "dt-1",
@@ -42,24 +89,51 @@ export const CONFIG = {
     ],
     welcomeText: "Click to edit",
     searchProvider: { id: "google", type: "engines" },
-    hiddenTools: {
-      "ai-deepseek": true,
-      "ai-qwen": true,
-      "social-snapchat": true,
-      "social-linkedin": true,
-    },
+    googleAiSearchActive: false,
+    googleAiSearchUsed: false,
+    googleAiSearchHintShownCount: 0,
+    searchSuggestionMode: "history-only",
+    searchSuggestionProxyUrl: "",
+    searchSuggestionConsentRemembered: false,
+    searchSuggestionBadgeDismissed: false,
+    customSearchEngines: [],
+    customAiTools: [],
+    customSocialLinks: [],
+    customApps: [],
+    googleAppOverrides: {},
+    hiddenApps: {},
+    appsEditHintCount: 0,
+    gradientColorThemeId: "",
+    gradientColor1: "",
+    gradientColor2: "",
+    hiddenTools: {},
+    hiddenToolsDefaultsMigrated: false,
     autoTheme: false,
+    zenMode: false,
+    zenNoticeAcknowledged: false,
+    miniSettingsHintShown: false,
+    themeGenerationHintShown: false,
+    miniSettingsOpenCount: 0,
+    fullSettingsEverOpened: false,
     darkMode: true,
+    darkSignalBackgroundActive: true,
+    darkSignalBackgroundEverActivated: false,
+    darkSignalBackgroundHintCount: 0,
+    transparencyActive: true,
+    grayscaleActive: true,
     normalThemeId: "default-dark",
     linkTargets: {
       ai: "_blank",
       apps: "_blank",
       shortcuts: "_blank",
       searchOpen: "_blank",
+      news: "_blank",
     },
     searchHistory: [],
     searchHistoryPaused: false,
     searchAutoDeleteDays: 365,
+    commandPaletteShortcutUseCount: 0,
+    commandUsage: {},
   },
   paths: {
     icons: "assets/icons/",
@@ -70,6 +144,193 @@ export const CONFIG = {
   },
 };
 
+// Font options
+export const FONT_OPTIONS = Object.freeze([
+  Object.freeze({
+    id: "lexend",
+    label: "Lexend",
+    googleFamily: "Lexend:wght@400;500;700",
+    stack: '"Lexend", system-ui, sans-serif',
+  }),
+  Object.freeze({
+    id: "inter",
+    label: "Inter",
+    googleFamily: "Inter:wght@400;600;700;800",
+    stack: '"Inter", system-ui, sans-serif',
+  }),
+  Object.freeze({
+    id: "roboto",
+    label: "Roboto",
+    googleFamily: "Roboto:wght@400;500;700",
+    stack: '"Roboto", system-ui, sans-serif',
+  }),
+  Object.freeze({
+    id: "manrope",
+    label: "Manrope",
+    googleFamily: "Manrope:wght@400;500;600;700",
+    stack: '"Manrope", system-ui, sans-serif',
+  }),
+  Object.freeze({
+    id: "outfit",
+    label: "Outfit",
+    googleFamily: "Outfit:wght@400;500;600;700",
+    stack: '"Outfit", system-ui, sans-serif',
+  }),
+  Object.freeze({
+    id: "nunito",
+    label: "Nunito",
+    googleFamily: "Nunito:wght@400;500;600;700",
+    stack: '"Nunito", system-ui, sans-serif',
+  }),
+  Object.freeze({
+    id: "merriweather",
+    label: "Merriweather",
+    googleFamily: "Merriweather:wght@400;700",
+    stack: '"Merriweather", Georgia, serif',
+  }),
+  Object.freeze({
+    id: "roboto-mono",
+    label: "Roboto Mono",
+    googleFamily: "Roboto Mono:wght@400;500;700",
+    stack: '"Roboto Mono", ui-monospace, monospace',
+  }),
+]);
+
+// News configuration
+export const NEWS_REFRESH_INTERVALS = Object.freeze([1, 2, 5, 10]);
+export const NEWS_HEADLINE_OPACITIES = Object.freeze([0, 30, 50, 70]);
+export const NEWS_CARD_COUNTS = Object.freeze([4, 5, 6, 7]);
+export const NEWS_MIN_REFETCH_MS = 60 * 1000;
+
+export const NEWS_CATEGORIES = Object.freeze([
+  { id: "top", label: "Top stories" },
+  { id: "world", label: "World" },
+  { id: "politics", label: "Politics" },
+  { id: "business", label: "Business" },
+  { id: "technology", label: "Technology" },
+  { id: "science", label: "Science" },
+  { id: "health", label: "Health" },
+  { id: "sports", label: "Sports" },
+  { id: "entertainment", label: "Culture" },
+  { id: "environment", label: "Environment" },
+  { id: "finance", label: "Finance" },
+  { id: "education", label: "Education" },
+  { id: "travel", label: "Travel" },
+  { id: "lifestyle", label: "Lifestyle" },
+  { id: "opinion", label: "Opinion" },
+  { id: "crime", label: "Crime" },
+]);
+
+export const NEWS_PROVIDERS = Object.freeze([
+  {
+    id: "bbc",
+    name: "BBC News",
+    shortName: "BBC",
+    color: "#bb1919",
+    permission: "https://feeds.bbci.co.uk/*",
+    feeds: {
+      top: "https://feeds.bbci.co.uk/news/rss.xml",
+      world: "https://feeds.bbci.co.uk/news/world/rss.xml",
+      politics: "https://feeds.bbci.co.uk/news/politics/rss.xml",
+      business: "https://feeds.bbci.co.uk/news/business/rss.xml",
+      technology: "https://feeds.bbci.co.uk/news/technology/rss.xml",
+      science: "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+      health: "https://feeds.bbci.co.uk/news/health/rss.xml",
+      sports: "https://feeds.bbci.co.uk/sport/rss.xml",
+      entertainment:
+        "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+    },
+  },
+  {
+    id: "guardian",
+    name: "The Guardian",
+    shortName: "G",
+    color: "#052962",
+    permission: "https://www.theguardian.com/*",
+    feeds: {
+      top: "https://www.theguardian.com/international/rss",
+      world: "https://www.theguardian.com/world/rss",
+      politics: "https://www.theguardian.com/politics/rss",
+      business: "https://www.theguardian.com/business/rss",
+      technology: "https://www.theguardian.com/technology/rss",
+      science: "https://www.theguardian.com/science/rss",
+      health: "https://www.theguardian.com/society/health/rss",
+      sports: "https://www.theguardian.com/sport/rss",
+      entertainment: "https://www.theguardian.com/culture/rss",
+      environment: "https://www.theguardian.com/environment/rss",
+      finance: "https://www.theguardian.com/money/rss",
+      education: "https://www.theguardian.com/education/rss",
+      travel: "https://www.theguardian.com/travel/rss",
+      lifestyle: "https://www.theguardian.com/lifeandstyle/rss",
+      opinion: "https://www.theguardian.com/commentisfree/rss",
+      crime: "https://www.theguardian.com/uk-news/crime/rss",
+    },
+  },
+  {
+    id: "cnn",
+    name: "CNN",
+    shortName: "CNN",
+    color: "#cc0000",
+    format: "cnn-search-json",
+    permission: "https://search.prod.di.api.cnn.io/*",
+    feeds: {
+      top: "https://search.prod.di.api.cnn.io/content?category=top",
+      world: "https://search.prod.di.api.cnn.io/content?category=world",
+      politics: "https://search.prod.di.api.cnn.io/content?category=politics",
+      business: "https://search.prod.di.api.cnn.io/content?category=business",
+      technology:
+        "https://search.prod.di.api.cnn.io/content?category=technology",
+      science: "https://search.prod.di.api.cnn.io/content?category=science",
+      health: "https://search.prod.di.api.cnn.io/content?category=health",
+      sports: "https://search.prod.di.api.cnn.io/content?category=sports",
+      entertainment:
+        "https://search.prod.di.api.cnn.io/content?category=entertainment",
+      travel: "https://search.prod.di.api.cnn.io/content?category=travel",
+    },
+  },
+  {
+    id: "npr",
+    name: "NPR",
+    shortName: "NPR",
+    color: "#d62021",
+    permission: "https://feeds.npr.org/*",
+    feeds: {
+      top: "https://feeds.npr.org/1001/rss.xml",
+      world: "https://feeds.npr.org/1001/rss.xml",
+    },
+  },
+  {
+    id: "dw",
+    name: "DW",
+    shortName: "DW",
+    color: "#0087c9",
+    permission: "https://rss.dw.com/*",
+    feeds: {
+      top: "https://rss.dw.com/rdf/rss-en-all",
+      world: "https://rss.dw.com/rdf/rss-en-all",
+    },
+  },
+  {
+    id: "euronews",
+    name: "Euronews",
+    shortName: "EU",
+    color: "#003399",
+    permission: "https://www.euronews.com/*",
+    feeds: {
+      top: "https://www.euronews.com/rss?level=theme&name=news",
+      world: "https://www.euronews.com/rss?level=theme&name=news",
+      business: "https://www.euronews.com/rss?level=theme&name=business",
+      technology: "https://www.euronews.com/rss?level=theme&name=next",
+      sports: "https://www.euronews.com/rss?level=theme&name=sport",
+      entertainment: "https://www.euronews.com/rss?level=theme&name=culture",
+      environment: "https://www.euronews.com/rss?level=theme&name=green",
+    },
+  },
+]);
+
+export const COMMAND_PALETTE_SHORTCUT_USE_LIMIT = 3;
+
+// Quote content
 export const QUOTES = [
   {
     text: "The only way to do great work is to love what you do.",
@@ -161,8 +422,82 @@ export const QUOTES = [
     text: "Tough times never last, but tough people do.",
     author: "Robert H. Schuller",
   },
+  {
+    text: "It always seems impossible until it's done.",
+    author: "Nelson Mandela",
+  },
+  { text: "Well begun is half done.", author: "Aristotle" },
+  {
+    text: "The future depends on what you do today.",
+    author: "Mahatma Gandhi",
+  },
+  {
+    text: "What you do speaks so loudly that I cannot hear what you say.",
+    author: "Ralph Waldo Emerson",
+  },
+  {
+    text: "Great things are done by a series of small things brought together.",
+    author: "Vincent van Gogh",
+  },
+  {
+    text: "Success is the sum of small efforts, repeated day in and day out.",
+    author: "Robert Collier",
+  },
+  {
+    text: "The secret of getting ahead is getting started.",
+    author: "Mark Twain",
+  },
+  {
+    text: "In the middle of difficulty lies opportunity.",
+    author: "Albert Einstein",
+  },
+  {
+    text: "The journey of a thousand miles begins with one step.",
+    author: "Lao Tzu",
+  },
+  {
+    text: "It does not matter how slowly you go as long as you do not stop.",
+    author: "Confucius",
+  },
+  {
+    text: "A person who never made a mistake never tried anything new.",
+    author: "Albert Einstein",
+  },
+  { text: "The best way out is always through.", author: "Robert Frost" },
+  {
+    text: "Believe you can and you're halfway there.",
+    author: "Theodore Roosevelt",
+  },
+  { text: "Everything you can imagine is real.", author: "Pablo Picasso" },
+  {
+    text:
+      "The future belongs to those who believe in the beauty of their dreams.",
+    author: "Eleanor Roosevelt",
+  },
+  {
+    text: "Start where you are. Use what you have. Do what you can.",
+    author: "Arthur Ashe",
+  },
+  {
+    text: "If opportunity doesn't knock, build a door.",
+    author: "Milton Berle",
+  },
+  {
+    text: "Don't count the days, make the days count.",
+    author: "Muhammad Ali",
+  },
+  {
+    text: "You miss 100% of the shots you don't take.",
+    author: "Wayne Gretzky",
+  },
+  {
+    text:
+      "The only limit to our realization of tomorrow is our doubts of today.",
+    author: "Franklin D. Roosevelt",
+  },
 ];
 
+// Google app definitions
 export const GOOGLE_APPS = [
   {
     name: "Account",
@@ -212,6 +547,10 @@ export const GOOGLE_APPS = [
     height: "40px",
     width: "40px",
   },
+  { name: "divider" },
+  { name: "Docs", url: "https://docs.google.com/", icon: "docs.png" },
+  { name: "Sheets", url: "https://sheets.google.com/", icon: "sheets.png" },
+  { name: "Slides", url: "https://slides.google.com/", icon: "slides.png" },
   {
     name: "Chat",
     url: "https://chat.google.com/",
@@ -219,7 +558,9 @@ export const GOOGLE_APPS = [
     height: "45px",
     width: "45px",
   },
+  { name: "Books", url: "https://books.google.com/", icon: "books.png" },
   { name: "News", url: "https://news.google.com/", icon: "news.png" },
+  { name: "Forms", url: "https://forms.google.com/", icon: "forms.png" },
   {
     name: "Contacts",
     url: "https://contacts.google.com/",
@@ -227,10 +568,29 @@ export const GOOGLE_APPS = [
     height: "50px",
     width: "50px",
   },
-  { name: "divider" },
-  { name: "Docs", url: "https://docs.google.com/", icon: "docs.png" },
-  { name: "Sheets", url: "https://sheets.google.com/", icon: "sheets.png" },
-  { name: "Slides", url: "https://slides.google.com/", icon: "slides.png" },
+  {
+    name: "Travel",
+    url: "https://www.google.com/travel/",
+    icon: "travel.png",
+  },
+  { name: "Ads", url: "https://ads.google.com/", icon: "ads.png" },
+  {
+    name: "Business Profile",
+    url: "https://business.google.com/",
+    icon: "businessprofile.png",
+  },
+  {
+    name: "Shopping",
+    url: "https://shopping.google.com/",
+    icon: "shopping.png",
+  },
+  {
+    name: "Ad Center",
+    url: "https://myadcenter.google.com/",
+    icon: "adcenter.png",
+  },
+  { name: "Tasks", url: "https://tasks.google.com/", icon: "tasks.png" },
+  { name: "Vids", url: "https://vids.google.com/", icon: "vids.png" },
   {
     name: "Google One",
     url: "https://one.google.com/",
@@ -288,6 +648,7 @@ export const GOOGLE_APPS = [
   },
 ];
 
+// AI tool definitions
 export const AI_TOOLS = [
   {
     name: "Claude",
@@ -338,8 +699,15 @@ export const AI_TOOLS = [
     icon: "perplexity.png",
     id: "ai-perplexity",
   },
+  {
+    name: "Mistral",
+    url: "https://chat.mistral.ai/",
+    icon: "mistral.png",
+    id: "ai-mistral",
+  },
 ];
 
+// Social link definitions
 export const SOCIAL_LINKS = [
   {
     name: "Facebook",
@@ -395,8 +763,15 @@ export const SOCIAL_LINKS = [
     icon: "sc.png",
     id: "social-snapchat",
   },
+  {
+    name: "TikTok",
+    url: "https://www.tiktok.com/",
+    icon: "tiktok.png",
+    id: "social-tiktok",
+  },
 ];
 
+// Search provider definitions
 export const SEARCH_PROVIDERS = {
   engines: [
     {
@@ -421,11 +796,11 @@ export const SEARCH_PROVIDERS = {
       icon: "yahoo.png",
     },
     {
-      id: "brave",
-      name: "Brave",
-      url: "https://search.brave.com/search",
+      id: "perplexity",
+      name: "Perplexity",
+      url: "https://www.perplexity.ai/search",
       queryParam: "q",
-      icon: "brave.png",
+      icon: "assets/ai-tools/perplexity.png",
     },
     {
       id: "duckduckgo",
@@ -489,6 +864,7 @@ export const SEARCH_PROVIDERS = {
   ],
 };
 
+// Search suggestion definitions
 export const SEARCH_SUGGESTIONS = [
   "How to learn a new language",
   "Easy dinner recipes for tonight",
@@ -545,20 +921,17 @@ export const SEARCH_SUGGESTIONS = [
   "How to protect data privacy online",
   "Future of remote work trends",
   "Quantum computing explained simply",
-  "Best coding languages for AI development",
+  "Best coding languages for AI",
   "SpaceX Starship mission updates",
   "Impact of automation on the economy",
   "Sustainable living tips for beginners",
-  "Web 3.0 and the future of the internet",
   "Advances in CRISPR gene editing",
-  "Top cybersecurity threats in 2026",
   "How to build a personal knowledge base",
   "Electric vehicle battery tech news",
   "Ethical implications of AGI",
   "Digital nomad visa requirements",
   "Future of vertical farming",
   "Best open source LLMs to try",
-  "Timeline for Mars colonization",
   "Augmented Reality glasses reviews",
   "How to detect AI generated text",
   "Career skills for the AI era",
@@ -567,16 +940,124 @@ export const SEARCH_SUGGESTIONS = [
   "Latest James Webb Telescope images",
   "Neuralink and brain-computer interfaces",
   "Guide to self-hosting cloud services",
-  "The state of the Metaverse today",
   "Biohacking tips for longevity",
-  "How LLMs are changing software engineering",
+  "How LLMs change software engineering",
+  "ChatGPT",
+  "WhatsApp Web",
+  "Google Translate",
+  "Gmail login",
+  "Google Docs",
+  "Google Calendar",
+  "Google Flights",
+  "Canva",
+  "Instagram",
+  "Discord",
+  "LinkedIn",
+  "Netflix",
+  "What is my IP address",
+  "What time is it",
+  "What day is it today",
+  "What is the weather today",
+  "Weather tomorrow",
+  "Google Maps",
+  "Internet speed test",
+  "Calculator",
+  "Currency converter",
+  "Unit converter",
+  "Time zone converter",
+  "Percentage calculator",
+  "Mortgage calculator",
+  "Loan calculator",
+  "Compound interest calculator",
+  "Bitcoin price",
+  "Gold price",
+  "What is an API",
+  "What is a URL",
+  "What is machine learning",
+  "What is generative AI",
+  "What is an LLM",
+  "What is a VPN",
+  "What is phishing",
+  "What is blockchain",
+  "What is cloud computing",
+  "What is data privacy",
+  "What is a password manager",
+  "What is two factor authentication",
+  "How to learn JavaScript",
+  "How to learn Python",
+  "Learn coding online",
+  "Free online courses",
+  "Online dictionary",
+  "Grammar checker",
+  "How to write a cover letter",
+  "How to prepare for an interview",
+  "How to start freelancing",
+  "Resume template",
+  "How to make a budget",
+  "How to save money",
+  "How to invest money",
+  "How to build credit",
+  "How to calculate percentages",
+  "How to screenshot on Windows",
+  "How to take a screenshot",
+  "How to convert PDF to Word",
+  "How to merge PDF files",
+  "How to compress a PDF",
+  "How to edit a PDF",
+  "How to create a PDF",
+  "How to clear browser cache",
+  "How to clear cache on iPhone",
+  "How to speed up a laptop",
+  "How to free up storage",
+  "How to back up your phone",
+  "How to scan a QR code",
+  "How to share WiFi password",
+  "How to reset a router",
+  "How to fix slow internet",
+  "How to check battery health",
+  "How to update apps",
+  "How to turn on dark mode",
+  "How to use Google Drive",
+  "How to make a presentation",
+  "How to zip a file",
+  "How to learn faster",
+  "How to improve focus",
+  "How to build good habits",
+  "How to reduce stress",
+  "How to relax",
+  "How to fall asleep fast",
+  "How to improve posture",
+  "How to lose weight",
+  "How to gain weight",
+  "How long to boil eggs",
+  "How to cook pasta",
+  "How to make coffee",
+  "How to change a tire",
+  "How to fix a running toilet",
+  "How to remove a stain",
+  "How to clean a microwave",
+  "How to grow tomatoes",
+  "How to care for houseplants",
+  "Healthy meal ideas",
+  "Home workout routine",
+  "Jobs near me",
+  "What to watch",
 ];
 
+// Search suggestion modes
+export const SEARCH_SUGGESTION_MODES = Object.freeze({
+  HISTORY_ONLY: "history-only",
+  HISTORY_ONLINE: "history-online",
+  HISTORY_CUSTOM: "history-custom",
+});
+
+// Keyboard defaults
 export const DEFAULT_KEY_MAP = {
   todo: { key: "t", enabled: true },
   ai: { key: "a", enabled: true },
   apps: { key: "g", enabled: true },
   settings: { key: "s", enabled: true },
+  miniSettings: { key: "m", enabled: true },
   search: { key: "/", enabled: true },
   clock: { key: "c", enabled: false },
   date: { key: "d", enabled: false },
@@ -588,4 +1069,4 @@ export const DEFAULT_KEY_MAP = {
   zen: { key: "z", enabled: true, fixed: true },
   voice: { key: "v", enabled: true, fixed: true },
 };
-// [src/config.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/config.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)

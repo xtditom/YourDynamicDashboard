@@ -1,0 +1,181 @@
+/* Core animations */
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fade-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes rotate-clockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dd-intro {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dd-outro {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+}
+
+.hidden {
+  display: none !important;
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+:where(button, input, select, textarea, a, [role="button"], [tabindex]):focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 3px;
+}
+
+/* Reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* User-controlled motion */
+html.disable-animations,
+html.disable-animations *,
+html.disable-animations *::before,
+html.disable-animations *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* Animation-disabled visibility */
+html.disable-animations #pinned-tasks-widget:not(.hidden) {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Feedback animations */
+@keyframes ydd-tremble {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-0.5px, 0.25px) rotate(-0.7deg);
+  }
+  50% {
+    transform: translate(0.5px, -0.25px) rotate(1.1deg);
+  }
+  75% {
+    transform: translate(-0.25px, 0.25px) rotate(-0.7deg);
+  }
+}
+.fade-up {
+  animation: fade-up 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+.fade-down {
+  animation: fade-down 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+.popup-scale-entry {
+  animation: popup-scale 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+/* Reordering targets */
+#apps-grid.is-reordering .app-icon,
+#ai-tools-popup.edit-mode .ai-tool-item .ai-tool-icon img,
+#search-dropdown.edit-mode .custom-search-provider-item,
+#search-dropdown .custom-search-provider-item.is-reordering,
+#shortcuts-editor-list.is-reordering .icon,
+.fs-shortcuts-list.is-reordering .icon {
+  animation: ydd-tremble 0.40s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+
+/* Popup animations */
+@keyframes popup-scale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-interactive-hover);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-interactive);
+}
+
+/* [css/animations.css] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26) */

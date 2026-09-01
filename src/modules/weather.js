@@ -1,7 +1,16 @@
 import { state } from "../state.js";
-import { showCustomModal } from "../utils.js";
+import {
+  chooseGeocodingResult,
+  getGeocodingResults,
+  isValidCoordinate,
+  showCustomModal,
+} from "../utils.js";
 import { SettingsManager } from "./settings.js";
 
+// Weather configuration
+const WEATHER_FETCH_TIMEOUT_MS = 12000;
+
+// Weather widget
 export class Weather {
   constructor() {
     this.els = {
@@ -20,74 +29,145 @@ export class Weather {
       location: document.getElementById("location"),
       icon: document.getElementById("weather-icon"),
     };
+    this._weatherRequestId = 0;
+    this._weatherController = null;
+    this._searchRequestId = 0;
+    this._searchController = null;
+    this._refreshTimer = null;
+    this.ready = Promise.resolve();
+    this._visibilityHandler = () => this.handleVisibilityChange();
     this.init();
   }
 
   init() {
     if (this.els.locInput) {
       this.els.locInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter")
+        if (e.key === "Enter") {
           this.searchLocation(this.els.locInput.value.trim());
+        }
       });
     }
     if (this.els.saveBtn) {
       this.els.saveBtn.addEventListener("click", () => {
-        if (this.els.locInput)
+        if (this.els.locInput) {
           this.searchLocation(this.els.locInput.value.trim());
+        }
       });
     }
     if (this.els.gpsBtn) {
       this.els.gpsBtn.addEventListener("click", () => this.detectLocation());
     }
 
-    this.fetchData();
-    setInterval(() => this.fetchData(), 1800000);
+    document.addEventListener("visibilitychange", this._visibilityHandler);
+    this.ready = this.fetchData();
+    this.syncRefreshTimer();
 
     state.subscribe((key) => {
-      if (
-        key === "tempUnit" ||
-        key === "locationUpdate" ||
-        key === "tempDisplayMode"
-      ) {
-        this.fetchData(key === "tempDisplayMode");
+      if (key === "tempUnit") {
+        if (!document.hidden) this.renderCachedData();
+      } else if (key === "tempDisplayMode") {
+        if (!document.hidden) this.renderCachedData();
+      } else if (key === "locationUpdate") {
+        if (!document.hidden) this.fetchData();
+      }
+      if (key === "widgetControl") {
+        this.syncRefreshTimer();
+        if (!document.hidden && this.isWeatherVisible()) {
+          void this.fetchData();
+        }
       }
     });
   }
 
+  isWeatherVisible() {
+    const control = state.get("widgetControl") || "all";
+    return ["all", "weather-only", "search-weather", "weather-quote"].includes(
+      control,
+    );
+  }
+
+  syncRefreshTimer() {
+    clearInterval(this._refreshTimer);
+    this._refreshTimer = null;
+    if (document.hidden || !this.isWeatherVisible()) return;
+    this._refreshTimer = window.setInterval(() => this.fetchData(), 1800000);
+  }
+
+  handleVisibilityChange() {
+    if (document.hidden) {
+      this._weatherController?.abort();
+      this._weatherController = null;
+      this._weatherRequestId++;
+      this.syncRefreshTimer();
+      return;
+    }
+    this.syncRefreshTimer();
+    this.fetchData();
+  }
+
+  // Location services
   async searchLocation(city) {
     if (!city) return;
+    const requestId = ++this._searchRequestId;
+    this._searchController?.abort();
+    const controller = new AbortController();
+    this._searchController = controller;
     try {
       const res = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`,
+        `https://geocoding-api.open-meteo.com/v1/search?name=${
+          encodeURIComponent(city)
+        }&count=5&language=en&format=json`,
+        { signal: controller.signal },
       );
-      const data = await res.json();
-      if (data.results && data.results.length > 0) {
-        const loc = data.results[0];
-        state.set("yd_city", loc.name);
-        state.set("yd_lat", loc.latitude);
-        state.set("yd_lon", loc.longitude);
-        state.set("locationUpdate", Date.now());
-        if (this.els.locInput) this.els.locInput.value = "";
-      } else {
+      if (!res.ok) throw new Error(`Geocoding request failed (${res.status})`);
+      const results = getGeocodingResults(await res.json());
+      if (requestId !== this._searchRequestId) return;
+      if (results.length === 0) {
         showCustomModal(`Could not find city: "${city}".`);
+        return;
       }
+      const loc = await chooseGeocodingResult(results, city);
+      if (requestId !== this._searchRequestId || !loc) return;
+      state.set("yd_city", loc.name);
+      state.set("yd_lat", Number(loc.latitude));
+      state.set("yd_lon", Number(loc.longitude));
+      state.set("locationUpdate", Date.now());
+      if (this.els.locInput) this.els.locInput.value = "";
     } catch (e) {
-      showCustomModal("Connection error.");
+      if (e?.name !== "AbortError" && requestId === this._searchRequestId) {
+        console.error("Geocoding Error:", e);
+        showCustomModal(
+          "Could not look up that location. Check your connection and try again.",
+        );
+      }
     }
   }
 
   async detectLocation() {
-    new SettingsManager().detectLocation();
+    if (window.__settingsManagerInstance) {
+      window.__settingsManagerInstance.detectLocation();
+    } else {
+      new SettingsManager().detectLocation();
+    }
   }
 
-  // --- SECTION: LOCATION LOGIC ---
+  // Location state
   async getLocation() {
     const city = state.get("yd_city");
     const lat = state.get("yd_lat");
     const lon = state.get("yd_lon");
 
-    if (city && lat && lon && lat !== "0" && lon !== "0") {
-      return { latitude: lat, longitude: lon, city: city };
+    if (
+      typeof city === "string" &&
+      city.trim() &&
+      isValidCoordinate(lat, -90, 90) &&
+      isValidCoordinate(lon, -180, 180)
+    ) {
+      return {
+        latitude: Number(lat),
+        longitude: Number(lon),
+        city: city.trim(),
+      };
     }
 
     return null;
@@ -98,17 +178,28 @@ export class Weather {
       const res = await fetch(
         `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`,
       );
+      if (!res.ok) throw new Error(`Reverse geocoding failed (${res.status})`);
       const data = await res.json();
-      return data.city || data.locality || "Unknown Location";
+      if (!data || typeof data !== "object") {
+        throw new TypeError("Invalid reverse geocoding response");
+      }
+      const city = [data.city, data.locality, data.principalSubdivision]
+        .find((value) => typeof value === "string" && value.trim());
+      return city || "Unknown Location";
     } catch (e) {
       return `${parseFloat(lat).toFixed(1)}, ${parseFloat(lon).toFixed(1)}`;
     }
   }
 
-  // --- SECTION: DATA FETCHING ---
+  // Weather data fetching
   async fetchData(onlyRender = false) {
+    if (document.hidden || !this.isWeatherVisible()) return;
+    const requestId = ++this._weatherRequestId;
+    this._weatherController?.abort();
+    this._weatherController = null;
     try {
       const coords = await this.getLocation();
+      if (requestId !== this._weatherRequestId) return;
 
       if (!coords) {
         if (this.els.setupUI) this.els.setupUI.classList.remove("hidden");
@@ -130,57 +221,103 @@ export class Weather {
         return;
       }
 
-      const unit =
-        state.get("tempUnit") === "imperial" ? "fahrenheit" : "celsius";
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=${unit}&timezone=auto`;
+      const controller = new AbortController();
+      this._weatherController = controller;
+      const timeoutId = window.setTimeout(
+        () => controller.abort(),
+        WEATHER_FETCH_TIMEOUT_MS,
+      );
+      const url =
+        `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=celsius&timezone=auto`;
 
-      const res = await fetch(url);
-      const data = await res.json();
-      this.lastData = data;
-      this.render(data.current, data.daily, coords);
-
-      // --- PIN DEFAULT TASKS ONLY ONCE WHEN WEATHER LOADS ---
-      if (!state.get("defaultTasksPinned")) {
-        const todos = state.get("todos") || [];
-        let modified = false;
-        todos.forEach((t) => {
-          if (
-            (String(t.id) === "dt-1" || String(t.id) === "dt-2") &&
-            !t.completed
-          ) {
-            t.pinned = true;
-            modified = true;
-          }
-        });
-        if (modified) {
-          state.set("todos", todos);
-        }
-        state.set("defaultTasksPinned", true);
-        import("../utils.js").then((utils) => {
-          utils.progressDefaultTasks();
-        });
+      let res;
+      let data;
+      try {
+        res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) throw new Error(`Weather request failed (${res.status})`);
+        data = await res.json();
+      } finally {
+        window.clearTimeout(timeoutId);
       }
+      const current = data?.current;
+      const daily = data?.daily;
+      const validCurrent = current &&
+        Number.isFinite(Number(current.temperature_2m)) &&
+        Number.isFinite(Number(current.relative_humidity_2m)) &&
+        Number(current.relative_humidity_2m) >= 0 &&
+        Number(current.relative_humidity_2m) <= 100 &&
+        Number.isFinite(Number(current.apparent_temperature)) &&
+        Number.isInteger(Number(current.weather_code)) &&
+        Number(current.weather_code) >= 0;
+      const validDaily = daily &&
+        Array.isArray(daily.temperature_2m_min) &&
+        Array.isArray(daily.temperature_2m_max) &&
+        Number.isFinite(Number(daily.temperature_2m_min[0])) &&
+        Number.isFinite(Number(daily.temperature_2m_max[0]));
+      if (!validCurrent || !validDaily) {
+        throw new TypeError("Invalid weather response");
+      }
+      if (requestId !== this._weatherRequestId) return;
+      this.lastData = data;
+      this.lastCoords = coords;
+      this.render(current, daily, coords);
     } catch (error) {
+      if (
+        error?.name === "AbortError" || requestId !== this._weatherRequestId
+      ) return;
       console.error("Weather Error:", error);
-      if (this.els.condition)
+      if (this.els.condition) {
         this.els.condition.textContent = "Weather Unavailable";
+      }
     }
   }
 
-  // --- SECTION: RENDERING ---
+  // Weather rendering
+  renderCachedData() {
+    if (!this.lastData || !this.lastCoords) return;
+    this.render(
+      this.lastData.current,
+      this.lastData.daily,
+      this.lastCoords,
+    );
+  }
+
+  toDisplayTemperature(value) {
+    const celsius = Number(value);
+    if (!Number.isFinite(celsius)) return value;
+    return state.get("tempUnit") === "imperial"
+      ? (celsius * 9) / 5 + 32
+      : celsius;
+  }
+
   render(current, daily, coords) {
     if (!current) return;
     const code = current.weather_code;
     const wmo = this.getWmo(code);
     const unitSym = state.get("tempUnit") === "imperial" ? "°F" : "°C";
+    const currentTemperature = this.toDisplayTemperature(
+      current.temperature_2m,
+    );
+    const apparentTemperature = this.toDisplayTemperature(
+      current.apparent_temperature,
+    );
+    const minTemperature = this.toDisplayTemperature(
+      daily?.temperature_2m_min?.[0],
+    );
+    const maxTemperature = this.toDisplayTemperature(
+      daily?.temperature_2m_max?.[0],
+    );
 
     if (this.els.condition) this.els.condition.textContent = wmo.desc;
-    if (this.els.humidity)
+    if (this.els.humidity) {
       this.els.humidity.textContent = `${current.relative_humidity_2m}%`;
-    if (this.els.bar)
+    }
+    if (this.els.bar) {
       this.els.bar.style.width = `${current.relative_humidity_2m}%`;
-    if (this.els.temp)
-      this.els.temp.textContent = `${Math.round(current.temperature_2m)}°`;
+    }
+    if (this.els.temp) {
+      this.els.temp.textContent = `${Math.round(currentTemperature)}°`;
+    }
 
     if (this.els.feelsLike) {
       if (
@@ -189,9 +326,13 @@ export class Weather {
         daily.temperature_2m_max &&
         daily.temperature_2m_min
       ) {
-        this.els.feelsLike.textContent = `Min: ${Math.round(daily.temperature_2m_min[0])}° | Max: ${Math.round(daily.temperature_2m_max[0])}°`;
+        this.els.feelsLike.textContent = `Min: ${
+          Math.round(minTemperature)
+        }° | Max: ${Math.round(maxTemperature)}°`;
       } else {
-        this.els.feelsLike.textContent = `Feels like ${Math.round(current.apparent_temperature)}${unitSym}`;
+        this.els.feelsLike.textContent = `Feels like ${
+          Math.round(apparentTemperature)
+        }${unitSym}`;
       }
     }
 
@@ -218,12 +359,31 @@ export class Weather {
       2: { desc: "Partly Cloudy", icon: "⛅" },
       3: { desc: "Overcast", icon: "☁️" },
       45: { desc: "Fog", icon: "🌫️" },
-      51: { desc: "Drizzle", icon: "🌦️" },
-      61: { desc: "Rain", icon: "🌧️" },
-      71: { desc: "Snow", icon: "🌨️" },
+      48: { desc: "Rime Fog", icon: "🌫️" },
+      51: { desc: "Light Drizzle", icon: "🌦️" },
+      53: { desc: "Moderate Drizzle", icon: "🌦️" },
+      55: { desc: "Dense Drizzle", icon: "🌧️" },
+      56: { desc: "Light Freezing Drizzle", icon: "🌧️" },
+      57: { desc: "Dense Freezing Drizzle", icon: "🌧️" },
+      61: { desc: "Light Rain", icon: "🌦️" },
+      63: { desc: "Moderate Rain", icon: "🌧️" },
+      65: { desc: "Heavy Rain", icon: "🌧️" },
+      66: { desc: "Light Freezing Rain", icon: "🌧️" },
+      67: { desc: "Heavy Freezing Rain", icon: "🌧️" },
+      71: { desc: "Light Snow", icon: "🌨️" },
+      73: { desc: "Moderate Snow", icon: "🌨️" },
+      75: { desc: "Heavy Snow", icon: "❄️" },
+      77: { desc: "Snow Grains", icon: "❄️" },
+      80: { desc: "Light Rain Showers", icon: "🌦️" },
+      81: { desc: "Moderate Rain Showers", icon: "🌧️" },
+      82: { desc: "Violent Rain Showers", icon: "⛈️" },
+      85: { desc: "Light Snow Showers", icon: "🌨️" },
+      86: { desc: "Heavy Snow Showers", icon: "❄️" },
       95: { desc: "Thunderstorm", icon: "⛈️" },
+      96: { desc: "Thunderstorm with Light Hail", icon: "⛈️" },
+      99: { desc: "Thunderstorm with Heavy Hail", icon: "⛈️" },
     };
     return map[code] || { desc: "Unknown", icon: "❓" };
   }
 }
-// [src/modules/weather.js] YourDynamicDashboard V2.2 (Ditom Baroi Antu - 2025-26)
+// [src/modules/weather.js] YourDynamicDashboard V3.0.0 (Ditom Baroi Antu - 2025-26)
