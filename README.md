@@ -1,179 +1,290 @@
-# YourDynamicDashboard — Development README
+<div align="center">
+  <h1 align="center">🚀 YourDynamicDashboard (v3.0.0)</h1>
+  <p align="center">
+    <strong>The Biggest Update Ever.</strong><br>
+    Transform your new tab into a powerful, customizable,<br> minimalist & privacy-first command center.<br>
+    <br />
+    <a href="#-features-of-v3"><strong>Features</strong></a> ·
+    <a href="#-the-showcase"><strong>Extension Preview</strong></a> .
+    <a href="https://ditom.me/ydd"><strong>YDD Landing Page</strong></a> .
+        <a href="#%EF%B8%8F-installation-guide"><strong>Installation</strong></a>
+  </p>
+</div>
 
-YourDynamicDashboard (YDD) is a Manifest V3 new-tab dashboard built with vanilla JavaScript and CSS. This branch is the development codebase: it may contain unfinished features, changing contracts, experimental UI, and behavior that is not yet suitable for a store release.
+<div align="center">
+  <img src="https://img.shields.io/github/license/xtditom/YourDynamicDashboard" alt="License">
+  <a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest" target="_blank">
+    <img src="https://img.shields.io/github/v/release/xtditom/YourDynamicDashboard?color=white" alt="Version">
+  </a>
+  <img src="https://img.shields.io/github/last-commit/xtditom/YourDynamicDashboard" alt="Last Commit">
+  <img src="https://img.shields.io/github/stars/xtditom/YourDynamicDashboard?logo=github&color=white" alt="Stars">
+</div>
 
-Do not treat this README as a stable-release manual. Store listings and packaged releases are maintained separately.
+<div align="center">
+  <a href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn" target="_blank">
+    <img src="https://img.shields.io/chrome-web-store/v/fckmlnagohleefboaleepppikpdkckjn" alt="Chrome Web Store Version">
+  </a>
+  <a href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn" target="_blank">
+    <img src="https://img.shields.io/chrome-web-store/users/fckmlnagohleefboaleepppikpdkckjn" alt="Chrome Web Store Users">
+  </a>
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/" target="_blank">
+    <img src="https://img.shields.io/amo/v/yourdynamicdashboard?color=orange" alt="Mozilla Addons Version">
+  </a>
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/" target="_blank">
+    <img src="https://img.shields.io/amo/users/yourdynamicdashboard?color=orange" alt="Mozilla Addons Users">
+  </a>
+</div>
 
-## Development status
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/promo/ydd-bg.png" alt="YDD in Custom Bg" width="100%">
+      <br><b>Transform Your</b>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/promo/ydd-bg-2.png" alt="YDD in Custom Bg 2" width="100%">
+      <br><b>New Tab Page</b>
+    </td>
+  </tr>
+</table>
 
-- Development version: `3.0.0` codebase, with ongoing fixes and feature work.
-- Build system: none. The extension is loaded directly from source.
-- Runtime: browser DOM, Web Storage, IndexedDB, Fetch, Web Speech API, and optional geolocation.
-- Frameworks: none; modules are native ES modules.
-- Automated test suite: not currently included in this source snapshot; use the syntax checks and manual browser verification below.
-- Data policy: settings, shortcuts, themes, search history, tasks, and backgrounds are intended to remain local to the browser.
+---
 
-## Requirements
+<br>
+<div align="center">
+  <h3>🔴 For a Live Test:</h3>
+  <a href="https://ditom.me/YourDynamicDashboard/" target="_blank" rel="noopener noreferrer">
+    <img src="assets/badges/live-test-badge.svg" alt="Live Demo - Try it now in your browser" height="40">
+  </a>
+</div>
+<br>
 
-- A Chromium-based browser with Manifest V3 support (Chrome, Edge, Brave, etc.), or a Gecko browser with MV3 support (Firefox, Zen, LibreWolf, etc.).
-- Node.js only for the optional JavaScript syntax checks. No `npm install` or build step is required.
-- A secure browser context for voice search. Extension pages normally qualify; a local development page should be served from `localhost` rather than an insecure remote origin.
+---
 
-## Repository layout
+## ⚡ Why Choose YourDynamicDashboard?
 
-```text
-.
-├── index.html              # New-tab document and static mini-settings markup
-├── manifest.json           # Chromium extension manifest
-├── firefox-manifest.json   # Gecko-specific development manifest
-├── css/                    # Modular stylesheets imported by css/main.css
-├── src/
-│   ├── main.js             # Application bootstrap and module initialization
-│   ├── config.js           # Defaults, providers, fixed shortcuts, and tasks
-│   ├── state.js            # Validated localStorage state manager
-│   ├── storageKeys.js      # Persisted-key allow-list and migration helpers
-│   ├── validators.js       # URL, shortcut, image, and key validation
-│   ├── secondStorage.js    # IndexedDB background storage
-│   ├── theme-init.js       # Early theme/background preload
-│   └── modules/            # Settings, search, palette, weather, widgets, etc.
-├── assets/                 # Icons, search providers, themes, and screenshots
-├── worker/suggestions/     # Free Cloudflare Worker for online autocomplete
-├── privacy-policy.html     # User-facing privacy policy
-└── releasenotes.md         # Release-focused notes; this README is dev-focused
-```
+Most new-tab dashboards are either too simple or overloaded with distractions. **YDD** gives you a focused, flexible command center that adapts to the way you work:
 
-## Load the development extension
+* **🔒 Privacy First:** No account, analytics, or behavioral profiles. Your history, tasks, links, settings, and news cache stay in your browser.
+* **🏎️ Fast & Lightweight:** Built with vanilla JavaScript and no heavy framework, keeping the dashboard responsive and quick to load.
+* **⌨️ Command-Driven:** Use the Command Palette, customizable shortcuts, and search bang commands to reach actions, tools, and services quickly.
+* **🎨 Personal by Design:** Shape the experience with custom themes, backgrounds, icons, widget visibility, and separate Mini and Full Settings.
+* **🌐 Optional Live Features:** Enable weather, News Feeds, or online suggestions only when you want them, with clear control over their data flow.
 
-### Chromium
+---
 
-1. Open `chrome://extensions` or the equivalent page in Edge/Brave.
-2. Enable **Developer mode**.
-3. Choose **Load unpacked**.
-4. Select the repository root—the folder containing `manifest.json` and `index.html`.
-5. Open a new tab. After source changes, press the extension page’s **Reload** button and open a fresh tab.
+## ✨ Features of V3
 
-### Firefox, Zen, or another Gecko browser
+YourDynamicDashboard has been heavily upgraded with the "Performance & Scaling" patch.
 
-1. Open `about:debugging#/runtime/this-firefox`.
-2. Choose **Load Temporary Add-on**.
-3. Select `firefox-manifest.json` from the repository root.
-4. Open a new tab and inspect the page from the browser’s extension tools.
+| Category | Premium Features |
+| :--- | :--- |
+| **🤖 Interaction** | <li>**Local Search History:** Native-feeling, privacy-first search history with real-time filtering and auto-delete.</li><li>**Command Palette:** Press `Ctrl+K` or `Cmd+K` to access dashboard actions, settings, tools, and search from one keyboard-driven panel.</li><li>**Drag & Drop Engine:** Reorder To-Do tasks, AI Tools, and Google Apps seamlessly.</li><li>**Voice Search:** Hands-free control with privacy-browser fallback support.</li><li>**Zen Mode:** Press `Z` to banish all clutter. Only the clock and wallpaper remain.</li> |
+| **🎨 Personalization** | <li>**Custom Icons:** Upload and set your own image icons for individual web shortcuts.</li><li>**Theme Generator:** Create custom themes with advanced color and gradient support.</li><li>**BG Blur Control:** Adjust the blur intensity of custom backgrounds for perfect UI readability.</li><li>**Random Backgrounds:** Fetch fresh wallpapers automatically, and **Freeze** the ones you love.</li> |
+| **☁️ Utilities** | <li>**Advanced Weather:** Live local weather including daily Min/Max temperatures. No API keys required.</li><li>**Expanded Search:** Switch engines or platforms with commands such as `!g`, `!yt`, `!sp`, and `!w`, with Perplexity, Google AI Search, and optional online suggestions available.</li><li>**RSS News Feeds:** Follow selected publishers through an optional, customizable news feed.</li><li>**Widget Expansion:** More granular visibility combinations (e.g., Search & Quote, Weather & Quote).</li> |
+| **⚡ Quick Access** | <li>**Separated Settings:** Use Mini Settings for everyday controls and Full Settings for advanced configuration.</li><li>**Custom Integrations:** Add your own AI tools, social links, search engines, and apps.</li><li>**Backup & Restore:** Export and import your settings, including background data.</li><li>**UI Toggles:** Hide greetings and editable text instantly via settings or custom shortcut keys.</li><li>**Link Direction:** Control exactly how and where your shortcut links open.</li><li>**Layout Flexibility:** Dock your Shortcuts bar to either the Top or Bottom of the screen.</li> |
 
-Temporary Gecko installations are removed when the browser restarts. For a persistent test install, package and sign the extension according to the target browser’s rules.
+### 🎨 The Showcase
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <b>Glassmorphism</b><br>
+      <img src="assets/the-showcase/custom-bg-2.png" alt="Glassmorphism">
+    </td>
+    <td align="center" width="33%">
+      <b>Wild West</b><br>
+      <img src="assets/the-showcase/wild-west-bg.png" alt="Wild West">
+    </td>
+    <td align="center" width="33%">
+      <b>Blue Abstract</b><br>
+      <img src="assets/the-showcase/abstract-bg.png" alt="Blue Abstract">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      <b>Bio Lime</b><br>
+      <img src="assets/the-showcase/bio-lime.png" alt="Bio Lime">
+    </td>
+    <td align="center" width="33%">
+      <b>The Dawn</b><br>
+      <img src="assets/the-showcase/custom-bg.png" alt="The Dawn">
+    </td>
+    <td align="center" width="33%">
+      <b>PopUp Features</b><br>
+      <img src="assets/the-showcase/pop-up-features.png" alt="PopUp Features">
+    </td>
+  </tr>
+</table>
 
-## Deploy the free search-suggestion relay
+---
 
-Online suggestions use the Cloudflare Worker in `worker/suggestions`. A free
-`workers.dev` address is sufficient; no domain or paid autocomplete API is
-required.
+## 🛠️ Installation Guide
 
-1. Create a free Cloudflare account.
-2. From `worker/suggestions`, run `npx wrangler login` and approve the browser login.
-3. Run `npx wrangler deploy` and copy the resulting `https://...workers.dev` URL.
-4. In `src/modules/suggestions.js`, replace `YOUR-SUBDOMAIN` in
-   `ONLINE_SUGGESTION_ENDPOINT` with the assigned subdomain.
-5. Open `<worker-url>/suggest?q=today` and verify that it returns a JSON
-   `suggestions` array, then reload the extension.
+### 🧩 Web Store (Stable)
+*Stores may have older versions if a new update has arrived recently.*
+<p>
+  <a href="https://chromewebstore.google.com/detail/fckmlnagohleefboaleepppikpdkckjn" target="_blank">
+    <img src="https://img.shields.io/badge/Get%20it%20on-Chrome%20Web%20Store-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white" height="40">
+  </a>
+  <a href="https://microsoftedge.microsoft.com/addons/detail/yourdynamicdashboard/phhofebhbmicnfhmmdgikiddaboljnec" target="_blank">
+    <img src="https://img.shields.io/badge/Get%20it%20on-Microsoft%20Edge%20Store-648F31?style=for-the-badge&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTExLjQgMEgwdjExLjRoMTEuNFYwek0yNCAwSDEyLjZ2MTEuNEgyNFYwek0xMS40IDEyLjZIMFYyNGgxMS40VjEyLjZ6TTI0IDEyLjZIMTIuNlYyNEgyNFYxMi42eiIvPjwvc3ZnPg%3D%3D" alt="Microsoft Edge Store" height="40">
+  </a>
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/" target="_blank">
+    <img src="https://img.shields.io/badge/Get%20it%20on-Firefox%20Add--ons-E66000?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Firefox Add-ons" height="40">
+  </a>
+</p>
 
-The Worker is deliberately not a general CORS proxy: it accepts only `/suggest`
-requests and contacts only DuckDuckGo. Cloudflare observability is disabled in
-its configuration, and neither the Worker nor the extension persist prefixes or
-results. If the Worker is unavailable or its free quota is exhausted, YDD falls
-back silently to local search history.
+> [!NOTE]
+> ‼️Follow these [steps](https://github.com/xtditom/YourDynamicDashboard?tab=readme-ov-file#-additional-steps-for-gecko-engine-based-browser-firefox-zen-etc) below to set it as the Homepage for Firefox, Zen, etc.
+>
+> ‼️Follow these [steps](https://github.com/xtditom/YourDynamicDashboard?tab=readme-ov-file#-additional-steps-for-opera--opera-gx) below to configure it for Opera/ Opera GX.
 
-Users may configure their own HTTPS suggestion endpoint in Full Settings. It
-must accept a `q` query parameter, allow extension CORS requests, and return
-`{"suggestions":[...]}`. Online results are cached locally with creation and
-expiry timestamps for up to 24 hours, then automatically removed.
+### 🦊 Additional steps for Gecko engine-based browser (Firefox, Zen, etc.)
+*Firefox, Zen, Librewolf, etc. treat New Tabs and Homepages separately. To see your dashboard on startup:*
 
-## Development workflow
+1.  **Install:** Get the extension from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/yourdynamicdashboard/).
+2.  **Bookmark:** Open a **New Tab** (so the dashboard loads), then press `Ctrl+D` to bookmark it.
+3.  **Configure:** Go to **Browser's Settings** > **Home**.
+4.  **Select:** Under **"Homepage and new windows"**, choose **Custom URLs** → **Use Bookmark...** and pick the bookmark you just created.
+5.  **Done:** Now your dashboard will load instantly when you start your browser.
 
-1. Edit source files directly; there is no bundler or transpiler.
-2. Keep Chromium and Gecko manifest changes synchronized when permissions, icons, resources, or extension metadata change.
-3. Reload the unpacked extension after JavaScript or manifest changes.
-4. Use the new-tab page DevTools console for runtime errors and the extension manager’s error page for manifest/API errors.
-5. Verify both a clean profile and a profile with existing saved state. State migrations and corrupt data handling are part of the application contract.
+<details>
+<summary><strong>⚠️ Important Step for Zen Browser Users</strong></summary>
 
-### Syntax validation
+By default, Zen Browser does not open extensions on New Tabs. You must enable this:
+1.  Open a new tab & Type `about:config` in your address bar and press Enter.
+2.  Click **"Accept the Risk and Continue"**.
+3.  Search for: `zen.urlbar.replace-newtab`
+4.  Double-click it or manually set its value to **false**.
+5.  Now open a new tab, and the dashboard will appear.
 
-From PowerShell at the repository root:
+</details>
 
-```powershell
-$files = rg --files -g '*.js'
-foreach ($file in $files) { node --check $file }
-git diff --check
-```
+<details>
+<summary><strong>⚠️ Settings Not Saving? (LibreWolf / Zen)</strong></summary>
 
-Do not start a local server unless the feature under test specifically requires one. The extension itself should be tested from an unpacked browser installation because extension permissions and Web Speech behavior differ from ordinary web pages.
+If your Theme, Location, or To-Do list resets every time you close the browser:
+* This happens because **"Delete cookies and site data when closed"** is enabled in your browser settings.
+* **Fix:** Add an **Exception** for this extension in your Privacy & Security settings, or disable the auto-delete feature to allow `localStorage` to save your preferences.
 
-## Architecture notes
+</details>
 
-- `src/main.js` initializes the dashboard modules in browser order.
-- `state.js` is the single state boundary for localStorage. New persisted keys should be added to `storageKeys.js` and given a compatible default in `config.js`.
-- `secondStorage.js` stores larger background/theme data in IndexedDB. Background operations must remain serialized and object URLs must be released when replaced.
-- `SettingsManager` owns mini settings, theme application, backgrounds, shortcuts, and legacy integration points.
-- `FullSettingsModal` dynamically builds the full settings dialog and synchronizes through the shared state manager.
-- `Search` owns provider selection, history, voice search, and search overlays. `src/modules/suggestions.js` owns the optional relay-backed DuckDuckGo autocomplete adapter.
-- `CommandPalette` exposes command actions and must use the same state contracts as visible controls.
-- CSS is split by responsibility and imported through `css/main.css`; theme-specific overrides live in `css/themes.css`.
+### ⭕ Additional steps for Opera / Opera GX
 
-## Current development contracts
+<details>
+<summary><strong>➡️ Set as Startup Page AND New Tab Page</strong></summary>
 
-- Users can save up to **20 shortcuts**. The numeric keyboard launcher remains `1`–`9`; the remaining saved shortcuts are available from the shortcuts bar and settings editor.
-- `Z` toggles Zen Mode and `V` starts voice search. These fixed actions must not be rebound through the shortcut editor.
-- Theme presets are selected from Full Settings. Mini Settings keeps a smaller curated theme set.
-- Gradient themes use the transparency/glass UI contract. Custom backgrounds and gradient themes intentionally restrict controls that would conflict with their rendering.
-- Full Settings must close on `Escape`, restore focus, and cancel an active key-capture listener.
-- Resetting one key binding must not silently create a duplicate active key. If a default key is occupied, the UI must explain the conflict before swapping bindings.
-- Search history, custom backgrounds, and saved themes are local browser data. Search suggestions default to history only. The optional online mode sends only the current typed prefix through YDD's Cloudflare Worker to DuckDuckGo, never saves the returned suggestions, and must not be changed into telemetry or remote persistence without an explicit product decision.
+*Opera blocks extensions from changing the New Tab page by default. You need a simple "Helper" extension to fix this.*
 
-## Manual verification checklist
+1.  **Install:** Download the **[New Tab & Toolbox](https://chromewebstore.google.com/detail/new-tab-start-page/mjfahldkpjhcnfbbmdhpjolcjpcfhcpj)** extension from the Chrome Web Store.
+2.  **Configure:** Open "New Tab & Toolbox" extension and select **Configuration**.
+3.  **Set URL:** In the "Custom URL" box, paste this exact ID:
+    `chrome-extension://fckmlnagohleefboaleepppikpdkckjn/index.html`
+4.  **Activate:** Change **"Override default Start Page when browser launches"** to **YES**.
+5.  **Save:** Click the **Save** button at the bottom.
+    * *Result:* You will now see your dashboard when opening a New Tab AND when starting Opera.
 
-Before considering a development change complete, check the affected behavior in both light and dark themes, and in glass/gradient mode when relevant:
+</details>
 
-- Fresh profile startup and reload with existing state.
-- Full Settings open/close, `Escape`, focus restoration, and drag behavior.
-- Mini Settings and Full Settings synchronization.
-- Theme changes, custom backgrounds, random/frozen backgrounds, and Auto Theme.
-- Search provider changes, history expiry, history-only/local/online suggestions, stale autocomplete responses, keyboard/palette overlays, and voice permission failure.
-- Shortcut add/edit/delete/reorder, custom icon reset, URL validation, and the 20-item limit.
-- Chromium unpacked loading and Firefox temporary loading when manifest changes are involved.
+<details>
+<summary><strong>➡️ Set as Startup Page only</strong></summary>
 
-## Debugging common development problems
+*If you only want the dashboard to appear when you first launch Opera (but keep the default Speed Dial for new tabs):*
 
-### Voice search does not start
+1.  **Settings:** Go to **Browser Settings** (`Alt+P`) > **On Startup**.
+2.  **Select:** Choose **"Open a specific page or set of pages"** → **Add a new page**.
+3.  **Paste:** Enter this URL and click **Add**:
+    `chrome-extension://fckmlnagohleefboaleepppikpdkckjn/index.html`
+4.  **Done:** The dashboard will now load automatically whenever you launch Opera.
 
-Check the browser page permission, the extension/new-tab context, and the DevTools console. Brave-style privacy blocking or a denied microphone permission can throw a synchronous `DOMException`; the UI should recover and leave the search control usable.
+</details>
 
-### Settings appear to reset
+---
 
-Inspect localStorage for the affected key and check the browser’s “clear data on exit” setting. Background images and larger blobs are stored separately in IndexedDB.
+### ⚡ Manual Installation
 
-### A manifest change is not visible
+#### 🟢 Chromium Browsers (Chrome, Edge, Brave, etc.)
 
-Reload the extension from the browser extension manager. A normal page refresh does not reload the manifest.
+<a href="https://github.com/xtditom/YourDynamicDashboard/releases/latest">
+    <img src="https://img.shields.io/badge/Download%20Latest%20Version-v3.0.0-2ea44f?style=for-the-badge&logo=github" alt="Download" height="40">
+</a>
 
-### A stale UI remains after a change
+**1. Download & Prepare**
+1.  Click the button above to download the latest `.zip` release. Or, direct download [![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v3.0.0/YourDynamicDashboard-V3.0.zip)
+2.  **Unzip** the folder to a **permanent location** (e.g., `Downloads/YDD`).
+    > ⚠️ **Important:** Do not delete or move this folder after installing, or the extension will stop working.
 
-Close and reopen the relevant overlay, then test from a fresh new tab. Avoid manually editing storage during normal verification unless testing migration or corruption recovery.
+**2. Load into Browser**
+1.  Open your browser's extension manager by typing `chrome://extensions` in the URL bar. (*Doesn't matter if you are using Edge, Brave, etc.*)
+2.  Toggle **Developer Mode** on (usually a switch in the top-right corner 🛠️).
+3.  Click the **Load Unpacked** button.
+4.  Select the folder you extracted in Step 1.
+5.  **Done!** Open a new tab to see your new dashboard.
 
-## Pull requests and commits
+#### 🦊 Gecko Browsers (Firefox, Zen, Waterfox, etc.)
 
-Keep changes focused and describe the user-visible contract being changed. Include:
+**1. Download & Prepare**
+1.  Download the latest `.xpi` release from above. Or, Direct download: [![Download XPI](https://img.shields.io/badge/Download-XPI-orange.svg)](https://github.com/xtditom/YourDynamicDashboard/releases/download/v3.0.0/YourDynamicDashboard-V3.0.xpi)
+2.  Keep the `.xpi` file in a **safe location** (e.g., `Downloads/YDD`).
+    > ⚠️ **Important:** Do not delete or move this file after installing, or the extension will stop working.
 
-- affected files and state keys;
-- browser contexts manually checked;
-- migration or compatibility behavior for existing users;
-- a note when verification was limited to syntax/static checks.
+**2. Load into Browser**
+1.  Open your browser's extension manager by typing `about:addons` in the URL bar.
+2.  Click the ⚙️ **(Settings Icon)** next to "Manage Your Extensions".
+3.  Select **Install Add-on From File...**
+4.  Browse and select the `.xpi` file you downloaded.
+5.  **Done!** Open a new tab to see your new dashboard.
 
-Do not commit generated build output, browser profiles, local screenshots, or private storage exports.
+---
 
-## License and privacy
+## 📄 License
 
-YDD is licensed under GPLv3; see [LICENSE](LICENSE). The project is designed for local-first use. Weather location detection is not declared as an install-time extension permission; it calls the browser's Geolocation API only after a user clicks a GPS control and accepts the privacy notice, and the browser or operating system controls the location decision. Optional online search suggestions use DuckDuckGo only after explicit opt-in, and optional News Feeds fetch feed metadata and story images directly from user-selected publishers after explicit opt-in. News publisher hosts are optional permissions granted or denied through the browser and removed when News is disabled or a provider is deselected. News metadata is cached locally and no news relay or account is used. Shortcut icons may use Google’s favicon service, and the selected dashboard font may be loaded on demand from Google Fonts; Lexend mode also loads Inter for the legacy clock and temperature display. Voice recognition is provided by the browser’s Web Speech API (with processing location determined by the browser). See [privacy-policy.html](https://ditom.me/YourDynamicDashboard/privacy-policy.html) for the user-facing policy.
+This project is legally protected and licensed under the **GNU General Public License v3.0**. 
 
-## Stable-release references
+**What this means:**
+* **✅ Permissions:** You are completely free to use, modify, and distribute this software for private or commercial purposes.
+* **🛑 Conditions (Copyleft):** If you modify and distribute this codebase, **you must** make your entire modified project open-source and free under the exact same GPLv3 license. You cannot take this code, modify it, and hide it in a closed-source project.
+* **⚠️ No Warranty:** This software is provided "as is", without warranty of any kind.
 
-- Repository: <https://github.com/xtditom/YourDynamicDashboard>
-- Live demo: <https://ditom.me/YourDynamicDashboard/>
-- Release notes: [releasenotes.md](releasenotes.md)
+See the [LICENSE](LICENSE) file for the full legal text and details.
+
+---
+
+## 🛡 Privacy Policy
+
+With **YourDynamicDashboard**, you are the product owner, not the product.
+
+* **Local-first:** Your customizations, search history, preferences, and News Feed cache stay in your browser. YDD has no account system and does not automatically upload this data.
+* **Search Suggestions:** History Only is the default and sends nothing typed online. Optional online modes send only the current prefix to the selected relay/provider after consent; results are cached locally for a limited time.
+* **News Feeds:** Optional and disabled by default. YDD connects directly to selected publishers through their RSS/RDF feeds or publisher-operated API, stores story metadata locally, and does not send browsing history or use a YDD news relay.
+* **Voice & Location:** Voice Search uses your browser's Web Speech API and YDD does not record or store your voice. Location is requested only after you click and confirm, then sent to weather providers and saved locally.
+* **Third-Party Services:** Weather, autocomplete, fonts, favicons, backgrounds, and other online features use the providers described in the full policy. Those providers may process ordinary network metadata under their own policies.
+
+Read the full [Privacy Policy](https://xtditom.github.io/YourDynamicDashboard/privacy-policy.html).
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+Feel free to check the [issues page](https://github.com/xtditom/YourDynamicDashboard/issues).
+
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+---
+
+## ❤️ Acknowledgments
+
+* **Inspiration:** A huge thanks to **XengShi** for their project, **[MaterialYouNewTab](https://github.com/prem-k-r/MaterialYouNewTab)**, which served as a major inspiration. (Currently maintained by _Prem Kumar_ & _Itz-RJ_)
+* **AI Assistance:** Developed with help from **Google's Gemini & OpenAI's ChatGPT**.
+
+---
+
+<div align="center">
+  <h3>Created with ❤️ by <a href="https://github.com/xtditom">Ditom Baroi Antu</a></h3>
+  <p>© 2025-2026 All Rights Reserved.</p>
+</div>
