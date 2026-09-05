@@ -89,25 +89,25 @@ YourDynamicDashboard has been heavily upgraded with the "Performance & Scaling" 
   <tr>
     <td align="center" width="33%">
       <b>Glassmorphism</b><br>
-      <img src="assets/the-showcase/custom-bg-2.png" alt="Glassmorphism">
+      <img src="assets/the-showcase/YDD-Fuji.png" alt="Mount Fuji">
     </td>
     <td align="center" width="33%">
-      <b>Wild West</b><br>
-      <img src="assets/the-showcase/wild-west-bg.png" alt="Wild West">
+      <b>Minecraft</b><br>
+      <img src="assets/the-showcase/YDD-MC.png" alt="Minecraft">
     </td>
     <td align="center" width="33%">
-      <b>Blue Abstract</b><br>
-      <img src="assets/the-showcase/abstract-bg.png" alt="Blue Abstract">
+      <b>Field</b><br>
+      <img src="assets/the-showcase/YDD-Field.png" alt="Field">
     </td>
   </tr>
   <tr>
     <td align="center" width="33%">
-      <b>Bio Lime</b><br>
-      <img src="assets/the-showcase/bio-lime.png" alt="Bio Lime">
+      <b>Glacier</b><br>
+      <img src="assets/the-showcase/YDD-Gla.png" alt="Glacier">
     </td>
     <td align="center" width="33%">
-      <b>The Dawn</b><br>
-      <img src="assets/the-showcase/custom-bg.png" alt="The Dawn">
+      <b>Dark</b><br>
+      <img src="assets/the-showcase/YDD-A.png" alt="Dark">
     </td>
     <td align="center" width="33%">
       <b>PopUp Features</b><br>
